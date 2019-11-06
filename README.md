@@ -12,6 +12,11 @@ RVis is a desktop application for Microsoft Windows. You will need:
 - Microsoft .NET Framework v4.7.1 or later
 - R v3.1 or later
 
+RVis depends on various R packages to provide functionality:
+
+- To use the sensitivity analysis feature in RVis, you will need to install the R [sensitivity](https://cran.r-project.org/web/packages/sensitivity/) package
+- The MCMC feature in RVis can provide diagnostics, for which you will need to install the [coda](https://cran.r-project.org/web/packages/coda/) package 
+
 ## Installation
 
 Visit the [releases](https://github.com/GMPtk/RVis/releases) page and download the zip archive containing the latest RVis.
