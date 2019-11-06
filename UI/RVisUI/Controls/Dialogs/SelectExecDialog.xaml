@@ -1,0 +1,101 @@
+﻿<ctrls:MetroWindow x:Class="RVisUI.Controls.Dialogs.SelectExecDialog"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ctrls="http://metro.mahapps.com/winfx/xaml/controls"
+                    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:local="clr-namespace:RVisUI.Controls.Dialogs"
+                    xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+                    mc:Ignorable="d"
+                    Title="Select Executive Function"
+                    Height="250" Width="450"
+                    GlowBrush="{DynamicResource AccentColorBrush}"
+                    NonActiveGlowBrush="Red"
+                    ResizeMode="CanResizeWithGrip"
+                    WindowTransitionsEnabled="False"
+                    Icon="../../Resources/app.ico" 
+                    WindowStartupLocation="CenterOwner"
+                    wpf:Behaviour.DialogResult="{Binding DialogResult}"
+                    >
+
+  <Grid>
+
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <Grid Margin="30">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition/>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+
+      <TextBlock VerticalAlignment="Center" 
+                 HorizontalAlignment="Right"
+                 Text="Executive function"
+                 Margin="20 0"
+                 />
+      
+      <ComboBox Grid.Column="1" 
+                md:HintAssist.Hint="(unary function)"
+                Margin="20 0"
+                ItemsSource="{Binding UnaryFunctions}"
+                SelectedIndex="{Binding UnaryFunctionSelectedIndex}"
+                />
+
+      <TextBlock Grid.Row="1"
+                 VerticalAlignment="Center" 
+                 HorizontalAlignment="Right"
+                 Text="Parameters"
+                 Margin="20 0"
+                 />
+
+      <ComboBox Grid.Row="1"
+                Grid.Column="1" 
+                md:HintAssist.Hint="(list or vector)"
+                Margin="20 0"
+                ItemsSource="{Binding ScalarSets}"
+                SelectedIndex="{Binding ScalarSetSelectedIndex}"
+                />
+
+    </Grid>    
+    
+    <Separator Grid.Row="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="2" Width="Auto" VerticalAlignment="Center" />
+
+    <Grid Grid.Row="2" Margin="0,0,0,10" HorizontalAlignment="Center">
+
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="30"/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+
+      <Button Style="{StaticResource MaterialDesignFlatButton}"
+              IsDefault="True"
+              Command="{Binding OK}"
+              Width="120" 
+              Height="Auto"
+              Content="OK"
+              />
+
+      <Button Grid.Column="2" 
+              Style="{StaticResource MaterialDesignFlatButton}"
+              IsCancel="True"
+              Command="{Binding Cancel}"
+              Width="120" 
+              Height="Auto"
+              Content="Cancel"
+              />
+
+    </Grid>
+
+  </Grid>
+
+</ctrls:MetroWindow>

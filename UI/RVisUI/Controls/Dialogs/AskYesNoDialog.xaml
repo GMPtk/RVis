@@ -1,0 +1,71 @@
+﻿<ctrls:MetroWindow x:Class="RVisUI.Controls.Dialogs.AskYesNoDialog"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ctrls="http://metro.mahapps.com/winfx/xaml/controls"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:local="clr-namespace:RVisUI.Controls.Dialogs"
+                    mc:Ignorable="d"
+                    Title=""
+                    Height="250" Width="350"
+                    GlowBrush="{DynamicResource AccentColorBrush}"
+                    NonActiveGlowBrush="Red"
+                    ResizeMode="CanResizeWithGrip"
+                    WindowTransitionsEnabled="False"
+                    Icon="../../Resources/app.ico" 
+                    WindowStartupLocation="CenterOwner"
+                    >
+  
+  <Grid>
+
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <Grid>
+      <TextBlock x:Name="_tbQuestion" 
+                 VerticalAlignment="Center" 
+                 HorizontalAlignment="Center"
+                 TextWrapping="Wrap"
+                 Margin="30"
+                 />
+    </Grid>
+
+    <Separator Grid.Row="1" 
+               Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" 
+               Height="2" 
+               Width="Auto" 
+               VerticalAlignment="Center" 
+               />
+
+    <Grid Grid.Row="2" Margin="0,0,0,10" HorizontalAlignment="Center">
+
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="30"/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+
+      <Button Style="{StaticResource MaterialDesignFlatButton}"
+              Click="HandleOK"
+              IsDefault="True"
+              Width="120" 
+              Height="Auto"
+              Content="Yes"
+              />
+
+      <Button Grid.Column="2" 
+              Style="{StaticResource MaterialDesignFlatButton}"
+              IsCancel="True"
+              Width="120" 
+              Height="Auto"
+              Content="No"
+              />
+
+    </Grid>
+
+  </Grid>
+
+</ctrls:MetroWindow>

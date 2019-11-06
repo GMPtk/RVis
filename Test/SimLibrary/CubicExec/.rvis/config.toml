@@ -1,0 +1,41 @@
+Title = "Cubic Exec"
+Description = "Cubic via exec fn"
+
+[Code]
+File = "cubic.R"
+Exec = "do_cubic"
+Formal = "params"
+
+[Input]
+
+[[Input.Parameters]]
+Name = "a"
+Value = "3"
+[[Input.Parameters]]
+Name = "b"
+Value = "-12"
+[[Input.Parameters]]
+Name = "c"
+Value = "0"
+[[Input.Parameters]]
+Name = "d"
+Value = "50"
+[[Input.Parameters]]
+Name = "x"
+Value = "seq(0, 4, by = 0.4)"
+
+[Output]
+
+[[Output.Values]]
+Name = "x"
+
+[[Output.Values.Elements]]
+Name = "x"
+IsIndependentVariable = true
+
+[[Output.Values]]
+Name = "y"
+
+[[Output.Values.Elements]]
+Name = "y"
+IsIndependentVariable = false

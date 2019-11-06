@@ -1,0 +1,440 @@
+﻿<ctrls:MetroWindow x:Class="RVisUI.Controls.Dialogs.ImportTmplDialog"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ctrls="http://metro.mahapps.com/winfx/xaml/controls"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:local="clr-namespace:RVisUI.Controls.Dialogs"
+                    xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+                    xmlns:mvvmd="clr-namespace:RVisUI.Mvvm.Design;assembly=RVisUI.Mvvm"
+                    mc:Ignorable="d"
+                    Title="Import Simulation (Tmpl)"
+                    Height="750" Width="1000"
+                    GlowBrush="{DynamicResource AccentColorBrush}"
+                    NonActiveGlowBrush="Red"
+                    ResizeMode="CanResizeWithGrip"
+                    WindowTransitionsEnabled="False"
+                    Icon="../../Resources/app.ico" 
+                    WindowStartupLocation="CenterOwner"
+                    wpf:Behaviour.DialogResult="{Binding DialogResult}"
+                    d:DataContext="{d:DesignInstance Type=mvvmd:ImportTmplViewModel, IsDesignTimeCreatable=True}"
+                    >
+
+  <ctrls:MetroWindow.Resources>
+    <Style x:Key="dgtb" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding IsUsed}" Value="False">
+          <Setter Property="TextDecorations" Value="StrikeThrough"/>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+    <Style x:Key="dg" TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Items.Count}" Value="0">
+          <Setter Property="Template">
+            <Setter.Value>
+              <ControlTemplate>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                  <TextBlock x:Name="text" 
+                             Margin="0,0,0,0" 
+                             HorizontalAlignment="Center"
+                             Style="{StaticResource MaterialDesignTitleTextBlock}"
+                             Text="{Binding Tag[0], RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                             />
+                </StackPanel>
+              </ControlTemplate>
+            </Setter.Value>
+          </Setter>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+
+    <x:Array x:Key="parametersResources" Type="sys:String">
+      <sys:String>EMPTY PARAMETERS</sys:String>
+    </x:Array>
+
+    <x:Array x:Key="outputResources" Type="sys:String">
+      <sys:String>EMPTY OUTPUT</sys:String>
+    </x:Array>
+
+  </ctrls:MetroWindow.Resources>
+
+  <Grid>
+
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+
+      <TextBlock Text="{Binding FileName, StringFormat='Importing {0}'}" 
+                 Style="{StaticResource MaterialDesignTitleTextBlock}" 
+                 Margin="10" 
+                 TextAlignment="Center"
+                 />
+
+      <TabControl Grid.Row="1" Margin="10 10 10 0">
+
+        <TabItem Header="PARAMETERS">
+          <Grid Margin="10 10 10 0">
+
+            <Grid.RowDefinitions>
+              <RowDefinition Height="*"/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <DataGrid ItemsSource="{Binding ParameterCandidates}" 
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      Style="{StaticResource dg}"
+                      Tag="{StaticResource parametersResources}" 
+                      MouseDoubleClick="HandleParametersMouseDoubleClick">
+
+              <DataGrid.Columns>
+
+                <DataGridTemplateColumn Header="Use?" 
+                                        Width="60" 
+                                        >
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <ToggleButton Style="{StaticResource MaterialDesignActionAccentToggleButton}"
+                                    IsChecked="{Binding IsUsed, UpdateSourceTrigger=PropertyChanged}"
+                                    ToolTip="Present this parameter for manipulation in RVis" 
+                                    Width="20"
+                                    Height="20"
+                                    >
+                        <ToggleButton.Content>
+                          <md:PackIcon Kind="Close" Width="12" Height="12" />
+                        </ToggleButton.Content>
+                        <md:ToggleButtonAssist.OnContent>
+                          <md:PackIcon Kind="Check" Width="12" Height="12" />
+                        </md:ToggleButtonAssist.OnContent>
+                      </ToggleButton>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="Name" 
+                                    Width="*" 
+                                    Binding="{Binding Name}" 
+                                    ElementStyle="{StaticResource dgtb}"
+                                    />
+                <DataGridTextColumn Header="Value" 
+                                    Width="*" 
+                                    Binding="{Binding Value, StringFormat=g4}" 
+                                    ElementStyle="{StaticResource dgtb}"
+                                    />
+                <DataGridTextColumn Header="Unit" 
+                                    Width="*" 
+                                    Binding="{Binding Unit}" 
+                                    ElementStyle="{StaticResource dgtb}"
+                                    />
+                <DataGridTextColumn Header="Description" 
+                                    Width="3*" 
+                                    Binding="{Binding Description}" 
+                                    ElementStyle="{StaticResource dgtb}"
+                                    />
+
+                <DataGridTemplateColumn Header="Edit" 
+                                        Width="60" 
+                                        >
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <Button Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                              ToolTip="Change description and unit" 
+                              Height="20" 
+                              Width="20" 
+                              HorizontalAlignment="Center"
+                              IsEnabled="{Binding IsUsed}"
+                              Command="{Binding ChangeUnitDescription}"
+                              CommandParameter="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}">
+                        <md:PackIcon Kind="Pencil" Height="12" Width="12" />
+                      </Button>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+              </DataGrid.Columns>
+
+            </DataGrid>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0 20 0 0">
+              <Button Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                      Width="100"
+                      ToolTip="Check all candidates" 
+                      Content="Use All"
+                      Margin="10 0 10 0"
+                      Command="{Binding UseAllParameters}"
+                      />
+              <Button Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                      Width="100"
+                      ToolTip="Uncheck all candidates" 
+                      Content="Use None"
+                      Margin="10 0 10 0"
+                      Command="{Binding UseNoParameters}"
+                      />
+            </StackPanel>
+            
+          </Grid>
+        </TabItem>
+
+        <TabItem Header="OUTPUT">
+          <Grid Margin="10 10 10 0">
+
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <GroupBox Header="Independent Variable" Margin="0 0 0 20">
+              <Grid>
+
+                <Button HorizontalAlignment="Left"
+                        Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                        Width="100"
+                        ToolTip="Select an output then click to set independent variable"
+                        Command="{Binding SetIndependentVariable}"
+                        Content="Set"
+                        />
+
+                <Grid HorizontalAlignment="Center">
+                  <Grid.Resources>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignBody1TextBlock}">
+                      <Setter Property="VerticalAlignment" Value="Center"/>
+                    </Style>
+                  </Grid.Resources>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="{Binding IndependentVariable.Name, FallbackValue='(not set)'}" FontWeight="Bold"/>
+                  <TextBlock Grid.Column="1" Text="Unit:" Margin="20 0 5 0"/>
+                  <TextBlock Grid.Column="2" Text="{Binding IndependentVariable.Unit, TargetNullValue='?', FallbackValue='?'}" TextTrimming="CharacterEllipsis"/>
+                  <TextBlock Grid.Column="3" Text="Description:" Margin="20 0 5 0"/>
+                  <TextBlock Grid.Column="4" Text="{Binding IndependentVariable.Description, TargetNullValue='?', FallbackValue='?'}" TextTrimming="CharacterEllipsis"/>
+                  <Button Grid.Column="5"
+                          ToolTip="Change description and unit" 
+                          Height="20" 
+                          Width="20"
+                          Margin="20 0"
+                          HorizontalAlignment="Center"
+                          Command="{Binding IndependentVariable.ChangeUnitDescription}"
+                          CommandParameter="{Binding IndependentVariable}">
+                    <Button.Style>
+                      <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniAccentButton}">
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IndependentVariable.ChangeUnitDescription}" Value="{x:Null}">
+                            <Setter Property="IsEnabled" Value="False"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </Button.Style>
+                    <md:PackIcon Kind="Pencil" Height="12" Width="12" />
+                  </Button>
+
+                </Grid>
+              </Grid>
+            </GroupBox>
+
+            <DataGrid Grid.Row="1" 
+                      ItemsSource="{Binding ElementCandidates}" 
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      SelectedItem="{Binding SelectedElementCandidate}"
+                      SelectionUnit="FullRow"
+                      Style="{StaticResource dg}"
+                      Tag="{StaticResource outputResources}"
+                      MouseDoubleClick="HandleOutputMouseDoubleClick">
+
+              <DataGrid.Columns>
+
+                <DataGridTemplateColumn Header="Use?" 
+                                        Width="60" 
+                                        >
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <ToggleButton Style="{StaticResource MaterialDesignActionAccentToggleButton}"
+                                    IsChecked="{Binding IsUsed, UpdateSourceTrigger=PropertyChanged}"
+                                    ToolTip="Present this output column in RVis" 
+                                    Width="20"
+                                    Height="20"
+                                    >
+                        <ToggleButton.Content>
+                          <md:PackIcon Kind="Close" Width="12" Height="12" />
+                        </ToggleButton.Content>
+                        <md:ToggleButtonAssist.OnContent>
+                          <md:PackIcon Kind="Check" Width="12" Height="12" />
+                        </md:ToggleButtonAssist.OnContent>
+                      </ToggleButton>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="Name (source)" 
+                                    Width="*" 
+                                    ElementStyle="{StaticResource dgtb}"
+                                    >
+                  <DataGridTextColumn.Binding>
+                    <MultiBinding StringFormat="{}{0} ({1})">
+                      <Binding Path="Name" />
+                      <Binding Path="ValueName" />
+                    </MultiBinding>
+                  </DataGridTextColumn.Binding>
+                  <DataGridTextColumn.CellStyle>
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                      <Setter Property="ToolTip">
+                        <Setter.Value>
+                          <TextBlock Text="{Binding Values, StringFormat='Data: {0} ...'}" />
+                        </Setter.Value>
+                      </Setter>
+                      <Setter Property="ToolTipService.InitialShowDelay" Value="1000"/>
+                    </Style>
+                  </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Unit" 
+                                    Width="*" 
+                                    Binding="{Binding Unit}" 
+                                    ElementStyle="{StaticResource dgtb}"
+                                    />
+                
+                <DataGridTextColumn Header="Description" 
+                                    Width="3*" 
+                                    Binding="{Binding Description}" 
+                                    ElementStyle="{StaticResource dgtb}"
+                                    />
+
+                <DataGridTemplateColumn Header="Edit" 
+                                        Width="60" 
+                                        >
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <Button Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                              ToolTip="Change description and unit" 
+                              Height="20" 
+                              Width="20" 
+                              HorizontalAlignment="Center"
+                              IsEnabled="{Binding IsUsed}"
+                              Command="{Binding ChangeUnitDescription}"
+                              CommandParameter="{Binding Path=DataContext, RelativeSource={RelativeSource Self}}">
+                        <md:PackIcon Kind="Pencil" Height="12" Width="12" />
+                      </Button>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+              </DataGrid.Columns>
+
+            </DataGrid>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 20 0 0">
+              <Button Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                      Width="100"
+                      ToolTip="Check all candidates" 
+                      Content="Use All"
+                      Margin="10 0 10 0"
+                      Command="{Binding UseAllOutputs}"
+                      />
+              <Button Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                      Width="100"
+                      ToolTip="Uncheck all candidates" 
+                      Content="Use None"
+                      Margin="10 0 10 0"
+                      Command="{Binding UseNoOutputs}"
+                      />
+            </StackPanel>
+
+          </Grid>
+        </TabItem>
+
+        <TabItem Header="LIBRARY">
+          <Grid Margin="10">
+            <Grid Margin="0 30 0 0" VerticalAlignment="Top" HorizontalAlignment="Center">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+              </Grid.RowDefinitions>
+
+              <Grid.Resources>
+                <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
+                  <Setter Property="Margin" Value="20 20"/>
+                  <Setter Property="VerticalAlignment" Value="Center"/>
+                  <Setter Property="HorizontalAlignment" Value="Left"/>
+                </Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignBody1TextBlock}">
+                  <Setter Property="Margin" Value="20 20"/>
+                  <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+              </Grid.Resources>
+
+              <TextBlock Text="Simulation name" TextAlignment="Right"/>
+              <TextBox Grid.Column="1" 
+                       Width="200" 
+                       Text="{Binding SimulationName, TargetNullValue='', ValidatesOnExceptions=True}" 
+                       md:HintAssist.Hint="Enter a short name"
+                       />
+
+              <TextBlock Grid.Row="1" Text="Simulation description" TextAlignment="Right"/>
+              <TextBox Grid.Row="1" 
+                       Grid.Column="1" 
+                       Width="400" 
+                       Text="{Binding SimulationDescription}" 
+                       md:HintAssist.Hint="Enter a brief description (optional)"
+                       />
+
+            </Grid>
+          </Grid>
+        </TabItem>
+
+      </TabControl>
+
+    </Grid>
+
+    <Separator Grid.Row="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="2" Width="Auto" VerticalAlignment="Center" />
+
+    <Grid Grid.Row="2" Margin="0,0,0,10" HorizontalAlignment="Center">
+
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="30"/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+
+      <Button Style="{StaticResource MaterialDesignFlatButton}"
+              IsDefault="True"
+              Command="{Binding OK}"
+              Width="120" 
+              Height="Auto"
+              Content="Import"
+              />
+
+      <Button Grid.Column="2" 
+              Style="{StaticResource MaterialDesignFlatButton}"
+              IsCancel="True"
+              Command="{Binding Cancel}"
+              Width="120" 
+              Height="Auto"
+              Content="Cancel"
+              />
+
+    </Grid>
+
+  </Grid>
+
+</ctrls:MetroWindow>

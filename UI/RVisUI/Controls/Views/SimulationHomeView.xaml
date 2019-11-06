@@ -1,0 +1,202 @@
+﻿<UserControl x:Class="RVisUI.Controls.Views.SimulationHomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:rvui="clr-namespace:RVisUI"
+             xmlns:ctrls="clr-namespace:RVisUI.Controls"
+             xmlns:impl="clr-namespace:RVisUI.Controls.Views.Impl"
+             xmlns:dps="clr-namespace:RVisUI.DepProps"
+             xmlns:mvvmd="clr-namespace:RVisUI.Mvvm.Design;assembly=RVisUI.Mvvm"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" 
+             d:DesignWidth="1366"
+             d:DataContext="{d:DesignInstance Type=mvvmd:SimulationHomeViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <AdornerDecorator>
+    <wpf:AdornedControl>
+      <wpf:AdornedControl.Style>
+        <Style TargetType="{x:Type wpf:AdornedControl}">
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding IsBusy}" Value="True">
+              <Setter Property="IsAdornerVisible" Value="True"/>
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </wpf:AdornedControl.Style>
+      <wpf:AdornedControl.AdornerContent>
+        <ctrls:BusyOverlay BusyWith="{Binding BusyWith}"
+                           Messages="{Binding BusyMessages}"
+                           EnableCancel="{Binding EnableBusyCancel}"
+                           Cancel="{Binding BusyCancel}"
+                           />
+      </wpf:AdornedControl.AdornerContent>
+
+      <Grid>
+
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <md:ColorZone Mode="PrimaryDark"
+                      Padding="0 2"
+                      CornerRadius="3"
+                      md:ShadowAssist.ShadowDepth="Depth3"
+                      Margin="0">
+
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Style="{StaticResource MaterialDesignSubheadingTextBlock}" 
+                         Text="{Binding Name, TargetNullValue='Name?'}"
+                         Margin="5,0,0,0"
+                         />
+            </StackPanel>
+
+            <Button Grid.Column="1" 
+                    Height="16" 
+                    Width="16"
+                    Margin="5,0,5,0"
+                    Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                    Command="{Binding ChangeCommonConfiguration}"
+                    ToolTip="Change module configuration..."
+                    >
+              <md:PackIcon Kind="Wrench"
+                           Height="12"
+                           Width="12" 
+                           />
+            </Button>
+
+            <StackPanel Grid.Column="2"
+                        Margin="5,0,5,0"
+                        VerticalAlignment="Center">
+
+              <Button x:Name="_openSharedStateView"
+                      Height="16" 
+                      Width="16"
+                      Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                      ToolTip="Apply/share state between modules..." 
+                      Command="{Binding SharedStateViewModel.OpenView}"
+                      >
+                <md:PackIcon Kind="SwapVertical"
+                             Height="12"
+                             Width="12" 
+                             />
+              </Button>
+
+              <Popup Name="_sharedStatePopup" 
+                     IsOpen="{Binding SharedStateViewModel.IsViewOpen, Mode=TwoWay}" 
+                     StaysOpen="False" 
+                     PlacementTarget="{Binding ElementName=_openSharedStateView}"
+                     Placement="Left"
+                     HorizontalOffset="{Binding ActualWidth, ElementName=_openSharedStateView}"
+                     VerticalOffset="{Binding ActualHeight, ElementName=_openSharedStateView}" 
+                     AllowsTransparency="True"
+                     wpf:Behaviour.IsKeyboardInputEnabled="True">
+                <Popup.CommandBindings>
+                  <CommandBinding Command="Close" Executed="CloseCommandHandler"/>
+                </Popup.CommandBindings>
+                <Popup.InputBindings>
+                  <KeyBinding Key="Escape" Command="Close"/>
+                </Popup.InputBindings>
+                <ContentControl Content="{Binding SharedStateViewModel}">
+                  <ContentControl.ContentTemplate>
+                    <DataTemplate>
+                      <impl:SharedStateView/>
+                    </DataTemplate>
+                  </ContentControl.ContentTemplate>
+                </ContentControl>
+              </Popup>
+
+            </StackPanel>
+
+            <Button Grid.Column="3" 
+                    Height="16" 
+                    Width="16"
+                    Margin="15,0,5,0"
+                    Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                    Command="{Binding Close}"
+                    >
+              <Button.ToolTip>
+                <ToolTip Content="{Binding Name}" ContentStringFormat="Close {0}"/>
+              </Button.ToolTip>
+              <md:PackIcon Kind="Close"
+                           Height="12"
+                           Width="12" 
+                           />
+            </Button>
+
+          </Grid>
+
+        </md:ColorZone>
+
+        <TabControl Grid.Row="1"
+                    Margin="0,6,0,0"
+                    dps:Content.UIComponents="{Binding AppState.UIComponents, Source={x:Static rvui:App.Current}}"
+                    SelectedIndex="{Binding UIComponentIndex}"
+                    TabStripPlacement="Right"
+                    >
+          <TabControl.Resources>
+            <Style TargetType="{x:Type TabItem}">
+              <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
+            </Style>
+          </TabControl.Resources>
+        </TabControl>
+
+        <md:ColorZone Grid.Row="1"
+                      Mode="PrimaryDark" 
+                      HorizontalAlignment="Right" 
+                      VerticalAlignment="Bottom" 
+                      CornerRadius="3"
+                      md:ShadowAssist.ShadowDepth="Depth3" 
+                      RenderTransformOrigin="1, 0" 
+                      >
+          <md:ColorZone.Style>
+            <Style TargetType="md:ColorZone">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding ActiveUIComponentName}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Hidden"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </md:ColorZone.Style>
+          <md:ColorZone.RenderTransform>
+            <RotateTransform Angle="90" CenterX="-14" CenterY="10"/>
+          </md:ColorZone.RenderTransform>
+          <TextBlock Margin="6, 0" 
+                     FontSize="24" 
+                     Text="{Binding ActiveUIComponentName, Converter={x:Static wpf:UpperCaseConverter.Default}}"
+                     />
+        </md:ColorZone>
+
+      </Grid>
+
+    </wpf:AdornedControl>
+  </AdornerDecorator>
+
+</UserControl>

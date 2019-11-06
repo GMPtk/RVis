@@ -1,0 +1,79 @@
+﻿<UserControl x:Class="Estimation.PosteriorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:oxy="http://oxyplot.org/wpf"
+             xmlns:design="clr-namespace:Estimation.Design"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1366"
+             d:DataContext="{d:DesignInstance Type=design:PosteriorViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition />
+      <ColumnDefinition Width="200"/>
+    </Grid.ColumnDefinitions>
+
+    <oxy:PlotView x:Name="_plotView" 
+                  Model="{Binding PlotModel}" 
+                  Background="Transparent"
+                  />
+
+    <StackPanel Grid.Column="1">
+      <GroupBox Margin="5" Header="Include Data From">
+        <ItemsControl ItemsSource="{Binding ChainViewModels}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <CheckBox Margin="5 2" 
+                        Content="{Binding No}"
+                        ContentStringFormat="Chain {0}"
+                        IsChecked="{Binding IsSelected}"
+                        />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+        </ItemsControl>
+      </GroupBox>
+      <GroupBox Margin="5" Header="Show Posterior For">
+        <ComboBox Grid.Column="1"
+                  Margin="5"
+                  VerticalAlignment="Center"
+                  ItemsSource="{Binding ParameterNames}" 
+                  SelectedIndex="{Binding SelectedParameterName}"
+                  />
+      </GroupBox>
+
+      <StackPanel Margin="0 50 0 0" HorizontalAlignment="Center" Orientation="Horizontal">
+        <TextBlock Text="{Binding AcceptRate, StringFormat='Accept rate = {0:P1}', TargetNullValue=''}"/>
+      </StackPanel>
+    </StackPanel>
+
+  </Grid>
+
+</UserControl>

@@ -1,0 +1,139 @@
+﻿<UserControl x:Class="Plot.Controls.Views.OutputsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:design="clr-namespace:Plot.Design"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1366"
+             d:DataContext="{d:DesignInstance Type=design:OutputsViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  
+  <Grid>
+
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+
+    <GroupBox Margin="0 0 0 5" Header="LOG ENTRIES">
+
+      <Grid>
+
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <ListView ItemsSource="{Binding LogEntryViewModels}" 
+                  SelectionMode="Extended">
+          <i:Interaction.Triggers>
+            <i:EventTrigger EventName="MouseDoubleClick">
+              <i:InvokeCommandAction Command="{Binding LoadLogEntry}" />
+            </i:EventTrigger>
+            <i:EventTrigger EventName="KeyDown">
+              <wpf:EventArgsCommandAction Command="{Binding FollowKeyboardInLogEntries}"
+                                          EventArgsConverter="{x:Static wpf:KeyEventArgsConverter.Default}"
+                                          />
+            </i:EventTrigger>
+          </i:Interaction.Triggers>
+          <i:Interaction.Behaviors>
+            <wpf:ListBoxSelectionBehavior SelectedItems="{Binding SelectedLogEntryViewModels, Converter={x:Static wpf:ElementTypeConverter.Default}}"/>
+          </i:Interaction.Behaviors>
+          <ListView.View>
+            <GridView>
+              <GridViewColumn Header="Logged on" DisplayMemberBinding="{Binding EnteredOn}" />
+              <GridViewColumn Header="Source" DisplayMemberBinding="{Binding RequesterTypeName}" />
+              <GridViewColumn Header="Parameter assignments" Width="Auto" DisplayMemberBinding="{Binding ParameterAssignments}" />
+            </GridView>
+          </ListView.View>
+        </ListView>
+
+        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10">
+
+          <Button Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                  Width="120"
+                  Margin="0 20"
+                  Command="{Binding LoadLogEntry}">
+            Load entry
+          </Button>
+
+          <Button Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                  Width="120"
+                  Margin="0 20"
+                  Command="{Binding CreateOutputGroup}">
+            Create group
+          </Button>
+
+        </StackPanel>
+
+      </Grid>
+      
+    </GroupBox>
+
+    <GroupBox Grid.Row="1" Margin="0 5 0 0" Header="OUTPUT GROUPS">
+
+      <Grid>
+
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <ListView ItemsSource="{Binding OutputGroupViewModels}" 
+                  SelectedValue="{Binding SelectedOutputGroupViewModel}"
+                  SelectionMode="Single">
+          <i:Interaction.Triggers>
+            <i:EventTrigger EventName="MouseDoubleClick">
+              <i:InvokeCommandAction Command="{Binding LoadOutputGroup}" />
+            </i:EventTrigger>
+            <i:EventTrigger EventName="KeyDown">
+              <wpf:EventArgsCommandAction Command="{Binding FollowKeyboardInOutputGroups}"
+                                          EventArgsConverter="{x:Static wpf:KeyEventArgsConverter.Default}"
+                                          />
+            </i:EventTrigger>
+          </i:Interaction.Triggers>
+          <ListView.View>
+            <GridView>
+              <GridViewColumn Header="Created on" DisplayMemberBinding="{Binding CreatedOn}" />
+              <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" />
+              <GridViewColumn Header="Description" Width="Auto" DisplayMemberBinding="{Binding Description}" />
+            </GridView>
+          </ListView.View>
+        </ListView>
+
+        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10">
+
+          <Button Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                  Width="120"
+                  Margin="0 20"
+                  Command="{Binding LoadOutputGroup}">
+            Load group
+          </Button>
+
+        </StackPanel>
+
+      </Grid>
+
+    </GroupBox>
+
+  </Grid>
+
+</UserControl>

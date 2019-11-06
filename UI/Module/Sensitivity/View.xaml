@@ -1,0 +1,67 @@
+﻿<UserControl x:Class="Sensitivity.View"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:ma="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             xmlns:local="clr-namespace:Sensitivity"
+             xmlns:design="clr-namespace:Sensitivity.Design"
+             xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1366"
+             d:DataContext="{d:DesignInstance Type=design:ViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Dark.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+      
+      <swc:BooleanToVisibilityConverter x:Key="b2v"/>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  
+  <Grid>
+
+    <TabControl>
+      <TabControl.Resources>
+        <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+          <Setter Property="ma:ControlsHelper.HeaderFontSize" Value="13"/>
+        </Style>
+      </TabControl.Resources>
+      <TabItem Header="PARAMETERS" DataContext="{Binding ParametersViewModel}">
+        <local:ParametersView />
+      </TabItem>
+      <TabItem Header="DESIGN" 
+               DataContext="{Binding DesignViewModel}"
+               IsSelected="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+        <local:DesignView />
+      </TabItem>
+      <TabItem Header="VARIANCE" 
+               DataContext="{Binding VarianceViewModel}"
+               Visibility="{Binding IsVisible, Converter={StaticResource b2v}}"
+               IsSelected="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+        <local:VarianceView />
+      </TabItem>
+      <TabItem Header="EFFECTS" 
+               DataContext="{Binding EffectsViewModel}"
+               Visibility="{Binding IsVisible, Converter={StaticResource b2v}}">
+        <local:EffectsView />
+      </TabItem>
+      <TabItem Header="SAVED DATA" DataContext="{Binding DesignDigestsViewModel}">
+        <local:DesignDigestsView />
+      </TabItem>
+    </TabControl>
+
+  </Grid>
+
+</UserControl>

@@ -1,0 +1,369 @@
+﻿<ctrls:MetroWindow x:Class="Sensitivity.ChartOptionsDialog"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:ctrls="http://metro.mahapps.com/winfx/xaml/controls"
+                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                   xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+                   xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+                   xmlns:local="clr-namespace:Sensitivity"
+                   xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+                   mc:Ignorable="d"
+                   Title="{Binding WindowTitle, TargetNullValue=''}"
+                   Height="650" Width="600"
+                   GlowBrush="{DynamicResource AccentColorBrush}"
+                   NonActiveGlowBrush="Red"
+                   ResizeMode="CanResizeWithGrip"
+                   WindowTransitionsEnabled="False"
+                   WindowStartupLocation="CenterOwner"
+                   wpf:Behaviour.DialogResult="{Binding DialogResult}"
+                   d:DataContext="{d:DesignInstance Type=local:ChartOptionsViewModel, IsDesignTimeCreatable=True}"
+                   >
+
+  <ctrls:MetroWindow.Resources>
+    <ResourceDictionary>
+
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+
+      <swc:BooleanToVisibilityConverter x:Key="b2v"/>
+
+    </ResourceDictionary>
+  </ctrls:MetroWindow.Resources>
+
+  <i:Interaction.Triggers>
+    <i:EventTrigger EventName="Loaded">
+      <i:InvokeCommandAction Command="{Binding Loaded}"/>
+    </i:EventTrigger>
+  </i:Interaction.Triggers>
+
+  <Grid>
+
+    <Grid.RowDefinitions>
+      <RowDefinition />
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <TabControl SelectedIndex="{Binding Page}">
+
+      <TabItem Header="Labels">
+
+        <Grid Margin="10">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition/>
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+          <Grid.Resources>
+            <ResourceDictionary>
+              <Style TargetType="TextBlock">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="HorizontalAlignment" Value="Right"/>
+                <Setter Property="Margin" Value="10,10,10,10"/>
+              </Style>
+              <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+              </Style>
+            </ResourceDictionary>
+          </Grid.Resources>
+          <TextBlock Grid.Column="0" Grid.Row="0">Title</TextBlock>
+          <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding ChartTitle, TargetNullValue=''}"/>
+          <TextBlock Grid.Column="0" Grid.Row="1">Y Axis</TextBlock>
+          <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding YAxisTitle, TargetNullValue=''}"/>
+          <TextBlock Grid.Column="0" Grid.Row="2">X Axis</TextBlock>
+          <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding XAxisTitle, TargetNullValue=''}"/>
+
+          <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.ColumnSpan="2">
+            <TextBlock FontSize="10" Text="Superscript example: 123 m^{3}"/>
+            <TextBlock FontSize="10" Text="Subscript example: H_{2}O"/>
+          </StackPanel>
+        </Grid>
+
+      </TabItem>
+
+      <TabItem Header="Chart">
+
+        <Grid Margin="10">
+
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+          </Grid.RowDefinitions>
+
+          <Grid HorizontalAlignment="Left">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition/>
+              <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock VerticalAlignment="Center" 
+                       Margin="0,0,20,0" 
+                       Text="Choose chart element"
+                       />
+
+            <ComboBox Grid.Column="1" 
+                      Width="100"
+                      SelectedIndex="{Binding SelectedElement}" 
+                      ItemsSource="{Binding ElementNames}">
+
+              <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectionChanged">
+                  <i:InvokeCommandAction Command="{Binding SelectElement}"/>
+                </i:EventTrigger>
+              </i:Interaction.Triggers>
+
+            </ComboBox>
+
+          </Grid>
+
+          <ListBox ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
+                   ItemsSource="{x:Static local:OxyColorData.OxyColors}" 
+                   SelectedIndex="{Binding SelectedOxyColor}"
+                   Margin="0,20,0,0" Grid.Row="1" 
+                   wpf:Behaviour.SelectedListItemView="{Binding SelectedOxyColorView}"
+                   >
+            <ListBox.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel Orientation="Horizontal" 
+                           />
+              </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Orientation="Horizontal">
+                  <Ellipse Width="16"
+                           Height="16"
+                           Fill="{Binding ColorBrush, Mode=OneWay}" 
+                           />
+                  <TextBlock Margin="10,0,0,0" 
+                             Width="90" 
+                             TextTrimming="CharacterEllipsis" 
+                             Text="{Binding Name}" 
+                             ToolTip="{Binding Name}"
+                             />
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+
+        </Grid>
+
+      </TabItem>
+
+      <TabItem Header="Axes" 
+               Visibility="{Binding ShowAxesTab, Converter={StaticResource b2v}}"
+               >
+
+        <TabItem.Resources>
+          <Style TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+          </Style>
+          <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Height" Value="Auto"/>
+            <Setter Property="Width" Value="70"/>
+          </Style>
+          <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="10,5,0,5"/>
+          </Style>
+        </TabItem.Resources>
+
+        <StackPanel Margin="10">
+
+          <GroupBox Header="Horizontal" 
+                    Height="Auto" 
+                    Padding="0 20"
+                    >
+            <Grid>
+
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+              </Grid.ColumnDefinitions>
+
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+              </Grid.RowDefinitions>
+
+              <TextBlock Grid.Column="0" Grid.Row="0" Text="Minimum"/>
+              <TextBox Grid.Column="1" 
+                       Grid.Row="0" 
+                       Text="{Binding HorizontalAxisMinimum}" 
+                       IsEnabled="{Binding HorizontalAxisMinimumAuto, Converter={x:Static wpf:InverseBooleanConverter.Default}}"
+                       />
+              <CheckBox Grid.Column="2" 
+                        Grid.Row="0" 
+                        Content="Auto" 
+                        IsChecked="{Binding HorizontalAxisMinimumAuto}"
+                        />
+
+              <TextBlock Grid.Column="0" Grid.Row="1" Text="Absolute minimum"/>
+              <TextBox Grid.Column="1" 
+                       Grid.Row="1" 
+                       Text="{Binding HorizontalAxisAbsoluteMinimum}" 
+                       IsEnabled="{Binding HorizontalAxisAbsoluteMinimumAuto, Converter={x:Static wpf:InverseBooleanConverter.Default}}"
+                       />
+              <CheckBox Grid.Column="2" 
+                        Grid.Row="1" 
+                        Content="Auto" 
+                        IsChecked="{Binding HorizontalAxisAbsoluteMinimumAuto}"
+                        />
+
+              <TextBlock Grid.Column="0" Grid.Row="2" Text="Maximum"/>
+              <TextBox Grid.Column="1" 
+                       Grid.Row="2" 
+                       Text="{Binding HorizontalAxisMaximum}" 
+                       IsEnabled="{Binding HorizontalAxisMaximumAuto, Converter={x:Static wpf:InverseBooleanConverter.Default}}"
+                       />
+              <CheckBox Grid.Column="2" 
+                        Grid.Row="2" 
+                        Content="Auto" 
+                        IsChecked="{Binding HorizontalAxisMaximumAuto}"
+                        />
+
+              <TextBlock Grid.Column="0" Grid.Row="3" Text="Absolute maximum"/>
+              <TextBox Grid.Column="1" 
+                       Grid.Row="3" 
+                       Text="{Binding HorizontalAxisAbsoluteMaximum}" 
+                       IsEnabled="{Binding HorizontalAxisAbsoluteMaximumAuto, Converter={x:Static wpf:InverseBooleanConverter.Default}}"
+                       />
+              <CheckBox Grid.Column="2" 
+                        Grid.Row="3" 
+                        Content="Auto" 
+                        IsChecked="{Binding HorizontalAxisAbsoluteMaximumAuto}"
+                        />
+
+            </Grid>
+          </GroupBox>
+
+          <GroupBox Header="Vertical" 
+                    Height="Auto" 
+                    VerticalAlignment="Top"
+                    Margin="0,20,0,0"
+                    Padding="0,20"
+                    >
+            <Grid>
+
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+              </Grid.ColumnDefinitions>
+
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+              </Grid.RowDefinitions>
+
+              <TextBlock Grid.Column="0" Grid.Row="0" Text="Minimum"/>
+              <TextBox Grid.Column="1" 
+                       Grid.Row="0" 
+                       Text="{Binding VerticalAxisMinimum}" 
+                       IsEnabled="{Binding VerticalAxisMinimumAuto, Converter={x:Static wpf:InverseBooleanConverter.Default}}"
+                       />
+              <CheckBox Grid.Column="2" 
+                        Grid.Row="0" 
+                        Content="Auto" 
+                        IsChecked="{Binding VerticalAxisMinimumAuto}"
+                        />
+
+              <TextBlock Grid.Column="0" Grid.Row="1" Text="Absolute minimum"/>
+              <TextBox Grid.Column="1" 
+                       Grid.Row="1" 
+                       Text="{Binding VerticalAxisAbsoluteMinimum}" 
+                       IsEnabled="{Binding VerticalAxisAbsoluteMinimumAuto, Converter={x:Static wpf:InverseBooleanConverter.Default}}"
+                       />
+              <CheckBox Grid.Column="2" 
+                        Grid.Row="1" 
+                        Content="Auto" 
+                        IsChecked="{Binding VerticalAxisAbsoluteMinimumAuto}"
+                        />
+
+              <TextBlock Grid.Column="0" Grid.Row="2" Text="Maximum"/>
+              <TextBox Grid.Column="1" 
+                       Grid.Row="2" 
+                       Text="{Binding VerticalAxisMaximum}" 
+                       IsEnabled="{Binding VerticalAxisMaximumAuto, Converter={x:Static wpf:InverseBooleanConverter.Default}}"
+                       />
+              <CheckBox Grid.Column="2" 
+                        Grid.Row="2" 
+                        Content="Auto" 
+                        IsChecked="{Binding VerticalAxisMaximumAuto}"
+                        />
+
+              <TextBlock Grid.Column="0" Grid.Row="3" Text="Absolute maximum"/>
+              <TextBox Grid.Column="1" 
+                       Grid.Row="3" 
+                       Text="{Binding VerticalAxisAbsoluteMaximum}" 
+                       IsEnabled="{Binding VerticalAxisAbsoluteMaximumAuto, Converter={x:Static wpf:InverseBooleanConverter.Default}}"
+                       />
+              <CheckBox Grid.Column="2" 
+                        Grid.Row="3" 
+                        Content="Auto" 
+                        IsChecked="{Binding VerticalAxisAbsoluteMaximumAuto}"
+                        />
+
+            </Grid>
+          </GroupBox>
+
+        </StackPanel>
+
+      </TabItem>
+
+    </TabControl>
+
+    <Separator Grid.Row="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="2" Width="Auto" VerticalAlignment="Center" />
+
+    <Grid Grid.Row="2" Margin="0,0,0,10" HorizontalAlignment="Center">
+
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="30"/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+
+      <Button Style="{StaticResource MaterialDesignFlatButton}"
+              IsDefault="True"
+              Command="{Binding OK}"
+              Width="120" 
+              Height="Auto"
+              Content="OK"
+              />
+
+      <Button Grid.Column="2" 
+              Style="{StaticResource MaterialDesignFlatButton}"
+              IsCancel="True"
+              Width="120" 
+              Height="Auto"
+              Content="Cancel"
+              />
+
+    </Grid>
+
+  </Grid>
+
+</ctrls:MetroWindow>

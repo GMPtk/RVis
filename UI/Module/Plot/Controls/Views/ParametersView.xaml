@@ -1,0 +1,172 @@
+﻿<UserControl x:Class="Plot.Controls.Views.ParametersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:plot="clr-namespace:Plot"
+             xmlns:impl="clr-namespace:Plot.Controls.Views.Impl"
+             xmlns:design="clr-namespace:Plot.Design"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1366"
+             d:DataContext="{d:DesignInstance Type=design:ParametersViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+      
+      <CollectionViewSource x:Key="_cvsUnselected" Source="{Binding UnselectedParameters}">
+        <CollectionViewSource.SortDescriptions>
+          <scm:SortDescription PropertyName="SortKey" Direction="Ascending"/>
+        </CollectionViewSource.SortDescriptions>        
+      </CollectionViewSource>
+      
+      <ControlTemplate x:Key="EmptyWorkingSetTemplate">
+        <TextBlock Text="NONE SELECTED" 
+                   VerticalAlignment="Center" 
+                   HorizontalAlignment="Center" 
+                   />
+      </ControlTemplate>
+      
+      <ControlTemplate x:Key="EmptyUnselectedTemplate">
+        <TextBlock Text="ALL AVAILABLE PARAMETERS SELECTED" 
+                   VerticalAlignment="Center" 
+                   HorizontalAlignment="Center" 
+                   />
+      </ControlTemplate>
+    
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition Height="2*"/>
+    </Grid.RowDefinitions>
+
+    <GroupBox Grid.Row="0" Style="{DynamicResource MaterialDesignCardGroupBox}" Header="WORKING SET">
+  
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding SelectedParameters}">
+          <ItemsControl.Style>
+            <Style TargetType="{x:Type ItemsControl}">
+              <Style.Triggers>
+                <DataTrigger Value="0" Binding="{Binding Items.Count, RelativeSource={RelativeSource Self}}">
+                  <Setter Property="Template" Value="{StaticResource EmptyWorkingSetTemplate}" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </ItemsControl.Style>
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel/>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type plot:IParameterViewModel}">
+              <impl:ParameterEditView/>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+
+    </GroupBox>
+
+    <Border Grid.Row="1"
+            BorderThickness="1"
+            BorderBrush="{DynamicResource PrimaryHueDarkBrush}"
+            Background="{DynamicResource MaterialDesignPaper}"
+            CornerRadius="4"
+            Margin="0 20 0 0"
+            >
+
+      <Grid Margin="9 10 9 0">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid Margin="0 0 0 10">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+          </Grid.ColumnDefinitions>
+
+          <TextBlock VerticalAlignment="Center" 
+                     FontWeight="Bold" 
+                     Text="PARAMETER POOL"
+                     />
+
+          <StackPanel Grid.Column="1" 
+                      HorizontalAlignment="Right" 
+                      Orientation="Horizontal"
+                      Margin="0 0 20 0">
+            <TextBlock VerticalAlignment="Center" 
+                       Margin="0 0 10 0" 
+                       Style="{DynamicResource MaterialDesignCaptionTextBlock}" 
+                       Text="Filter"
+                       />
+            <TextBox x:Name="_txtSearch"
+                     VerticalAlignment="Center" 
+                     Width="200"
+                     Margin="0 0 10 0"
+                     />
+            <Button x:Name="_btnClearSearch"
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center"
+                    Padding="0"
+                    Height="20"
+                    Width="20"
+                    ToolTip="Clear filter"
+                    >
+              <md:PackIcon Kind="FilterRemove"/>
+            </Button>
+          </StackPanel>
+
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+          <ItemsControl ItemsSource="{Binding Source={StaticResource _cvsUnselected}}">
+            <ItemsControl.Style>
+              <Style TargetType="{x:Type ItemsControl}">
+                <Style.Triggers>
+                  <DataTrigger Value="0" Binding="{Binding Items.Count, RelativeSource={RelativeSource Self}}">
+                    <Setter Property="Template" Value="{StaticResource EmptyUnselectedTemplate}" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </ItemsControl.Style>
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="{x:Type plot:IParameterViewModel}">
+                <impl:ParameterBrowseView/>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+      </Grid>
+      
+    </Border>
+
+  </Grid>
+
+</UserControl>

@@ -1,0 +1,139 @@
+﻿using LanguageExt;
+using Nett;
+using ProtoBuf;
+using RVis.Base.Extensions;
+using RVis.Model.Extensions;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using static RVis.Base.Check;
+using static RVis.Model.Constant;
+using static RVis.Model.Sim;
+
+namespace RVis.Model
+{
+  [ProtoContract]
+  public struct Simulation : IEquatable<Simulation>
+  {
+    public static Simulation LoadFrom(string pathToSimulation)
+    {
+      var pathToPrivate = Path.Combine(pathToSimulation, PRIVATE_SUBDIRECTORY);
+      RequireDirectory(pathToPrivate);
+
+      var pathToConfig = Path.Combine(pathToPrivate, CONFIG_FILE_NAME);
+      RequireFile(pathToConfig);
+
+      TSimConfig fromToml;
+      try
+      {
+        fromToml = Toml.ReadFile<TSimConfig>(pathToConfig);
+      }
+      catch (Exception ex)
+      {
+        throw new ArgumentException($"Failed to load config file", nameof(pathToSimulation), ex);
+      }
+
+      var config = FromToml(fromToml);
+
+      var simulation = new Simulation(pathToSimulation, config);
+
+      return simulation;
+    }
+
+    [ProtoIgnore]
+    public string PathToSimulation => _pathToSimulation;
+
+    [ProtoIgnore]
+    public SimConfig SimConfig => _simConfig;
+
+    [ProtoIgnore]
+    public string PathToCodeFile => Path.Combine(PathToSimulation, SimConfig.SimCode.File);
+
+    public string PopulateTemplate(Arr<SimParameter> parameters)
+    {
+      RequireTrue(this.IsTmplType());
+      RequireFile(PathToCodeFile);
+      var template = File.ReadAllText(PathToCodeFile);
+
+      var expectedParameterNames = SimConfig.SimInput.SimParameters.Map(p => p.Name);
+      var fullyPopulated = expectedParameterNames.ForAll(
+        n => parameters.ContainsParameter(n)
+        );
+      RequireTrue(fullyPopulated);
+
+      var pathToPopulated = Path.GetTempFileName();
+      File.Move(pathToPopulated, pathToPopulated + ".R");
+      pathToPopulated += ".R";
+
+      var populated = SubstitutePlaceholders(template, parameters);
+
+      File.WriteAllText(pathToPopulated, populated);
+
+      return pathToPopulated;
+    }
+
+    private static string SubstitutePlaceholders(string template, Arr<SimParameter> parameters)
+    {
+      var nSubstitutions = parameters.Count;
+
+      var parts = template.Split(new string[] { "${" }, StringSplitOptions.None);
+
+      RequireEqual(parts.Length, nSubstitutions + 1, "Incompatible parameter set and template: non-equal substitutions");
+
+      if (0 == nSubstitutions) return template;
+
+      var sb = new StringBuilder(parts[0]);
+
+      for (var i = 1; i < parts.Length; ++i)
+      {
+        var part = parts[i];
+        var posRBrace = part.IndexOf('}');
+
+        RequireTrue(posRBrace.IsFound(), "No closing } in section: " + part);
+
+        var name = part.Substring(0, posRBrace).Trim();
+        var parameter = parameters
+          .FindParameter(name)
+          .AssertSome($"Template specifies unknown parameter: {name}");
+
+        sb.Append(parameter.GetRValue());
+        sb.Append(part.Substring(posRBrace + 1));
+      }
+
+      return sb.ToString();
+    }
+
+    public bool Equals(Simulation rhs) =>
+      _pathToSimulation == rhs._pathToSimulation && _simConfig == rhs._simConfig;
+
+    public override bool Equals(object obj) =>
+      obj is Simulation simulation ? Equals(simulation) : false;
+
+    public override int GetHashCode()
+    {
+      var hashCode = 1016786274;
+      hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_pathToSimulation);
+      hashCode = hashCode * -1521134295 + EqualityComparer<SimConfig>.Default.GetHashCode(_simConfig);
+      return hashCode;
+    }
+
+    private Simulation(string pathToSimulation, SimConfig simConfig)
+    {
+      _pathToSimulation = pathToSimulation;
+      _simConfig = simConfig;
+    }
+
+    [ProtoMember(1)]
+    private readonly string _pathToSimulation;
+
+    [ProtoMember(2)]
+    private readonly SimConfig _simConfig;
+
+    public static bool operator ==(Simulation left, Simulation right) =>
+      left.Equals(right);
+
+    public static bool operator !=(Simulation left, Simulation right) =>
+      !(left == right);
+  }
+}

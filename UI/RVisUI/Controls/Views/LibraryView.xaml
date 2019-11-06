@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="RVisUI.Controls.Views.LibraryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="700"
+             d:DesignWidth="800">
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  
+  <Grid>
+
+    <GroupBox Header="Location"
+              Style="{DynamicResource MaterialDesignGroupBox}"
+              md:ColorZoneAssist.Mode="Accent"
+              Margin="100,0,100,0" 
+              VerticalAlignment="Center">
+      <StackPanel>
+        <TextBlock Text="{Binding Location, TargetNullValue=(none set)}" TextTrimming="CharacterEllipsis"/>
+        <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                ToolTip="Choose directory"
+                Margin="0,20,0,0"
+                HorizontalAlignment="Right"
+                Command="{Binding ChooseDirectory}">
+          <StackPanel Orientation="Horizontal">
+            <md:PackIcon VerticalAlignment="Center"
+                          Margin="0 .5 4 0"
+                          Kind="Folder"
+                          />
+            <TextBlock VerticalAlignment="Center" Text="Change"/>
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </GroupBox>
+
+  </Grid>
+
+</UserControl>

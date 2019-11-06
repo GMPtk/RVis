@@ -1,0 +1,112 @@
+﻿<UserControl x:Class="Evidence.Controls.Views.ManageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Evidence.Controls.Views"
+             xmlns:design="clr-namespace:Evidence.Design"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1366"
+             d:DataContext="{d:DesignInstance Type=design:ManageViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+  
+    <Grid.RowDefinitions>
+      <RowDefinition Height="2*"/>
+      <RowDefinition Height="3*"/>
+    </Grid.RowDefinitions>
+
+    <GroupBox Header="Sources" Margin="5">
+
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <ListView ItemsSource="{Binding EvidenceSourceViewModels}" 
+              SelectedItem="{Binding SelectedEvidenceSourceViewModel}">
+          <ListView.View>
+            <GridView>
+              <GridViewColumn Header="Name" Width="Auto" DisplayMemberBinding="{Binding Name}"/>
+              <GridViewColumn Header="Description" Width="Auto" DisplayMemberBinding="{Binding Description}"/>
+            </GridView>
+          </ListView.View>
+
+        </ListView>
+
+        <Button Grid.Column="1" 
+            Style="{StaticResource MaterialDesignRaisedDarkButton}"
+            ToolTip="Delete source and associated observations" 
+            Margin="30 0"
+            HorizontalAlignment="Center"
+            Command="{Binding DeleteEvidenceSource}"
+            >
+          <StackPanel Orientation="Horizontal">
+            <md:PackIcon Margin="0 0 4 0" VerticalAlignment="Center" Kind="Delete"/>
+            <TextBlock Text="Delete"/>
+          </StackPanel>
+        </Button>
+
+      </Grid>
+      
+    </GroupBox>
+
+    <GroupBox Grid.Row="1" Margin="5" Header="Observations">
+
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <ListView ItemsSource="{Binding ObservationsViewModels}" 
+                  SelectedItem="{Binding SelectedObservationsViewModel}">
+          <ListView.View>
+            <GridView>
+              <GridViewColumn Header="Output" Width="Auto" DisplayMemberBinding="{Binding Subject}"/>
+              <GridViewColumn Header="Name" Width="Auto" DisplayMemberBinding="{Binding RefName}"/>
+              <GridViewColumn Header="Observations" Width="Auto" DisplayMemberBinding="{Binding Data}"/>
+            </GridView>
+          </ListView.View>
+
+        </ListView>
+
+        <Button Grid.Column="1"
+                Style="{StaticResource MaterialDesignRaisedDarkButton}"
+                ToolTip="Delete observations" 
+                Margin="30 0"
+                HorizontalAlignment="Center"
+                Command="{Binding DeleteObservations}"
+                >
+          <StackPanel Orientation="Horizontal">
+            <md:PackIcon Margin="0 0 4 0" VerticalAlignment="Center" Kind="Delete"/>
+            <TextBlock Text="Delete"/>
+          </StackPanel>
+        </Button>
+
+      </Grid>
+      
+    </GroupBox>
+
+  </Grid>
+
+</UserControl>

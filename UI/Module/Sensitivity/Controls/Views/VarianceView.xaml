@@ -1,0 +1,77 @@
+﻿<UserControl x:Class="Sensitivity.VarianceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Sensitivity"
+             xmlns:oxy="http://oxyplot.org/wpf"
+             xmlns:design="clr-namespace:Sensitivity.Design"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1366"
+             d:DataContext="{d:DesignInstance Type=design:VarianceViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition/>
+      <ColumnDefinition Width="Auto"/>
+    </Grid.ColumnDefinitions>
+
+    <oxy:PlotView x:Name="_plotView" 
+                  Model="{Binding PlotModel}" 
+                  Background="Transparent"
+                  />
+
+    <StackPanel Grid.Column="1">
+
+      <GroupBox Header="Output">
+
+        <ComboBox ItemsSource="{Binding OutputNames}" 
+                  SelectedIndex="{Binding SelectedOutputName}"
+                  MinWidth="200"
+                  Margin="5"
+                  />
+
+      </GroupBox>
+
+      <GroupBox Header="Measure" Margin="0,10,0,0">
+
+        <StackPanel>
+          <RadioButton Content="Main effect" GroupName="VarianceMeasureType" Margin="5"
+             IsChecked="{Binding Path=VarianceMeasureType, Mode=TwoWay, 
+                                 Converter={x:Static wpf:EnumMatchToBooleanConverter.Default},
+                                 ConverterParameter=MainEffect}"  />
+          <RadioButton Content="Total effect" GroupName="VarianceMeasureType" Margin="5" 
+             IsChecked="{Binding Path=VarianceMeasureType, Mode=TwoWay, 
+                                 Converter={x:Static wpf:EnumMatchToBooleanConverter.Default},
+                                 ConverterParameter=TotalEffect}"  />
+          <RadioButton Content="Variance" GroupName="VarianceMeasureType" Margin="5"
+             IsChecked="{Binding Path=VarianceMeasureType, Mode=TwoWay, 
+                                 Converter={x:Static wpf:EnumMatchToBooleanConverter.Default},
+                                 ConverterParameter=Variance}"  />
+        </StackPanel>
+        
+      </GroupBox>
+      
+    </StackPanel>
+
+  </Grid>
+
+</UserControl>

@@ -1,0 +1,161 @@
+﻿<UserControl x:Class="Plot.Controls.Views.TraceDataPlotView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:oxy="http://oxyplot.org/wpf"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Plot.Controls.Views.Impl"
+             xmlns:design="clr-namespace:Plot.Design"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="750" 
+             d:DesignWidth="1000"
+             d:DataContext="{d:DesignInstance Type=design:TraceDataPlotViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+
+    <oxy:PlotView x:Name="_plotView" Model="{Binding PlotModel}" Background="Transparent"/>
+
+    <StackPanel Orientation="Horizontal" 
+                VerticalAlignment="Top" 
+                HorizontalAlignment="Left"
+                Margin="100 18 0 0">
+
+      <Button x:Name="_openDepVarConfig" 
+              Style="{DynamicResource MaterialDesignFlatButton}" 
+              Padding="0"
+              Height="Auto"
+              Width="Auto"
+              Command="{Binding DepVarConfigViewModel.ToggleView}"
+              >
+        <StackPanel Orientation="Horizontal">
+          <md:PackIcon VerticalAlignment="Center" 
+                        Margin="0 0 3 0"
+                        Width="12"
+                        Height="12"
+                        Kind="TableColumnWidth" 
+                        />
+          <TextBlock FontSize="12" 
+                     Text="{Binding DepVarConfigViewModel.SelectedElement.Label}"
+                     />
+          <md:PackIcon VerticalAlignment="Center" 
+                        Margin="0"
+                        Width="12"
+                        Height="12"
+                        Kind="DotsVertical" 
+                        />
+        </StackPanel>
+      </Button>
+
+      <Popup Name="_depVarConfigPopup" 
+              IsOpen="{Binding DepVarConfigViewModel.IsViewOpen, Mode=TwoWay}" 
+              StaysOpen="False" 
+              PlacementTarget="{Binding ElementName=_openDepVarConfig}"
+             Placement="Right"
+             VerticalOffset="{Binding ActualHeight, ElementName=_openDepVarConfig}"
+              AllowsTransparency="True"
+              wpf:Behaviour.IsKeyboardInputEnabled="True">
+        <Popup.CommandBindings>
+          <CommandBinding Command="Close" Executed="CloseCommandHandler"/>
+        </Popup.CommandBindings>
+        <Popup.InputBindings>
+          <KeyBinding Key="Escape" Command="Close"/>
+        </Popup.InputBindings>
+        <ContentControl Content="{Binding DepVarConfigViewModel}">
+          <ContentControl.ContentTemplate>
+            <DataTemplate>
+              <local:DepVarConfigView/>
+            </DataTemplate>
+          </ContentControl.ContentTemplate>
+        </ContentControl>
+      </Popup>
+
+    </StackPanel>
+
+    <StackPanel Orientation="Horizontal" 
+                VerticalAlignment="Top" 
+                HorizontalAlignment="Right"
+                Margin="0 18 15 0">
+
+      <Button ToolTip="Toggle lock axes' origin to 0,0"
+              Command="{Binding ToggleLockAxesOriginToZeroZero}"
+              >
+        <Button.Style>
+          <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Margin" Value="0,0,5,0"/>
+            <Setter Property="Content">
+              <Setter.Value>
+                <TextBlock Text="X,Y" 
+                            FontSize="6" 
+                            FontWeight="Bold"
+                            />
+              </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsAxesOriginLockedToZeroZero}" Value="True">
+                <Setter Property="Content">
+                  <Setter.Value>
+                    <TextBlock Text="0,0" 
+                                FontSize="6" 
+                                FontWeight="Bold"
+                                />
+                  </Setter.Value>
+                </Setter>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Button.Style>
+      </Button>
+
+      <Button Height="16" 
+              Width="16"
+              Margin="0,0,5,0"
+              Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+              ToolTip="Reset axis ranges to default" 
+              Command="{Binding ResetAxisRanges}"
+              >
+        <md:PackIcon Kind="Refresh"
+                      Height="12"
+                      Width="12" 
+                      />
+      </Button>
+
+      <Button Height="16" 
+              Width="16"
+              Margin="10,0,0,0"
+              Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+              ToolTip="Remove chart" 
+              Command="{Binding RemoveChart}"
+              >
+        <md:PackIcon Kind="Close"
+                      Height="12"
+                      Width="12" 
+                      />
+      </Button>
+
+    </StackPanel>
+
+  </Grid>
+
+</UserControl>

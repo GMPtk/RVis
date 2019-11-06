@@ -1,0 +1,204 @@
+﻿<UserControl x:Class="Estimation.DesignView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:design="clr-namespace:Estimation.Design"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1366"
+             d:DataContext="{d:DesignInstance Type=design:DesignViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+
+      <Style x:Key="ItemsControlStyle" TargetType="{x:Type ItemsControl}">
+        <Style.Triggers>
+          <DataTrigger Binding="{Binding Items.Count, RelativeSource={RelativeSource Self}}" Value="0">
+            <Setter Property="Template">
+              <Setter.Value>
+                <ControlTemplate>
+                  <TextBlock VerticalAlignment="Center" 
+                             HorizontalAlignment="Center"
+                             Text="{TemplateBinding Tag}"
+                             />
+                </ControlTemplate>
+              </Setter.Value>
+            </Setter>
+          </DataTrigger>
+        </Style.Triggers>
+      </Style>
+
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="2*"/>
+      <ColumnDefinition/>
+    </Grid.ColumnDefinitions>
+
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition/>
+      <RowDefinition/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+
+    <GroupBox Margin="0 0 4 0" Header="Priors">
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+        <ItemsControl ItemsSource="{Binding Priors}" 
+                      Tag="(configure a distribution for one or more parameters)" 
+                      Style="{StaticResource ItemsControlStyle}"
+                      />
+      </ScrollViewer>
+    </GroupBox>
+
+    <GroupBox Grid.Row="1" Margin="0 8 4 0" Header="Invariants">
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+        <ItemsControl ItemsSource="{Binding Invariants}" 
+                      Tag="(none)" 
+                      Style="{StaticResource ItemsControlStyle}"
+                      />
+      </ScrollViewer>
+    </GroupBox>
+
+    <GroupBox Grid.Row="2" Margin="0 8 4 0" Header="Output Error Models">
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+        <ItemsControl ItemsSource="{Binding Outputs}"
+                      Tag="(configure an error model for one or more outputs)" 
+                      Style="{StaticResource ItemsControlStyle}"
+                      />
+      </ScrollViewer>
+    </GroupBox>
+
+    <GroupBox Grid.Row="3" Margin="0 8 4 0" Header="Observations">
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+        <ItemsControl ItemsSource="{Binding Observations}"
+                      Tag="(select one or more observation sets for each output)" 
+                      Style="{StaticResource ItemsControlStyle}"
+                      />
+      </ScrollViewer>
+    </GroupBox>
+
+    <Grid Grid.Column="1" 
+          Grid.RowSpan="2"
+          Height="240"
+          Width="400"
+          VerticalAlignment="Center">
+
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+
+      <Grid.RowDefinitions>
+        <RowDefinition/>
+        <RowDefinition/>
+        <RowDefinition/>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+
+      <TextBlock VerticalAlignment="Center"
+                 HorizontalAlignment="Right"
+                 Margin="4"
+                 Text="No. of iterations"
+                 />
+      <TextBox Grid.Column="1" 
+               VerticalAlignment="Center" 
+               Margin="4"
+               IsEnabled="{Binding CanCreateDesign}"
+               Text="{Binding Iterations, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+               />
+
+      <TextBlock Grid.Row="1"
+                 VerticalAlignment="Center" 
+                 HorizontalAlignment="Right"
+                 Margin="4"
+                 Text="Burn-in"
+                 />
+      <TextBox Grid.Row="1"
+               Grid.Column="1" 
+               VerticalAlignment="Center" 
+               Margin="4"
+               IsEnabled="{Binding CanCreateDesign}"
+               Text="{Binding BurnIn, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+               />
+
+      <TextBlock Grid.Row="2"
+                 VerticalAlignment="Center" 
+                 HorizontalAlignment="Right"
+                 Margin="4"
+                 Text="Chains"
+                 />
+      <ComboBox Grid.Row="2"
+                Grid.Column="1"
+                Margin="4"
+                Width="30"
+                HorizontalAlignment="Left"
+                IsEnabled="{Binding CanCreateDesign}"
+                ItemsSource="{Binding ChainsOptions}"
+                SelectedIndex="{Binding ChainsIndex}"
+                />
+
+      <Button Grid.Row="3"
+              Grid.Column="1"
+              HorizontalAlignment="Left"
+              Content="Create Design"
+              Command="{Binding CreateDesign}"
+              />
+
+    </Grid>
+
+    <Grid Grid.Column="1"
+          Grid.Row="2"
+          Height="120"
+          Width="400"
+          VerticalAlignment="Center">
+
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+
+      <Grid.RowDefinitions>
+        <RowDefinition/>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+
+      <TextBlock VerticalAlignment="Center"
+                 HorizontalAlignment="Right"
+                 Margin="4"
+                 Text="Design created on"
+                 />
+      <TextBlock Grid.Column="1"
+                 VerticalAlignment="Center"
+                 Margin="4" 
+                 Text="{Binding DesignCreatedOn, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}', TargetNullValue='?'}"
+                 />
+
+      <Button Grid.Row="1"
+              Grid.Column="1"
+              HorizontalAlignment="Left"
+              Content="Unload Design"
+              Command="{Binding UnloadDesign}"
+              />
+
+    </Grid>
+
+  </Grid>
+
+</UserControl>

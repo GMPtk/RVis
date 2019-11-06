@@ -1,0 +1,85 @@
+﻿<UserControl x:Class="Estimation.OutputErrorModelView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             xmlns:local="clr-namespace:Estimation"
+             xmlns:design="clr-namespace:Estimation.Design"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1366"
+             d:DataContext="{d:DesignInstance Type=design:OutputErrorViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Style>
+    <Style TargetType="UserControl">
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding SelectedErrorModelName}" Value="-1">
+          <Setter Property="ContentTemplate">
+            <Setter.Value>
+              <DataTemplate>
+                <TextBlock VerticalAlignment="Center" 
+                           HorizontalAlignment="Center"
+                           Text="No output selected"
+                           />
+              </DataTemplate>
+            </Setter.Value>
+          </Setter>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+  </UserControl.Style>
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+      <DataTemplate DataType="{x:Type local:NormalErrorViewModel}">
+        <local:NormalErrorModelView />
+      </DataTemplate>
+      <DataTemplate DataType="{x:Type local:LogNormalErrorViewModel}">
+        <local:LogNormalErrorModelView />
+      </DataTemplate>
+      <DataTemplate DataType="{x:Type local:HeteroscedasticPowerErrorViewModel}">
+        <local:HeteroscedasticPowerErrorModelView />
+      </DataTemplate>
+      <DataTemplate DataType="{x:Type local:HeteroscedasticExpErrorViewModel}">
+        <local:HeteroscedasticExpErrorModelView />
+      </DataTemplate>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+
+    <Grid.RowDefinitions>
+      <RowDefinition Height="40"/>
+      <RowDefinition />
+    </Grid.RowDefinitions>
+
+    <ComboBox HorizontalAlignment="Left"
+              VerticalAlignment="Top"
+              ItemsSource="{Binding ErrorModelNames}" 
+              SelectedIndex="{Binding SelectedErrorModelName}"/>
+
+    <Button Style="{StaticResource HelpButtonStyle}"
+            HorizontalAlignment="Right"
+            ToolTip="Help about error models" 
+            Tag="rvis/modules/estimation/errormodels/"
+            />
+
+    <ContentControl Grid.Row="1"
+                    Content="{Binding ErrorViewModel}"
+                    />
+
+  </Grid>
+
+</UserControl>

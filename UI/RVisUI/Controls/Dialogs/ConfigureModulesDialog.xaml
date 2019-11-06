@@ -1,0 +1,163 @@
+﻿<Controls:MetroWindow x:Class="RVisUI.Controls.Dialogs.ConfigureModulesDialog"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+                      xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                      xmlns:local="clr-namespace:RVisUI.Controls.Dialogs"
+                      xmlns:mvvm="clr-namespace:RVisUI.Ioc.Mvvm"
+                      xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+                      mc:Ignorable="d"
+                      Title="Configure Modules"
+                      Height="500" Width="700"
+                      GlowBrush="{DynamicResource AccentColorBrush}"
+                      NonActiveGlowBrush="Red"
+                      ResizeMode="CanResizeWithGrip"
+                      WindowTransitionsEnabled="False"
+                      Icon="../../Resources/app.ico" 
+                      WindowStartupLocation="CenterOwner"
+                      >
+
+  <Grid>
+
+    <!--<Grid.Resources>
+      <ResourceDictionary>
+        <x:Array x:Key="_designData" Type="mvvm:ModuleConfigViewModel">
+          <mvvm:ModuleConfigViewModel Name="Aaa" Description="Aaaaaaaaa" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="Bbbbbb" Description="Bbbbbbbbbbbbbbbbb" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="C" Description="Cccc" IsEnabled="False"/>
+          <mvvm:ModuleConfigViewModel Name="Aaa" Description="Aaaaaaaaa" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="Bbbbbb" Description="Bbbbbbbbbbbbbbbbb" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="C" Description="Cccc" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="Aaa" Description="Aaaaaaaaa" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="Bbbbbb" Description="Bbbbbbbbbbbbbbbbb" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="C" Description="Cccc" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="Aaa" Description="Aaaaaaaaa" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="Bbbbbb" Description="Bbbbbbbbbbbbbbbbb" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="C" Description="Cccc" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="Aaa" Description="Aaaaaaaaa" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="Bbbbbb" Description="Bbbbbbbbbbbbbbbbb" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="C" Description="Cccc" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="Aaa" Description="Aaaaaaaaa" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="Bbbbbb" Description="Bbbbbbbbbbbbbbbbb" IsEnabled="True"/>
+          <mvvm:ModuleConfigViewModel Name="C" Description="Cccc" IsEnabled="True"/>
+        </x:Array>
+      </ResourceDictionary>
+    </Grid.Resources>-->
+
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <Grid>
+
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+
+      <ListView x:Name="_listView" 
+                Margin="10" 
+                Grid.IsSharedSizeScope="True" 
+                SelectionChanged="HandleSelectionChanged" 
+                SelectionMode="Single"
+                >
+        <ListView.Resources>
+          <Style x:Key="TextBlockStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="10,0"/>
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                <Setter Property="TextDecorations" Value="Strikethrough"/>
+                <Setter Property="Foreground" Value="LightGray"/>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </ListView.Resources>
+        <ListView.ItemTemplate>
+          <DataTemplate>
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="A" />
+                <ColumnDefinition Width="Auto" SharedSizeGroup="B" />
+              </Grid.ColumnDefinitions>
+              <TextBlock Grid.Column="0" 
+                         Style="{StaticResource TextBlockStyle}" 
+                         FontWeight="Bold"
+                         Text="{Binding Name}" 
+                         />
+              <TextBlock Grid.Column="1" 
+                         Style="{StaticResource TextBlockStyle}"
+                         Text="{Binding Description}" 
+                         />
+            </Grid>
+          </DataTemplate>
+        </ListView.ItemTemplate>
+      </ListView>
+
+      <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" wpf:Layout.Margin="10">
+        <Button x:Name="_moveDown"
+                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                HorizontalAlignment="Left"
+                ToolTip="Move down"
+                Click="HandleMoveDown">
+          <md:PackIcon Kind="ArrowDownBold"
+                       Height="24"
+                       Width="24" 
+                       />
+        </Button>
+        <Button x:Name="_moveUp"
+                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                HorizontalAlignment="Left"
+                ToolTip="Move up"
+                Click="HandleMoveUp">
+          <md:PackIcon Kind="ArrowUpBold"
+                       Height="24"
+                       Width="24" 
+                       />
+        </Button>
+        <ToggleButton x:Name="_toggleEnable"
+                      Height="40" 
+                      Width="40"
+                      Content="X"
+                      Style="{StaticResource MaterialDesignActionToggleButton}"
+                      ToolTip="Toggle enable"
+                      Click="HandleToggleEnable"
+                      />
+      </StackPanel>
+
+    </Grid>
+
+    <Separator Grid.Row="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="2" Width="Auto" VerticalAlignment="Center" />
+
+    <Grid Grid.Row="2" Margin="0,0,0,10" HorizontalAlignment="Center">
+
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="30"/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+
+      <Button Style="{StaticResource MaterialDesignFlatButton}"
+              Click="HandleOK"
+              IsDefault="True"
+              Width="120" 
+              Height="Auto"
+              Content="OK"
+              />
+
+      <Button Grid.Column="2" 
+              Style="{StaticResource MaterialDesignFlatButton}"
+              IsCancel="True"
+              Width="120" 
+              Height="Auto"
+              Content="Cancel"
+              />
+
+    </Grid>
+
+  </Grid>
+
+</Controls:MetroWindow>

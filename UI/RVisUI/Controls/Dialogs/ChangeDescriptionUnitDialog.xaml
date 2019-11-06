@@ -1,0 +1,173 @@
+﻿<ctrls:MetroWindow x:Class="RVisUI.Controls.Dialogs.ChangeDescriptionUnitDialog"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ctrls="http://metro.mahapps.com/winfx/xaml/controls"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:local="clr-namespace:RVisUI.Controls.Dialogs"
+                    xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+                    xmlns:mvvmd="clr-namespace:RVisUI.Mvvm.Design;assembly=RVisUI.Mvvm"
+                    mc:Ignorable="d"
+                    Title="{Binding TargetSymbol, StringFormat='Description and Unit for {0}'}"
+                    Height="600" Width="800"
+                    GlowBrush="{DynamicResource AccentColorBrush}"
+                    NonActiveGlowBrush="Red"
+                    ResizeMode="CanResizeWithGrip"
+                    WindowTransitionsEnabled="False"
+                    Icon="../../Resources/app.ico" 
+                    WindowStartupLocation="CenterOwner"
+                    wpf:Behaviour.DialogResult="{Binding DialogResult}"
+                    d:DataContext="{d:DesignInstance Type=mvvmd:ChangeDescriptionUnitViewModel, IsDesignTimeCreatable=True}"
+                    >
+
+  <Grid>
+
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+
+      <Grid HorizontalAlignment="Center">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="60"/>
+          <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal">
+          <TextBox x:Name="_txtUnit" 
+                    Width="200" 
+                    VerticalAlignment="Center"
+                    md:HintAssist.Hint="Unit"
+                    Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                    />
+          <Button x:Name="_btnClearUnit" 
+                  Style="{StaticResource MaterialDesignFlatButton}"
+                  ToolTip="Clear unit" 
+                  Padding="4,0,4,0"
+                  Click="HandleClearUnit"
+                  >
+            <md:PackIcon Kind="Close"
+                          Height="24"
+                          Width="24" 
+                          />
+          </Button>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+          <TextBox x:Name="_txtDesc" 
+                    Width="400" 
+                    VerticalAlignment="Center"
+                    md:HintAssist.Hint="Description"
+                    Text="{Binding Description, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                    />
+          <Button x:Name="_btnClearDesc" 
+                  Style="{StaticResource MaterialDesignFlatButton}"
+                  ToolTip="Clear description" 
+                  Padding="4,0,4,0" 
+                  Click="HandleClearDesc"
+                  >
+            <md:PackIcon Kind="Close"
+                          Height="24"
+                          Width="24" 
+                          />
+          </Button>
+        </StackPanel>
+
+      </Grid>
+
+      <DataGrid x:Name="_dataGrid" 
+                Grid.Row="1" 
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                ItemsSource="{Binding LineSymDescUnit}" 
+                SelectionChanged="HandleSelectionChanged"
+                md:DataGridAssist.CellPadding="4 2 2 2"
+                >
+
+        <DataGrid.Style>
+          <Style TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Items.Count}" Value="0">
+                <Setter Property="Template">
+                  <Setter.Value>
+                    <ControlTemplate>
+                      <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Margin="0,0,0,0" 
+                                    HorizontalAlignment="Center"
+                                    Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                    Text="NO DESCRIPTIONS/UNITS AVAILABLE FROM SOURCE"
+                                    />
+                      </StackPanel>
+                    </ControlTemplate>
+                  </Setter.Value>
+                </Setter>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </DataGrid.Style>
+        
+        <DataGrid.Resources>
+          <Style x:Key="dgtb" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+          </Style>
+        </DataGrid.Resources>
+        
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Line" Width="50" Binding="{Binding [0]}">
+            <DataGridTextColumn.ElementStyle>
+              <Style TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center" />
+              </Style>
+            </DataGridTextColumn.ElementStyle>
+          </DataGridTextColumn>
+          <DataGridTextColumn Header="Name" Width="*" Binding="{Binding [1]}"/>
+          <DataGridTextColumn Header="Unit" Width="*" Binding="{Binding [3]}" ElementStyle="{StaticResource dgtb}"/>
+          <DataGridTextColumn Header="Description" Width="3*" Binding="{Binding [2]}" ElementStyle="{StaticResource dgtb}"/>
+        </DataGrid.Columns>
+        
+      </DataGrid>
+
+    </Grid>
+
+    <Separator Grid.Row="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="2" Width="Auto" VerticalAlignment="Center" />
+
+    <Grid Grid.Row="2" Margin="0,0,0,10" HorizontalAlignment="Center">
+
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="30"/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+
+      <Button Style="{StaticResource MaterialDesignFlatButton}"
+              IsDefault="True"
+              Command="{Binding OK}"
+              Width="120" 
+              Height="Auto"
+              Content="OK"
+              />
+
+      <Button Grid.Column="2" 
+              Style="{StaticResource MaterialDesignFlatButton}"
+              IsCancel="True"
+              Command="{Binding Cancel}"
+              Width="120" 
+              Height="Auto"
+              Content="Cancel"
+              />
+
+    </Grid>
+
+  </Grid>
+
+</ctrls:MetroWindow>

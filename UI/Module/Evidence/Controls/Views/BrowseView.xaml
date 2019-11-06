@@ -1,0 +1,138 @@
+﻿<UserControl x:Class="Evidence.Controls.Views.BrowseView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:oxy="http://oxyplot.org/wpf"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:design="clr-namespace:Evidence.Design"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1366"
+             d:DataContext="{d:DesignInstance Type=design:BrowseViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition/>
+      <ColumnDefinition/>
+    </Grid.ColumnDefinitions>
+    
+    <ListBox Grid.Row="0" 
+             ItemsSource="{Binding SubjectViewModels}" 
+             SelectedItem="{Binding SelectedSubjectViewModel}" 
+             Margin="0 20">
+      <ListBox.Style>
+        <Style TargetType="ListBox" BasedOn="{StaticResource MaterialDesignListBox}">
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding SubjectViewModels.Count}" Value="0">
+              <Setter Property="Template">
+                <Setter.Value>
+                  <ControlTemplate>
+                    <TextBlock VerticalAlignment="Center" 
+                               HorizontalAlignment="Center" 
+                               Text="TO GET STARTED, IMPORT SOME OBSERVATIONS"
+                               />
+                  </ControlTemplate>
+                </Setter.Value>
+              </Setter>
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </ListBox.Style>
+      <ListBox.ItemTemplate>
+        <DataTemplate>
+          <Border BorderThickness="1" 
+                  BorderBrush="{DynamicResource PrimaryHueLightBrush}"
+                  CornerRadius="8">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding Subject}" 
+                         Margin="5" 
+                         />
+              <TextBlock Margin="5" TextAlignment="Right">
+                <TextBlock.Text>
+                  <MultiBinding StringFormat="{}{0} / {1}">
+                    <Binding Path="NSelected" />
+                    <Binding Path="NAvailable" />
+                  </MultiBinding>
+                </TextBlock.Text>
+              </TextBlock>
+            </StackPanel>
+          </Border>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+      <ListBox.ItemsPanel>
+        <ItemsPanelTemplate>
+          <WrapPanel IsItemsHost="True" Orientation="Horizontal"  />
+        </ItemsPanelTemplate>
+      </ListBox.ItemsPanel>
+    </ListBox>
+
+    <ListView Grid.Row="2" ItemsSource="{Binding ObservationsViewModels}">
+      <ListView.ItemContainerStyle>
+        <Style TargetType="ListViewItem">
+          <Setter Property="Focusable" Value="false"/>
+        </Style>
+      </ListView.ItemContainerStyle>
+      <ListView.View>
+        <GridView>
+          <GridViewColumn Header="">
+            <GridViewColumn.CellTemplate>
+              <DataTemplate>
+                <CheckBox IsChecked="{Binding IsSelected}"/>
+              </DataTemplate>
+            </GridViewColumn.CellTemplate>
+          </GridViewColumn>
+          <GridViewColumn Header="ID" DisplayMemberBinding="{Binding ID}" />
+          <GridViewColumn Header="Name" DisplayMemberBinding="{Binding RefName}" />
+          <GridViewColumn Header="Source" DisplayMemberBinding="{Binding Source}" />
+          <GridViewColumn Header="Data" Width="Auto" DisplayMemberBinding="{Binding Data}" />
+        </GridView>
+      </ListView.View>
+    </ListView>
+
+    <oxy:PlotView x:Name="_plotView" 
+                  Grid.Column="1" 
+                  Grid.RowSpan="2" 
+                  Model="{Binding PlotModel}" 
+                  Background="Transparent"
+                  />
+
+    <Grid Grid.Column="1" Grid.RowSpan="2">
+      <Grid.Style>
+        <Style TargetType="Grid">
+          <Setter Property="Visibility" Value="Collapsed"/>
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding PlotModel}" Value="{x:Null}">
+              <Setter Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Grid.Style>
+      <TextBlock VerticalAlignment="Center" 
+                 HorizontalAlignment="Center"
+                 Text="DATA REQUIRED"
+                 />
+    </Grid>
+
+  </Grid>
+
+</UserControl>

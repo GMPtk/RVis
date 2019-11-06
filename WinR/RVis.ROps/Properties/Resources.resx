@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FMT_LOAD_FROM_BINARY" xml:space="preserve">
+    <value>zzLFB &lt;- rawConnection(rawLFB, open='rb')
+load(zzLFB)</value>
+  </data>
+  <data name="FMT_SAVE_OBJECT_TO_BINARY" xml:space="preserve">
+    <value>zzSOTB &lt;- rawConnection(raw(0), "r+b")
+save({0}, file=zzSOTB)
+seek(zzSOTB, 0, rw="r+b")
+raw &lt;- rawConnectionValue(zzSOTB)
+close(zzSOTB)
+rm("zzSOTB")
+raw</value>
+  </data>
+  <data name="RFRAG_FAST99" xml:space="preserve">
+    <value>rvis_nFactors &lt;- length(rvis_factors)
+rvis_omega &lt;- NULL
+
+if (rvis_omegaFromCukier)
+{
+  rvis_omega &lt;- fast::freq_cukier(rvis_nFactors)
+  if (0 == rvis_sampleSize)
+  {
+    rvis_maxOmega &lt;- max(rvis_omega)
+    rvis_sampleSize &lt;- rvis_maxOmega * rvis_nFactors + 1
+  }
+}
+
+if (0 == rvis_sampleSize) rvis_sampleSize &lt;- 1000
+
+rvis_fast99 &lt;- sensitivity::fast99(
+  model = NULL, 
+  factors = rvis_factors, 
+  n = rvis_sampleSize, 
+  M = 4, 
+  omega = rvis_omega, 
+  q = rvis_distributions, 
+  q.arg = rvis_distributionLimits
+  )</value>
+  </data>
+  <data name="RFRAG_MORRIS_OAT" xml:space="preserve">
+    <value>rvis_morris &lt;- sensitivity::morris(
+  factors = rvis_factors,
+  r = rvis_r,
+  design = list(type = "oat", levels = rvis_levels, grid.jump = rvis_gridJump),
+  binf = rvis_binf,
+  bsup = rvis_bsup,
+  scale = rvis_scale
+)</value>
+  </data>
+  <data name="RFRAG_MORRIS_SIMPLEX" xml:space="preserve">
+    <value>rvis_morris &lt;- sensitivity::morris(
+  factors = rvis_factors,
+  r = rvis_r,
+  design = list(type = "simplex", scale.factor = rvis_scaleFactor),
+  binf = rvis_binf,
+  bsup = rvis_bsup,
+  scale = rvis_scale
+)</value>
+  </data>
+  <data name="RSTAT_PLOTMORRIS" xml:space="preserve">
+    <value>par(mar=c(3,3,2,0.5), mgp=c(1.5,0.5,0))
+plot(
+  rvis_morrisMuStar, 
+  rvis_morrisSigma, 
+  cex.lab=0.8, 
+  cex.axis=0.8, 
+  cex.main=0.8, 
+  xlab=rvis_xlab, 
+  xlim=rvis_xlim,
+  ylab=rvis_ylab, 
+  ylim=rvis_ylim,
+  log="xy",
+  main=rvis_main
+  )
+text(
+  rvis_morrisMuStar, 
+  rvis_morrisSigma, 
+  labels=rvis_morrisFactors, 
+  cex= 0.7, 
+  pos=1
+  )</value>
+  </data>
+  <data name="RSTAT_PLOTSA" xml:space="preserve">
+    <value>par(mar=c(3,3,2,0.5), mgp=c(1.5,0.5,0))
+plot(
+  c(rvis_xMin, rvis_xMax), 
+  c(rvis_yMin, rvis_yMax), 
+  type="n", 
+  cex.lab=0.8, 
+  cex.axis=0.8, 
+  cex.main=0.8, 
+  xlab=rvis_xlab, 
+  ylab=rvis_ylab, 
+  main=rvis_main
+  )</value>
+  </data>
+  <data name="RSTAT_SALEGEND" xml:space="preserve">
+    <value>legend(
+  "topright", 
+  inset=0.05, 
+  cex=0.7, 
+  rvis_legend,
+  col=rvis_col, 
+  lty=c(1,1), 
+  lwd=c(2,2), 
+  bg="grey96"
+  )</value>
+  </data>
+</root>

@@ -1,0 +1,81 @@
+# .NET Desktop
+# Build and run tests for .NET Desktop or Windows classic desktop solutions.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildConfiguration: 'Release'
+
+steps:
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(solution)'
+    msbuildArgs: '/p:DefineConstants="IS_PIPELINES_BUILD"'
+    platform: 'Any CPU'
+    configuration: '$(buildConfiguration)'
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(solution)'
+    msbuildArgs: '/p:DefineConstants="IS_PIPELINES_BUILD"'
+    platform: 'x64'
+    configuration: '$(buildConfiguration)'
+
+- task: VSTest@2
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: PowerShell@2
+  inputs:
+    filePath: 'SetAppVerVariables.ps1'
+
+- task: BatchScript@1
+  inputs:
+    filename: 'prepare_release.bat'
+    arguments: '$(AppVer)'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: 'RVis_v$(AppVer)'
+    includeRootFolder: true
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/RVis_v$(AppVer).zip'
+    replaceExistingArchive: true
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: 'RVis_v$(AppVer)_x64'
+    includeRootFolder: true
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/RVis_v$(AppVer)_x64.zip'
+    replaceExistingArchive: true
+
+- task: GitHubRelease@1
+  inputs:
+    gitHubConnection: 'GH-GMPtk-RVis'
+    repositoryName: '$(Build.Repository.Name)'
+    action: 'create'
+    target: '$(Build.SourceVersion)'
+    tagSource: 'userSpecifiedTag'
+    tag: 'v$(AppVer)'
+    title: 'RVis v$(AppVer)'
+    releaseNotesFilePath: 'release_notes.md'
+    assets: |
+      $(Build.ArtifactStagingDirectory)/RVis_v$(AppVer).zip
+      $(Build.ArtifactStagingDirectory)/RVis_v$(AppVer)_x64.zip
+    isPreRelease: true
+    addChangeLog: false

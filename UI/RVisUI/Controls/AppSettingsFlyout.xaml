@@ -1,0 +1,68 @@
+﻿<mmc:Flyout x:Class="RVisUI.Controls.AppSettingsFlyout"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:mmc="http://metro.mahapps.com/winfx/xaml/controls"
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:vi="clr-namespace:RVisUI.Controls.Views.Impl"
+            xmlns:mvvm="clr-namespace:RVisUI.Ioc.Mvvm"
+            xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+            mc:Ignorable="d" 
+            Header="Settings"
+            IsOpen="{Binding Show}"  
+            d:DesignHeight="800" 
+            d:DesignWidth="850"
+            >
+
+  <mmc:Flyout.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </mmc:Flyout.Resources>
+
+  <d:DesignProperties.DataContext>
+    <mvvm:AppSettingsViewModel />
+  </d:DesignProperties.DataContext>
+
+  <Grid Width="750" Margin="0,0,20,0">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <TabControl>
+      <TabItem Header="SETTINGS">
+        <StackPanel Orientation="Vertical" Width="400" HorizontalAlignment="Left" wpf:Layout.Margin="10,10,0,10">
+          <GroupBox Header="Behaviour">
+            <StackPanel wpf:Layout.Margin="0,10,0,10" Orientation="Horizontal">
+              <Label></Label>
+              <CheckBox Content="Restore window" IsChecked="{Binding RestoreWindow}"/>
+            </StackPanel>
+          </GroupBox>
+          <GroupBox Header="System Resources">
+            <StackPanel Orientation="Horizontal">
+              <Label VerticalAlignment="Center" HorizontalContentAlignment="Right" Margin="0,10,10,10">Allow use of</Label>
+              <ComboBox ItemsSource="{Binding CoresOptions}" SelectedIndex="{Binding NumberOfCoresSelectedIndex}" Margin="0,10,0,10"/>
+              <TextBlock VerticalAlignment="Center" Margin="10,10,0,10">cores</TextBlock>
+            </StackPanel>
+          </GroupBox>
+        </StackPanel>
+      </TabItem>
+      <TabItem Header="APPEARANCE">
+        <vi:PaletteSelector Margin="10,10,0,10"/>
+      </TabItem>
+    </TabControl>
+
+  </Grid>
+
+</mmc:Flyout>

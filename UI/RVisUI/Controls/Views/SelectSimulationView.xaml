@@ -1,0 +1,226 @@
+﻿<UserControl x:Class="RVisUI.Controls.Views.SelectSimulationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:base="clr-namespace:RVis.Base;assembly=RVis.Base"
+             xmlns:mvvmd="clr-namespace:RVisUI.Mvvm.Design;assembly=RVisUI.Mvvm"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" 
+             d:DesignWidth="1200"
+             d:DataContext="{d:DesignInstance Type=mvvmd:SelectSimulationViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+
+      <ControlTemplate x:Key="NoSimulationData">
+        <Grid VerticalAlignment="Center">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+          </Grid.RowDefinitions>
+
+          <TextBlock Grid.ColumnSpan="2" Margin="0 0 0 40"
+                   TextAlignment="Center" 
+                   Text="LIBRARY IS EMPTY"
+                   />
+
+          <TextBlock Grid.Row="1" 
+                   Margin="20" 
+                   Text="Go to the IMPORT tab to get started. Click the ? button for more information." 
+                   TextWrapping="Wrap"
+                   />
+
+          <Button Grid.Row="1" 
+                Grid.Column="1"
+                Style="{DynamicResource HelpButtonStyle}"
+                Margin="20"
+                ToolTip="Help about importing a simulation into RVis" 
+                Tag="rvis/application/import"
+                />
+
+        </Grid>
+      </ControlTemplate>
+      
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid Margin="50">
+
+    <Grid.Style>
+      <Style TargetType="Grid">
+        <Style.Triggers>
+          <DataTrigger Binding="{Binding SimulationVMs}" Value="{x:Null}">
+            <Setter Property="Visibility" Value="Hidden"/>
+          </DataTrigger>
+        </Style.Triggers>
+      </Style>
+    </Grid.Style>
+
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition/>
+      <ColumnDefinition Width="Auto"/>
+    </Grid.ColumnDefinitions>
+
+    <Grid HorizontalAlignment="Center">
+
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="100"/>
+      </Grid.ColumnDefinitions>
+
+      <Grid.RowDefinitions>
+        <RowDefinition/>
+        <RowDefinition Height="50"/>
+      </Grid.RowDefinitions>
+
+      <ListView x:Name="_simulations" 
+                ItemsSource="{Binding SimulationVMs}" 
+                SelectedValue="{Binding SelectedSimulationVM}"
+                MinWidth="400"
+                >
+
+        <ListView.Style>
+          <Style TargetType="ListView" BasedOn="{StaticResource MaterialDesignListView}">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding SimulationVMs.Count}" Value="0">
+                <Setter Property="Template" Value="{StaticResource NoSimulationData}"/>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </ListView.Style>
+
+        <i:Interaction.Triggers>
+          <i:EventTrigger EventName="MouseDoubleClick">
+            <i:InvokeCommandAction Command="{Binding OpenSimulation}"/>
+          </i:EventTrigger>
+        </i:Interaction.Triggers>
+
+        <ListView.View>
+          <GridView>
+            <GridViewColumn Header="Name">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Title}">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="ToolTip">
+                          <Setter.Value>
+                            <TextBlock Text="{Binding DirectoryName, StringFormat='In library directory {0}'}" />
+                          </Setter.Value>
+                        </Setter>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn Header="Description">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Description}" 
+                             TextTrimming="CharacterEllipsis"
+                             />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+          </GridView>
+        </ListView.View>
+
+      </ListView>
+
+      <TextBlock Grid.Row="1"
+                 VerticalAlignment="Bottom"
+                 Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                 Text="{Binding PathToLibrary, StringFormat='Library location: {0}', FallbackValue='Library location: (not set)'}"
+                 />
+
+      <StackPanel Grid.Column="1" HorizontalAlignment="Right"
+                >
+        <StackPanel.Style>
+          <Style TargetType="StackPanel">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding SimulationVMs.Count}" Value="0">
+                <Setter Property="Visibility" Value="Hidden"/>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </StackPanel.Style>
+
+        <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                ToolTip="Load simulation"
+                Command="{Binding OpenSimulation}" 
+                HorizontalAlignment="Left"
+                Margin="20"
+                >
+          <md:PackIcon Kind="ArrowRightDropCircleOutline"
+                        Height="24"
+                        Width="24" 
+                       />
+        </Button>
+
+        <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                ToolTip="Delete simulation"
+                Command="{Binding DeleteSimulation}" 
+                HorizontalAlignment="Left"
+                Margin="20"
+                >
+          <md:PackIcon Kind="DeleteForever"
+                        Height="24"
+                        Width="24" 
+                       />
+        </Button>
+
+      </StackPanel>
+
+    </Grid>
+
+    <StackPanel Grid.Column="2"
+                Margin="100 20 20 20"
+                >
+      <TextBlock TextAlignment="Right" 
+                  Style="{StaticResource MaterialDesignHeadlineTextBlock}"
+                  Text="{Binding Source={x:Static base:Meta.Product}}" 
+                  />
+      <TextBlock TextAlignment="Right"
+                  Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                  Text="{Binding Source={x:Static base:Meta.VersionMajorDotMinor}, StringFormat={}v{0}}"
+                  />
+      <TextBlock TextAlignment="Right"
+                 Margin="0 20 0 0"
+                  Text="{Binding RVersion, StringFormat='using R v{0}'}"
+                  >
+        <TextBlock.Style>
+          <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignCaptionTextBlock}">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding RVersion}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Hidden"/>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
+    </StackPanel>
+
+  </Grid>
+
+</UserControl>

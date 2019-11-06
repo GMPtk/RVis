@@ -1,0 +1,100 @@
+﻿<UserControl x:Class="RVisUI.AppInf.LogUniformDistributionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:oxy="http://oxyplot.org/wpf"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             xmlns:appinf="clr-namespace:RVisUI.AppInf"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1366"
+             >
+
+  <d:DesignProperties.DataContext>
+    <appinf:LogUniformDistributionViewModel Variable="x" Lower="4.85" Upper="8.29"/>
+  </d:DesignProperties.DataContext>
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition />
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <TextBlock VerticalAlignment="Center"
+               HorizontalAlignment="Center"
+               Margin="50"
+               Style="{DynamicResource MaterialDesignTitleTextBlock}"
+               >
+      <TextBlock.Text>
+        <MultiBinding StringFormat="ln({0}) ~ U(a = {1}, b = {2})">
+          <Binding Path="Variable" TargetNullValue="?"/>
+          <Binding Path="Lower" TargetNullValue="?" />
+          <Binding Path="Upper" TargetNullValue="?" />
+        </MultiBinding>
+      </TextBlock.Text>
+    </TextBlock>
+
+    <oxy:PlotView x:Name="_plotView"
+                  Grid.Row="1"
+                  Model="{Binding PlotModel}" 
+                  Background="Transparent"
+                  />
+
+    <Grid Grid.Row="2" Margin="0 20" HorizontalAlignment="Center">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="150"/>
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition/>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+
+      <TextBlock HorizontalAlignment="Right" 
+                 VerticalAlignment="Center" 
+                 Text="Lower"
+                 />
+      <TextBox Grid.Column="1" 
+               Margin="10"
+               Width="200"
+               HorizontalAlignment="Left"
+               Text="{Binding Lower, TargetNullValue=''}"
+               wpf:Behaviour.UpdateOnEnter="TextBox.Text"
+               />
+
+      <TextBlock Grid.Row="1" 
+                 HorizontalAlignment="Right" 
+                 VerticalAlignment="Center" 
+                 Text="Upper"
+                 />
+      <TextBox Grid.Column="1" 
+               Grid.Row="1"
+               Margin="10"
+               Width="200"
+               HorizontalAlignment="Left"
+               Text="{Binding Upper, TargetNullValue=''}"
+               wpf:Behaviour.UpdateOnEnter="TextBox.Text"
+               />
+
+    </Grid>
+
+  </Grid>
+
+</UserControl>

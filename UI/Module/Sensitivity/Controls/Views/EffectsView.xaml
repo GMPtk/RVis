@@ -1,0 +1,205 @@
+﻿<UserControl x:Class="Sensitivity.EffectsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:local="clr-namespace:Sensitivity"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:design="clr-namespace:Sensitivity.Design"
+             xmlns:oxy="http://oxyplot.org/wpf"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1366"
+             d:DataContext="{d:DesignInstance Type=design:EffectsViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+
+      <ContextMenu x:Key="LowryContextMenu">
+        <MenuItem Command="{Binding LowryViewModel.ResetAxes}">
+          <MenuItem.Icon>
+            <md:PackIcon Kind="Refresh"/>
+          </MenuItem.Icon>
+          <MenuItem.Header>
+            <TextBlock Text="Reset axes" VerticalAlignment="Center"/>
+          </MenuItem.Header>
+        </MenuItem>
+        <Separator/>
+        <MenuItem Command="{Binding LowryViewModel.ShowOptions}">
+          <MenuItem.Icon>
+            <md:PackIcon Kind="Gear"/>
+          </MenuItem.Icon>
+          <MenuItem.Header>
+            <TextBlock Text="Options..." VerticalAlignment="Center"/>
+          </MenuItem.Header>
+        </MenuItem>
+        <Separator/>
+        <MenuItem Command="{Binding LowryViewModel.ExportImage}">
+          <MenuItem.Icon>
+            <md:PackIcon Kind="FileImage"/>
+          </MenuItem.Icon>
+          <MenuItem.Header>
+            <TextBlock Text="Export image..." VerticalAlignment="Center"/>
+          </MenuItem.Header>
+        </MenuItem>
+      </ContextMenu>
+      
+      <ContextMenu x:Key="TraceContextMenu">
+        <MenuItem Command="{Binding TraceViewModel.ResetAxes}">
+          <MenuItem.Icon>
+            <md:PackIcon Kind="Refresh"/>
+          </MenuItem.Icon>
+          <MenuItem.Header>
+            <TextBlock Text="Reset Axes" VerticalAlignment="Center"/>
+          </MenuItem.Header>
+        </MenuItem>
+        <Separator/>
+        <MenuItem Command="{Binding TraceViewModel.ShowOptions}">
+          <MenuItem.Icon>
+            <md:PackIcon Kind="Gear"/>
+          </MenuItem.Icon>
+          <MenuItem.Header>
+            <TextBlock Text="Options..." VerticalAlignment="Center"/>
+          </MenuItem.Header>
+        </MenuItem>
+      </ContextMenu>
+
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition/>
+      <ColumnDefinition Width="5"/>
+      <ColumnDefinition Width="Auto"/>
+    </Grid.ColumnDefinitions>
+
+    <Grid x:Name="_grid">
+
+      <Grid.RowDefinitions>
+        <RowDefinition />
+        <RowDefinition Height="5"/>
+        <RowDefinition Height="{Binding TraceViewModel.ViewHeight, Mode=TwoWay, Converter={x:Static wpf:PixelToGridLengthConverter.Default}}"/>
+      </Grid.RowDefinitions>
+
+      <oxy:PlotView x:Name="_lowryPlotView" 
+                    Model="{Binding LowryViewModel.PlotModel}" 
+                    Background="Transparent"
+                    ContextMenu="{StaticResource LowryContextMenu}"
+                    >
+        <i:Interaction.Triggers>
+          <i:EventTrigger EventName="SizeChanged">
+            <i:InvokeCommandAction Command="{Binding LowryViewModel.UpdateSize}"/>
+          </i:EventTrigger>
+        </i:Interaction.Triggers>
+      </oxy:PlotView>
+
+      <TextBlock VerticalAlignment="Bottom" 
+                 HorizontalAlignment="Right"
+                 Margin="0,0,12,12"
+                 ToolTip="Exported image size"
+                 FontSize="8"
+                 >
+        <Run Text="{Binding LowryViewModel.Width}"/>
+        <Run> x </Run>
+        <Run Text="{Binding LowryViewModel.Height}"/>
+        <Run>px</Run>
+      </TextBlock>
+
+      <GridSplitter Grid.Row="1" 
+                    HorizontalAlignment="Stretch" 
+                    Height="5"
+                    />
+
+      <oxy:PlotView x:Name="_tracePlotView"
+                    Grid.Row="2"
+                    Model="{Binding TraceViewModel.PlotModel}" 
+                    Background="Transparent"
+                    ContextMenu="{StaticResource TraceContextMenu}"
+                    />
+
+    </Grid>
+
+    <StackPanel Grid.Column="1" Orientation="Horizontal">
+      <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+    </StackPanel>
+
+    <StackPanel Grid.Column="2">
+
+      <GroupBox Header="Output">
+
+        <ComboBox ItemsSource="{Binding OutputNames}" 
+                  SelectedIndex="{Binding SelectedOutputName}"
+                  MinWidth="200"
+                  Margin="5"
+                  IsEnabled="{Binding CanSelectOutputName}"
+                  />
+
+      </GroupBox>
+
+      <GroupBox Header="Simulation" 
+                Margin="0,20,0,0" 
+                Padding="14" 
+                >
+        <StackPanel Width="160">
+          <StackPanel.Resources>
+            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedAccentButton}">
+              <Setter Property="Height" Value="32"/>
+              <Setter Property="Width" Value="32"/>
+              <Setter Property="Padding" Value="0"/>
+              <Setter Property="Margin" Value="2 0 2 0"/>
+            </Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="FontSize" Value="14"/>
+            </Style>
+            <Style TargetType="md:PackIcon">
+              <Setter Property="Width" Value="24"/>
+              <Setter Property="Height" Value="24"/>
+            </Style>
+          </StackPanel.Resources>
+
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition/>
+              <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding TraceViewModel.SelectedX, StringFormat=t \= {0:G4}}" Margin="20,0,0,0"/>
+            <TextBlock Grid.Column="1" Text="{Binding PlaySpeed, StringFormat=x {0}}" Margin="0,0,20,0" HorizontalAlignment="Right"/>
+          </Grid>
+
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+            <Button Command="{Binding PlaySimulation}">
+              <md:PackIcon Kind="Play"/>
+            </Button>
+            <Button Command="{Binding StopSimulation}">
+              <md:PackIcon Kind="Stop"/>
+            </Button>
+            <Button Command="{Binding PlaySlower}">
+              <md:PackIcon Kind="Rewind"/>
+            </Button>
+            <Button Command="{Binding PlayFaster}">
+              <md:PackIcon Kind="FastForward"/>
+            </Button>
+          </StackPanel>
+
+        </StackPanel>
+      </GroupBox>
+
+    </StackPanel>
+
+  </Grid>
+</UserControl>
