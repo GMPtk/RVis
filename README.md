@@ -1,6 +1,6 @@
 # RVis
 
-![x](https://repository-images.githubusercontent.com/217533905/edffd200-f72f-11e9-9750-0cdb2c75dadf)
+![RVis](https://repository-images.githubusercontent.com/217533905/edffd200-f72f-11e9-9750-0cdb2c75dadf "RVis")
 
 [azpl build status]
 
