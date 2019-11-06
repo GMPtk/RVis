@@ -2,7 +2,7 @@
 
 ![RVis](https://repository-images.githubusercontent.com/217533905/edffd200-f72f-11e9-9750-0cdb2c75dadf "RVis")
 
-[azpl build status]
+[![Build Status](https://dev.azure.com/GMPtk/RVis/_apis/build/status/GMPtk.RVis?branchName=master)](https://dev.azure.com/GMPtk/RVis/_build/latest?definitionId=1&branchName=master)
 
 RVis is a modeller's tool for loading and exercising simulation code written in R.
 
