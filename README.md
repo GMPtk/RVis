@@ -1,5 +1,7 @@
 # RVis
 
+![x](https://repository-images.githubusercontent.com/217533905/edffd200-f72f-11e9-9750-0cdb2c75dadf)
+
 [azpl build status]
 
 RVis is a modeller's tool for loading and exercising simulation code written in R.
