@@ -94,22 +94,23 @@ namespace Sensitivity
         var muStars = Range(0, nXs)
           .Map(i => muStar.Rows[i].Field<double>(pn))
           .ToArr();
-        var maxMuStar = muStars.Max();
-        muStars = muStars.Map(d => d / maxMuStar);
 
         var sigmas = Range(0, nXs)
           .Map(i => sigma.Rows[i].Field<double>(pn))
           .ToArr();
-        var maxSigma = sigmas.Max();
-        sigmas = sigmas.Map(d => d / maxSigma);
 
         var combined = Range(0, nXs)
           .Map(i => muStars[i] * muStars[i] + sigmas[i] * sigmas[i])
           .Map(Sqrt)
           .ToArr();
 
-        return (pn, combined);
+        return (ParameterName: pn, Scores: combined);
       });
+
+      var maxScore = scores.Max(s => s.Scores.Max());
+      scores = scores.Map(
+        s => (s.ParameterName, s.Scores.Map(d => d / maxScore))
+        );
 
       _scores.Add(output, scores);
     }

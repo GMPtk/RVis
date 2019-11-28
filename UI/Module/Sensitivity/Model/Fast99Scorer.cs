@@ -93,11 +93,14 @@ namespace Sensitivity
         var firstOrders = Range(0, nXs)
           .Map(i => firstOrder.Rows[i].Field<double>(pn))
           .ToArr();
-        var maxMuStar = firstOrders.Max();
-        firstOrders = firstOrders.Map(d => d / maxMuStar);
-
-        return (pn, firstOrders);
+        
+        return (ParameterName: pn, Scores: firstOrders);
       });
+
+      var maxScore = scores.Max(s => s.Scores.Max());
+      scores = scores.Map(
+        s => (s.ParameterName, s.Scores.Map(d => d / maxScore))
+        );
 
       _scores.Add(output, scores);
     }
