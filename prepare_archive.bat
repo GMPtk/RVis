@@ -43,30 +43,30 @@
 @mkdir rvis
 @mkdir rvis\bin
 
-@copy UI\RVisUI\bin\Release\RVisUI.exe rvis\
-@copy UI\RVisUI\bin\Release\RVisUI.exe.config rvis\
-@copy UI\RVisUI\bin\Release\*.dll rvis\bin\
+@copy UI\RVisUI\bin\Release\RVisUI.exe rvis\ >nul
+@copy UI\RVisUI\bin\Release\RVisUI.exe.config rvis\ >nul
+@copy UI\RVisUI\bin\Release\*.dll rvis\bin\ >nul
 
-@copy WinR\RVis.Server\bin\Release\RVis.Server.exe rvis\bin\
-@copy WinR\RVis.Server\bin\Release\RVis.Server.exe.config rvis\bin\
-@copy /Y WinR\RVis.Server\bin\Release\*.dll rvis\bin\
+@copy WinR\RVis.Server\bin\Release\RVis.Server.exe rvis\bin\ >nul
+@copy WinR\RVis.Server\bin\Release\RVis.Server.exe.config rvis\bin\ >nul
+@copy /Y WinR\RVis.Server\bin\Release\*.dll rvis\bin\ >nul
 
 @mkdir rvis\module
 
 @mkdir rvis\module\estimation
-@copy UI\module\Estimation\bin\Release\Estimation.dll rvis\module\estimation\
+@copy UI\module\Estimation\bin\Release\Estimation.dll rvis\module\estimation\ >nul
 
 @mkdir rvis\module\evidence
-@copy UI\module\Evidence\bin\Release\Evidence.dll rvis\module\evidence\
+@copy UI\module\Evidence\bin\Release\Evidence.dll rvis\module\evidence\ >nul
 
 @mkdir rvis\module\plot
-@copy UI\module\Plot\bin\Release\Plot.dll rvis\module\plot\
+@copy UI\module\Plot\bin\Release\Plot.dll rvis\module\plot\ >nul
 
 @mkdir rvis\module\sampling
-@copy UI\module\Sampling\bin\Release\Sampling.dll rvis\module\sampling\
+@copy UI\module\Sampling\bin\Release\Sampling.dll rvis\module\sampling\ >nul
 
 @mkdir rvis\module\sensitivity
-@copy UI\module\Sensitivity\bin\Release\Sensitivity.dll rvis\module\sensitivity\
+@copy UI\module\Sensitivity\bin\Release\Sensitivity.dll rvis\module\sensitivity\ >nul
 
 "%ProgramFiles%\7-zip\7z.exe" a rvis.zip %cd%\rvis\
 

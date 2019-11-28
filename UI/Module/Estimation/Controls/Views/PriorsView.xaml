@@ -54,8 +54,15 @@
                   <TextBlock VerticalAlignment="Center" 
                              HorizontalAlignment="Center"
                              Margin="0 60"
-                             Text="None selected"
-                             />
+                             TextAlignment="Center"
+                             >
+                    <TextBlock.Inlines>
+                      <Run Text="Prior Distributions"/>
+                      <LineBreak/>
+                      <LineBreak/>
+                      <Run Text="Select one or more parameters to populate"/>
+                    </TextBlock.Inlines>
+                  </TextBlock>
                 </ControlTemplate>
               </Setter.Value>
             </Setter>

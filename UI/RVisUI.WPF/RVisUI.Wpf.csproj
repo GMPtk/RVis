@@ -74,6 +74,7 @@
       <Link>VersionInfo.cs</Link>
     </Compile>
     <Compile Include="Behavior\ListBoxSelectionBehavior.cs" />
+    <Compile Include="Converter\BooleanConverter.cs" />
     <Compile Include="Converter\BrushToHexConverter.cs" />
     <Compile Include="Converter\ColorToBrushConverter.cs" />
     <Compile Include="Converter\ElementTypeConverter.cs" />

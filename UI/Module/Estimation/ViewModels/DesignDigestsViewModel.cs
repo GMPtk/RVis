@@ -39,9 +39,14 @@ namespace Estimation
         estimationDesigns.DesignDigests.Map(dd => new DesignDigestViewModel(dd.CreatedOn, dd.Description)
         ));
 
-      _targetEstimationDesignCreatedOn = _moduleState.EstimationDesign == default
-        ? None
-        : Some((_moduleState.EstimationDesign.CreatedOn, DateTime.Now));
+      if (_moduleState.EstimationDesign != default)
+      {
+        TargetEstimationDesign = Some((_moduleState.EstimationDesign.CreatedOn, DateTime.Now));
+
+        SelectedDesignDigestViewModel = DesignDigestViewModels
+          .Find(vm => vm.CreatedOn == _moduleState.EstimationDesign.CreatedOn)
+          .Match(vm => vm, () => default);
+      }
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
@@ -81,10 +86,10 @@ namespace Estimation
 
     public Option<(DateTime CreatedOn, DateTime SelectedOn)> TargetEstimationDesign
     {
-      get => _targetEstimationDesignCreatedOn;
-      set => this.RaiseAndSetIfChanged(ref _targetEstimationDesignCreatedOn, value, PropertyChanged);
+      get => _targetEstimationDesign;
+      set => this.RaiseAndSetIfChanged(ref _targetEstimationDesign, value, PropertyChanged);
     }
-    private Option<(DateTime CreatedOn, DateTime SelectedOn)> _targetEstimationDesignCreatedOn;
+    private Option<(DateTime CreatedOn, DateTime SelectedOn)> _targetEstimationDesign;
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -140,9 +145,20 @@ namespace Estimation
 
     private void ObserveModuleStateEstimationDesign(object _)
     {
-      _targetEstimationDesignCreatedOn = _moduleState.EstimationDesign == default
-        ? None
-        : Some((_moduleState.EstimationDesign.CreatedOn, DateTime.Now));
+      if (_moduleState.EstimationDesign != default)
+      {
+        _targetEstimationDesign = Some((_moduleState.EstimationDesign.CreatedOn, DateTime.Now));
+
+        SelectedDesignDigestViewModel = DesignDigestViewModels
+          .Find(vm => vm.CreatedOn == _moduleState.EstimationDesign.CreatedOn)
+          .Match(vm => vm, () => default);
+      }
+      else
+      {
+        _targetEstimationDesign = None;
+
+        SelectedDesignDigestViewModel = default;
+      }
     }
 
     private void ObserveEstimationDesignChange((DesignDigest DesignDigest, ObservableQualifier ObservableQualifier) change)

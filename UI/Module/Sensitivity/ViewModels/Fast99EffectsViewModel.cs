@@ -1,42 +1,37 @@
 ﻿using LanguageExt;
 using ReactiveUI;
-using RVis.Data.Extensions;
+using RVis.Base.Extensions;
 using RVis.Model;
+using RVis.Model.Extensions;
 using RVisUI.Model;
 using RVisUI.Model.Extensions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static RVis.Base.Extensions.NumExt;
 using static Sensitivity.LowryPlotData;
-using static Sensitivity.MeasuresOps;
 using static System.Double;
-using DataTable = System.Data.DataTable;
 
 namespace Sensitivity
 {
-  internal sealed class EffectsViewModel : ViewModelBase, IEffectsViewModel
+  internal sealed class Fast99EffectsViewModel : IFast99EffectsViewModel, INotifyPropertyChanged, IDisposable
   {
-    internal EffectsViewModel(
+    internal Fast99EffectsViewModel(
       IAppState appState,
       IAppService appService,
       IAppSettings appSettings,
-      ModuleState moduleState,
-      SensitivityDesigns sensitivityDesigns
+      ModuleState moduleState
       )
     {
-      _appState = appState;
-      _appService = appService;
+      _simulation = appState.Target.AssertSome();
       _moduleState = moduleState;
-      _sensitivityDesigns = sensitivityDesigns;
 
       _lowryViewModel = new LowryViewModel(appService, appSettings, moduleState.LowryState);
       _traceViewModel = new TraceViewModel(appService, appSettings, moduleState.TraceState);
@@ -69,40 +64,52 @@ namespace Sensitivity
 
       _subscriptions = new CompositeDisposable(
 
-        moduleState.ObservableForProperty(ms => ms.SensitivityDesign).Subscribe(
-          ObserveModuleStateSensitivityDesign
-          ),
+        moduleState
+          .ObservableForProperty(ms => ms.SensitivityDesign)
+          .Subscribe(ObserveModuleStateSensitivityDesign),
 
-        moduleState.MeasuresState.ObservableForProperty(ms => ms.OutputMeasures).Subscribe(
-          ObserveMeasuresStateOutputMeasures
-          ),
+        moduleState.MeasuresState
+          .ObservableForProperty(ms => ms.Fast99OutputMeasures)
+          .Subscribe(ObserveMeasuresStateFast99OutputMeasures),
 
-        moduleState.MeasuresState.ObservableForProperty(ms => ms.SelectedOutputName).Subscribe(
-          ObserveMeasuresStateSelectedOutputName
-          ),
+        moduleState.MeasuresState
+          .ObservableForProperty(ms => ms.SelectedOutputName)
+          .Subscribe(ObserveMeasuresStateSelectedOutputName),
 
-        this.ObservableForProperty(vm => vm.SelectedOutputName).Subscribe(
-          ObserveSelectedOutputName
-          ),
+        this
+          .ObservableForProperty(vm => vm.IsVisible)
+          .Subscribe(ObserveIsVisible),
 
-        _traceViewModel.ObservableForProperty(vm => vm.SelectedX).Subscribe(
-          ObserveTraceSelectedX
-          )
+        this
+          .ObservableForProperty(vm => vm.SelectedOutputName)
+          .Subscribe(ObserveSelectedOutputName),
+
+        _traceViewModel
+          .ObservableForProperty(vm => vm.SelectedX)
+          .Subscribe(ObserveTraceSelectedX)
 
         );
 
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
         Populate();
+        UpdateEnable();
       }
     }
 
     public bool IsVisible
     {
       get => _isVisible;
-      set => this.RaiseAndSetIfChanged(ref _isVisible, value);
+      set => this.RaiseAndSetIfChanged(ref _isVisible, value, PropertyChanged);
     }
     private bool _isVisible;
+
+    public bool IsReady
+    {
+      get => _isReady;
+      set => this.RaiseAndSetIfChanged(ref _isReady, value, PropertyChanged);
+    }
+    private bool _isReady;
 
     public ILowryViewModel LowryViewModel => _lowryViewModel;
 
@@ -111,28 +118,28 @@ namespace Sensitivity
     public Arr<string> OutputNames
     {
       get => _outputNames;
-      set => this.RaiseAndSetIfChanged(ref _outputNames, value);
+      set => this.RaiseAndSetIfChanged(ref _outputNames, value, PropertyChanged);
     }
     private Arr<string> _outputNames;
 
     public bool CanSelectOutputName
     {
       get => _canSelectOutputName;
-      set => this.RaiseAndSetIfChanged(ref _canSelectOutputName, value);
+      set => this.RaiseAndSetIfChanged(ref _canSelectOutputName, value, PropertyChanged);
     }
     private bool _canSelectOutputName;
 
     public int SelectedOutputName
     {
       get => _selectedOutputName;
-      set => this.RaiseAndSetIfChanged(ref _selectedOutputName, value);
+      set => this.RaiseAndSetIfChanged(ref _selectedOutputName, value, PropertyChanged);
     }
     private int _selectedOutputName = NOT_FOUND;
 
     public int PlaySpeed
     {
       get => _playSpeed;
-      set => this.RaiseAndSetIfChanged(ref _playSpeed, value);
+      set => this.RaiseAndSetIfChanged(ref _playSpeed, value, PropertyChanged);
     }
     private int _playSpeed;
 
@@ -141,7 +148,7 @@ namespace Sensitivity
     public bool CanPlaySimulation
     {
       get => _canPlaySimulation;
-      set => this.RaiseAndSetIfChanged(ref _canPlaySimulation, value);
+      set => this.RaiseAndSetIfChanged(ref _canPlaySimulation, value, PropertyChanged);
     }
     private bool _canPlaySimulation;
 
@@ -150,7 +157,7 @@ namespace Sensitivity
     public bool CanStopSimulation
     {
       get => _canStopSimulation;
-      set => this.RaiseAndSetIfChanged(ref _canStopSimulation, value);
+      set => this.RaiseAndSetIfChanged(ref _canStopSimulation, value, PropertyChanged);
     }
     private bool _canStopSimulation;
 
@@ -159,7 +166,7 @@ namespace Sensitivity
     public bool CanPlaySlower
     {
       get => _canPlaySlower;
-      set => this.RaiseAndSetIfChanged(ref _canPlaySlower, value);
+      set => this.RaiseAndSetIfChanged(ref _canPlaySlower, value, PropertyChanged);
     }
     private bool _canPlaySlower;
 
@@ -168,16 +175,16 @@ namespace Sensitivity
     public bool CanPlayFaster
     {
       get => _canPlayFaster;
-      set => this.RaiseAndSetIfChanged(ref _canPlayFaster, value);
+      set => this.RaiseAndSetIfChanged(ref _canPlayFaster, value, PropertyChanged);
     }
     private bool _canPlayFaster;
 
-    public override void HandleCancelTask()
-    {
-      _cancellationTokenSource?.Cancel();
-    }
+    public event PropertyChangedEventHandler PropertyChanged;
 
-    protected override void Dispose(bool disposing)
+    public void Dispose() =>
+      Dispose(disposing: true);
+
+    private void Dispose(bool disposing)
     {
       if (!_disposed)
       {
@@ -186,18 +193,10 @@ namespace Sensitivity
           _subscriptions.Dispose();
           _traceViewModel.Dispose();
           _lowryViewModel.Dispose();
-
-          if (_cancellationTokenSource?.IsCancellationRequested == false)
-          {
-            _cancellationTokenSource?.Cancel();
-            _cancellationTokenSource?.Dispose();
-          }
         }
 
         _disposed = true;
       }
-
-      base.Dispose(disposing);
     }
 
     private void UpdateEnable()
@@ -268,27 +267,19 @@ namespace Sensitivity
 
     private void ObserveModuleStateSensitivityDesign(object _)
     {
-      if (_moduleState.SensitivityDesign == default)
+      using (_reactiveSafeInvoke.SuspendedReactivity)
       {
-        using (_reactiveSafeInvoke.SuspendedReactivity)
-        {
-          _cancellationTokenSource?.Cancel();
-          _lowryViewModel.Clear();
-          _traceViewModel.Clear();
-          OutputNames = default;
-          SelectedOutputName = NOT_FOUND;
-          _compiledOutputMeasures.Clear();
-
-          IsVisible = false;
-        }
+        Populate();
+        UpdateEnable();
       }
     }
 
-    private void ObserveMeasuresStateOutputMeasures(object _)
+    private void ObserveMeasuresStateFast99OutputMeasures(object _)
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
         Populate();
+        UpdateEnable();
       }
     }
 
@@ -297,78 +288,16 @@ namespace Sensitivity
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
         Populate();
+        UpdateEnable();
       }
     }
 
-    private async Task GenerateOutputMeasuresAsync(string outputName, ServerLicense serverLicense)
+    private void ObserveIsVisible(object _)
     {
-      using (serverLicense)
+      using (_reactiveSafeInvoke.SuspendedReactivity)
       {
-        _cancellationTokenSource = new CancellationTokenSource();
-
-        TaskName = "Generate Output Measures";
-        IsRunningTask = true;
-        CanCancelTask = true;
-
-        try
-        {
-          var measures = await Task.Run(
-            () => GenerateOutputMeasures(
-              outputName,
-              _moduleState.SensitivityDesign.SerializedDesign,
-              _moduleState.SensitivityDesign.Samples,
-              _moduleState.DesignOutputs,
-              serverLicense.Client,
-              _cancellationTokenSource.Token,
-              s => _appService.ScheduleLowPriorityAction(() => RaiseTaskMessageEvent(s))
-            ),
-            _cancellationTokenSource.Token
-            );
-
-          _moduleState.MeasuresState.SelectedOutputName = outputName;
-
-          _moduleState.MeasuresState.OutputMeasures =
-            _moduleState.MeasuresState.OutputMeasures.Add(outputName, measures);
-
-          _sensitivityDesigns.SaveOutputMeasures(
-            _moduleState.SensitivityDesign,
-            outputName,
-            measures.FirstOrder,
-            measures.TotalOrder,
-            measures.Variance
-            );
-
-          var nansInFirstOrder = measures.FirstOrder.Rows
-            .Cast<DataRow>()
-            .Skip(1)
-            .Any(dr => dr.ItemArray.OfType<double>().Any(IsNaN));
-
-          var nansInTotalOrder = measures.TotalOrder.Rows
-            .Cast<DataRow>()
-            .Skip(1)
-            .Any(dr => dr.ItemArray.OfType<double>().Any(IsNaN));
-
-          if (nansInFirstOrder || nansInTotalOrder)
-          {
-            _appState.Status = "NaN(s) generated by sensitivity::tell()";
-          }
-        }
-        catch (OperationCanceledException)
-        {
-          // expected
-        }
-        catch (Exception ex)
-        {
-          _appService.Notify(
-            nameof(EffectsViewModel),
-            nameof(GenerateOutputMeasuresAsync),
-            ex
-            );
-        }
-
-        IsRunningTask = false;
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = default;
+        Populate();
+        UpdateEnable();
       }
     }
 
@@ -377,55 +306,7 @@ namespace Sensitivity
       if (!_reactiveSafeInvoke.React) return;
 
       var outputName = OutputNames[SelectedOutputName];
-
-      if (_moduleState.MeasuresState.OutputMeasures.ContainsKey(outputName))
-      {
-        _moduleState.MeasuresState.SelectedOutputName = outputName;
-        return;
-      }
-
-      var loadedMeasures = _sensitivityDesigns.LoadOutputMeasures(
-        _moduleState.SensitivityDesign,
-        outputName,
-        out (DataTable FirstOrder, DataTable TotalOrder, DataTable Variance) measures
-        );
-
-      if (loadedMeasures)
-      {
-        _moduleState.MeasuresState.OutputMeasures =
-          _moduleState.MeasuresState.OutputMeasures.Add(outputName, measures);
-        _moduleState.MeasuresState.SelectedOutputName = outputName;
-        return;
-      }
-
-      if (_moduleState.DesignOutputs.IsEmpty)
-      {
-        _appService.Notify(
-          NotificationType.Information,
-          "Change Selected Output",
-          outputName,
-          "Cannot compute measures as design outputs are not loaded. Reload data from design screen to continue."
-          );
-        _moduleState.MeasuresState.SelectedOutputName = outputName;
-        return;
-      }
-
-      void SomeServer(ServerLicense serverLicense)
-      {
-        var __ = GenerateOutputMeasuresAsync(outputName, serverLicense);
-      }
-
-      void NoServer()
-      {
-        _appService.Notify(
-          NotificationType.Information,
-          nameof(VarianceViewModel),
-          nameof(ObserveSelectedOutputName),
-          "No R server available."
-          );
-      }
-
-      _appService.RVisServerPool.RequestServer().Match(SomeServer, NoServer);
+      _moduleState.MeasuresState.SelectedOutputName = outputName;
     }
 
     private void ObserveTraceSelectedX(object _)
@@ -447,35 +328,42 @@ namespace Sensitivity
       UpdateEnable();
     }
 
+    private void Unload()
+    {
+      _lowryViewModel.Clear();
+      _traceViewModel.Clear();
+      OutputNames = default;
+      SelectedOutputName = NOT_FOUND;
+      _compiledOutputMeasures.Clear();
+      IsReady = false;
+    }
+
     private void Populate()
     {
-      if (_moduleState.SensitivityDesign == default || _moduleState.MeasuresState.OutputMeasures.IsEmpty)
+      if (!IsVisible)
       {
-        IsVisible = false;
+        Unload();
         return;
       }
 
-      var canPlot = _moduleState.MeasuresState.OutputMeasures.ContainsKey(
-        _moduleState.MeasuresState.SelectedOutputName
-        );
+      IsReady =
+        _moduleState.SensitivityDesign != default &&
+        _moduleState.MeasuresState.Fast99OutputMeasures.ContainsKey(
+          _moduleState.MeasuresState.SelectedOutputName
+        )
+        &&
+        _moduleState.Trace != default;
 
-      canPlot = canPlot && _moduleState.Trace != default;
-
-      if (!canPlot)
-      {
-        _lowryViewModel.Clear();
-        _traceViewModel.Clear();
-        return;
-      }
+      if (!IsReady) return;
 
       var compiledOutputMeasures = GetPlotData(_moduleState.MeasuresState.SelectedOutputName);
 
       var x = _traceViewModel.SelectedX;
       var trace = _moduleState.Trace;
-      var independent = trace.GetIndependentVariable();
+      var independent = _simulation.SimConfig.SimOutput.GetIndependentData(trace);
       if (!independent.Data.Contains(x)) x = independent[0];
 
-      var hasMeasures = compiledOutputMeasures.TryGetValue(x, out OutputMeasures outputMeasures);
+      var hasMeasures = compiledOutputMeasures.TryGetValue(x, out LowryOutputMeasures outputMeasures);
 
       hasMeasures = hasMeasures && !outputMeasures.ParameterMeasures.Exists(
         pm => IsNaN(pm.MainEffect) || IsNaN(pm.Interaction)
@@ -489,7 +377,7 @@ namespace Sensitivity
             )
           );
 
-        if (startMeasure.Value == default)
+        if (startMeasure.Value.ParameterMeasures.IsEmpty)
         {
           startMeasure = compiledOutputMeasures.Head();
         }
@@ -507,6 +395,8 @@ namespace Sensitivity
         trace[_moduleState.MeasuresState.SelectedOutputName]
         );
 
+      _traceViewModel.SelectedX = x;
+
       if (OutputNames.IsEmpty)
       {
         var outputNames = trace.ColumnNames
@@ -519,23 +409,16 @@ namespace Sensitivity
 
       RequireFalse(OutputNames.IsEmpty);
 
-      _traceViewModel.SelectedX = x;
       SelectedOutputName = OutputNames.IndexOf(_moduleState.MeasuresState.SelectedOutputName);
-      UpdateEnable();
-
-      if (!IsVisible)
-      {
-        IsVisible = true;
-      }
     }
 
-    private IDictionary<double, OutputMeasures> GetPlotData(string outputName)
+    private IDictionary<double, LowryOutputMeasures> GetPlotData(string outputName)
     {
       if (!_compiledOutputMeasures.ContainsKey(outputName))
       {
-        var outputMeasures = _moduleState.MeasuresState.OutputMeasures[outputName];
+        var outputMeasures = _moduleState.MeasuresState.Fast99OutputMeasures[outputName];
         var trace = _moduleState.Trace;
-        var traceIndependent = trace.GetIndependentVariable();
+        var traceIndependent = _simulation.SimConfig.SimOutput.GetIndependentData(trace);
         var traceDependent = trace[outputName];
         var compiledOutputMeasures = CompileOutputMeasures(
           outputMeasures,
@@ -550,17 +433,14 @@ namespace Sensitivity
 
     private static readonly Arr<int> _playSpeeds = Array(1, 2, 5, 10, 20, 50, 100);
 
-    private readonly IAppState _appState;
-    private readonly IAppService _appService;
+    private readonly Simulation _simulation;
     private readonly ModuleState _moduleState;
-    private readonly SensitivityDesigns _sensitivityDesigns;
     private readonly LowryViewModel _lowryViewModel;
     private readonly TraceViewModel _traceViewModel;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private CancellationTokenSource _cancellationTokenSource;
-    private readonly SortedDictionary<string, IDictionary<double, OutputMeasures>> _compiledOutputMeasures =
-      new SortedDictionary<string, IDictionary<double, OutputMeasures>>();
+    private readonly SortedDictionary<string, IDictionary<double, LowryOutputMeasures>> _compiledOutputMeasures =
+      new SortedDictionary<string, IDictionary<double, LowryOutputMeasures>>();
     private readonly DispatcherTimer _playTicker;
     private int _playSpeedIndex;
     private bool _disposed = false;

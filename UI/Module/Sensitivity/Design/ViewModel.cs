@@ -6,9 +6,13 @@
 
     public IDesignViewModel DesignViewModel => new DesignViewModel();
 
-    public IVarianceViewModel VarianceViewModel => new VarianceViewModel();
+    public IMorrisMeasuresViewModel MorrisMeasuresViewModel => new MorrisMeasuresViewModel();
 
-    public IEffectsViewModel EffectsViewModel => new EffectsViewModel();
+    public IMorrisEffectsViewModel MorrisEffectsViewModel => new MorrisEffectsViewModel();
+
+    public IFast99MeasuresViewModel Fast99MeasuresViewModel => new Fast99MeasuresViewModel();
+
+    public IFast99EffectsViewModel Fast99EffectsViewModel => new Fast99EffectsViewModel();
 
     public IDesignDigestsViewModel DesignDigestsViewModel => new DesignDigestsViewModel();
   }

@@ -365,11 +365,8 @@ namespace Plot
 
       series.IfSome(s =>
       {
-        var ivName = s[0].Serie.GetIndependentVariable().Name;
-        _traceHorizontalAxis.Title = ivName;
-
         var ivElement = _simulation.SimConfig.SimOutput.IndependentVariable;
-        RequireTrue(ivElement.Name == ivName);
+        _traceHorizontalAxis.Title = ivElement.Name;
         _traceHorizontalAxis.Unit = ivElement.Unit;
 
         _plotModel.DefaultColors = GetPalette(s[0].Serie.NColumns - 1).Colors;
@@ -471,7 +468,7 @@ namespace Plot
         var nSerie = series.Count;
         var (serieName, serie) = series[0];
 
-        var independentVariable = serie.GetIndependentVariable();
+        var independentVariable = _simulation.SimConfig.SimOutput.GetIndependentData(serie);
         var dependentVariable = serie[State.DepVarConfigState.SelectedElementName];
         AddSerie(
           (SerieType.DepVar, dependentVariable.Name),
@@ -490,7 +487,7 @@ namespace Plot
         for (var i = 1; i < nSerie; ++i)
         {
           (serieName, serie) = series[i];
-          independentVariable = serie.GetIndependentVariable();
+          independentVariable = _simulation.SimConfig.SimOutput.GetIndependentData(serie);
           dependentVariable = serie[State.DepVarConfigState.SelectedElementName];
           AddSerie(
             (SerieType.DepVar, dependentVariable.Name),
@@ -572,7 +569,7 @@ namespace Plot
       for (var i = 0; i < dataSet.Count; ++i)
       {
         var serieTitle = useIndex ? $"{name} [{(1 + i):00}]" : name;
-        var independentVariable = dataSet[i].Serie.GetIndependentVariable();
+        var independentVariable = _simulation.SimConfig.SimOutput.GetIndependentData(dataSet[i].Serie);
         var dependentVariable = dataSet[i].Serie[name];
         AddSerie(
           (SerieType.Supplementary, name),

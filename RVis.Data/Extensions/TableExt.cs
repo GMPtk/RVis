@@ -28,18 +28,6 @@ namespace RVis.Data.Extensions
 
     public static IDataColumn<T> Get<T>(this IDataTable dataTable, int index) => EnsureDataType<T>(dataTable[index]);
 
-    public static NumDataColumn GetIndependentVariable(this NumDataTable dataTable)
-    {
-      RequireTrue(dataTable.NColumns > 0, $"{nameof(GetIndependentVariable)} called with empty DataTable");
-      if (!(dataTable[0] is NumDataColumn dataColumn)) throw new ArgumentException($"{nameof(GetIndependentVariable)} called against non-numeric IV", nameof(dataTable));
-      return dataColumn;
-    }
-
-    public static Arr<NumDataColumn> GetDependentVariables(this NumDataTable dataTable)
-    {
-      return dataTable.NumDataColumns.Skip(1).ToArr();
-    }
-
     private static IDataColumn<T> EnsureDataType<T>(IDataColumn dataColumn) =>
       dataColumn is IDataColumn<T> dt ?
         dt :

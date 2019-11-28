@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace Sensitivity
 {
   /// <summary>
-  /// Interaction logic for VarianceView.xaml
+  /// Interaction logic for MorrisEffectsView.xaml
   /// </summary>
-  public partial class VarianceView : UserControl
+  public partial class MorrisEffectsView : UserControl
   {
-    public VarianceView()
+    public MorrisEffectsView()
     {
       InitializeComponent();
     }

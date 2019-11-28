@@ -21,8 +21,15 @@
               <DataTemplate>
                 <TextBlock VerticalAlignment="Center" 
                            HorizontalAlignment="Center"
-                           Text="No parameter selected"
-                           />
+                           TextAlignment="Center"
+                           >
+                  <TextBlock.Inlines>
+                    <Run Text="Distribution Editor"/>
+                    <LineBreak/>
+                    <LineBreak/>
+                    <Run Text="Select a parameter to continue"/>
+                  </TextBlock.Inlines>
+                </TextBlock>
               </DataTemplate>
             </Setter.Value>
           </Setter>

@@ -242,12 +242,22 @@ namespace RVis.Client
         var pathToServer = Path.Combine(_executableDirectory, "RVis.Server.exe");
         if (!File.Exists(pathToServer))
         {
+          var bitness = Environment.Is64BitProcess ? @"x64\" : string.Empty;
+          var bitnessUp = Environment.Is64BitProcess ? @"..\" : string.Empty;
+
 #if DEBUG
           var buildTargetDirectory = "Debug";
 #else
           var buildTargetDirectory = "Release";
 #endif
-          pathToServer = Path.Combine(_executableDirectory, @"..\..\..\..\WinR\RVis.Server\bin\" + buildTargetDirectory, "RVis.Server.exe");
+
+          var serverDirectory = bitnessUp + @"..\..\..\..\WinR\RVis.Server\bin\" + bitness + buildTargetDirectory;
+
+          pathToServer = Path.Combine(
+            _executableDirectory,
+            serverDirectory,
+            "RVis.Server.exe"
+            );
 
           RequireFile(pathToServer, "Failed to find server executable");
         }

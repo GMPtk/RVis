@@ -3,12 +3,15 @@ using RVis.Base.Extensions;
 using RVis.Data;
 using RVis.Model.Extensions;
 using System;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static LanguageExt.Prelude;
+using static RVis.Data.NumDataTable;
+using static RVis.Model.Constant;
 using static System.Globalization.CultureInfo;
+using static System.IO.Path;
+using static RVis.Base.Check;
 
 namespace RVis.Model
 {
@@ -140,7 +143,7 @@ namespace RVis.Model
 
     public Arr<ValueCandidate> ExecutorValueCandidates { get; private set; }
 
-    public string ImportExecToLibrary()
+    public async Task<string> ImportExecToLibraryAsync(IRVisClient rVisClient)
     {
       var code = new SimCode(_codeFileName, ExecutorFunction.Symbol, ExecutorFormal.Symbol);
 
@@ -186,10 +189,21 @@ namespace RVis.Model
 
       config.WriteToFile(_pathToContainingDirectory);
 
+      var trace = await Task.Run(() =>
+      {
+        var pathToCode = Path.Combine(_pathToContainingDirectory, _codeFileName);
+
+        rVisClient.Clear();
+        rVisClient.RunExec(pathToCode, config);
+        return rVisClient.TabulateExecOutput(config);
+      });
+
+      CheckTrace(trace);
+
       return _simLibrary.Import(_pathToContainingDirectory);
     }
 
-    public string ImportTmplToLibrary()
+    public async Task<string> ImportTmplToLibraryAsync(IRVisClient rVisClient)
     {
       var code = new SimCode(_codeFileName, default, default);
 
@@ -227,6 +241,17 @@ namespace RVis.Model
         );
 
       config.WriteToFile(_pathToContainingDirectory);
+
+      var trace = await Task.Run(() =>
+      {
+        var pathToCode = Path.Combine(_pathToContainingDirectory, _codeFileName);
+
+        rVisClient.Clear();
+        rVisClient.SourceFile(pathToCode);
+        return rVisClient.TabulateTmplOutput(config);
+      });
+
+      CheckTrace(trace);
 
       var codeLines = _codeLines.ToArray();
 
@@ -273,6 +298,14 @@ namespace RVis.Model
       File.WriteAllLines(pathToRFile, _codeLines);
 
       _pathToContainingDirectory = pathToContainingDirectory;
+    }
+
+    private void CheckTrace(NumDataTable trace)
+    {
+      RequireTrue(
+        trace.NumDataColumns.AllUnique(ndc => ndc.Name),
+        "Output contains duplicate names"
+        );
     }
 
     private readonly string _codeFileName;

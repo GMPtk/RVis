@@ -5,7 +5,7 @@ using System.Resources;
 [assembly: AssemblyProduct("RVis")]
 [assembly: AssemblyCopyright("Copyright © HSE 2019")]
 
-[assembly: AssemblyVersion("0.6.11068.0")]
-[assembly: AssemblyFileVersion("0.6.11068.0")]
+[assembly: AssemblyVersion("0.7.11068.0")]
+[assembly: AssemblyFileVersion("0.7.11068.0")]
 
 [assembly: NeutralResourcesLanguage("en")]

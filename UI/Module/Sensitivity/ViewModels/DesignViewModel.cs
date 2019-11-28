@@ -1,8 +1,8 @@
 ﻿using LanguageExt;
 using ReactiveUI;
 using RVis.Base.Extensions;
-using RVis.Data;
 using RVis.Model;
+using RVis.Model.Extensions;
 using RVisUI.AppInf;
 using RVisUI.AppInf.Extensions;
 using RVisUI.Model;
@@ -14,14 +14,12 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using static RVis.Base.Check;
-using static RVis.Base.Extensions.CollExt;
 using static RVis.Base.Extensions.LangExt;
 using static RVis.Base.Extensions.NumExt;
-using static Sensitivity.MeasuresOps;
 using DataTable = System.Data.DataTable;
+using static LanguageExt.Prelude;
 
 namespace Sensitivity
 {
@@ -45,7 +43,13 @@ namespace Sensitivity
 
       CreateDesign = ReactiveCommand.Create(
         HandleCreateDesign,
-        this.WhenAny(vm => vm.SampleSize, _ => SampleSize > 0)
+        this.WhenAny(
+          vm => vm.SensitivityMethod,
+          vm => vm.NoOfRuns,
+          vm => vm.NoOfSamples,
+          (_, __, ___) =>
+            (SensitivityMethod == SensitivityMethod.Morris && NoOfRuns > 0) ||
+            (SensitivityMethod == SensitivityMethod.Fast99 && NoOfSamples > 0))
         );
 
       UnloadDesign = ReactiveCommand.Create(HandleUnloadDesign);
@@ -72,7 +76,9 @@ namespace Sensitivity
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
-      _subscriptions = new CompositeDisposable(
+      using (_reactiveSafeInvoke.SuspendedReactivity)
+      {
+        _subscriptions = new CompositeDisposable(
 
         moduleState
           .ObservableForProperty(ms => ms.ParameterStates)
@@ -83,15 +89,27 @@ namespace Sensitivity
             ),
 
         moduleState
-          .ObservableForProperty(vm => vm.SensitivityDesign)
+          .ObservableForProperty(ms => ms.SensitivityDesign)
           .Subscribe(
             _reactiveSafeInvoke.SuspendAndInvoke<object>(
               ObserveModuleStateSensitivityDesign
               )
             ),
 
+        moduleState.MeasuresState
+          .ObservableForProperty(ms => ms.SelectedOutputName)
+          .Subscribe(
+            _reactiveSafeInvoke.SuspendAndInvoke<object>(
+              ObserveMeasuresStateSelectedOutputName
+              )
+            ),
+
         this
-          .ObservableForProperty(vm => vm.SampleSize)
+          .WhenAnyValue(
+            vm => vm.SensitivityMethod,
+            vm => vm.NoOfRuns,
+            vm => vm.NoOfSamples
+            )
           .Subscribe(
             _reactiveSafeInvoke.SuspendAndInvoke<object>(
               ObserveInputs
@@ -116,11 +134,12 @@ namespace Sensitivity
 
         );
 
-      using (_reactiveSafeInvoke.SuspendedReactivity)
-      {
         if (_moduleState.SensitivityDesign == default)
         {
-          Populate(_moduleState.DesignState, _moduleState.ParameterStates);
+          Populate(
+            _moduleState.DesignState, 
+            _moduleState.ParameterStates
+            );
         }
         else
         {
@@ -146,12 +165,26 @@ namespace Sensitivity
     }
     private Arr<string> _invariants;
 
-    public int? SampleSize
+    public SensitivityMethod SensitivityMethod
     {
-      get => _sampleSize;
-      set => this.RaiseAndSetIfChanged(ref _sampleSize, value);
+      get => _sensitivityMethod;
+      set => this.RaiseAndSetIfChanged(ref _sensitivityMethod, value);
     }
-    private int? _sampleSize;
+    private SensitivityMethod _sensitivityMethod;
+
+    public int? NoOfRuns
+    {
+      get => _noOfRuns;
+      set => this.RaiseAndSetIfChanged(ref _noOfRuns, value);
+    }
+    private int? _noOfRuns;
+
+    public int? NoOfSamples
+    {
+      get => _noOfSamples;
+      set => this.RaiseAndSetIfChanged(ref _noOfSamples, value);
+    }
+    private int? _noOfSamples;
 
     public ICommand CreateDesign { get; }
 
@@ -284,6 +317,7 @@ namespace Sensitivity
           lock (_jobSyncLock)
           {
             _jobSubscriptions?.Dispose();
+
             if (_cancellationTokenSource?.IsCancellationRequested == false)
             {
               _cancellationTokenSource?.Cancel();
@@ -302,7 +336,21 @@ namespace Sensitivity
 
     private void HandleCreateDesign()
     {
-      RequireTrue(SampleSize > 0);
+      var parameterDistributions = _moduleState.ParameterStates
+        .Filter(ps => ps.IsSelected)
+        .OrderBy(ps => ps.Name.ToUpperInvariant())
+        .Select(ps => (ps.Name, Distribution: ps.GetDistribution()))
+        .ToArr();
+
+      RequireFalse(
+        parameterDistributions.Count == 0,
+        "Configure one or more parameter distributions."
+        );
+
+      RequireTrue(
+        parameterDistributions.ForAll(t => t.Distribution.IsConfigured),
+        "One or more parameter distribitions not correctly configured"
+        );
 
       void SomeServer(ServerLicense serverLicense)
       {
@@ -312,73 +360,19 @@ namespace Sensitivity
           {
             try
             {
-              var (samples, serializedDesign) = GetFast99Samples(
-                _moduleState.ParameterStates,
-                SampleSize.Value,
-                serverLicense.Client
-                );
-
-              var parameterDistributions = _moduleState.ParameterStates
-                .Filter(ps => ps.IsSelected)
-                .OrderBy(ps => ps.Name.ToUpperInvariant())
-                .Select(ps => (ps.Name, Distribution: ps.GetDistribution()))
-                .ToArr();
-
-              RequireTrue(parameterDistributions.ForAll(t => t.Distribution.IsConfigured));
-
-              var sensitivityDesign = SensitivityDesign.CreateSensitivityDesign(
-                DateTime.Now,
-                serializedDesign,
-                parameterDistributions,
-                SampleSize.Value,
-                samples
-                );
-              _sensitivityDesigns.Add(sensitivityDesign);
-
-              UnloadCurrentDesign();
-
-              _moduleState.SensitivityDesign = default;
-
-              _moduleState.DesignOutputs = default;
-              _moduleState.Trace = default;
-              _moduleState.MeasuresState.OutputMeasures = default;
-              _moduleState.SensitivityDesign = sensitivityDesign;
-
-              var outputRequestJob = CompileOutputRequestJob(
-                _simulation,
-                _simData,
-                samples,
-                sensitivityDesign.DesignParameters.Filter(dp => dp.Distribution.DistributionType == DistributionType.Invariant)
-                );
-
-              NOutputsAcquired = outputRequestJob.Count(t => t.Input == default || t.Output != default);
-              NOutputsToAcquire = samples.Rows.Count;
-              if (NOutputsAcquired < NOutputsToAcquire) _outputRequestJob = outputRequestJob;
-
-              var inputs = CreateInputs(samples);
-              ShowIssues = false;
-              UpdateInputs(inputs, outputRequestJob);
-
-              DesignCreatedOn = sensitivityDesign.CreatedOn;
-
-              var designOutputs = outputRequestJob
-                .Select(t => t.Output)
-                .ToArr();
-
-              var canMeasure = designOutputs.ForAll(o => o != default);
-
-              if (canMeasure)
+              if (SensitivityMethod == SensitivityMethod.Morris)
               {
-                if (designOutputs.NotAllSame(ndt => ndt.NRows))
-                {
-                  designOutputs = ToCommonIndependent(designOutputs);
-                }
-
-                var trace = designOutputs.Head();
-                _moduleState.Trace = trace;
-                _sensitivityDesigns.SaveTrace(sensitivityDesign, trace);
-
-                PrepareInitialMeasures(designOutputs);
+                CreateMorrisDesign(
+                  parameterDistributions, 
+                  serverLicense.Client
+                  );
+              }
+              else
+              {
+                CreateFast99Design(
+                  parameterDistributions, 
+                  serverLicense.Client
+                  );
               }
             }
             catch (Exception ex)
@@ -406,7 +400,9 @@ namespace Sensitivity
           );
       }
 
-      _appService.RVisServerPool.RequestServer().Match(SomeServer, NoServer);
+      _appService.RVisServerPool
+        .RequestServer()
+        .Match(SomeServer, NoServer);
     }
 
     private void HandleUnloadDesign()
@@ -414,9 +410,10 @@ namespace Sensitivity
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
         UnloadCurrentDesign();
-        _moduleState.DesignOutputs = default;
+        _moduleState.Ranking = default;
         _moduleState.Trace = default;
-        _moduleState.MeasuresState.OutputMeasures = default;
+        _moduleState.MeasuresState.MorrisOutputMeasures = default;
+        _moduleState.MeasuresState.Fast99OutputMeasures = default;
         _moduleState.SensitivityDesign = default;
         UpdateDesignEnable();
         UpdateSamplesEnable();
@@ -427,7 +424,6 @@ namespace Sensitivity
     {
       RequireNotNull(_outputRequestJob);
       RequireFalse(_runOutputRequestJob);
-      RequireTrue(_moduleState.DesignOutputs.IsEmpty);
       RequireTrue(NOutputsAcquired < NOutputsToAcquire);
 
       _jobSubscriptions = new CompositeDisposable(
@@ -449,11 +445,22 @@ namespace Sensitivity
         {
           var (input, outputRequested, output) = _outputRequestJob[i];
 
-          if (input == default || outputRequested || output != default) continue;
+          var failedOrInProgressOrCompleted =
+            input == default ||
+            outputRequested ||
+            output != default;
+
+          if (failedOrInProgressOrCompleted) continue;
 
           _outputRequestJob[i] = (input, true, default);
 
-          var didRequest = _simData.RequestOutput(_simulation, input, this, i, true);
+          var didRequest = _simData.RequestOutput(
+            _simulation, 
+            input, 
+            this, 
+            i, 
+            persist: true
+            );
 
           if (!didRequest) continue;
 
@@ -489,17 +496,18 @@ namespace Sensitivity
 
     private void HandleShareParameters()
     {
+      RequireNotNull(Inputs);
       RequireNotNull(_moduleState.SensitivityDesign);
       RequireFalse(SelectedInputIndex == NOT_FOUND);
 
       var defaultInput = _simulation.SimConfig.SimInput;
 
-      var targetParameterNames = _moduleState.SensitivityDesign.Samples.Columns
+      var targetParameterNames = Inputs.Table.Columns
         .Cast<DataColumn>()
         .Select(dc => dc.ColumnName)
         .ToArr();
 
-      var dataRow = _moduleState.SensitivityDesign.Samples.Rows[SelectedInputIndex];
+      var dataRow = Inputs.Table.Rows[SelectedInputIndex];
 
       var designStates = targetParameterNames.Map(n =>
       {
@@ -560,43 +568,95 @@ namespace Sensitivity
         RequireTrue(outputRequest.RequestToken.Resolve(out int thisIndex));
         if (thisIndex >= _outputRequestJob.Length) return;
 
-        var (input, _, output) = _outputRequestJob[thisIndex];
-        if (input.Hash != outputRequest.Item.SeriesInput.Hash) return;
-        if (output != default) return;
+        var (thisInput, _, thisOutput) = _outputRequestJob[thisIndex];
+        if (thisInput.Hash != outputRequest.Item.SeriesInput.Hash) return;
+        if (thisOutput != default) return;
 
-        outputRequest.Item.SerieInputs.Match(
-          si =>
-          {
-            RequireTrue(si.Count == 1);
-            output = _simData.GetOutput(si[0], _simulation).AssertSome();
-          },
-          ex =>
-          {
-            input = default;
-            _outputRequestErrors.Add(thisIndex, ex);
-          });
-
-        _outputRequestJob[thisIndex] = (input, false, output);
-
-        for (var index = thisIndex + 1; index < _outputRequestJob.Length; ++index)
+        void RequestSucceeded(Arr<SimInput> serieInputs)
         {
-          if (_outputRequestJob[index].Input.Hash != outputRequest.Item.SeriesInput.Hash) continue;
-          _outputRequestJob[index] = (input, false, output);
+          RequireTrue(serieInputs.Count == 1);
+          RequireTrue(_moduleState.MeasuresState.SelectedOutputName.IsAString());
+
+          var numDataTable = _simData
+            .GetOutput(serieInputs[0], _simulation)
+            .AssertSome();
+
+          if (_moduleState.Trace == default && thisIndex == 0)
+          {
+            var independentData = _simulation.SimConfig.SimOutput.GetIndependentData(numDataTable);
+            
+            var unique = independentData.Data.AllUnique(d => d);
+            var ascending = Range(1, independentData.Length - 1)
+              .ForAll(i => independentData[i - 1] < independentData[i]);
+            
+            if (unique && ascending)
+            {
+              _moduleState.Trace = numDataTable;
+
+              _sensitivityDesigns.SaveTrace(
+                _moduleState.SensitivityDesign,
+                numDataTable
+                );
+            }
+            else
+            {
+              thisInput = default;
+              _outputRequestErrors.Add(
+                thisIndex, 
+                new Exception($"{independentData.Name} column does not contain unique and ascending values")
+                );
+            }
+          }
+
+          if (thisInput != default)
+          {
+            thisOutput = numDataTable[_moduleState.MeasuresState.SelectedOutputName].Data.ToArr();
+          }
         }
 
-        for (var index = 0; index < _outputRequestJob.Length; ++index)
+        void RequestFailed(Exception ex)
         {
-          if (_outputRequestJob[index].Input == default) continue;
-          if (_outputRequestJob[index].OutputRequested) continue;
-          if (_outputRequestJob[index].Output != default) continue;
+          thisInput = default;
+          _outputRequestErrors.Add(thisIndex, ex);
+        }
 
-          (input, _, _) = _outputRequestJob[index];
-          _outputRequestJob[index] = (input, true, default);
+        outputRequest.Item.SerieInputs.Match(
+          RequestSucceeded, 
+          RequestFailed
+          );
 
-          var didRequest = _simData.RequestOutput(_simulation, input, this, index, true);
+        _outputRequestJob[thisIndex] = (thisInput, false, thisOutput);
+
+        for (var i = thisIndex + 1; i < _outputRequestJob.Length; ++i)
+        {
+          if (_outputRequestJob[i].Input.Hash != outputRequest.Item.SeriesInput.Hash) continue;
+          _outputRequestJob[i] = (thisInput, false, thisOutput);
+        }
+
+        for (var i = 0; i < _outputRequestJob.Length; ++i)
+        {
+          var (input, outputRequested, output) = _outputRequestJob[i];
+
+          var requestOutput =
+            input != default &&
+            !outputRequested &&
+            output == default;
+
+          if (!requestOutput) continue;
+
+          _outputRequestJob[i] = (input, true, default);
+
+          var didRequest = _simData.RequestOutput(
+            _simulation, 
+            input, 
+            this, 
+            i, 
+            persist: true
+            );
+
           if (didRequest) break;
 
-          _outputRequestJob[index] = (input, false, default);
+          _outputRequestJob[i] = (input, false, default);
         }
       }
     }
@@ -623,13 +683,40 @@ namespace Sensitivity
 
         UpdateInputs(Inputs.Table, outputRequestJob);
 
+        if (_moduleState.Trace != default)
+        {
+          var expectedOutputLength = _moduleState.Trace.NRows;
+
+          for (var i = 1; i < outputRequestJob.Length; ++i)
+          {
+            if (_outputRequestErrors.ContainsKey(i)) continue;
+
+            var output = outputRequestJob[i].Output;
+            if (output == default) continue;
+
+            var actualOutputLength = output.Count;
+
+            if (actualOutputLength == expectedOutputLength) continue;
+
+            _outputRequestErrors.Add(
+              i,
+              new ArgumentOutOfRangeException(
+                nameof(actualOutputLength),
+                $"Unexpected output length: {actualOutputLength} (expected {expectedOutputLength})"
+                )
+              );
+
+            hasProducedErrors = true;
+          }
+        }
+
         if (hasProducedErrors)
         {
           _appService.Notify(
             NotificationType.Error,
             nameof(DesignViewModel),
             nameof(ObserveSecondInterval),
-            "Simulation produced one or more errors. Analysis not possible."
+            "Simulation produced one or more errors. See grid for details. Analysis not possible."
             );
         }
         else
@@ -638,21 +725,9 @@ namespace Sensitivity
             .Select(t => t.Output)
             .ToArr();
 
-          RequireFalse(designOutputs.Exists(o => o == default));
+          RequireFalse(designOutputs.Exists(o => o.IsEmpty));
 
-          if (designOutputs.NotAllSame(ndt => ndt.NRows))
-          {
-            designOutputs = ToCommonIndependent(designOutputs);
-          }
-
-          if (_moduleState.Trace == default)
-          {
-            var trace = designOutputs.Head();
-            _sensitivityDesigns.SaveTrace(_moduleState.SensitivityDesign, trace);
-            _moduleState.Trace = trace;
-          }
-
-          PrepareInitialMeasures(designOutputs);
+          Measure(designOutputs);
         }
 
         UpdateDesignEnable();
@@ -662,11 +737,6 @@ namespace Sensitivity
 
     private void ObserveParameterStateChange(object _)
     {
-      UnloadCurrentDesign();
-      _moduleState.DesignOutputs = default;
-      _moduleState.Trace = default;
-      _moduleState.MeasuresState.OutputMeasures = default;
-      _moduleState.SensitivityDesign = default;
       PopulateFactors(_moduleState.ParameterStates);
       PopulateInvariants(_moduleState.ParameterStates);
       UpdateDesignEnable();
@@ -689,16 +759,89 @@ namespace Sensitivity
       UpdateSamplesEnable();
     }
 
+    private void ObserveMeasuresStateSelectedOutputName(object _)
+    {
+      if (_moduleState.MeasuresState.SelectedOutputName.IsntAString()) return;
+
+      if (_moduleState.SensitivityDesign.SensitivityMethod == SensitivityMethod.Morris)
+      {
+        var alreadyAcquired = _moduleState.MeasuresState.MorrisOutputMeasures.ContainsKey(
+          _moduleState.MeasuresState.SelectedOutputName
+          );
+        if (alreadyAcquired) return;
+
+        var loadedMeasures = _sensitivityDesigns.LoadMorrisOutputMeasures(
+          _moduleState.SensitivityDesign,
+          _moduleState.MeasuresState.SelectedOutputName,
+          out (DataTable Mu, DataTable MuStar, DataTable Sigma) measures
+          );
+
+        if (loadedMeasures)
+        {
+          _moduleState.MeasuresState.MorrisOutputMeasures =
+            _moduleState.MeasuresState.MorrisOutputMeasures.Add(
+              _moduleState.MeasuresState.SelectedOutputName,
+              measures
+              );
+          return;
+        }
+      }
+      else
+      {
+        var alreadyAcquired = _moduleState.MeasuresState.Fast99OutputMeasures.ContainsKey(
+          _moduleState.MeasuresState.SelectedOutputName
+          );
+        if (alreadyAcquired) return;
+
+        var loadedMeasures = _sensitivityDesigns.LoadFast99OutputMeasures(
+          _moduleState.SensitivityDesign,
+          _moduleState.MeasuresState.SelectedOutputName,
+          out (DataTable FirstOrder, DataTable TotalOrder, DataTable Variance) measures
+          );
+
+        if (loadedMeasures)
+        {
+          _moduleState.MeasuresState.Fast99OutputMeasures =
+            _moduleState.MeasuresState.Fast99OutputMeasures.Add(
+              _moduleState.MeasuresState.SelectedOutputName,
+              measures
+              );
+          return;
+        }
+      }
+
+      var outputRequestJob = CompileOutputRequestJob(
+        _moduleState.MeasuresState.SelectedOutputName,
+        _simulation,
+        _simData,
+        _moduleState.SensitivityDesign.Samples,
+        _moduleState.SensitivityDesign.DesignParameters.Filter(
+          dp => dp.Distribution.DistributionType == DistributionType.Invariant
+          )
+        );
+
+      NOutputsAcquired = outputRequestJob.Count(t => t.Input == default || t.Output != default);
+      AcquireOutputsProgress = 100.0 * NOutputsAcquired / outputRequestJob.Length;
+
+      if (NOutputsAcquired < NOutputsToAcquire)
+      {
+        _outputRequestJob = outputRequestJob;
+        HandleAcquireOutputs();
+      }
+      else
+      {
+        var designOutputs = outputRequestJob
+          .Select(t => t.Output)
+          .ToArr();
+
+        RequireFalse(designOutputs.Exists(o => o == default));
+
+        Measure(designOutputs);
+      }
+    }
+
     private void ObserveInputs(object _)
     {
-      UnloadCurrentDesign();
-
-      _moduleState.DesignOutputs = default;
-      _moduleState.Trace = default;
-      _moduleState.MeasuresState.OutputMeasures = default;
-      _moduleState.SensitivityDesign = default;
-      _moduleState.DesignState.SampleSize = SampleSize;
-
       UpdateDesignEnable();
     }
 
@@ -758,7 +901,9 @@ namespace Sensitivity
 
     private void Populate(DesignState designState, Arr<ParameterState> parameterStates)
     {
-      SampleSize = designState.SampleSize ?? 1000;
+      SensitivityMethod = designState.SensitivityMethod ?? SensitivityMethod.Morris;
+      NoOfRuns = designState.NoOfRuns ?? 6;
+      NoOfSamples = designState.NoOfSamples ?? 1000;
       DesignCreatedOn = default;
       PopulateFactors(parameterStates);
       PopulateInvariants(parameterStates);
@@ -773,21 +918,47 @@ namespace Sensitivity
     private void Populate()
     {
       RequireNotNull(_moduleState.SensitivityDesign);
+      RequireTrue(_moduleState.MeasuresState.SelectedOutputName.IsAString());
       RequireNull(_outputRequestJob);
 
       var sensitivityDesign = _moduleState.SensitivityDesign;
 
-      SampleSize = sensitivityDesign.SampleSize;
+      var methodParameters = sensitivityDesign.MethodParameters.ToMethodParameters();
+
+      if (sensitivityDesign.SensitivityMethod == SensitivityMethod.Morris)
+      {
+        SensitivityMethod = SensitivityMethod.Morris;
+
+        RequireTrue(int.TryParse(
+          methodParameters.Snd(nameof(NoOfRuns)),
+          out int noOfRuns
+          ));
+        NoOfRuns = noOfRuns;
+      }
+      else
+      {
+        SensitivityMethod = SensitivityMethod.Fast99;
+
+        RequireTrue(int.TryParse(
+          methodParameters.Snd(nameof(NoOfSamples)),
+          out int noOfSamples
+          ));
+        NoOfSamples = noOfSamples;
+      }
+
       DesignCreatedOn = sensitivityDesign.CreatedOn;
       PopulateFactors(sensitivityDesign.DesignParameters);
       PopulateInvariants(sensitivityDesign.DesignParameters);
-      NOutputsToAcquire = sensitivityDesign.Samples.Rows.Count;
+      NOutputsToAcquire = sensitivityDesign.Samples.Sum(dt => dt.Rows.Count);
 
       var outputRequestJob = CompileOutputRequestJob(
+        _moduleState.MeasuresState.SelectedOutputName,
         _simulation,
         _simData,
         sensitivityDesign.Samples,
-        sensitivityDesign.DesignParameters.Filter(dp => dp.Distribution.DistributionType == DistributionType.Invariant)
+        sensitivityDesign.DesignParameters.Filter(
+          dp => dp.Distribution.DistributionType == DistributionType.Invariant
+          )
         );
 
       var inputs = CreateInputs(sensitivityDesign.Samples);
@@ -802,19 +973,39 @@ namespace Sensitivity
 
         if (_moduleState.MeasuresState.SelectedOutputName.IsAString())
         {
-          var loadedMeasures = _sensitivityDesigns.LoadOutputMeasures(
-            sensitivityDesign,
-            _moduleState.MeasuresState.SelectedOutputName,
-            out (DataTable FirstOrder, DataTable TotalOrder, DataTable Variance) measures
-            );
-
-          if (loadedMeasures)
+          if (sensitivityDesign.SensitivityMethod == SensitivityMethod.Morris)
           {
-            _moduleState.MeasuresState.OutputMeasures =
-              _moduleState.MeasuresState.OutputMeasures.Add(
-                _moduleState.MeasuresState.SelectedOutputName,
-                measures
-                );
+            var loadedMeasures = _sensitivityDesigns.LoadMorrisOutputMeasures(
+              sensitivityDesign,
+              _moduleState.MeasuresState.SelectedOutputName,
+              out (DataTable Mu, DataTable MuStar, DataTable Sigma) measures
+              );
+
+            if (loadedMeasures)
+            {
+              _moduleState.MeasuresState.MorrisOutputMeasures =
+                _moduleState.MeasuresState.MorrisOutputMeasures.Add(
+                  _moduleState.MeasuresState.SelectedOutputName,
+                  measures
+                  );
+            }
+          }
+          else
+          {
+            var loadedMeasures = _sensitivityDesigns.LoadFast99OutputMeasures(
+              sensitivityDesign,
+              _moduleState.MeasuresState.SelectedOutputName,
+              out (DataTable FirstOrder, DataTable TotalOrder, DataTable Variance) measures
+              );
+
+            if (loadedMeasures)
+            {
+              _moduleState.MeasuresState.Fast99OutputMeasures =
+                _moduleState.MeasuresState.Fast99OutputMeasures.Add(
+                  _moduleState.MeasuresState.SelectedOutputName,
+                  measures
+                  );
+            }
           }
         }
       }
@@ -826,29 +1017,8 @@ namespace Sensitivity
 
         RequireFalse(designOutputs.Exists(o => o == default));
 
-        if (designOutputs.NotAllSame(ndt => ndt.NRows))
-        {
-          designOutputs = ToCommonIndependent(designOutputs);
-        }
-
-        if (_moduleState.Trace == default)
-        {
-          var trace = designOutputs.Head();
-          _sensitivityDesigns.SaveTrace(_moduleState.SensitivityDesign, trace);
-          _moduleState.Trace = trace;
-        }
-
-        PrepareInitialMeasures(designOutputs);
+        Measure(designOutputs);
       }
-    }
-
-    private void UpdateInputs(DataTable inputs, (SimInput Input, bool OutputRequested, NumDataTable Output)[] outputRequestJob)
-    {
-      Inputs = default;
-      HasIssues = UpdateInputsImpl(inputs, outputRequestJob);
-      var dataView = inputs.DefaultView;
-      dataView.RowFilter = InputsRowFilter;
-      Inputs = dataView;
     }
 
     private void UnloadCurrentDesign()
@@ -901,126 +1071,6 @@ namespace Sensitivity
       }
     }
 
-    private async Task GenerateOutputMeasuresAsync(string outputName, Arr<NumDataTable> designOutputs, ServerLicense serverLicense)
-    {
-      using (serverLicense)
-      {
-        _cancellationTokenSource = new CancellationTokenSource();
-
-        TaskName = "Generate Output Measures";
-        IsRunningTask = true;
-        CanCancelTask = true;
-
-        try
-        {
-          var measures = await Task.Run(
-            () => GenerateOutputMeasures(
-              outputName,
-              _moduleState.SensitivityDesign.SerializedDesign,
-              _moduleState.SensitivityDesign.Samples,
-              designOutputs,
-              serverLicense.Client,
-              _cancellationTokenSource.Token,
-              s => _appService.ScheduleLowPriorityAction(() => RaiseTaskMessageEvent(s))
-            ),
-            _cancellationTokenSource.Token
-            );
-
-          _moduleState.MeasuresState.SelectedOutputName = outputName;
-          _moduleState.DesignOutputs = designOutputs;
-          _moduleState.MeasuresState.OutputMeasures =
-            _moduleState.MeasuresState.OutputMeasures.Add(outputName, measures);
-
-          UpdateDesignEnable();
-          UpdateSamplesEnable();
-
-          _sensitivityDesigns.SaveOutputMeasures(
-            _moduleState.SensitivityDesign,
-            outputName,
-            measures.FirstOrder,
-            measures.TotalOrder,
-            measures.Variance
-            );
-        }
-        catch (OperationCanceledException)
-        {
-          // expected
-        }
-        catch (Exception ex)
-        {
-          _appService.Notify(
-            nameof(DesignViewModel),
-            nameof(GenerateOutputMeasuresAsync),
-            ex
-            );
-        }
-
-        IsRunningTask = false;
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = default;
-      }
-    }
-
-    private void PrepareInitialMeasures(Arr<NumDataTable> designOutputs)
-    {
-      RequireTrue(_moduleState.DesignOutputs.IsEmpty);
-
-      var outputName = _moduleState.MeasuresState.SelectedOutputName;
-      if (outputName.IsntAString())
-      {
-        outputName = _simulation.SimConfig.SimOutput.DependentVariables.Head().Name;
-      }
-
-      if (_moduleState.MeasuresState.OutputMeasures.ContainsKey(outputName))
-      {
-        _moduleState.MeasuresState.SelectedOutputName = outputName;
-        _moduleState.DesignOutputs = designOutputs;
-        return;
-      }
-
-      var loadedMeasures = _sensitivityDesigns.LoadOutputMeasures(
-        _moduleState.SensitivityDesign,
-        outputName,
-        out (DataTable FirstOrder, DataTable TotalOrder, DataTable Variance) measures
-        );
-
-      if (loadedMeasures)
-      {
-        _moduleState.MeasuresState.SelectedOutputName = outputName;
-        _moduleState.DesignOutputs = designOutputs;
-        _moduleState.MeasuresState.OutputMeasures =
-          _moduleState.MeasuresState.OutputMeasures.Add(outputName, measures);
-        return;
-      }
-
-      void SomeServer(ServerLicense serverLicense)
-      {
-        var _ = GenerateOutputMeasuresAsync(outputName, designOutputs, serverLicense);
-      }
-
-      void NoServer()
-      {
-        _appService.Notify(
-          NotificationType.Information,
-          nameof(DesignViewModel),
-          nameof(PrepareInitialMeasures),
-          "No R server available."
-          );
-      }
-
-      _appService.RVisServerPool.RequestServer().Match(SomeServer, NoServer);
-    }
-
-    private enum AcquiredType
-    {
-      Error,
-      Suspect,
-      No,
-      Yes
-    }
-
-    private const string ACQUIRED_DATACOLUMN_NAME = "Acquired?";
-
     private readonly IAppState _appState;
     private readonly IAppService _appService;
     private readonly IAppSettings _appSettings;
@@ -1031,7 +1081,7 @@ namespace Sensitivity
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
     private CancellationTokenSource _cancellationTokenSource;
-    private (SimInput Input, bool OutputRequested, NumDataTable Output)[] _outputRequestJob;
+    private (SimInput Input, bool OutputRequested, Arr<double> Output)[] _outputRequestJob;
     private bool _runOutputRequestJob;
     private readonly IDictionary<int, Exception> _outputRequestErrors = new SortedDictionary<int, Exception>();
     private IDisposable _jobSubscriptions;

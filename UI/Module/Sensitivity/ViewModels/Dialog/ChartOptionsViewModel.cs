@@ -57,8 +57,13 @@ namespace Sensitivity
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
-      this.ObservableForProperty(vm => vm.Page).Subscribe(_reactiveSafeInvoke.SuspendAndInvoke<object>(ObservePage));
-      this.ObservableForProperty(vm => vm.SelectedOxyColor).Subscribe(_reactiveSafeInvoke.SuspendAndInvoke<object>(ObserveSelectedOxyColor));
+      this
+        .ObservableForProperty(vm => vm.Page)
+        .Subscribe(_reactiveSafeInvoke.SuspendAndInvoke<object>(ObservePage));
+
+      this
+        .ObservableForProperty(vm => vm.SelectedOxyColor)
+        .Subscribe(_reactiveSafeInvoke.SuspendAndInvoke<object>(ObserveSelectedOxyColor));
     }
 
     internal const int LABELS_PAGE = 0;

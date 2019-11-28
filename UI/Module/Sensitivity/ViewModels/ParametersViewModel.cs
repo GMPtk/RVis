@@ -22,12 +22,19 @@ namespace Sensitivity
 {
   internal sealed class ParametersViewModel : IParametersViewModel, INotifyPropertyChanged, IDisposable
   {
-    internal ParametersViewModel(IAppState appState, IAppService appService, IAppSettings appSettings, ModuleState moduleState)
+    internal ParametersViewModel(
+      IAppState appState, 
+      IAppService appService, 
+      IAppSettings appSettings, 
+      ModuleState moduleState
+      )
     {
       _simulation = appState.Target.AssertSome("No simulation");
       _moduleState = moduleState;
 
-      _toggleSelectParameter = ReactiveCommand.Create<IParameterViewModel>(HandleToggleSelectParameter);
+      _toggleSelectParameter = ReactiveCommand.Create<IParameterViewModel>(
+        HandleToggleSelectParameter
+        );
 
       var parameters = _simulation.SimConfig.SimInput.SimParameters;
 
@@ -91,6 +98,13 @@ namespace Sensitivity
       );
     }
 
+    public bool IsVisible
+    {
+      get => _isVisible;
+      set => this.RaiseAndSetIfChanged(ref _isVisible, value, PropertyChanged);
+    }
+    private bool _isVisible;
+
     public Arr<IParameterViewModel> AllParameterViewModels { get; }
 
     public ObservableCollection<IParameterViewModel> SelectedParameterViewModels { get; }
@@ -112,7 +126,9 @@ namespace Sensitivity
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
-        var index = _moduleState.ParameterStates.FindIndex(ps => ps.Name == parameterViewModel.Name);
+        var index = _moduleState.ParameterStates.FindIndex(
+          ps => ps.Name == parameterViewModel.Name
+          );
         var isSelected = SelectedParameterViewModels.Contains(parameterViewModel);
         ParameterState parameterState;
 
@@ -120,7 +136,10 @@ namespace Sensitivity
         {
           parameterState = _moduleState.ParameterStates[index];
           parameterState = parameterState.WithIsSelected(!isSelected);
-          _moduleState.ParameterStates = _moduleState.ParameterStates.SetItem(index, parameterState);
+          _moduleState.ParameterStates = _moduleState.ParameterStates.SetItem(
+            index, 
+            parameterState
+            );
         }
         else
         {
@@ -142,7 +161,9 @@ namespace Sensitivity
         else
         {
           SelectedParameterViewModels.InsertInOrdered(parameterViewModel, pvm => pvm.SortKey);
-          parameterViewModel.Distribution = parameterState.GetDistribution().ToString(parameterViewModel.Name);
+          parameterViewModel.Distribution = parameterState
+            .GetDistribution()
+            .ToString(parameterViewModel.Name);
         }
 
         parameterViewModel.IsSelected = !isSelected;
@@ -158,8 +179,13 @@ namespace Sensitivity
     {
       void Some(ParameterState parameterState)
       {
-        var index = _moduleState.ParameterStates.FindIndex(ps => ps.Name == parameterState.Name);
-        _moduleState.ParameterStates = _moduleState.ParameterStates.SetItem(index, parameterState);
+        var index = _moduleState.ParameterStates.FindIndex(
+          ps => ps.Name == parameterState.Name
+          );
+        _moduleState.ParameterStates = _moduleState.ParameterStates.SetItem(
+          index, 
+          parameterState
+          );
 
         var parameterViewModel = AllParameterViewModels
           .Find(pvm => pvm.Name == parameterState.Name)
@@ -168,7 +194,9 @@ namespace Sensitivity
         RequireTrue(parameterViewModel.IsSelected);
         RequireTrue(parameterViewModel == SelectedParameterViewModels[SelectedParameterViewModel]);
 
-        parameterViewModel.Distribution = parameterState.GetDistribution().ToString(parameterState.Name);
+        parameterViewModel.Distribution = parameterState
+          .GetDistribution()
+          .ToString(parameterState.Name);
       }
 
       void None()
@@ -178,17 +206,24 @@ namespace Sensitivity
         parameterViewModel.IsSelected = false;
         _moduleState.ParametersState.SelectedParameter = default;
 
-        var index = _moduleState.ParameterStates.FindIndex(ps => ps.Name == parameterViewModel.Name);
+        var index = _moduleState.ParameterStates.FindIndex(
+          ps => ps.Name == parameterViewModel.Name
+          );
         var parameterState = _moduleState.ParameterStates[index];
         RequireTrue(parameterState.IsSelected);
         parameterState = parameterState.WithIsSelected(false);
-        _moduleState.ParameterStates = _moduleState.ParameterStates.SetItem(index, parameterState);
+        _moduleState.ParameterStates = _moduleState.ParameterStates.SetItem(
+          index, 
+          parameterState
+          );
       }
 
       _parameterDistributionViewModel.ParameterState.Match(Some, None);
     }
 
-    private void ObserveModuleStateParameterStateChange((Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier) change)
+    private void ObserveModuleStateParameterStateChange(
+      (Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier) change
+      )
     {
       if (!change.ObservableQualifier.IsAddOrChange()) return;
 
@@ -198,7 +233,9 @@ namespace Sensitivity
 
       change.ParameterStates.Iter(ps =>
       {
-        var parameterViewModel = AllParameterViewModels.Find(vm => vm.Name == ps.Name).AssertSome();
+        var parameterViewModel = AllParameterViewModels
+          .Find(vm => vm.Name == ps.Name)
+          .AssertSome();
 
         if (ps.IsSelected)
         {
@@ -206,7 +243,10 @@ namespace Sensitivity
           {
             RequireFalse(parameterViewModel.IsSelected);
             parameterViewModel.IsSelected = true;
-            SelectedParameterViewModels.InsertInOrdered(parameterViewModel, pvm => pvm.SortKey);
+            SelectedParameterViewModels.InsertInOrdered(
+              parameterViewModel, 
+              pvm => pvm.SortKey
+              );
           }
 
           parameterViewModel.Distribution = ps.GetDistribution().ToString(ps.Name);

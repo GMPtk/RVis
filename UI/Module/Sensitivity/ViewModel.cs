@@ -25,15 +25,20 @@ namespace Sensitivity
       _appService = appService;
       _simulation = appState.Target.AssertSome();
 
-      var pathToSensitivityDesignsDirectory = _simulation.GetPrivateDirectory(nameof(Sensitivity), nameof(SensitivityDesigns));
+      var pathToSensitivityDesignsDirectory = _simulation.GetPrivateDirectory(
+        nameof(Sensitivity), 
+        nameof(SensitivityDesigns)
+        );
       _sensitivityDesigns = new SensitivityDesigns(pathToSensitivityDesignsDirectory);
 
       _moduleState = ModuleState.LoadOrCreate(_simulation, _sensitivityDesigns);
 
       _parametersViewModel = new ParametersViewModel(appState, appService, appSettings, _moduleState);
       _designViewModel = new DesignViewModel(appState, appService, appSettings, _moduleState, _sensitivityDesigns);
-      _varianceViewModel = new VarianceViewModel(appState, appService, appSettings, _moduleState, _sensitivityDesigns);
-      _effectsViewModel = new EffectsViewModel(appState, appService, appSettings, _moduleState, _sensitivityDesigns);
+      _morrisMeasuresViewModel = new MorrisMeasuresViewModel(appState, appService, appSettings, _moduleState, _sensitivityDesigns);
+      _morrisEffectsViewModel = new MorrisEffectsViewModel(appState, appService, appSettings, _moduleState);
+      _fast99MeasuresViewModel = new Fast99MeasuresViewModel(appState, appService, appSettings, _moduleState, _sensitivityDesigns);
+      _fast99EffectsViewModel = new Fast99EffectsViewModel(appState, appService, appSettings, _moduleState);
       _designDigestsViewModel = new DesignDigestsViewModel(appService, _moduleState, _sensitivityDesigns);
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
@@ -59,6 +64,14 @@ namespace Sensitivity
               )
           ),
 
+        _moduleState
+          .ObservableForProperty(ms => ms.SensitivityDesign)
+          .Subscribe(
+            _reactiveSafeInvoke.SuspendAndInvoke<object>(
+              ObserveModuleStateSensitivityDesign
+              )
+            ),
+
         _sensitivityDesigns.SensitivityDesignChanges.Subscribe(
           _reactiveSafeInvoke.SuspendAndInvoke<(DesignDigest, ObservableQualifier)>(
             ObserveSensitivityDesignChange
@@ -67,6 +80,8 @@ namespace Sensitivity
 
         );
 
+      SetActivities();
+
       if (_moduleState.SensitivityDesign != default) _designViewModel.IsSelected = true;
     }
 
@@ -74,13 +89,17 @@ namespace Sensitivity
 
     public IDesignViewModel DesignViewModel => _designViewModel;
 
-    public IVarianceViewModel VarianceViewModel => _varianceViewModel;
+    public IMorrisMeasuresViewModel MorrisMeasuresViewModel => _morrisMeasuresViewModel;
 
-    public IEffectsViewModel EffectsViewModel => _effectsViewModel;
+    public IMorrisEffectsViewModel MorrisEffectsViewModel => _morrisEffectsViewModel;
+
+    public IFast99MeasuresViewModel Fast99MeasuresViewModel => _fast99MeasuresViewModel;
+
+    public IFast99EffectsViewModel Fast99EffectsViewModel => _fast99EffectsViewModel;
 
     public IDesignDigestsViewModel DesignDigestsViewModel => _designDigestsViewModel;
 
-    public Arr<ITaskRunner> GetTaskRunners() => Array<ITaskRunner>(_designViewModel, _varianceViewModel, _effectsViewModel);
+    public Arr<ITaskRunner> GetTaskRunners() => Array<ITaskRunner>(_designViewModel);
 
     public void ApplyState(
       SimSharedStateApply applyType,
@@ -108,6 +127,9 @@ namespace Sensitivity
             .Filter(pss => !_moduleState.ParameterStates.Exists(ps => ps.Name == pss.Parameter.Name))
             .Map(pss => CreateAndApplyDistribution(pss));
 
+          UnloadDesign();
+          SetActivities();
+
           _moduleState.ParameterStates = (updated + added)
             .OrderBy(ps => ps.Name.ToUpperInvariant())
             .ToArr();
@@ -119,6 +141,9 @@ namespace Sensitivity
           var index = _moduleState.ParameterStates.FindIndex(
             ps => ps.Name == parameterSharedState.Parameter.Name
             );
+
+          UnloadDesign();
+          SetActivities();
 
           if (index.IsFound())
           {
@@ -149,10 +174,11 @@ namespace Sensitivity
       {
         _moduleState.ParameterStates.Filter(ps => ps.IsSelected).Iter(ps =>
         {
-          var (value, minimum, maximum) = _appState.SimSharedState.ParameterSharedStates.GetParameterValueStateOrDefaults(
-            ps.Name,
-            _simulation.SimConfig.SimInput.SimParameters
-            );
+          var (value, minimum, maximum) = 
+            _appState.SimSharedState.ParameterSharedStates.GetParameterValueStateOrDefaults(
+              ps.Name,
+              _simulation.SimConfig.SimInput.SimParameters
+              );
 
           var distribution = ps.GetDistribution();
 
@@ -218,8 +244,10 @@ namespace Sensitivity
         {
           _subscriptions.Dispose();
           _designDigestsViewModel.Dispose();
-          _effectsViewModel.Dispose();
-          _varianceViewModel.Dispose();
+          _fast99EffectsViewModel.Dispose();
+          _fast99MeasuresViewModel.Dispose();
+          _morrisEffectsViewModel.Dispose();
+          _morrisMeasuresViewModel.Dispose();
           _designViewModel.Dispose();
           _parametersViewModel.Dispose();
           _moduleState.Dispose();
@@ -230,36 +258,24 @@ namespace Sensitivity
       }
     }
 
-    private void ObserveParameterStateChange((Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier) change)
+    private void ObserveParameterStateChange(
+      (Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier) change
+      )
     {
+      var isUnloading = _moduleState.SensitivityDesign != default;
+
+      UnloadDesign();
+      SetActivities();
+
+      if (isUnloading) _designViewModel.IsSelected = true;
+
       if (!_moduleState.AutoShareParameterSharedState.IsTrue()) return;
 
       if (change.ObservableQualifier.IsAddOrChange())
       {
-        var states = change.ParameterStates
+        change.ParameterStates
           .Filter(ps => ps.IsSelected)
-          .Map(ps =>
-          {
-            var (value, minimum, maximum) = _appState.SimSharedState.ParameterSharedStates.GetParameterValueStateOrDefaults(
-              ps.Name,
-              _simulation.SimConfig.SimInput.SimParameters
-              );
-
-            var distribution = ps.GetDistribution();
-
-            if (distribution.DistributionType == DistributionType.Invariant)
-            {
-              var invariantDistribution = RequireInstanceOf<InvariantDistribution>(distribution);
-              value = invariantDistribution.Value;
-              if (minimum > value) minimum = value.GetPreviousOrderOfMagnitude();
-              if (maximum < value) maximum = value.GetNextOrderOfMagnitude();
-              return (ps.Name, value, minimum, maximum, None);
-            }
-
-            return (ps.Name, value, minimum, maximum, Some(ps.GetDistribution()));
-          });
-
-        _appState.SimSharedState.ShareParameterState(states);
+          .ShareStates(_appState);
       }
       else if (change.ObservableQualifier.IsRemove())
       {
@@ -267,7 +283,9 @@ namespace Sensitivity
       }
     }
 
-    private void ObserveParameterSharedStateChange((Arr<SimParameterSharedState> ParameterSharedStates, ObservableQualifier ObservableQualifier) change)
+    private void ObserveParameterSharedStateChange(
+      (Arr<SimParameterSharedState> ParameterSharedStates, ObservableQualifier ObservableQualifier) change
+      )
     {
       if (!_moduleState.AutoApplyParameterSharedState.IsTrue()) return;
 
@@ -308,18 +326,25 @@ namespace Sensitivity
     }
 
     private void ObserveTargetSensitivityDesignCreatedOn(object _) => 
-      _designDigestsViewModel.TargetSensitivityDesign.IfSome(t => LoadSensitivityDesign(t.CreatedOn));
+      _designDigestsViewModel.TargetSensitivityDesign.IfSome(
+        t => LoadSensitivityDesign(t.CreatedOn)
+        );
 
-    private void ObserveSensitivityDesignChange((DesignDigest DesignDigest, ObservableQualifier ObservableQualifier) change)
+    private void ObserveModuleStateSensitivityDesign(object _)
+    {
+      SetActivities();
+    }
+
+    private void ObserveSensitivityDesignChange(
+      (DesignDigest DesignDigest, ObservableQualifier ObservableQualifier) change
+      )
     {
       if (change.ObservableQualifier.IsRemove())
       {
         if (change.DesignDigest.CreatedOn == _moduleState.SensitivityDesign?.CreatedOn)
         {
-          _moduleState.SensitivityDesign = default;
-          _moduleState.DesignOutputs = default;
-          _moduleState.Trace = default;
-          _moduleState.MeasuresState.OutputMeasures = default;
+          UnloadDesign();
+          SetActivities();
         }
       }
     }
@@ -339,15 +364,27 @@ namespace Sensitivity
       maybeDistribution.Match(
         d =>
         {
-          var index = parameterState.Distributions.FindIndex(e => e.DistributionType == d.DistributionType);
+          var index = parameterState.Distributions.FindIndex(
+            e => e.DistributionType == d.DistributionType
+            );
           var distributions = parameterState.Distributions.SetItem(index, d);
-          return new ParameterState(parameterState.Name, d.DistributionType, distributions, true);
+          return new ParameterState(
+            parameterState.Name, 
+            d.DistributionType, 
+            distributions, 
+            isSelected: true
+            );
         },
         () =>
         {
           var invariantDistribution = new InvariantDistribution(value);
           var distributions = parameterState.Distributions.SetDistribution(invariantDistribution);
-          parameterState = new ParameterState(parameterState.Name, DistributionType.Invariant, distributions, true);
+          parameterState = new ParameterState(
+            parameterState.Name, 
+            DistributionType.Invariant, 
+            distributions, 
+            isSelected: true
+            );
           return parameterState;
         });
 
@@ -386,7 +423,7 @@ namespace Sensitivity
         name,
         distribution.DistributionType,
         distributions,
-        true
+        isSelected: true
         );
 
       return parameterState;
@@ -398,6 +435,7 @@ namespace Sensitivity
       {
         var sensitivityDesign = _sensitivityDesigns.Load(createdOn);
         var trace = _sensitivityDesigns.LoadTrace(sensitivityDesign);
+        var ranking = _sensitivityDesigns.LoadRanking(sensitivityDesign);
 
         var existingParameterStates = _moduleState.ParameterStates.Map(
           ps => sensitivityDesign.DesignParameters
@@ -405,9 +443,16 @@ namespace Sensitivity
             .Match(
               dp =>
               {
-                var index = ps.Distributions.FindIndex(e => e.DistributionType == dp.Distribution.DistributionType);
+                var index = ps.Distributions.FindIndex(
+                  e => e.DistributionType == dp.Distribution.DistributionType
+                  );
                 var distributions = ps.Distributions.SetItem(index, dp.Distribution);
-                return new ParameterState(ps.Name, dp.Distribution.DistributionType, distributions, true);
+                return new ParameterState(
+                  ps.Name, 
+                  dp.Distribution.DistributionType, 
+                  distributions, 
+                  isSelected: true
+                  );
               },
               () => ps.WithIsSelected(false))
           );
@@ -424,7 +469,7 @@ namespace Sensitivity
               dp.Name,
               dp.Distribution.DistributionType,
               distributions,
-              true
+              isSelected: true
               );
 
             return parameterState;
@@ -432,17 +477,15 @@ namespace Sensitivity
 
         _moduleState.ParameterStates = existingParameterStates + newParameterStates;
 
-        _moduleState.SensitivityDesign = default;
+        UnloadDesign();
 
-        _moduleState.DesignOutputs = default;
-        _moduleState.MeasuresState.OutputMeasures = default;
+        _moduleState.Ranking = ranking;
         _moduleState.Trace = trace;
         _moduleState.SensitivityDesign = sensitivityDesign;
 
-        if (!_varianceViewModel.IsSelected)
-        {
-          _designViewModel.IsSelected = true;
-        }
+        SetActivities();
+
+        _designViewModel.IsSelected = true;
       }
       catch (Exception ex)
       {
@@ -455,6 +498,29 @@ namespace Sensitivity
       }
     }
 
+    private void UnloadDesign()
+    {
+      _moduleState.SensitivityDesign = default;
+      _moduleState.Trace = default;
+      _moduleState.MeasuresState.MorrisOutputMeasures = default;
+      _moduleState.MeasuresState.Fast99OutputMeasures = default;
+      _moduleState.Ranking = default;
+    }
+
+    private void SetActivities()
+    {
+      var isInDesignMode = _moduleState.SensitivityDesign == default;
+      _parametersViewModel.IsVisible = isInDesignMode;
+
+      var isInMorrisMode = !isInDesignMode && _moduleState.SensitivityDesign.SensitivityMethod == SensitivityMethod.Morris;
+      _morrisMeasuresViewModel.IsVisible = isInMorrisMode;
+      _morrisEffectsViewModel.IsVisible = isInMorrisMode;
+
+      var isInFast99Mode = !isInDesignMode && _moduleState.SensitivityDesign.SensitivityMethod == SensitivityMethod.Fast99;
+      _fast99MeasuresViewModel.IsVisible = isInFast99Mode;
+      _fast99EffectsViewModel.IsVisible = isInFast99Mode;
+    }
+
     private readonly IAppState _appState;
     private readonly IAppService _appService;
     private readonly Simulation _simulation;
@@ -462,8 +528,10 @@ namespace Sensitivity
     private readonly ModuleState _moduleState;
     private readonly ParametersViewModel _parametersViewModel;
     private readonly DesignViewModel _designViewModel;
-    private readonly VarianceViewModel _varianceViewModel;
-    private readonly EffectsViewModel _effectsViewModel;
+    private readonly MorrisMeasuresViewModel _morrisMeasuresViewModel;
+    private readonly MorrisEffectsViewModel _morrisEffectsViewModel;
+    private readonly Fast99MeasuresViewModel _fast99MeasuresViewModel;
+    private readonly Fast99EffectsViewModel _fast99EffectsViewModel;
     private readonly DesignDigestsViewModel _designDigestsViewModel;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;

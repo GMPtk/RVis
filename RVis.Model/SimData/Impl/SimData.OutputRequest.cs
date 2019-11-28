@@ -72,7 +72,7 @@ namespace RVis.Model
 
       _outputs.TryAdd(
         (serieInput.Hash, simulation),
-        SimDataOutput.Create(simulation, serieInput, serie, OutputOrigin.Storage, false)
+        SimDataOutput.Create(simulation, serieInput, serie, OutputOrigin.Storage, DateTime.UtcNow, false)
         );
 
       return OutputRequest.Create(serieInput, Array(serieInput));
@@ -143,7 +143,7 @@ namespace RVis.Model
         {
           var didAdd = _outputs.TryAdd(
             (t.SerieInput.Hash, simulation),
-            SimDataOutput.Create(simulation, t.SerieInput, t.Serie, t.OutputOrigin, t.Persist)
+            SimDataOutput.Create(simulation, t.SerieInput, t.Serie, t.OutputOrigin, DateTime.UtcNow, t.Persist)
             );
 
           return didAdd && t.Persist;

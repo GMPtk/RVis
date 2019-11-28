@@ -13,7 +13,15 @@ namespace Sensitivity.Design
 
     public Arr<string> Invariants => Range(1, 30).Map(i => $"Var{i:000} = {i}").ToArr();
 
-    public int? SampleSize { get => 123; set => throw new NotImplementedException(); }
+    public SensitivityMethod SensitivityMethod 
+    { 
+      get => SensitivityMethod.Morris; 
+      set => throw new NotImplementedException(); 
+    }
+
+    public int? NoOfRuns { get => 123; set => throw new NotImplementedException(); }
+
+    public int? NoOfSamples { get => 456; set => throw new NotImplementedException(); }
 
     public ICommand CreateDesign => throw new NotImplementedException();
 

@@ -43,19 +43,19 @@ namespace Sensitivity
     }
     private SensitivityDesign _sensitivityDesign;
 
-    public Arr<NumDataTable> DesignOutputs
-    {
-      get => _designOutputs;
-      set => this.RaiseAndSetIfChanged(ref _designOutputs, value, PropertyChanged);
-    }
-    private Arr<NumDataTable> _designOutputs;
-
     public NumDataTable Trace
     {
       get => _trace;
       set => this.RaiseAndSetIfChanged(ref _trace, value, PropertyChanged);
     }
     private NumDataTable _trace;
+
+    public Ranking Ranking
+    {
+      get => _ranking;
+      set => this.RaiseAndSetIfChanged(ref _ranking, value, PropertyChanged);
+    }
+    private Ranking _ranking;
 
     internal IObservable<(Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier)> ParameterStateChanges =>
       _parameterStateChangesSubject.AsObservable();

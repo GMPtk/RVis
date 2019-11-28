@@ -44,30 +44,37 @@ namespace Sensitivity
       _sensitivityDesignChangesSubject.OnNext((designDigest, ObservableQualifier.Add));
     }
 
-    //internal bool Update(SensitivityDesign sensitivityDesign)
-    //{
-    //  var index = DesignDigests.FindIndex(dd => dd.CreatedOn == sensitivityDesign.CreatedOn);
-
-    //  if (index.IsntFound()) return false;
-
-    //  UpdateSensitivityDesign(sensitivityDesign, _pathToSensitivityDesignsDirectory);
-
-    //  var designDigest = new DesignDigest(sensitivityDesign.CreatedOn, sensitivityDesign.ToString());
-    //  DesignDigests = DesignDigests.SetItem(index, designDigest);
-    //  SaveDesignDigests();
-
-    //  _sensitivityDesignChangesSubject.OnNext((designDigest, ObservableQualifier.Change));
-
-    //  return true;
-    //}
-
     internal void SaveTrace(SensitivityDesign sensitivityDesign, NumDataTable trace) => 
       SaveSensitivityDesignTrace(sensitivityDesign, trace, _pathToSensitivityDesignsDirectory);
 
     internal NumDataTable LoadTrace(SensitivityDesign sensitivityDesign) => 
       LoadSensitivityDesignTrace(sensitivityDesign, _pathToSensitivityDesignsDirectory);
 
-    internal void SaveOutputMeasures(
+    internal void SaveRanking(SensitivityDesign sensitivityDesign, Ranking ranking) =>
+      SaveSensitivityDesignRanking(sensitivityDesign, ranking, _pathToSensitivityDesignsDirectory);
+
+    internal Ranking LoadRanking(SensitivityDesign sensitivityDesign) =>
+      LoadSensitivityDesignRanking(sensitivityDesign, _pathToSensitivityDesignsDirectory);
+
+    internal void SaveMorrisOutputMeasures(
+      SensitivityDesign sensitivityDesign,
+      string outputName,
+      DataTable mu,
+      DataTable muStar,
+      DataTable sigma
+      )
+    {
+      SensitivityDesign.SaveMorrisOutputMeasures(
+        sensitivityDesign,
+        outputName,
+        mu,
+        muStar,
+        sigma,
+        _pathToSensitivityDesignsDirectory
+        );
+    }
+
+    internal void SaveFast99OutputMeasures(
       SensitivityDesign sensitivityDesign,
       string outputName,
       DataTable firstOrder,
@@ -75,7 +82,7 @@ namespace Sensitivity
       DataTable variance
       )
     {
-      SensitivityDesign.SaveOutputMeasures(
+      SensitivityDesign.SaveFast99OutputMeasures(
         sensitivityDesign, 
         outputName, 
         firstOrder, 
@@ -85,13 +92,27 @@ namespace Sensitivity
         );
     }
 
-    internal bool LoadOutputMeasures(
+    internal bool LoadMorrisOutputMeasures(
+      SensitivityDesign sensitivityDesign,
+      string outputName,
+      out (DataTable Mu, DataTable MuStar, DataTable Sigma) measures
+      )
+    {
+      return SensitivityDesign.LoadMorrisOutputMeasures(
+        sensitivityDesign,
+        outputName,
+        _pathToSensitivityDesignsDirectory,
+        out measures
+        );
+    }
+
+    internal bool LoadFast99OutputMeasures(
       SensitivityDesign sensitivityDesign,
       string outputName,
       out (DataTable FirstOrder, DataTable TotalOrder, DataTable Variance) measures
       )
     {
-      return SensitivityDesign.LoadOutputMeasures(
+      return SensitivityDesign.LoadFast99OutputMeasures(
         sensitivityDesign,
         outputName,
         _pathToSensitivityDesignsDirectory,

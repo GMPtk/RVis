@@ -124,7 +124,8 @@ namespace Estimation
     }
 
     internal bool Propose(
-      NumDataTable outputForPendingProposal,
+      NumDataColumn independentData,
+      Arr<NumDataColumn> outputData,
       out IterationState iterationState
       )
     {
@@ -135,7 +136,10 @@ namespace Estimation
       double proposedLogLikelihood;
       try
       {
-        proposedLogLikelihood = GetProposalLogLikelihood(outputForPendingProposal);
+        proposedLogLikelihood = GetProposalLogLikelihood(
+          independentData, 
+          outputData
+          );
       }
       catch (Exception ex)
       {
@@ -185,8 +189,12 @@ namespace Estimation
         ++_currentIteration;
         indexNextModelParameter = 0;
         var nextChainDataRow = _chainData.Rows[_currentIteration];
-        _modelParameters.Iter(mp => nextChainDataRow[mp.Name] = currentChainDataRow[mp.Name]);
-        _modelParameters.Iter(mp => nextChainDataRow[ToLLColumnName(mp.Name)] = currentChainDataRow[ToLLColumnName(mp.Name)]);
+        _modelParameters.Iter(
+          mp => nextChainDataRow[mp.Name] = currentChainDataRow[mp.Name]
+          );
+        _modelParameters.Iter(
+          mp => nextChainDataRow[ToLLColumnName(mp.Name)] = currentChainDataRow[ToLLColumnName(mp.Name)]
+          );
         currentChainDataRow = nextChainDataRow;
       }
 
@@ -402,9 +410,15 @@ namespace Estimation
       var previousChainDataRow = _chainData.Rows[_currentIteration - 1];
       var currentChainDataRow = _chainData.Rows[_currentIteration];
 
-      _modelParameters.Iter(mp => currentChainDataRow[mp.Name] = previousChainDataRow[mp.Name]);
-      _modelParameters.Iter(mp => currentChainDataRow[ToLLColumnName(mp.Name)] = previousChainDataRow[ToLLColumnName(mp.Name)]);
-      _modelParameters.Iter(mp => _priorDensities[mp.Name] = Log(mp.GetValueDensity()));
+      _modelParameters.Iter(
+        mp => currentChainDataRow[mp.Name] = previousChainDataRow[mp.Name]
+        );
+      _modelParameters.Iter(
+        mp => currentChainDataRow[ToLLColumnName(mp.Name)] = previousChainDataRow[ToLLColumnName(mp.Name)]
+        );
+      _modelParameters.Iter(
+        mp => _priorDensities[mp.Name] = Log(mp.GetValueDensity())
+        );
 
       // start at beginning of chain row and propose
       _currentProposal = _modelParameters[0].GetProposal();
@@ -448,14 +462,18 @@ namespace Estimation
       throw new InvalidOperationException(message);
     }
 
-    private double GetProposalLogLikelihood(NumDataTable outputForPendingProposal)
+    private double GetProposalLogLikelihood(
+      NumDataColumn independentData,
+      Arr<NumDataColumn> outputData
+      )
     {
-      var independentColumn = outputForPendingProposal.GetIndependentVariable().Data;
       var proposedLogLikelihood = 0.0;
 
       foreach (var modelOutput in _modelOutputs)
       {
-        var predictedOutput = outputForPendingProposal[modelOutput.Name].Data;
+        var predictedOutput = outputData
+          .Find(ndc => ndc.Name == modelOutput.Name)
+          .AssertSome();
 
         var outputObservations = _observations.Filter(o => o.Subject == modelOutput.Name);
 
@@ -464,8 +482,8 @@ namespace Estimation
         foreach (var observations in outputObservations)
         {
           var proposalOutput = _approximate
-            ? observations.X.ApproximateY(independentColumn, predictedOutput).ToArr()
-            : observations.X.SelectNearestY(independentColumn, predictedOutput).ToArr();
+            ? observations.X.ApproximateY(independentData.Data, predictedOutput.Data).ToArr()
+            : observations.X.SelectNearestY(independentData.Data, predictedOutput.Data).ToArr();
 
           RequireFalse(
             proposalOutput.Exists(IsNaN),
@@ -480,7 +498,15 @@ namespace Estimation
           _proposalOutputs[observations.GetHashCode()] = (currentPO, proposalOutput);
 
           var logLikelihood = modelOutput.ErrorModel.GetLogLikelihood(proposalOutput, observations.Y);
-          if (IsNaN(logLikelihood)) HandleInvalidLogLikelihood(modelOutput, independentColumn, predictedOutput, observations.X);
+          if (IsNaN(logLikelihood))
+          {
+            HandleInvalidLogLikelihood(
+              modelOutput, 
+              independentData.Data, 
+              predictedOutput.Data, 
+              observations.X
+              );
+          }
           outputLogLikelihood += logLikelihood;
         }
 
@@ -501,7 +527,9 @@ namespace Estimation
       if (_currentIteration == 0)
       {
         // top row is prior means; not individually perturbed so same LL
-        _modelParameters.Iter(mp => currentChainDataRow[ToLLColumnName(mp.Name)] = proposedLogLikelihood);
+        _modelParameters.Iter(
+          mp => currentChainDataRow[ToLLColumnName(mp.Name)] = proposedLogLikelihood
+          );
         _currentLogLikelihood = proposedLogLikelihood;
         return;
       }

@@ -9,24 +9,42 @@ using static System.Double;
 
 namespace Sensitivity
 {
-  internal struct ParameterMeasure
+  internal struct LowryParameterMeasure
   {
-    internal string ParameterName;
-    internal double MainEffect;
-    internal double Interaction;
-    internal double LowerBound;
-    internal double UpperBound;
+    internal LowryParameterMeasure(string parameterName)
+    {
+      ParameterName = parameterName;
+      MainEffect = NaN;
+      Interaction = NaN;
+      LowerBound = NaN;
+      UpperBound = NaN;
+    }
+
+    internal string ParameterName { get; }
+    internal double MainEffect { get; set; }
+    internal double Interaction { get; set; }
+    internal double LowerBound { get; set; }
+    internal double UpperBound { get; set; }
   }
 
-  internal class OutputMeasures
+  internal struct LowryOutputMeasures
   {
-    internal Arr<ParameterMeasure> ParameterMeasures;
-    internal double OutputValue;
+    internal LowryOutputMeasures(
+      Arr<LowryParameterMeasure> parameterMeasures,
+      double outputValue
+      )
+    {
+      ParameterMeasures = parameterMeasures;
+      OutputValue = outputValue;
+    }
+
+    internal Arr<LowryParameterMeasure> ParameterMeasures { get; }
+    internal double OutputValue { get; }
   }
 
   internal static class LowryPlotData
   {
-    internal static IDictionary<double, OutputMeasures> CompileOutputMeasures(
+    internal static IDictionary<double, LowryOutputMeasures> CompileOutputMeasures(
       (DataTable FirstOrder, DataTable TotalOrder, DataTable Variance) measures,
       IReadOnlyList<double> traceIndependent,
       IReadOnlyList<double> traceDependent
@@ -46,32 +64,22 @@ namespace Sensitivity
 
       var nZeroes = traceIndependent.TakeWhile(d => d == 0.0).Count();
 
-      var outputMeasures = new SortedDictionary<double, OutputMeasures>();
+      var outputMeasures = new SortedDictionary<double, LowryOutputMeasures>();
 
       for (var i = nZeroes; i < traceIndependent.Count; ++i)
       {
         var x = traceIndependent[i];
         if (outputMeasures.ContainsKey(x)) continue;
 
-        var parameterMeasures = new ParameterMeasure[parameterNames.Count];
+        var parameterMeasures = new LowryParameterMeasure[parameterNames.Count];
 
         var totalEffects = 0.0;
 
         for (var j = 0; j < parameterNames.Count; ++j)
         {
-          var parameterMeasure = new ParameterMeasure
-          {
-            ParameterName = parameterNames[j]
-          };
+          var parameterMeasure = new LowryParameterMeasure(parameterNames[j]);
 
-          if (i == 0)
-          {
-            parameterMeasure.MainEffect = NaN;
-            parameterMeasure.Interaction = NaN;
-            parameterMeasure.LowerBound = NaN;
-            parameterMeasure.UpperBound = NaN;
-          }
-          else
+          if (i != 0)
           {
             var mainEffect = firstOrder.Rows[i].Field<double>(j + 1);
             var totalEffect = totalOrder.Rows[i].Field<double>(j + 1);
@@ -109,11 +117,8 @@ namespace Sensitivity
 
         outputMeasures.Add(
           x,
-          new OutputMeasures
-          {
-            OutputValue = traceDependent[i],
-            ParameterMeasures = parameterMeasures.ToArr()
-          });
+          new LowryOutputMeasures(parameterMeasures.ToArr(), traceDependent[i])
+          );
       }
 
       return outputMeasures;

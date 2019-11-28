@@ -16,19 +16,29 @@ namespace Sensitivity
 {
   internal sealed class DesignDigestsViewModel : IDesignDigestsViewModel, INotifyPropertyChanged, IDisposable
   {
-    internal DesignDigestsViewModel(IAppService appService, ModuleState moduleState, SensitivityDesigns sensitivityDesigns)
+    internal DesignDigestsViewModel(
+      IAppService appService, 
+      ModuleState moduleState, 
+      SensitivityDesigns sensitivityDesigns
+      )
     {
       _moduleState = moduleState;
       _sensitivityDesigns = sensitivityDesigns;
 
       LoadSensitivityDesign = ReactiveCommand.Create(
         HandleLoadSensitivityDesign,
-        this.WhenAny(vm => vm.SelectedDesignDigestViewModel, _ => SelectedDesignDigestViewModel != default)
+        this.WhenAny(
+          vm => vm.SelectedDesignDigestViewModel, 
+          _ => SelectedDesignDigestViewModel != default
+          )
         );
 
       DeleteSensitivityDesign = ReactiveCommand.Create(
         HandleDeleteSensitivityDesign,
-        this.WhenAny(vm => vm.SelectedDesignDigestViewModel, _ => SelectedDesignDigestViewModel != default)
+        this.WhenAny(
+          vm => vm.SelectedDesignDigestViewModel, 
+          _ => SelectedDesignDigestViewModel != default
+          )
         );
 
       FollowKeyboardInDesignDigests = ReactiveCommand.Create<(Key Key, bool Control, bool Shift)>(
@@ -36,12 +46,19 @@ namespace Sensitivity
         );
 
       DesignDigestViewModels = new ObservableCollection<IDesignDigestViewModel>(
-        sensitivityDesigns.DesignDigests.Map(dd => new DesignDigestViewModel(dd.CreatedOn, dd.Description)
+        sensitivityDesigns.DesignDigests.Map(
+          dd => new DesignDigestViewModel(dd.CreatedOn, dd.Description
+          )
         ));
 
-      _targetSensitivityDesignCreatedOn = _moduleState.SensitivityDesign == default
-        ? None
-        : Some((_moduleState.SensitivityDesign.CreatedOn, DateTime.Now));
+      if (_moduleState.SensitivityDesign != default)
+      {
+        TargetSensitivityDesign = Some((_moduleState.SensitivityDesign.CreatedOn, DateTime.Now));
+
+        SelectedDesignDigestViewModel = DesignDigestViewModels
+          .Find(vm => vm.CreatedOn == _moduleState.SensitivityDesign.CreatedOn)
+          .Match(vm => vm, () => default);
+      }
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
@@ -81,10 +98,10 @@ namespace Sensitivity
 
     public Option<(DateTime CreatedOn, DateTime SelectedOn)> TargetSensitivityDesign
     {
-      get => _targetSensitivityDesignCreatedOn;
-      set => this.RaiseAndSetIfChanged(ref _targetSensitivityDesignCreatedOn, value, PropertyChanged);
+      get => _targetSensitivityDesign;
+      set => this.RaiseAndSetIfChanged(ref _targetSensitivityDesign, value, PropertyChanged);
     }
-    private Option<(DateTime CreatedOn, DateTime SelectedOn)> _targetSensitivityDesignCreatedOn;
+    private Option<(DateTime CreatedOn, DateTime SelectedOn)> _targetSensitivityDesign;
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -140,28 +157,51 @@ namespace Sensitivity
 
     private void ObserveModuleStateSensitivityDesign(object _)
     {
-      _targetSensitivityDesignCreatedOn = _moduleState.SensitivityDesign == default
-        ? None
-        : Some((_moduleState.SensitivityDesign.CreatedOn, DateTime.Now));
+      if (_moduleState.SensitivityDesign != default)
+      {
+        _targetSensitivityDesign = Some((_moduleState.SensitivityDesign.CreatedOn, DateTime.Now));
+
+        SelectedDesignDigestViewModel = DesignDigestViewModels
+          .Find(vm => vm.CreatedOn == _moduleState.SensitivityDesign.CreatedOn)
+          .Match(vm => vm, () => default);
+      }
+      else
+      {
+        _targetSensitivityDesign = None;
+
+        SelectedDesignDigestViewModel = default;
+      }
     }
 
-    private void ObserveSensitivityDesignChange((DesignDigest DesignDigest, ObservableQualifier ObservableQualifier) change)
+    private void ObserveSensitivityDesignChange(
+      (DesignDigest DesignDigest, ObservableQualifier ObservableQualifier) change
+      )
     {
       if (change.ObservableQualifier == ObservableQualifier.Add)
       {
-        var designDigestViewModel = new DesignDigestViewModel(change.DesignDigest.CreatedOn, change.DesignDigest.Description);
+        var designDigestViewModel = new DesignDigestViewModel(
+          change.DesignDigest.CreatedOn, 
+          change.DesignDigest.Description
+          );
         DesignDigestViewModels.Insert(0, designDigestViewModel);
       }
       else if (change.ObservableQualifier == ObservableQualifier.Change)
       {
-        var index = DesignDigestViewModels.FindIndex(vm => vm.CreatedOn == change.DesignDigest.CreatedOn);
+        var index = DesignDigestViewModels.FindIndex(
+          vm => vm.CreatedOn == change.DesignDigest.CreatedOn
+          );
         RequireTrue(index.IsFound());
-        var designDigestViewModel = new DesignDigestViewModel(change.DesignDigest.CreatedOn, change.DesignDigest.Description);
+        var designDigestViewModel = new DesignDigestViewModel(
+          change.DesignDigest.CreatedOn, 
+          change.DesignDigest.Description
+          );
         DesignDigestViewModels[index] = designDigestViewModel;
       }
       else if (change.ObservableQualifier == ObservableQualifier.Remove)
       {
-        var index = DesignDigestViewModels.FindIndex(vm => vm.CreatedOn == change.DesignDigest.CreatedOn);
+        var index = DesignDigestViewModels.FindIndex(
+          vm => vm.CreatedOn == change.DesignDigest.CreatedOn
+          );
         RequireTrue(index.IsFound());
         var designDigest = DesignDigestViewModels[index];
         TargetSensitivityDesign.IfSome(t =>

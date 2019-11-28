@@ -23,6 +23,7 @@
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
       </ResourceDictionary.MergedDictionaries>
 
       <Style x:Key="SamplesDataGridStyle" TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
@@ -66,18 +67,14 @@
 
   <Grid>
 
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition/>
-      <ColumnDefinition Width="500"/>
-    </Grid.ColumnDefinitions>
-
     <Grid.RowDefinitions>
-      <RowDefinition Height="400"/>
+      <RowDefinition MinHeight="450"/>
       <RowDefinition/>
     </Grid.RowDefinitions>
 
     <Grid Margin="0 0 5 5">
       <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
         <ColumnDefinition/>
         <ColumnDefinition/>
       </Grid.ColumnDefinitions>
@@ -108,79 +105,162 @@
 
       </GroupBox>
 
-    </Grid>
+      <StackPanel Grid.Column="2" Margin="5 0 0 5">
 
-    <StackPanel Grid.Column="1" Margin="5 0 0 5">
+        <GroupBox Header="METHOD" IsEnabled="{Binding CanCreateDesign}">
 
-      <GroupBox Header="SAMPLES" IsEnabled="{Binding CanCreateDesign}">
-
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Margin="10" VerticalAlignment="Center" Text="Sample size:"/>
-          <TextBox Margin="10" Width="100" Text="{Binding SampleSize, TargetNullValue='', UpdateSourceTrigger=PropertyChanged}"/>
-          <Button Margin="10" Command="{Binding CreateDesign}" Content="Create Design"/>
-        </StackPanel>
-
-      </GroupBox>
-
-      <GroupBox Margin="0 5 0 0" Header="DESIGN" IsEnabled="{Binding CanUnloadDesign}">
-
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Margin="10" 
-                     VerticalAlignment="Center"
-                     MinWidth="150"
-                     Text="{Binding DesignCreatedOn, StringFormat='Created on {0:yyyy-MM-dd HH:mm:ss}', TargetNullValue='Created on ?'}"
-                     />
-          <Button Margin="10" Command="{Binding UnloadDesign}" Content="Unload Design"/>
-        </StackPanel>
-
-      </GroupBox>
-
-      <GroupBox Margin="0 5 0 0" Header="ACQUIRE OUTPUTS" IsEnabled="{Binding CanUnloadDesign}">
-
-        <StackPanel>
-
-          <Grid Margin="20 20 20 10">
+          <Grid>
             <Grid.ColumnDefinitions>
               <ColumnDefinition/>
               <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <ProgressBar Value="{Binding AcquireOutputsProgress, Mode=OneWay}"/>
+            <StackPanel>
 
-            <TextBlock Grid.Column="1" Margin="10 0 0 0">
-              <TextBlock.Text>
-                <MultiBinding StringFormat="{}{0} / {1}">
-                  <Binding Path="NOutputsAcquired" />
-                  <Binding Path="NOutputsToAcquire" />
-                </MultiBinding>
-              </TextBlock.Text>
-            </TextBlock>
-          </Grid>
-          
-          <Grid Margin="20 10 20 20">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition/>
-              <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
+              <StackPanel Orientation="Horizontal">
+                <RadioButton Content="Morris" 
+                             GroupName="SensitivityMethod" 
+                             Margin="10"
+                             IsChecked="{Binding 
+                               Path=SensitivityMethod, 
+                               Mode=TwoWay, 
+                               Converter={x:Static wpf:EnumMatchToBooleanConverter.Default},
+                               ConverterParameter=Morris
+                             }"  
+                         />
+                <RadioButton Content="e-FAST" 
+                             GroupName="SensitivityMethod" 
+                             Margin="10" 
+                             IsChecked="{Binding 
+                               Path=SensitivityMethod, 
+                               Mode=TwoWay, 
+                               Converter={x:Static wpf:EnumMatchToBooleanConverter.Default},
+                               ConverterParameter=Fast99
+                             }"  
+                         />
+              </StackPanel>
 
-            <Button HorizontalAlignment="Center" 
-                    Content="Start" 
-                    Command="{Binding AcquireOutputs}"
-                    />
+              <StackPanel Orientation="Horizontal" Margin="10">
+                <StackPanel.Style>
+                  <Style TargetType="StackPanel">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding SensitivityMethod}" Value="Morris">
+                        <Setter Property="Visibility" Value="Visible"/>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </StackPanel.Style>
+                <TextBlock Margin="10" VerticalAlignment="Center" Text="No. of runs:"/>
+                <TextBox Margin="10" Width="100" Text="{Binding NoOfRuns, TargetNullValue='', UpdateSourceTrigger=PropertyChanged}"/>
+              </StackPanel>
+
+              <StackPanel Orientation="Horizontal" Margin="10">
+                <StackPanel.Style>
+                  <Style TargetType="StackPanel">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding SensitivityMethod}" Value="Fast99">
+                        <Setter Property="Visibility" Value="Visible"/>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </StackPanel.Style>
+                <TextBlock Margin="10" VerticalAlignment="Center" Text="No. of samples:"/>
+                <TextBox Margin="10" Width="100" Text="{Binding NoOfSamples, TargetNullValue='', UpdateSourceTrigger=PropertyChanged}"/>
+              </StackPanel>
+
+            </StackPanel>
+
             <Button Grid.Column="1" 
                     HorizontalAlignment="Center" 
-                    Content="Stop" 
-                    Command="{Binding CancelAcquireOutputs}"
+                    Margin="30" 
+                    Command="{Binding CreateDesign}" 
+                    Content="Create Design"
                     />
+
+            <Button Grid.Column="1" 
+                    Style="{StaticResource HelpButtonStyle}"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Right"
+                    ToolTip="Help about method" 
+                    Tag="rvis/modules/sensitivity/design/#method"
+                    />
+
           </Grid>
 
-        </StackPanel>        
+        </GroupBox>
 
-      </GroupBox>
+        <GroupBox Margin="0 5 0 0" Header="DESIGN" IsEnabled="{Binding CanUnloadDesign}">
 
-    </StackPanel>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Margin="10" 
+                       VerticalAlignment="Center"
+                       MinWidth="150"
+                       Text="{Binding DesignCreatedOn, StringFormat='Created on {0:yyyy-MM-dd HH:mm:ss}', TargetNullValue='Created on ?'}"
+                       />
+            <Button Margin="10" 
+                    Command="{Binding UnloadDesign}" 
+                    Content="Unload Design"
+                    />
+          </StackPanel>
 
-    <GroupBox Grid.Row="1" Grid.ColumnSpan="2" Margin="0 5 0 0" Header="SAMPLES">
+        </GroupBox>
+
+        <GroupBox Margin="0 5 0 0" Header="ACQUIRE OUTPUTS" IsEnabled="{Binding CanUnloadDesign}">
+
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel VerticalAlignment="Center">
+              <ProgressBar Margin="10"
+                           Value="{Binding AcquireOutputsProgress, Mode=OneWay}"
+                           />
+
+              <TextBlock Grid.Column="1"
+                         HorizontalAlignment="Center"
+                         Margin="10">
+                <TextBlock.Text>
+                  <MultiBinding StringFormat="{}{0} / {1}">
+                    <Binding Path="NOutputsAcquired" />
+                    <Binding Path="NOutputsToAcquire" />
+                  </MultiBinding>
+                </TextBlock.Text>
+              </TextBlock>
+              
+            </StackPanel>
+
+            <Button Style="{StaticResource HelpButtonStyle}"
+                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Left"
+                    ToolTip="Help about outputs" 
+                    Tag="rvis/modules/sensitivity/design/#outputs"
+                    />
+
+            <StackPanel Grid.Column="1">
+              <Button Margin="10"
+                      Content="Start" 
+                      Command="{Binding AcquireOutputs}"
+                      />
+              <Button Grid.Column="1" 
+                      Margin="10"
+                      Content="Stop" 
+                      Command="{Binding CancelAcquireOutputs}"
+                      />
+            </StackPanel>
+
+          </Grid>
+
+        </GroupBox>
+
+      </StackPanel>
+
+    </Grid>
+
+    <GroupBox Grid.Row="1" Margin="0 5 0 0" Header="SAMPLES">
 
       <Grid>
 
@@ -213,7 +293,15 @@
                     IsEnabled="{Binding HasIssues}"
                     />
         </StackPanel>
-        
+
+        <Button Grid.Column="1" 
+                Style="{StaticResource HelpButtonStyle}"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Right"
+                ToolTip="Help about samples" 
+                Tag="rvis/modules/sensitivity/design/#samples"
+                />
+
       </Grid>
       
     </GroupBox>    

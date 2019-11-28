@@ -10,24 +10,36 @@ namespace Sensitivity
   {
     internal static SensitivityDesign CreateSensitivityDesign(
       DateTime createdOn,
-      byte[] serializedDesign,
+      Arr<byte[]> serializedDesigns,
       Arr<(string Name, IDistribution Distribution)> parameterDistributions,
-      int sampleSize,
-      DataTable samples
+      SensitivityMethod sensitivityMethod,
+      string methodParameters,
+      Arr<DataTable> samples
       )
     {
       RequireFalse(parameterDistributions.IsEmpty);
       RequireTrue(parameterDistributions.ForAll(ps => ps.Distribution.IsConfigured));
       RequireNotNull(samples);
-      RequireTrue(samples.Columns.Count > 0);
-      RequireTrue(samples.Rows.Count > 0);
+      RequireTrue(samples.Count > 0);
+      RequireTrue(samples.ForAll(dt => dt.Rows.Count > 0));
       RequireTrue(parameterDistributions.ForAll(
-        ps => ps.Distribution.DistributionType == DistributionType.Invariant || samples.Columns.Contains(ps.Name)
+        ps => 
+          ps.Distribution.DistributionType == DistributionType.Invariant || 
+          samples.ForAll(dt => dt.Columns.Contains(ps.Name))
         ));
 
-      var designParameters = parameterDistributions.Map(ps => new DesignParameter(ps.Name, ps.Distribution));
+      var designParameters = parameterDistributions.Map(
+        ps => new DesignParameter(ps.Name, ps.Distribution)
+        );
 
-      return new SensitivityDesign(createdOn, serializedDesign, designParameters, sampleSize, samples);
+      return new SensitivityDesign(
+        createdOn, 
+        serializedDesigns, 
+        designParameters, 
+        sensitivityMethod, 
+        methodParameters, 
+        samples
+        );
     }
   }
 }

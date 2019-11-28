@@ -25,6 +25,7 @@
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
       </ResourceDictionary.MergedDictionaries>
 
       <Style x:Key="ItemsControlStyle" TargetType="{x:Type ItemsControl}">
@@ -54,8 +55,15 @@
                   <TextBlock VerticalAlignment="Center" 
                              HorizontalAlignment="Center"
                              Margin="0 60"
-                             Text="No parameters selected"
-                             />
+                             TextAlignment="Center"
+                             >
+                    <TextBlock.Inlines>
+                      <Run Text="Target Parameters"/>
+                      <LineBreak/>
+                      <LineBreak/>
+                      <Run Text="Select one or more parameters to populate"/>
+                    </TextBlock.Inlines>
+                  </TextBlock>
                 </ControlTemplate>
               </Setter.Value>
             </Setter>
@@ -153,6 +161,14 @@
                                       Margin="10 0 0 0"
                                       DataContext="{Binding ParameterDistributionViewModel}"
                                       />
+
+    <Button Grid.Column="1" 
+            Style="{StaticResource HelpButtonStyle}"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Right"
+            ToolTip="Help about parameters" 
+            Tag="rvis/modules/sensitivity/parameters/"
+            />
 
   </Grid>
 

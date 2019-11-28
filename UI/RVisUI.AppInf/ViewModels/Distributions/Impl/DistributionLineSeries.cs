@@ -12,62 +12,95 @@ namespace RVisUI.AppInf
 {
   internal static class DistributionLineSeries
   {
-    internal static LineSeries CreateLineSeries(Normal normal, IList<OxyColor> defaultColors) =>
+    internal static LineSeries CreateLineSeries(
+      Normal normal,
+      double lower,
+      double upper,
+      IList<OxyColor> defaultColors
+      ) =>
       CreateLineSeries(
         normal,
-        d => normal.InverseCumulativeDistribution(d),
+        lower,
+        upper,
         defaultColors,
+        d => normal.InverseCumulativeDistribution(d),
         InterpolationAlgorithms.CatmullRomSpline
         );
 
-    internal static LineSeries CreateLineSeries(LogNormal logNormal, IList<OxyColor> defaultColors) =>
+    internal static LineSeries CreateLineSeries(
+      LogNormal logNormal,
+      double lower,
+      double upper,
+      IList<OxyColor> defaultColors
+      ) =>
       CreateLineSeries(
         logNormal,
-        d => logNormal.InverseCumulativeDistribution(d),
+        lower,
+        upper,
         defaultColors,
+        d => logNormal.InverseCumulativeDistribution(d),
         InterpolationAlgorithms.CatmullRomSpline
         );
 
-    internal static LineSeries CreateLineSeries(ContinuousUniform continuousUniform, IList<OxyColor> defaultColors) =>
+    internal static LineSeries CreateLineSeries(
+      ContinuousUniform continuousUniform,
+      double lower,
+      double upper,
+      IList<OxyColor> defaultColors
+      ) =>
       CreateLineSeries(
         continuousUniform,
+        lower,
+        upper,
+        defaultColors,
         d => continuousUniform.InverseCumulativeDistribution(d),
-        defaultColors,
         default
         );
 
-    internal static LineSeries CreateLineSeries(Beta beta, IList<OxyColor> defaultColors) =>
-      CreateLineSeries(
-        beta,
-        d => beta.InverseCumulativeDistribution(d),
-        defaultColors,
-        default
-        );
-
-    internal static LineSeries CreateLineSeries(Gamma gamma, IList<OxyColor> defaultColors) =>
+    internal static LineSeries CreateLineSeries(
+      Gamma gamma,
+      double lower,
+      double upper,
+      IList<OxyColor> defaultColors
+      ) =>
       CreateLineSeries(
         gamma,
-        d => gamma.InverseCumulativeDistribution(d),
+        lower,
+        upper,
         defaultColors,
+        d => gamma.InverseCumulativeDistribution(d),
         default
         );
 
     private static LineSeries CreateLineSeries<T>(
       T continuousDistribution,
-      Func<double, double> inverseCumulativeDistribution,
+      double lower,
+      double upper,
       IList<OxyColor> defaultColors,
+      Func<double, double> inverseCumulativeDistribution,
       IInterpolationAlgorithm interpolationAlgorithm
       ) where T : IContinuousDistribution
     {
-      var cdLower = inverseCumulativeDistribution(0.0005);
-      var cdUpper = inverseCumulativeDistribution(0.9995);
-      RequireTrue(cdLower < cdUpper, $"Configured {typeof(T).Name} has zero width");
+      var hasLowerBound = lower > NegativeInfinity;
+      var hasUpperBound = upper < PositiveInfinity;
+
+      if(!hasLowerBound) lower = inverseCumulativeDistribution(0.0005);
+      if(!hasUpperBound) upper = inverseCumulativeDistribution(0.9995);
+
+      if(hasLowerBound || hasUpperBound)
+      {
+        var padding = (upper - lower) / 10d;
+        if (hasLowerBound) lower -= padding;
+        if (hasUpperBound) upper += padding;
+      }
+
+      RequireTrue(lower < upper, $"Configured {typeof(T).Name} has zero width");
 
       const int nPoints = 100;
-      var division = (cdUpper - cdLower) / nPoints;
-      var x = Range(0, nPoints + 1).Map(i => cdLower + i * division).ToArr();
+      var division = (upper - lower) / nPoints;
+      var x = Range(0, nPoints + 1).Map(i => lower + i * division).ToArr();
       var densities = x.Map(continuousDistribution.Density);
-      RequireFalse(densities.ForAll(IsNaN), $"Configured {typeof(T).Name} has undefined density in range {cdLower} to {cdUpper}");
+      RequireFalse(densities.ForAll(IsNaN), $"Configured {typeof(T).Name} has undefined density in range {lower} to {upper}");
 
       return CreateLineSeries(
         0,

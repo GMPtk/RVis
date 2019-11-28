@@ -27,7 +27,9 @@ namespace Sensitivity
   {
     internal TraceViewModel()
     {
+      _traceState = new TraceState { };
       PlotModel = CreatePlotModel();
+      _traceSeries.IsVisible = true;
     }
 
     internal TraceViewModel(IAppService appService, IAppSettings appSettings, TraceState traceState)
@@ -54,7 +56,9 @@ namespace Sensitivity
             _reactiveSafeInvoke.SuspendAndInvoke<string>(ObserveAppSettingsPropertyChange)
             ),
 
-        this.ObservableForProperty(vm => vm.ViewHeight).Subscribe(_reactiveSafeInvoke.SuspendAndInvoke<object>(ObserveViewHeight)),
+        this
+          .ObservableForProperty(vm => vm.ViewHeight)
+          .Subscribe(_reactiveSafeInvoke.SuspendAndInvoke<object>(ObserveViewHeight)),
 
         this
           .ObservableForProperty(vm => vm.SelectedX)
@@ -251,7 +255,10 @@ namespace Sensitivity
 
       if (dataPoint.X < minimumVisibleTime)
       {
-        var actualTitleFontSizeProperty = _traceVerticalAxis.GetType().GetProperty("ActualTitleFontSize", BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Instance);
+        var actualTitleFontSizeProperty = _traceVerticalAxis.GetType().GetProperty(
+          "ActualTitleFontSize", 
+          BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Instance
+          );
         var titleFontSize = (double)actualTitleFontSizeProperty.GetValue(_traceVerticalAxis);
         var titleEndsAt = PlotModel.Padding.Left + titleFontSize + _traceVerticalAxis.AxisTickToLabelDistance;
         var isLabelClick = e.Position.X < titleEndsAt;
@@ -260,7 +267,10 @@ namespace Sensitivity
       }
       else if (dataPoint.Y < minimumVisibleOutput)
       {
-        var actualTitleFontSizeProperty = _traceHorizontalAxis.GetType().GetProperty("ActualTitleFontSize", BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Instance);
+        var actualTitleFontSizeProperty = _traceHorizontalAxis.GetType().GetProperty(
+          "ActualTitleFontSize", 
+          BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Instance
+          );
         var titleFontSize = (double)actualTitleFontSizeProperty.GetValue(_traceHorizontalAxis);
         var titleEndsAt = PlotModel.Padding.Left + titleFontSize + _traceHorizontalAxis.AxisTickToLabelDistance;
         var distanceOver = PlotModel.PlotAndAxisArea.Bottom - e.Position.Y;
@@ -372,9 +382,13 @@ namespace Sensitivity
         HorizontalAxisMaximum = _traceHorizontalAxis.ActualMaximum,
 
         HorizontalAxisAbsoluteMinimumAuto = _traceHorizontalAxis.AbsoluteMinimum == MinValue,
-        HorizontalAxisAbsoluteMinimum = _traceHorizontalAxis.AbsoluteMinimum == MinValue ? _traceHorizontalAxis.ActualMinimum : _traceHorizontalAxis.AbsoluteMinimum,
+        HorizontalAxisAbsoluteMinimum = _traceHorizontalAxis.AbsoluteMinimum == MinValue 
+          ? _traceHorizontalAxis.ActualMinimum 
+          : _traceHorizontalAxis.AbsoluteMinimum,
         HorizontalAxisAbsoluteMaximumAuto = _traceHorizontalAxis.AbsoluteMaximum == MaxValue,
-        HorizontalAxisAbsoluteMaximum = _traceHorizontalAxis.AbsoluteMaximum == MaxValue ? _traceHorizontalAxis.ActualMaximum : _traceHorizontalAxis.ActualMaximum,
+        HorizontalAxisAbsoluteMaximum = _traceHorizontalAxis.AbsoluteMaximum == MaxValue 
+          ? _traceHorizontalAxis.ActualMaximum 
+          : _traceHorizontalAxis.ActualMaximum,
 
         VerticalAxisMinimumAuto = IsNaN(_traceVerticalAxis.Minimum),
         VerticalAxisMinimum = _traceVerticalAxis.ActualMinimum,
@@ -382,9 +396,13 @@ namespace Sensitivity
         VerticalAxisMaximum = _traceVerticalAxis.ActualMaximum,
 
         VerticalAxisAbsoluteMinimumAuto = _traceVerticalAxis.AbsoluteMinimum == MinValue,
-        VerticalAxisAbsoluteMinimum = _traceVerticalAxis.AbsoluteMinimum == MinValue ? _traceVerticalAxis.ActualMinimum : _traceVerticalAxis.AbsoluteMinimum,
+        VerticalAxisAbsoluteMinimum = _traceVerticalAxis.AbsoluteMinimum == MinValue 
+          ? _traceVerticalAxis.ActualMinimum 
+          : _traceVerticalAxis.AbsoluteMinimum,
         VerticalAxisAbsoluteMaximumAuto = _traceVerticalAxis.AbsoluteMaximum == MaxValue,
-        VerticalAxisAbsoluteMaximum = _traceVerticalAxis.AbsoluteMaximum == MaxValue ? _traceVerticalAxis.ActualMaximum : _traceVerticalAxis.ActualMaximum,
+        VerticalAxisAbsoluteMaximum = _traceVerticalAxis.AbsoluteMaximum == MaxValue 
+          ? _traceVerticalAxis.ActualMaximum 
+          : _traceVerticalAxis.ActualMaximum,
       };
 
       var ok = _appService.ShowDialog(new ChartOptionsDialog(), viewModel, default);
@@ -404,8 +422,12 @@ namespace Sensitivity
         _traceHorizontalAxis.Title = viewModel.XAxisTitle;
         _traceSeries.MarkerFill = OxyColorData.OxyColors[viewModel.ElementColorIndices[MARKER_ELEMENT]].OxyColor;
         _traceSeries.Color = OxyColorData.OxyColors[viewModel.ElementColorIndices[LINE_ELEMENT]].OxyColor;
-        _traceHorizontalAxis.AbsoluteMinimum = viewModel.HorizontalAxisAbsoluteMinimumAuto ? MinValue : viewModel.HorizontalAxisAbsoluteMinimum;
-        _traceHorizontalAxis.AbsoluteMaximum = viewModel.HorizontalAxisAbsoluteMaximumAuto ? MaxValue : viewModel.HorizontalAxisAbsoluteMaximum;
+        _traceHorizontalAxis.AbsoluteMinimum = viewModel.HorizontalAxisAbsoluteMinimumAuto 
+          ? MinValue 
+          : viewModel.HorizontalAxisAbsoluteMinimum;
+        _traceHorizontalAxis.AbsoluteMaximum = viewModel.HorizontalAxisAbsoluteMaximumAuto 
+          ? MaxValue 
+          : viewModel.HorizontalAxisAbsoluteMaximum;
 
         double minimum;
         if (viewModel.HorizontalAxisMinimumAuto)
@@ -433,10 +455,18 @@ namespace Sensitivity
 
         _traceHorizontalAxis.Zoom(minimum, maximum);
 
-        _traceVerticalAxis.AbsoluteMinimum = viewModel.VerticalAxisAbsoluteMinimumAuto ? MinValue : viewModel.VerticalAxisAbsoluteMinimum;
-        _traceVerticalAxis.AbsoluteMaximum = viewModel.VerticalAxisAbsoluteMaximumAuto ? MaxValue : viewModel.VerticalAxisAbsoluteMaximum;
-        minimum = viewModel.VerticalAxisMinimumAuto ? _traceVerticalAxis.ActualMinimum : viewModel.VerticalAxisMinimum;
-        maximum = viewModel.VerticalAxisMaximumAuto ? _traceVerticalAxis.ActualMaximum : viewModel.VerticalAxisMaximum;
+        _traceVerticalAxis.AbsoluteMinimum = viewModel.VerticalAxisAbsoluteMinimumAuto 
+          ? MinValue 
+          : viewModel.VerticalAxisAbsoluteMinimum;
+        _traceVerticalAxis.AbsoluteMaximum = viewModel.VerticalAxisAbsoluteMaximumAuto 
+          ? MaxValue 
+          : viewModel.VerticalAxisAbsoluteMaximum;
+        minimum = viewModel.VerticalAxisMinimumAuto 
+          ? _traceVerticalAxis.ActualMinimum 
+          : viewModel.VerticalAxisMinimum;
+        maximum = viewModel.VerticalAxisMaximumAuto 
+          ? _traceVerticalAxis.ActualMaximum 
+          : viewModel.VerticalAxisMaximum;
 
         if (viewModel.VerticalAxisMinimumAuto)
         {

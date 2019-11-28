@@ -20,7 +20,9 @@ namespace Sensitivity
 
     private class _DesignStateDTO
     {
-      public int? SampleSize { get; set; }
+      public string SensitivityMethod { get; set; }
+      public int? NoOfRuns { get; set; }
+      public int? NoOfSamples { get; set; }
       public string SelectedElementName { get; set; }
     }
 
@@ -97,16 +99,15 @@ namespace Sensitivity
 
           DesignState = new _DesignStateDTO
           {
-            SampleSize = instance.DesignState.SampleSize,
+            SensitivityMethod = instance.DesignState.SensitivityMethod?.ToString(),
+            NoOfRuns = instance.DesignState.NoOfRuns,
+            NoOfSamples = instance.DesignState.NoOfSamples,
             SelectedElementName = instance.DesignState.SelectedElementName
           },
 
           TraceState = new _TraceStateDTO
           {
             ViewHeight = instance.TraceState.ViewHeight,
-            //ChartTitle = instance.TraceState.ChartTitle,
-            //XAxisTitle = instance.TraceState.XAxisTitle,
-            //YAxisTitle = instance.TraceState.YAxisTitle,
             MarkerFill = instance.TraceState.MarkerFill?.ToByteString(),
             SeriesColor = instance.TraceState.SeriesColor?.ToByteString(),
             HorizontalAxisMinimum = ToDTOAxisValue(instance.TraceState.HorizontalAxisMinimum),
@@ -177,7 +178,14 @@ namespace Sensitivity
     {
       ParametersState.SelectedParameter = dto.ParametersState?.SelectedParameter;
 
-      DesignState.SampleSize = dto.DesignState?.SampleSize;
+      DesignState.SensitivityMethod = 
+        Enum.TryParse(dto.DesignState?.SensitivityMethod, out SensitivityMethod sensitivityMethod) 
+        ? sensitivityMethod 
+        : default(SensitivityMethod?);
+
+      DesignState.NoOfRuns = dto.DesignState?.NoOfRuns;
+      DesignState.NoOfSamples = dto.DesignState?.NoOfSamples;
+      
       DesignState.SelectedElementName = dto.DesignState?.SelectedElementName;
 
       if (dto.TraceState == default)
@@ -255,6 +263,7 @@ namespace Sensitivity
           var createdOn = dto.SensitivityDesign.FromDirectoryName();
           SensitivityDesign = sensitivityDesigns.Load(createdOn);
           Trace = sensitivityDesigns.LoadTrace(SensitivityDesign);
+          Ranking = sensitivityDesigns.LoadRanking(SensitivityDesign);
         }
         catch (Exception) { /* logged elsewhere */ }
       }

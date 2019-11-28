@@ -30,7 +30,7 @@ namespace Sensitivity.Design
       }
     }
 
-    internal static Arr<ParameterMeasure> LowryPlotDataFrom4DPieCharts
+    internal static Arr<LowryParameterMeasure> LowryPlotDataFrom4DPieCharts
     {
       get
       {
@@ -57,33 +57,32 @@ namespace Sensitivity.Design
           2.61E-02, 6.68E-04, 4.57E-02, 1.32E-04, 6.96E-04, 6.55E-04
         };
 
-        var parameterDatas = Range(0, parameterNames.Length)
+        var parameterMeasures = Range(0, parameterNames.Length)
           .Map(i =>
-            new ParameterMeasure
+            new LowryParameterMeasure(parameterNames[i])
             {
               Interaction = interactions[i],
-              MainEffect = mainEffects[i],
-              ParameterName = parameterNames[i]
+              MainEffect = mainEffects[i]
             })
           .OrderByDescending(pd => pd.MainEffect)
           .ToArray();
 
         var upperBounds = ComputeUpperBounds(
-          parameterDatas.Select(pd => pd.MainEffect).ToArray(), 
-          parameterDatas.Select(pd => pd.Interaction).ToArray()
+          parameterMeasures.Select(pd => pd.MainEffect).ToArray(), 
+          parameterMeasures.Select(pd => pd.Interaction).ToArray()
           );
 
         var lowerBounds = ComputeLowerBounds(
-          parameterDatas.Select(pd => pd.MainEffect).ToArray()
+          parameterMeasures.Select(pd => pd.MainEffect).ToArray()
           );
 
-        for (var i = 0; i < parameterDatas.Length; ++i)
+        for (var i = 0; i < parameterMeasures.Length; ++i)
         {
-          parameterDatas[i].LowerBound = lowerBounds[i];
-          parameterDatas[i].UpperBound = upperBounds[i];
+          parameterMeasures[i].LowerBound = lowerBounds[i];
+          parameterMeasures[i].UpperBound = upperBounds[i];
         }
 
-        return parameterDatas;
+        return parameterMeasures;
       }
     }
   }

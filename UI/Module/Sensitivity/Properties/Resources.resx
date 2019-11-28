@@ -117,7 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="FMT_CREATE_DESIGN" xml:space="preserve">
+  <data name="FAST99_TELL_AND_COLLECT" xml:space="preserve">
+    <value>sensitivity::tell(rvis_sensitivity_design, rvis_sensitivity_out)
+rvis_sensitivity_ignored &lt;- capture.output(rvis_sensitivity_printed &lt;- print(rvis_sensitivity_design))
+rvis_sensitivity_measures &lt;- cbind(rvis_sensitivity_printed, rvis_sensitivity_design$V, rvis_sensitivity_design$D1, rvis_sensitivity_design$Dt)
+colnames(rvis_sensitivity_measures) &lt;- c("first", "total", "V", "D1", "Dt")</value>
+  </data>
+  <data name="FMT_CREATE_FAST99_DESIGN" xml:space="preserve">
     <value>rvis_sensitivity_sampleSize &lt;- {0}
 rvis_sensitivity_factors &lt;- c({1})
 rvis_sensitivity_omegaFromCukier &lt;- {2}
@@ -144,10 +150,29 @@ rvis_sensitivity_design &lt;- sensitivity::fast99(
   q.arg = rvis_sensitivity_qfargs
 )</value>
   </data>
-  <data name="TELL_AND_COLLECT" xml:space="preserve">
-    <value>sensitivity::tell(rvis_sensitivity_design, rvis_sensitivity_out)
-rvis_sensitivity_ignored &lt;- capture.output(rvis_sensitivity_printed &lt;- print(rvis_sensitivity_design))
-rvis_sensitivity_measures &lt;- cbind(rvis_sensitivity_printed, rvis_sensitivity_design$V, rvis_sensitivity_design$D1, rvis_sensitivity_design$Dt)
-colnames(rvis_sensitivity_measures) &lt;- c("first", "total", "V", "D1", "Dt")</value>
+  <data name="FMT_CREATE_MORRIS_DESIGN" xml:space="preserve">
+    <value>rvis_sensitivity_factors &lt;- c({0})
+rvis_sensitivity_r &lt;- {1}
+rvis_sensitivity_binf &lt;- c({2}) 
+rvis_sensitivity_bsup &lt;- c({3}) 
+rvis_sensitivity_levels &lt;- rep(as.integer({4}), length(rvis_sensitivity_factors))
+rvis_sensitivity_grid_jump &lt;- rep(as.integer({5}), length(rvis_sensitivity_factors))
+  
+rvis_sensitivity_design_{6:00000000} &lt;- sensitivity::morris(
+  factors = rvis_sensitivity_factors, 
+  r = rvis_sensitivity_r,
+  binf = rvis_sensitivity_binf,
+  bsup = rvis_sensitivity_bsup,
+  design = list(
+    type = "oat", 
+    levels = rvis_sensitivity_levels, 
+    grid.jump = rvis_sensitivity_grid_jump
+    )
+  )</value>
+  </data>
+  <data name="FMT_MORRIS_TELL_AND_COLLECT" xml:space="preserve">
+    <value>rvis_sensitivity_out_{0:00000000} &lt;- c({1})
+sensitivity::tell(rvis_sensitivity_design_{0:00000000}, rvis_sensitivity_out_{0:00000000})
+rvis_ignored &lt;- capture.output(rvis_p_{0:00000000} &lt;- print(rvis_sensitivity_design_{0:00000000}))</value>
   </data>
 </root>

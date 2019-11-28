@@ -220,8 +220,14 @@ namespace RVisUI.AppInf
 
       if (Alpha.HasValue && Beta.HasValue)
       {
-        var gamma = Distribution.AssertSome().Implementation;
-        var series = CreateLineSeries(gamma, PlotModel.DefaultColors);
+        var distribution = Distribution.AssertSome();
+        var gamma = distribution.Implementation;
+        var series = CreateLineSeries(
+          gamma, 
+          distribution.Lower, 
+          distribution.Upper, 
+          PlotModel.DefaultColors
+          );
 
         if (!series.Points.All(p => IsNaN(p.Y)))
         {

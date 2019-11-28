@@ -36,10 +36,6 @@
     </ResourceDictionary>
   </ctrls:MetroWindow.Resources>
 
-  <ctrls:MetroWindow.RightWindowCommands>
-    <ctrls:WindowCommands>
-    </ctrls:WindowCommands>
-  </ctrls:MetroWindow.RightWindowCommands>
   <Grid>
 
     <Grid.RowDefinitions>

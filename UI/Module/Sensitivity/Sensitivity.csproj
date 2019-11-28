@@ -84,31 +84,57 @@
     <Compile Include="Controls\Dialogs\ChartOptionsDialog.xaml.cs">
       <DependentUpon>ChartOptionsDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Dialogs\RankingDialog.xaml.cs">
+      <DependentUpon>RankingDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Views\DesignDigestsView.xaml.cs">
       <DependentUpon>DesignDigestsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Views\DesignView.xaml.cs">
       <DependentUpon>DesignView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Views\EffectsView.xaml.cs">
-      <DependentUpon>EffectsView.xaml</DependentUpon>
+    <Compile Include="Controls\Views\Fast99EffectsView.xaml.cs">
+      <DependentUpon>Fast99EffectsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Views\MorrisMeasuresView.xaml.cs">
+      <DependentUpon>MorrisMeasuresView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Views\MorrisEffectsView.xaml.cs">
+      <DependentUpon>MorrisEffectsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Views\ParametersView.xaml.cs">
       <DependentUpon>ParametersView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Views\VarianceView.xaml.cs">
-      <DependentUpon>VarianceView.xaml</DependentUpon>
+    <Compile Include="Controls\Views\Fast99MeasuresView.xaml.cs">
+      <DependentUpon>Fast99MeasuresView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Design\Model\Data.cs" />
     <Compile Include="Design\ViewModel.cs" />
     <Compile Include="Design\ViewModels\DesignDigestsViewModel.cs" />
     <Compile Include="Design\ViewModels\DesignViewModel.cs" />
+    <Compile Include="Design\ViewModels\Dialog\RankingViewModel.cs" />
+    <Compile Include="Design\ViewModels\MorrisEffectsViewModel.cs" />
     <Compile Include="Design\ViewModels\ParametersViewModel.cs" />
-    <Compile Include="Design\ViewModels\EffectsViewModel.cs" />
-    <Compile Include="Design\ViewModels\VarianceViewModel.cs" />
+    <Compile Include="Design\ViewModels\Fast99EffectsViewModel.cs" />
+    <Compile Include="Design\ViewModels\MorrisMeasuresViewModel.cs" />
+    <Compile Include="Design\ViewModels\Fast99MeasuresViewModel.cs" />
+    <Compile Include="Model\Interface.cs" />
+    <Compile Include="Model\Method.cs" />
+    <Compile Include="Model\Fast99Scorer.cs" />
+    <Compile Include="Model\Ranking.cs" />
+    <Compile Include="Model\MorrisScorer.cs" />
+    <Compile Include="Model\RankedParameter.cs" />
+    <Compile Include="ViewModels\Dialog\RankingViewModel.cs" />
+    <Compile Include="ViewModels\Impl\OutputViewModel.cs" />
+    <Compile Include="ViewModels\Impl\RankedParameterViewModel.cs" />
+    <Compile Include="ViewModels\MorrisEffectsViewModel.cs" />
     <Compile Include="ViewModels\Enum.cs" />
-    <Compile Include="ViewModels\Impl\DesignViewModel.static.cs" />
-    <Compile Include="ViewModels\Impl\MeasuresOps.cs" />
+    <Compile Include="ViewModels\Impl\DesignViewModel.FAST99.cs" />
+    <Compile Include="ViewModels\Impl\DesignViewModel.Morris.cs" />
+    <Compile Include="ViewModels\Impl\DesignViewModel.Input.cs" />
+    <Compile Include="ViewModels\Impl\DesignViewModel.Output.cs" />
+    <Compile Include="ViewModels\Impl\MuStarSigmaPlotData.cs" />
+    <Compile Include="ViewModels\Impl\MuStarSigmaViewModel.cs" />
     <Compile Include="ViewModels\Interface.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Model\DesignDigest.cs" />
@@ -134,7 +160,7 @@
     <Compile Include="ViewModels\DesignDigestsViewModel.cs" />
     <Compile Include="ViewModels\DesignViewModel.cs" />
     <Compile Include="ViewModels\Dialog\ChartOptionsViewModel.cs" />
-    <Compile Include="ViewModels\EffectsViewModel.cs" />
+    <Compile Include="ViewModels\Fast99EffectsViewModel.cs" />
     <Compile Include="ViewModels\Impl\DesignDigestViewModel.cs" />
     <Compile Include="ViewModels\Impl\LowryPlotData.cs" />
     <Compile Include="ViewModels\Impl\OxyColorData.cs" />
@@ -142,7 +168,8 @@
     <Compile Include="ViewModels\Impl\LowryViewModel.cs" />
     <Compile Include="ViewModels\Impl\ParameterViewModel.cs" />
     <Compile Include="ViewModels\ParametersViewModel.cs" />
-    <Compile Include="ViewModels\VarianceViewModel.cs" />
+    <Compile Include="ViewModels\MorrisMeasuresViewModel.cs" />
+    <Compile Include="ViewModels\Fast99MeasuresViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -222,6 +249,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\Dialogs\RankingDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\Views\DesignDigestsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -230,7 +261,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\Views\EffectsView.xaml">
+    <Page Include="Controls\Views\Fast99EffectsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Views\MorrisMeasuresView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Views\MorrisEffectsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -238,7 +277,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\Views\VarianceView.xaml">
+    <Page Include="Controls\Views\Fast99MeasuresView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

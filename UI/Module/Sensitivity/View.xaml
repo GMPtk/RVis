@@ -38,7 +38,9 @@
           <Setter Property="ma:ControlsHelper.HeaderFontSize" Value="13"/>
         </Style>
       </TabControl.Resources>
-      <TabItem Header="PARAMETERS" DataContext="{Binding ParametersViewModel}">
+      <TabItem Header="PARAMETERS" 
+               DataContext="{Binding ParametersViewModel}"
+               Visibility="{Binding IsVisible, Converter={StaticResource b2v}}">
         <local:ParametersView />
       </TabItem>
       <TabItem Header="DESIGN" 
@@ -46,16 +48,27 @@
                IsSelected="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
         <local:DesignView />
       </TabItem>
-      <TabItem Header="VARIANCE" 
-               DataContext="{Binding VarianceViewModel}"
+      <TabItem Header="MEASURES" 
+               DataContext="{Binding MorrisMeasuresViewModel}"
                Visibility="{Binding IsVisible, Converter={StaticResource b2v}}"
                IsSelected="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-        <local:VarianceView />
+        <local:MorrisMeasuresView />
       </TabItem>
       <TabItem Header="EFFECTS" 
-               DataContext="{Binding EffectsViewModel}"
+               DataContext="{Binding MorrisEffectsViewModel}"
                Visibility="{Binding IsVisible, Converter={StaticResource b2v}}">
-        <local:EffectsView />
+        <local:MorrisEffectsView />
+      </TabItem>
+      <TabItem Header="MEASURES" 
+               DataContext="{Binding Fast99MeasuresViewModel}"
+               Visibility="{Binding IsVisible, Converter={StaticResource b2v}}"
+               IsSelected="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+        <local:Fast99MeasuresView />
+      </TabItem>
+      <TabItem Header="EFFECTS" 
+               DataContext="{Binding Fast99EffectsViewModel}"
+               Visibility="{Binding IsVisible, Converter={StaticResource b2v}}">
+        <local:Fast99EffectsView />
       </TabItem>
       <TabItem Header="SAVED DATA" DataContext="{Binding DesignDigestsViewModel}">
         <local:DesignDigestsView />

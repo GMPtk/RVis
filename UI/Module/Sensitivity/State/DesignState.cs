@@ -5,12 +5,26 @@ namespace Sensitivity
 {
   internal sealed class DesignState : INotifyPropertyChanged
   {
-    internal int? SampleSize
+    public SensitivityMethod? SensitivityMethod
     {
-      get => _sampleSize;
-      set => this.RaiseAndSetIfChanged(ref _sampleSize, value, PropertyChanged);
+      get => _sensitivityMethod;
+      set => this.RaiseAndSetIfChanged(ref _sensitivityMethod, value, PropertyChanged);
     }
-    private int? _sampleSize;
+    private SensitivityMethod? _sensitivityMethod;
+
+    public int? NoOfRuns
+    {
+      get => _noOfRuns;
+      set => this.RaiseAndSetIfChanged(ref _noOfRuns, value, PropertyChanged);
+    }
+    private int? _noOfRuns;
+
+    public int? NoOfSamples
+    {
+      get => _noOfSamples;
+      set => this.RaiseAndSetIfChanged(ref _noOfSamples, value, PropertyChanged);
+    }
+    private int? _noOfSamples;
 
     internal string SelectedElementName
     {

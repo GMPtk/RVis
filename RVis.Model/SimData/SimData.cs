@@ -70,8 +70,30 @@ namespace RVis.Model
 
     public void Clear(bool includePendingRequests)
     {
-      if (includePendingRequests) _outputRequests.Clear();
-      _outputs.Clear();
+      if (includePendingRequests)
+      {
+        Log.Debug($"{nameof(SimData)} output clear all");
+        _outputRequests.Clear();
+        _outputs.Clear();
+        return;
+      }
+
+      Log.Debug($"{nameof(SimData)} output count before clear: {_outputs.Count}");
+
+      var keys = _outputs.Keys;
+      var utcCutOff = DateTime.UtcNow.AddMilliseconds(-OUTPUTCLEARWINDOWMS);
+
+      foreach (var key in keys)
+      {
+        if (!_outputs.TryGetValue(key, out SimDataOutput simDataOutput)) continue;
+
+        if (simDataOutput.AcquiredOn < utcCutOff)
+        {
+          _outputs.TryRemove(key, out SimDataOutput _);
+        }
+      }
+
+      Log.Debug($"{nameof(SimData)} output count after clear: {_outputs.Count} ({OUTPUTCLEARWINDOWMS}ms cut-off)");
     }
 
     public Option<(int ms, int n)> GetExecutionInterval(Simulation simulation)
@@ -154,6 +176,8 @@ namespace RVis.Model
 
       Log.Debug($"{nameof(SimData)} exiting service loop");
     }
+
+    private const int OUTPUTCLEARWINDOWMS = 1000;
 
     private readonly IRVisServerPool _serverPool;
     private readonly ConcurrentDictionary<int, SimDataItem<OutputRequest>> _outputRequests =

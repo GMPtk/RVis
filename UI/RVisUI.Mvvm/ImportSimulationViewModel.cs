@@ -184,8 +184,9 @@ namespace RVisUI.Mvvm
         _appService.Notify(
           NotificationType.Information,
           nameof(ImportSimulationViewModel),
-          nameof(ServerLicense),
-          "No R server available"
+          nameof(HandleInspectRFile),
+          "No R server available",
+          this
           );
       }
       _appService.RVisServerPool.RequestServer().Match(Some, None);
@@ -233,7 +234,8 @@ namespace RVisUI.Mvvm
           NotificationType.Error,
           nameof(ImportSimulationViewModel),
           nameof(RunInspectionAsync),
-          error
+          error,
+          this
           );
       }
     }
@@ -273,8 +275,9 @@ namespace RVisUI.Mvvm
         _appService.Notify(
           NotificationType.Information,
           nameof(ImportSimulationViewModel),
-          nameof(ServerLicense),
-          "No R server available"
+          nameof(HandleSelectExec),
+          "No R server available",
+          this
           );
       }
       _appService.RVisServerPool.RequestServer().Match(Some, None);
@@ -318,7 +321,59 @@ namespace RVisUI.Mvvm
           NotificationType.Error,
           nameof(ImportSimulationViewModel),
           nameof(SetExecAsync),
-          error
+          error,
+          this
+          );
+      }
+    }
+
+    private async Task DoImportUsingExecAsync(ServerLicense serverLicense)
+    {
+      _busyCancelHandler = () => serverLicense.Client.StopServer();
+
+      BusyWith = "IMPORT EXEC";
+      EnableBusyCancel = true;
+      IsBusy = true;
+
+      string error = default;
+
+      try
+      {
+        var destinationDirectoryName = 
+          await _managedImport.ImportExecToLibraryAsync(
+            serverLicense.Client
+            );
+
+        _simLibrary.Refresh();
+        ResetInspection();
+        PathToRFile = default;
+
+        var fileName = Path.GetFileName(PathToRFile);
+        _appState.Status = $"Imported {fileName} into {destinationDirectoryName}";
+      }
+      catch (CommunicationException)
+      {
+        error = "R channel lost";
+      }
+      catch (Exception ex)
+      {
+        error = ex.Message;
+      }
+      finally
+      {
+        IsBusy = false;
+        serverLicense.Dispose();
+        _busyCancelHandler = null;
+      }
+
+      if (error != default)
+      {
+        _appService.Notify(
+          NotificationType.Error,
+          nameof(ImportSimulationViewModel),
+          nameof(DoImportUsingExecAsync),
+          error,
+          this
           );
       }
     }
@@ -358,26 +413,74 @@ namespace RVisUI.Mvvm
         _managedImport.SimulationName = importExecViewModel.SimulationName;
         _managedImport.SimulationDescription = importExecViewModel.SimulationDescription;
 
-        try
+        void Some(ServerLicense serverLicense)
         {
-          var destinationDirectoryName = _managedImport.ImportExecToLibrary();
-          var fileName = Path.GetFileName(PathToRFile);
-          _appState.Status = $"Imported {fileName} into {destinationDirectoryName}";
+          var _ = DoImportUsingExecAsync(serverLicense);
         }
-        catch (Exception ex)
+
+        void None()
         {
           _appService.Notify(
-            nameof(ImportSimulationViewModel), 
-            nameof(ManagedImport.ImportExecToLibrary), 
-            ex, 
+            NotificationType.Information,
+            nameof(ImportSimulationViewModel),
+            nameof(HandleImportUsingExec),
+            "No R server available",
             this
             );
-          return;
         }
+
+        _appService.RVisServerPool.RequestServer().Match(Some, None);
+      }
+    }
+
+    private async Task DoImportUsingTmplAsync(ServerLicense serverLicense)
+    {
+      _busyCancelHandler = () => serverLicense.Client.StopServer();
+
+      BusyWith = "IMPORT TMPL";
+      EnableBusyCancel = true;
+      IsBusy = true;
+
+      string error = default;
+
+      try
+      {
+        var destinationDirectoryName = 
+          await _managedImport.ImportTmplToLibraryAsync(
+            serverLicense.Client
+            );
 
         _simLibrary.Refresh();
         ResetInspection();
         PathToRFile = default;
+
+        var fileName = Path.GetFileName(PathToRFile);
+        _appState.Status = $"Imported {fileName} into {destinationDirectoryName}";
+      }
+      catch (CommunicationException)
+      {
+        error = "R channel lost";
+      }
+      catch (Exception ex)
+      {
+        error = ex.Message;
+      }
+      finally
+      {
+        IsBusy = false;
+        serverLicense.Dispose();
+        _busyCancelHandler = null;
+      }
+
+      if (error != default)
+      {
+        _appService.Notify(
+          NotificationType.Error,
+          nameof(ImportSimulationViewModel),
+          nameof(DoImportUsingTmplAsync),
+          error,
+          this
+          );
       }
     }
 
@@ -435,25 +538,23 @@ namespace RVisUI.Mvvm
         _managedImport.SimulationName = importTmplViewModel.SimulationName;
         _managedImport.SimulationDescription = importTmplViewModel.SimulationDescription;
 
-        try
+        void Some(ServerLicense serverLicense)
         {
-          var destinationDirectoryName = _managedImport.ImportTmplToLibrary();
-          _appState.Status = $"Imported {fileName} into {destinationDirectoryName}";
-        }
-        catch (Exception ex)
-        {
-          _appService.Notify(
-            nameof(ImportSimulationViewModel), 
-            nameof(ManagedImport.ImportTmplToLibrary), 
-            ex, 
-            this
-            );
-          return;
+          var _ = DoImportUsingTmplAsync(serverLicense);
         }
 
-        _simLibrary.Refresh();
-        ResetInspection();
-        PathToRFile = default;
+        void None()
+        {
+          _appService.Notify(
+            NotificationType.Information,
+            nameof(ImportSimulationViewModel),
+            nameof(HandleImportUsingTmpl),
+            "No R server available",
+            this
+            );
+        }
+
+        _appService.RVisServerPool.RequestServer().Match(Some, None);
       }
     }
 

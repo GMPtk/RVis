@@ -19,7 +19,7 @@ namespace Sensitivity.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -61,6 +61,18 @@ namespace Sensitivity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to sensitivity::tell(rvis_sensitivity_design, rvis_sensitivity_out)
+        ///rvis_sensitivity_ignored &lt;- capture.output(rvis_sensitivity_printed &lt;- print(rvis_sensitivity_design))
+        ///rvis_sensitivity_measures &lt;- cbind(rvis_sensitivity_printed, rvis_sensitivity_design$V, rvis_sensitivity_design$D1, rvis_sensitivity_design$Dt)
+        ///colnames(rvis_sensitivity_measures) &lt;- c(&quot;first&quot;, &quot;total&quot;, &quot;V&quot;, &quot;D1&quot;, &quot;Dt&quot;).
+        /// </summary>
+        internal static string FAST99_TELL_AND_COLLECT {
+            get {
+                return ResourceManager.GetString("FAST99_TELL_AND_COLLECT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to rvis_sensitivity_sampleSize &lt;- {0}
         ///rvis_sensitivity_factors &lt;- c({1})
         ///rvis_sensitivity_omegaFromCukier &lt;- {2}
@@ -76,21 +88,41 @@ namespace Sensitivity.Properties {
         ///  rvis_sensitivity_maxOmega &lt;- max(rvis_sensitivity_omega)
         ///  rvis_sensitivity_sampleSize &lt;- rvis_sensitivity_max [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string FMT_CREATE_DESIGN {
+        internal static string FMT_CREATE_FAST99_DESIGN {
             get {
-                return ResourceManager.GetString("FMT_CREATE_DESIGN", resourceCulture);
+                return ResourceManager.GetString("FMT_CREATE_FAST99_DESIGN", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to sensitivity::tell(rvis_sensitivity_design, rvis_sensitivity_out)
-        ///rvis_sensitivity_ignored &lt;- capture.output(rvis_sensitivity_printed &lt;- print(rvis_sensitivity_design))
-        ///rvis_sensitivity_measures &lt;- cbind(rvis_sensitivity_printed, rvis_sensitivity_design$V, rvis_sensitivity_design$D1, rvis_sensitivity_design$Dt)
-        ///colnames(rvis_sensitivity_measures) &lt;- c(&quot;first&quot;, &quot;total&quot;, &quot;V&quot;, &quot;D1&quot;, &quot;Dt&quot;).
+        ///   Looks up a localized string similar to rvis_sensitivity_factors &lt;- c({0})
+        ///rvis_sensitivity_r &lt;- {1}
+        ///rvis_sensitivity_binf &lt;- c({2}) 
+        ///rvis_sensitivity_bsup &lt;- c({3}) 
+        ///rvis_sensitivity_levels &lt;- rep(as.integer({4}), length(rvis_sensitivity_factors))
+        ///rvis_sensitivity_grid_jump &lt;- rep(as.integer({5}), length(rvis_sensitivity_factors))
+        ///  
+        ///rvis_sensitivity_design_{6:00000000} &lt;- sensitivity::morris(
+        ///  factors = rvis_sensitivity_factors, 
+        ///  r = rvis_sensitivity_r,
+        ///  binf = rvis_sensitivity_binf,
+        ///  bsup = rvis_sensitivity_bsup,
+        ///  design = li [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string TELL_AND_COLLECT {
+        internal static string FMT_CREATE_MORRIS_DESIGN {
             get {
-                return ResourceManager.GetString("TELL_AND_COLLECT", resourceCulture);
+                return ResourceManager.GetString("FMT_CREATE_MORRIS_DESIGN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to rvis_sensitivity_out_{0:00000000} &lt;- c({1})
+        ///sensitivity::tell(rvis_sensitivity_design_{0:00000000}, rvis_sensitivity_out_{0:00000000})
+        ///rvis_ignored &lt;- capture.output(rvis_p_{0:00000000} &lt;- print(rvis_sensitivity_design_{0:00000000})).
+        /// </summary>
+        internal static string FMT_MORRIS_TELL_AND_COLLECT {
+            get {
+                return ResourceManager.GetString("FMT_MORRIS_TELL_AND_COLLECT", resourceCulture);
             }
         }
     }

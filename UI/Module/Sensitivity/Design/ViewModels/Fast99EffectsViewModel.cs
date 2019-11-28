@@ -7,9 +7,9 @@ using static Sensitivity.Design.Data;
 
 namespace Sensitivity.Design
 {
-  internal sealed class EffectsViewModel : IEffectsViewModel
+  internal sealed class Fast99EffectsViewModel : IFast99EffectsViewModel
   {
-    public EffectsViewModel()
+    public Fast99EffectsViewModel()
     {
       var lowryViewModel = new LowryViewModel();
       lowryViewModel.PlotParameterData(LowryPlotDataFrom4DPieCharts);
@@ -27,6 +27,8 @@ namespace Sensitivity.Design
     }
 
     public bool IsVisible => true;
+
+    public bool IsReady { get => true; set => throw new NotImplementedException(); }
 
     public ILowryViewModel LowryViewModel { get; }
 

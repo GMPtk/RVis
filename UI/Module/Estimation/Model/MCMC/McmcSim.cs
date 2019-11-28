@@ -182,8 +182,10 @@ namespace Estimation
             void RequestSucceeded(Arr<SimInput> _)
             {
               var output = _simData.GetOutput(outputRequest.Item.SeriesInput, _simulation).AssertSome();
+              var independentData = _simulation.SimConfig.SimOutput.GetIndependentData(output);
+              var outputData = _estimationDesign.Outputs.Map(mo => output[mo.Name]);
 
-              var didPropose = chain.Propose(output, out IterationState iterationState);
+              var didPropose = chain.Propose(independentData, outputData, out IterationState iterationState);
               if (chain.IsFaulted) return;
 
               var (currentIteration, currentValues, proposedValues) = iterationState;

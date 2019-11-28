@@ -5,7 +5,7 @@ namespace Sensitivity
 {
   [DisplayName("Sensitivity")]
   [DisplayIcon("ChartBarStacked")]
-  [Description("Global sensitivity analysis using FAST99 method")]
+  [Description("Sensitivity analysis using Morris and e-FAST methods")]
   [RequiredRPackages("sensitivity")]
   [Purpose(ModulePurpose.Uncertainty | ModulePurpose.Sensitivity | ModulePurpose.Case)]
   public sealed class Service : IRVisExtensibility

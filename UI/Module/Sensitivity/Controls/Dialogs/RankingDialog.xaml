@@ -1,0 +1,163 @@
+﻿<ctrls:MetroWindow x:Class="Sensitivity.RankingDialog"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:ctrls="http://metro.mahapps.com/winfx/xaml/controls"
+                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                   xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+                   xmlns:design="clr-namespace:Sensitivity.Design"
+                   mc:Ignorable="d"
+                   Title="Rank Parameters"
+                   Height="500" Width="500"
+                   GlowBrush="{DynamicResource AccentColorBrush}"
+                   NonActiveGlowBrush="Red"
+                   ResizeMode="CanResizeWithGrip"
+                   WindowTransitionsEnabled="False"
+                   WindowStartupLocation="CenterOwner"
+                   wpf:Behaviour.DialogResult="{Binding DialogResult}"
+                   d:DataContext="{d:DesignInstance Type=design:RankingViewModel, IsDesignTimeCreatable=True}"
+                   >
+
+  <ctrls:MetroWindow.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </ctrls:MetroWindow.Resources>
+
+  <Grid>
+
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+
+      <GroupBox Margin="10,10,5,5" Header="Rank Using Range">
+        <StackPanel Orientation="Horizontal">
+          <TextBlock VerticalAlignment="Center" 
+                     Text="From"
+                     />
+          <TextBox Width="40" 
+                   Margin="4,0,2,0" 
+                   Text="{Binding From, TargetNullValue='', UpdateSourceTrigger=PropertyChanged}"
+                   />
+          <TextBlock VerticalAlignment="Center" 
+                     Margin="2,0,4,0" 
+                     Text="To"
+                     />
+          <TextBox Width="40" 
+                   Text="{Binding To, TargetNullValue='', UpdateSourceTrigger=PropertyChanged}"
+                   />
+          <TextBlock VerticalAlignment="Center"
+                     Margin="4,0,0,0"
+                     MaxWidth="70"
+                     TextTrimming="CharacterEllipsis"
+                     Text="{Binding XUnits}"/>
+        </StackPanel>        
+      </GroupBox>
+
+      <GroupBox Grid.Row="1" 
+                Margin="10,5,5,10" 
+                Header="Rank Using Outputs"
+                >
+        <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+          <ItemsControl ItemsSource="{Binding OutputViewModels}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <CheckBox IsChecked="{Binding IsSelected}" 
+                          Content="{Binding Name}"
+                          />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </GroupBox>
+
+      <GroupBox Grid.Column="1" 
+                Margin="5,10,10,10" 
+                Grid.RowSpan="2" 
+                Header="Select Important Parameters"
+                >
+        <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+          <ItemsControl ItemsSource="{Binding RankedParameterViewModels}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <CheckBox IsChecked="{Binding IsSelected}" 
+                          >
+                  <CheckBox.Content>
+                    <TextBlock>
+                      <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0} ({1:G3})">
+                          <Binding Path="Name"/>
+                          <Binding Path="Score"/>
+                        </MultiBinding>
+                      </TextBlock.Text>
+                    </TextBlock>
+                  </CheckBox.Content>
+                </CheckBox>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </GroupBox>
+    </Grid>
+
+    <Separator Grid.Row="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="2" Width="Auto" VerticalAlignment="Center" />
+
+    <Grid Grid.Row="2" Margin="10,0,10,10" HorizontalAlignment="Stretch">
+
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="100"/>
+        <ColumnDefinition Width="100"/>
+      </Grid.ColumnDefinitions>
+
+      <Button Grid.Row="2" 
+              Style="{StaticResource HelpButtonStyle}"
+              ToolTip="Help about ranking parameters" 
+              Tag="rvis/modules/sensitivity/ranking/#rank-parameters"
+              />
+
+      <Button Grid.Column="1"
+              Style="{StaticResource MaterialDesignFlatButton}"
+              IsDefault="True"
+              Command="{Binding OK}"
+              Width="80" 
+              Height="Auto"
+              Content="OK"
+              />
+
+      <Button Grid.Column="2" 
+              Style="{StaticResource MaterialDesignFlatButton}"
+              IsCancel="True"
+              Command="{Binding Cancel}"
+              Width="80" 
+              Height="Auto"
+              Content="Cancel"
+              />
+
+    </Grid>
+
+  </Grid>
+
+</ctrls:MetroWindow>

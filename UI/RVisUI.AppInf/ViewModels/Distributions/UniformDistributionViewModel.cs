@@ -181,8 +181,14 @@ namespace RVisUI.AppInf
 
       if (Lower.HasValue && Upper.HasValue)
       {
-        var uniform = Distribution.AssertSome().Implementation;
-        var series = CreateLineSeries(uniform, PlotModel.DefaultColors);
+        var distribution = Distribution.AssertSome();
+        var uniform = distribution.Implementation;
+        var series = CreateLineSeries(
+          uniform, 
+          distribution.Lower, 
+          distribution.Upper, 
+          PlotModel.DefaultColors
+          );
         series.Points.Insert(0, new DataPoint(uniform.LowerBound, 0.0));
         series.Points.Add(new DataPoint(uniform.UpperBound, 0.0));
 

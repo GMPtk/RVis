@@ -209,9 +209,11 @@ namespace RVisUI.AppInf
         }
         else
         {
-          var setBounds = AllowTruncation && Distribution.Match(d => IsNaN(d.Sigma), () => true);
+          var initializeBounds = 
+            AllowTruncation && 
+            Distribution.Match(d => IsNaN(d.Sigma), () => true);
 
-          if (setBounds)
+          if (initializeBounds)
           {
             Lower = Mu - 2 * Sigma;
             Upper = Mu + 2 * Sigma;
@@ -250,8 +252,14 @@ namespace RVisUI.AppInf
 
       if (Mu.HasValue && Sigma.HasValue)
       {
-        var normal = Distribution.AssertSome().Implementation;
-        var series = CreateLineSeries(normal, PlotModel.DefaultColors);
+        var distribution = Distribution.AssertSome();
+        var normal = distribution.Implementation;
+        var series = CreateLineSeries(
+          normal, 
+          distribution.Lower, 
+          distribution.Upper, 
+          PlotModel.DefaultColors
+          );
 
         if (!series.Points.All(p => IsNaN(p.Y)))
         {

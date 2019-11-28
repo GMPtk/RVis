@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,17 +11,16 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace Sensitivity
 {
   /// <summary>
-  /// Interaction logic for EffectsView.xaml
+  /// Interaction logic for RankingDialog.xaml
   /// </summary>
-  public partial class EffectsView : UserControl
+  public partial class RankingDialog : MetroWindow
   {
-    public EffectsView()
+    public RankingDialog()
     {
       InitializeComponent();
     }

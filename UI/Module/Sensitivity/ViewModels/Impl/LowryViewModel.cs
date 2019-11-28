@@ -24,6 +24,7 @@ namespace Sensitivity
   {
     internal LowryViewModel()
     {
+      _lowryState = new LowryState { };
       PlotModel = CreatePlotModel();
     }
 
@@ -80,9 +81,9 @@ namespace Sensitivity
 
     public event PropertyChangedEventHandler PropertyChanged;
 
-    internal void PlotParameterData(Arr<ParameterMeasure> parameterData)
+    internal void PlotParameterData(Arr<LowryParameterMeasure> parameterMeasures)
     {
-      var parameterNames = parameterData.Map(pd => pd.ParameterName);
+      var parameterNames = parameterMeasures.Map(pd => pd.ParameterName);
 
       if (parameterNames.Count == _lowryStackAxis.Labels.Count)
       {
@@ -100,19 +101,19 @@ namespace Sensitivity
         }
       }
 
-      if (parameterData.Count == _mainEffectsSeries.Items.Count)
+      if (parameterMeasures.Count == _mainEffectsSeries.Items.Count)
       {
-        for (var i = 0; i < parameterData.Count; ++i)
+        for (var i = 0; i < parameterMeasures.Count; ++i)
         {
-          _mainEffectsSeries.Items[i].Value = parameterData[i].MainEffect;
-          _interactionsSeries.Items[i].Value = parameterData[i].Interaction;
+          _mainEffectsSeries.Items[i].Value = parameterMeasures[i].MainEffect;
+          _interactionsSeries.Items[i].Value = parameterMeasures[i].Interaction;
         }
       }
       else
       {
         _mainEffectsSeries.Items.Clear();
         _interactionsSeries.Items.Clear();
-        foreach (var parameterDatum in parameterData)
+        foreach (var parameterDatum in parameterMeasures)
         {
           _mainEffectsSeries.Items.Add(new ColumnItem { Value = parameterDatum.MainEffect });
           _interactionsSeries.Items.Add(new ColumnItem { Value = parameterDatum.Interaction });
@@ -121,13 +122,13 @@ namespace Sensitivity
 
       _smokeSeries.Points2.Clear();
       _smokeSeries.Points.Clear();
-      for (var i = 0; i < parameterData.Count; ++i)
+      for (var i = 0; i < parameterMeasures.Count; ++i)
       {
-        _smokeSeries.Points2.Add(new DataPoint(0.5 + i, parameterData[i].LowerBound));
-        _smokeSeries.Points.Add(new DataPoint(0.5 + i, parameterData[i].UpperBound));
+        _smokeSeries.Points2.Add(new DataPoint(0.5 + i, parameterMeasures[i].LowerBound));
+        _smokeSeries.Points.Add(new DataPoint(0.5 + i, parameterMeasures[i].UpperBound));
       }
 
-      _lowrySmokeAxis.Maximum = parameterData.Count;
+      _lowrySmokeAxis.Maximum = parameterMeasures.Count;
 
       PlotModel.InvalidatePlot(true);
     }
