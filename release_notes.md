@@ -1,5 +1,9 @@
 # Beta Release
 
+Fix to v0.7:
+
+* [#3: Morris Test Ranking calculation](https://github.com/GMPtk/RVis/issues/3)
+
 Changes in v0.7:
 
 * Added Morris test and parameter ranking to sensitivity
