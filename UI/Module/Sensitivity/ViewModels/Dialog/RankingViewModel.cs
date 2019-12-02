@@ -1,11 +1,13 @@
 ﻿using LanguageExt;
 using ReactiveUI;
+using RVis.Base.Extensions;
 using RVisUI.Model.Extensions;
 using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using static System.Globalization.CultureInfo;
 
 namespace Sensitivity
 {
@@ -20,8 +22,8 @@ namespace Sensitivity
       IScorer scorer
       )
     {
-      From = from;
-      To = to;
+      FromText = from?.ToString(InvariantCulture);
+      ToText = to?.ToString(InvariantCulture);
       XUnits = xUnits;
       _scorer = scorer;
 
@@ -42,27 +44,33 @@ namespace Sensitivity
 
       Cancel = ReactiveCommand.Create(HandleCancel);
 
-      this.ObservableForProperty(vm => vm.From).Subscribe(ObserveFrom);
-      this.ObservableForProperty(vm => vm.To).Subscribe(ObserveTo);
+      this.ObservableForProperty(vm => vm.FromText).Subscribe(ObserveFromText);
+      this.ObservableForProperty(vm => vm.ToText).Subscribe(ObserveToText);
       OutputViewModels.Iter(ovm => ovm
         .ObservableForProperty(vm => vm.IsSelected)
         .Subscribe(ObserveOutputIsSelected)
         );
     }
 
-    public double? From
+    public string FromText
     {
-      get => _from;
-      set => this.RaiseAndSetIfChanged(ref _from, value, PropertyChanged);
+      get => _fromText;
+      set => this.RaiseAndSetIfChanged(ref _fromText, value.CheckParseValue<double>(), PropertyChanged);
     }
-    private double? _from;
+    private string _fromText;
 
-    public double? To
+    public double? From =>
+      double.TryParse(_fromText, out double d) ? d : default(double?);
+
+    public string ToText
     {
-      get => _to;
-      set => this.RaiseAndSetIfChanged(ref _to, value, PropertyChanged);
+      get => _toText;
+      set => this.RaiseAndSetIfChanged(ref _toText, value.CheckParseValue<double>(), PropertyChanged);
     }
-    private double? _to;
+    private string _toText;
+
+    public double? To =>
+      double.TryParse(_toText, out double d) ? d : default(double?);
 
     public string XUnits { get; }
 
@@ -75,7 +83,7 @@ namespace Sensitivity
     }
     private Arr<IRankedParameterViewModel> _rankedParameterViewModels;
 
-    public bool CanOK 
+    public bool CanOK
     {
       get => _canOK;
       set => this.RaiseAndSetIfChanged(ref _canOK, value, PropertyChanged);
@@ -99,13 +107,13 @@ namespace Sensitivity
 
     private void HandleCancel() => DialogResult = false;
 
-    private void ObserveFrom(IObservedChange<RankingViewModel, double?> _)
+    private void ObserveFromText(IObservedChange<RankingViewModel, string> _)
     {
       Populate();
       UpdateEnable();
     }
 
-    private void ObserveTo(IObservedChange<RankingViewModel, double?> _)
+    private void ObserveToText(IObservedChange<RankingViewModel, string> _)
     {
       Populate();
       UpdateEnable();

@@ -28,6 +28,13 @@ namespace Sampling
     }
     private Arr<ParameterState> _parameterStates;
 
+    internal LatinHypercubeDesign LatinHypercubeDesign
+    {
+      get => _latinHypercubeDesign;
+      set => this.RaiseAndSetIfChanged(ref _latinHypercubeDesign, value, PropertyChanged);
+    }
+    private LatinHypercubeDesign _latinHypercubeDesign = LatinHypercubeDesign.Default;
+
     internal SamplingDesign SamplingDesign
     {
       get => _samplingDesign;
@@ -39,6 +46,20 @@ namespace Sampling
       _parameterStateChangesSubject.AsObservable();
     private readonly ISubject<(Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier)> _parameterStateChangesSubject =
       new Subject<(Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier)>();
+
+    internal string RootExportDirectory
+    {
+      get => _rootExportDirectory;
+      set => this.RaiseAndSetIfChanged(ref _rootExportDirectory, value, PropertyChanged);
+    }
+    private string _rootExportDirectory;
+
+    internal bool OpenAfterExport
+    {
+      get => _openAfterExport;
+      set => this.RaiseAndSetIfChanged(ref _openAfterExport, value, PropertyChanged);
+    }
+    private bool _openAfterExport;
 
     internal bool? AutoApplyParameterSharedState
     {

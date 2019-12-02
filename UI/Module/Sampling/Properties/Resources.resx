@@ -117,4 +117,35 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="FMT_LHSDESIGN" xml:space="preserve">
+    <value>rvis_n &lt;- {0}
+rvis_dimension &lt;- {1}
+rvis_randomized &lt;- {2}
+rvis_seed &lt;- {3}
+
+rvis_lhsDesign_out &lt;- DiceDesign::lhsDesign(
+  rvis_n, 
+  rvis_dimension, 
+  randomized = rvis_randomized, 
+  seed = rvis_seed
+  )</value>
+  </data>
+  <data name="FMT_MAXIMINSALHS" xml:space="preserve">
+    <value>rvis_T0 &lt;- {0}
+rvis_c &lt;- {1}
+rvis_it &lt;- {2}
+rvis_p &lt;- {3}
+rvis_profile &lt;- "{4}"
+rvis_Imax &lt;- {5}
+
+rvis_lhsDesign_out_opt &lt;- DiceDesign::maximinSA_LHS(
+  rvis_lhsDesign_out$design,
+  T0 = rvis_T0,
+  c = rvis_c,
+  it = rvis_it,
+  p = rvis_p,
+  profile = rvis_profile,
+  Imax = rvis_Imax
+  )</value>
+  </data>
 </root>

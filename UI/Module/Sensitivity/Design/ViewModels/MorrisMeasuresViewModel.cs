@@ -25,9 +25,11 @@ namespace Sensitivity.Design
 
     public string XUnits => "secs.secs.secs.secs.secs";
 
-    public double? XBegin { get => 1.23456; set => throw new NotImplementedException(); }
+    public string XBeginText { get => "5.4321!!!"; set => throw new NotImplementedException(); }
+    public double? XBegin { get => 1.23456;}
 
-    public double? XEnd { get => 4.56789; set => throw new NotImplementedException(); }
+    public string XEndText { get => "9.8765!!!"; set => throw new NotImplementedException(); }
+    public double? XEnd { get => 4.56789; }
 
     public Arr<IRankedParameterViewModel> RankedParameterViewModels =>
       Range(1, 20)

@@ -10,8 +10,6 @@ namespace RVisUI.Mvvm
   {
     internal CommonConfigurationViewModel(IAppState appState)
     {
-      _appState = appState;
-
       var commonConfigurations = appState.UIComponents
         .Map(uic => uic.ViewModel is ICommonConfiguration commonConfiguration
           ? Some((UIC: uic, CommonConfiguration: commonConfiguration))
@@ -48,7 +46,5 @@ namespace RVisUI.Mvvm
 
       DialogResult = true;
     }
-
-    private readonly IAppState _appState;
   }
 }

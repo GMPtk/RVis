@@ -81,6 +81,9 @@
     <Compile Include="..\..\..\Version\VersionInfo.cs">
       <Link>VersionInfo.cs</Link>
     </Compile>
+    <Compile Include="Controls\Dialog\LHSConfigurationDialog.xaml.cs">
+      <DependentUpon>LHSConfigurationDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Views\DesignDigestsView.xaml.cs">
       <DependentUpon>DesignDigestsView.xaml</DependentUpon>
     </Compile>
@@ -106,9 +109,13 @@
     <Compile Include="Design\ViewModel.cs" />
     <Compile Include="Design\ViewModels\DesignDigestsViewModel.cs" />
     <Compile Include="Design\ViewModels\DesignViewModel.cs" />
+    <Compile Include="Design\ViewModels\Dialog\LHSConfigurationViewModel.cs" />
     <Compile Include="Model\DesignDigest.cs" />
     <Compile Include="Model\DesignParameter.cs" />
+    <Compile Include="Model\Enum.cs" />
+    <Compile Include="Model\Impl\LHDPersist.cs" />
     <Compile Include="Model\Impl\SamplingDesign.cs" />
+    <Compile Include="Model\LatinHypercubeDesign.cs" />
     <Compile Include="Model\ModelExt.cs" />
     <Compile Include="Model\SamplingDesign.cs" />
     <Compile Include="Model\SamplingDesigns.cs" />
@@ -132,7 +139,9 @@
       <DependentUpon>View.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModel.cs" />
+    <Compile Include="ViewModels\Dialog\LHSConfigurationViewModel.cs" />
     <Compile Include="ViewModels\Impl\ParameterSamplingViewModel.cs" />
+    <Compile Include="ViewModels\Impl\LHSParameterViewModel.cs" />
     <Compile Include="ViewModels\Impl\ParameterViewModel.cs" />
     <Compile Include="ViewModels\ParametersViewModel.cs" />
   </ItemGroup>
@@ -213,6 +222,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Controls\Dialog\LHSConfigurationDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\Views\DesignDigestsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

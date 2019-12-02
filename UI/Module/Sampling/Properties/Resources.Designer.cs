@@ -19,7 +19,7 @@ namespace Sampling.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -57,6 +57,49 @@ namespace Sampling.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to rvis_n &lt;- {0}
+        ///rvis_dimension &lt;- {1}
+        ///rvis_randomized &lt;- {2}
+        ///rvis_seed &lt;- {3}
+        ///
+        ///rvis_lhsDesign_out &lt;- DiceDesign::lhsDesign(
+        ///  rvis_n, 
+        ///  rvis_dimension, 
+        ///  randomized = rvis_randomized, 
+        ///  seed = rvis_seed
+        ///  ).
+        /// </summary>
+        internal static string FMT_LHSDESIGN {
+            get {
+                return ResourceManager.GetString("FMT_LHSDESIGN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to rvis_T0 &lt;- {0}
+        ///rvis_c &lt;- {1}
+        ///rvis_it &lt;- {2}
+        ///rvis_p &lt;- {3}
+        ///rvis_profile &lt;- &quot;{4}&quot;
+        ///rvis_Imax &lt;- {5}
+        ///
+        ///rvis_lhsDesign_out_opt &lt;- DiceDesign::maximinSA_LHS(
+        ///  rvis_lhsDesign_out$design,
+        ///  T0 = rvis_T0,
+        ///  c = rvis_c,
+        ///  it = rvis_it,
+        ///  p = rvis_p,
+        ///  profile = rvis_profile,
+        ///  Imax = rvis_Imax
+        ///  ).
+        /// </summary>
+        internal static string FMT_MAXIMINSALHS {
+            get {
+                return ResourceManager.GetString("FMT_MAXIMINSALHS", resourceCulture);
             }
         }
     }

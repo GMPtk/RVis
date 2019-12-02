@@ -106,15 +106,28 @@
                        />
             <TextBox Width="40" 
                      Margin="4,0,2,0" 
-                     Text="{Binding XBegin, TargetNullValue='', UpdateSourceTrigger=PropertyChanged}"
-                     />
+                     >
+              <TextBox.Text>
+                <Binding Path="XBeginText" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+            </TextBox>
             <TextBlock VerticalAlignment="Center" 
                        Margin="2,0,4,0" 
                        Text="To"
                        />
-            <TextBox Width="40" 
-                     Text="{Binding XEnd, TargetNullValue='', UpdateSourceTrigger=PropertyChanged}"
-                     />
+            <TextBox Width="40">
+              <TextBox.Text>
+                <Binding Path="XEndText" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+            </TextBox>
             <TextBlock VerticalAlignment="Center"
                        Margin="4,0,0,0"
                        MaxWidth="70"

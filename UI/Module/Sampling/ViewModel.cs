@@ -4,20 +4,29 @@ using RVis.Base;
 using RVis.Base.Extensions;
 using RVis.Model;
 using RVis.Model.Extensions;
+using RVisUI;
 using RVisUI.AppInf;
 using RVisUI.AppInf.Extensions;
 using RVisUI.Model;
 using RVisUI.Model.Extensions;
 using System;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static Sampling.Logger;
+using static System.IO.Path;
 
 namespace Sampling
 {
-  internal sealed class ViewModel : IViewModel, ISharedStateProvider, ICommonConfiguration, IDisposable
+  internal sealed class ViewModel :
+    IViewModel,
+    ITaskRunnerContainer,
+    ISharedStateProvider,
+    ICommonConfiguration,
+    IExportedDataProvider,
+    IDisposable
   {
     internal ViewModel(IAppState appState, IAppService appService, IAppSettings appSettings)
     {
@@ -73,6 +82,8 @@ namespace Sampling
     public IDesignViewModel DesignViewModel => _designViewModel;
 
     public IDesignDigestsViewModel DesignDigestsViewModel => _designDigestsViewModel;
+
+    public Arr<ITaskRunner> GetTaskRunners() => Array<ITaskRunner>(_designViewModel);
 
     public void ApplyState(
       SimSharedStateApply applyType,
@@ -198,6 +209,73 @@ namespace Sampling
     {
       get => _moduleState.AutoShareObservationsSharedState;
       set => _moduleState.AutoShareObservationsSharedState = value;
+    }
+
+    public DataExportConfiguration GetConfiguration(
+      string rootExportDirectory
+      )
+    {
+      if (_moduleState.SamplingDesign == default)
+      {
+        throw new InvalidOperationException("Load a sampling design");
+      }
+
+      if (_designViewModel.Outputs.IsEmpty)
+      {
+        throw new InvalidOperationException("Acquire sampling outputs");
+      }
+
+      var title = $"Export from {nameof(Sampling)}: {_moduleState.SamplingDesign.CreatedOn.ToDirectoryName()}";
+
+      if (_moduleState.RootExportDirectory.IsAString())
+      {
+        rootExportDirectory = _moduleState.RootExportDirectory;
+      }
+      else
+      {
+        rootExportDirectory = Combine(
+          rootExportDirectory,
+          nameof(Sampling).ToLowerInvariant(),
+          _simulation.SimConfig.Title
+          );
+      }
+
+      var exportDirectoryName = _moduleState.SamplingDesign.CreatedOn.ToDirectoryName();
+
+      var openAfterExport = _moduleState.OpenAfterExport;
+
+      var outputs = _simulation.SimConfig.SimOutput.DependentVariables.Map(e => (e.Name, false));
+
+      return new DataExportConfiguration(
+        title,
+        rootExportDirectory,
+        exportDirectoryName,
+        openAfterExport,
+        outputs
+        );
+    }
+
+    public void ExportData(DataExportConfiguration dataExportConfiguration)
+    {
+      var targetDirectory = Combine(
+        dataExportConfiguration.RootExportDirectory,
+        dataExportConfiguration.ExportDirectoryName
+        );
+
+      if (!Directory.Exists(targetDirectory))
+      {
+        Directory.CreateDirectory(targetDirectory);
+      }
+
+      _designViewModel.ExportData(
+        targetDirectory,
+        dataExportConfiguration.Outputs
+          .Filter(o => o.IncludeInExport)
+          .Map(o => o.Name)
+        );
+
+      _moduleState.RootExportDirectory = dataExportConfiguration.RootExportDirectory;
+      _moduleState.OpenAfterExport = dataExportConfiguration.OpenAfterExport;
     }
 
     public void Dispose() => Dispose(true);

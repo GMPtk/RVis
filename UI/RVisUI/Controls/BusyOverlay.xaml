@@ -5,6 +5,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
              x:Name="_parent"
              mc:Ignorable="d" 
              d:DesignHeight="768" 
@@ -23,11 +24,12 @@
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
       </ResourceDictionary.MergedDictionaries>
+      <swc:BooleanToVisibilityConverter x:Key="b2vc"/>
     </ResourceDictionary>
   </UserControl.Resources>
 
   <UserControl.Background>
-    <SolidColorBrush Opacity="0.6" Color="DarkGray"/>
+    <SolidColorBrush Opacity="0.8" Color="DarkGray"/>
   </UserControl.Background>
 
   <Grid DataContext="{Binding ElementName=_parent}">
@@ -38,9 +40,9 @@
     </Grid.ColumnDefinitions>
 
     <Grid.RowDefinitions>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="30"/>
-      <RowDefinition Height="*"/>
+      <RowDefinition Height="3*"/>
+      <RowDefinition Height="100"/>
+      <RowDefinition Height="2*"/>
     </Grid.RowDefinitions>
 
     <md:Card Grid.Column="0" 
@@ -49,6 +51,7 @@
              HorizontalAlignment="Center"
              md:ShadowAssist.ShadowDepth="Depth4"
              UniformCornerRadius="12"
+             Margin="20, 0"
              Padding="32">
 
       <TextBlock Style="{StaticResource MaterialDesignTitleTextBlock}"
@@ -76,35 +79,38 @@
                  Grid.Row="1" 
                  Grid.ColumnSpan="2" 
                  IsIndeterminate="True" 
-                 Height="10" 
+                 Value="0"
+                 Height="50"
+                 Width="50"
                  Margin="100,0,100,0"
+                 Style="{StaticResource MaterialDesignCircularProgressBar}"
                  />
 
-    <Button Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2"
-            Height="Auto" 
-            Width="Auto" 
-            VerticalAlignment="Center" 
-            HorizontalAlignment="Center"
-            Command="{Binding Cancel}"
-            >
-      <Button.Style>
-        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedAccentButton}">
-          <Setter Property="Background" Value="Red"/>
-          <Style.Triggers>
-            <DataTrigger Binding="{Binding EnableCancel}" Value="False">
-              <Setter Property="Visibility" Value="Hidden"/>
-            </DataTrigger>
-          </Style.Triggers>
-        </Style>
-      </Button.Style>
-      <StackPanel Orientation="Horizontal" Margin="7">
-        <TextBlock>CANCEL</TextBlock>
-        <md:PackIcon VerticalAlignment="Center"
-                     Margin="6 0 0 0"
-                     Kind="Cancel" 
-                     />
-      </StackPanel>
-    </Button>
+    <StackPanel Grid.Column="0"
+                Grid.Row="2"
+                Grid.ColumnSpan="2"
+                VerticalAlignment="Center" 
+                HorizontalAlignment="Center"
+                Visibility="{Binding EnableCancel, Converter={StaticResource b2vc}}"
+                >
+
+      <Button Grid.Column="0" 
+              Grid.Row="2" 
+              Grid.ColumnSpan="2"
+              Height="Auto" 
+              Width="Auto" 
+              Command="{Binding Cancel}"
+              >
+        <StackPanel Orientation="Horizontal" Margin="0">
+          <md:PackIcon VerticalAlignment="Center"
+                       Margin="0 0 6 0"
+                       Kind="Cancel" 
+                       />
+          <TextBlock>CANCEL</TextBlock>
+        </StackPanel>
+      </Button>
+
+    </StackPanel>
 
   </Grid>
 

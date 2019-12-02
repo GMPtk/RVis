@@ -31,8 +31,44 @@ namespace Sampling
   {
     Arr<IParameterViewModel> AllParameterViewModels { get; }
     ObservableCollection<IParameterViewModel> SelectedParameterViewModels { get; }
+    LatinHypercubeDesignType LatinHypercubeDesignType { get; }
+    bool CanConfigureLHS { get; }
+    ICommand ConfigureLHS { get; }
     int SelectedParameterViewModel { get; set; }
     IParameterDistributionViewModel ParameterDistributionViewModel { get; }
+  }
+
+  internal interface ILHSParameterViewModel
+  {
+    string Name { get; }
+    double? Lower { get; set; }
+    double? Upper { get; set; }
+  }
+
+  internal interface ILHSConfigurationViewModel
+  {
+    bool IsDiceDesignInstalled { get; }
+
+    Arr<ILHSParameterViewModel> LHSParameterViewModels { get; }
+
+    LatinHypercubeDesignType LatinHypercubeDesignType { get; set; }
+
+    bool UseSimulatedAnnealing { get; set; }
+    double? T0 { get; set; }
+    double? C { get; set; }
+    int? Iterations { get; set; }
+    double? P { get; set; }
+    TemperatureDownProfile Profile { get; set; }
+    int? Imax { get; set; }
+
+    ICommand Disable { get; }
+    bool CanOK { get; }
+    ICommand OK { get; }
+    ICommand Cancel { get; }
+    bool? DialogResult { get; set; }
+
+    Arr<(string Parameter, double Lower, double Upper)> Variables { get; set; }
+    LatinHypercubeDesign LatinHypercubeDesign { get; set; }
   }
 
   internal interface IDesignViewModel

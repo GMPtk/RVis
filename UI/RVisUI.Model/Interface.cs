@@ -144,4 +144,15 @@ namespace RVisUI.Model
     bool? AutoApplyObservationsSharedState { get; set; }
     bool? AutoShareObservationsSharedState { get; set; }
   }
+
+  public interface IExportedDataProvider
+  {
+    DataExportConfiguration GetConfiguration(
+      string rootExportDirectory
+      );
+
+    void ExportData(
+      DataExportConfiguration dataExportConfiguration
+      );
+  }
 }

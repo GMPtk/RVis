@@ -45,12 +45,13 @@ namespace Sampling
     {
       public string CreatedOn { get; set; }
       public _DesignParameterDTO[] DesignParameters { get; set; }
+      public _LatinHypercubeDesignDTO LatinHypercubeDesign { get; set; }
       public int? Seed { get; set; }
       public int[] NoDataIndices { get; set; }
     }
 
     private const string DESIGN_FILE_NAME = "design.toml";
-    private const string DESIGN_SAMPLES_FILE_NAME = "design.csv";
+    private const string DESIGN_SAMPLES_FILE_NAME = "samples.csv";
 
     internal static void RemoveSamplingDesign(string pathToSamplingDesignsDirectory, DateTime createdOn)
     {
@@ -73,19 +74,21 @@ namespace Sampling
 
       var pathToDesign = Combine(pathToSamplingDesignDirectory, DESIGN_FILE_NAME);
       Arr<DesignParameter> designParameters;
+      LatinHypercubeDesign latinHypercubeDesign;
       int? seed;
       Arr<int> noDataIndices;
 
       try
       {
         var dto = Toml.ReadFile<_SamplingDesignDTO>(pathToDesign);
-        designParameters = dto.DesignParameters
+        designParameters = dto.DesignParameters?
           .Select(dp => new DesignParameter(
             dp.Name,
             Distribution.DeserializeDistribution(dp.Distribution).AssertSome()
             )
           )
-          .ToArr();
+          .ToArr() ?? default;
+        latinHypercubeDesign = dto.LatinHypercubeDesign.FromDTO();
         seed = dto.Seed;
         noDataIndices = dto.NoDataIndices.ToArr();
       }
@@ -119,12 +122,15 @@ namespace Sampling
         throw new Exception(message);
       }
 
-      return new SamplingDesign(createdOn, designParameters, seed, samples, noDataIndices);
+      return designParameters.Count > 0
+        ? new SamplingDesign(createdOn, designParameters, seed, samples, noDataIndices)
+        : new SamplingDesign(createdOn, latinHypercubeDesign, seed, samples, noDataIndices);
     }
 
     private static void SaveDesign(
       DateTime createdOn,
       Arr<DesignParameter> designParameters,
+      LatinHypercubeDesign latinHypercubeDesign,
       int? seed,
       Arr<int> noDataIndices,
       string pathToSamplingDesignDirectory
@@ -138,6 +144,7 @@ namespace Sampling
         DesignParameters = designParameters
           .Map(dp => new _DesignParameterDTO { Name = dp.Name, Distribution = dp.Distribution.ToString() })
           .ToArray(),
+        LatinHypercubeDesign = latinHypercubeDesign.ToDTO(),
         Seed = seed,
         NoDataIndices = noDataIndices.ToArray()
       };
@@ -206,6 +213,7 @@ namespace Sampling
       SaveDesign(
         instance.CreatedOn,
         instance.DesignParameters,
+        instance.LatinHypercubeDesign,
         instance.Seed,
         instance.NoDataIndices,
         pathToSamplingDesignDirectory
@@ -229,6 +237,7 @@ namespace Sampling
       SaveDesign(
         instance.CreatedOn,
         instance.DesignParameters,
+        instance.LatinHypercubeDesign,
         instance.Seed,
         instance.NoDataIndices,
         pathToSamplingDesignDirectory

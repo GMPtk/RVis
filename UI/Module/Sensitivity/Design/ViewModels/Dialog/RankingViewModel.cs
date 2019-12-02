@@ -7,17 +7,11 @@ namespace Sensitivity.Design
 {
   internal sealed class RankingViewModel : IRankingViewModel
   {
-    public double? From
-    {
-      get => 1.23;
-      set => throw new NotImplementedException();
-    }
+    public string FromText { get => "1.23!!!"; set => throw new NotImplementedException(); }
+    public double? From => 1.23;
 
-    public double? To
-    {
-      get => 4.56;
-      set => throw new NotImplementedException();
-    }
+    public string ToText { get => "4.56!!!"; set => throw new NotImplementedException(); }
+    public double? To => 4.56;
 
     public string XUnits => "x units x units x units x units";
 

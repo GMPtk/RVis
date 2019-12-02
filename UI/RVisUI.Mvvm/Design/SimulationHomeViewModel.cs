@@ -36,14 +36,16 @@ namespace RVisUI.Mvvm.Design
 
     public ICommand ChangeCommonConfiguration => throw new NotImplementedException();
 
+    public ICommand Export => throw new NotImplementedException();
+
     public ICommand Close => throw new NotImplementedException();
 
     public bool IsBusy { get => false; set => throw new NotImplementedException(); }
-    public string BusyWith { get => "The Main Activity"; set => throw new NotImplementedException(); }
+    public string BusyWith { get => "The Main Activity. Some extra text. Some extra text. Some extra text. Some extra text."; set => throw new NotImplementedException(); }
 
     public ObservableCollection<string> BusyMessages { get; } = new ObservableCollection<string>();
 
-    public bool EnableBusyCancel { get => false; set => throw new NotImplementedException(); }
+    public bool EnableBusyCancel { get => true; set => throw new NotImplementedException(); }
 
     public ICommand BusyCancel => throw new NotImplementedException();
 

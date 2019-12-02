@@ -174,6 +174,7 @@ namespace RVisUI.Mvvm
   {
     string Name { get; set; }
     ICommand ChangeCommonConfiguration { get; }
+    ICommand Export { get; }
     ICommand Close { get; }
     bool IsBusy { get; set; }
     string BusyWith { get; set; }
@@ -197,5 +198,25 @@ namespace RVisUI.Mvvm
   {
     string ModuleName { get; }
     Arr<string> MissingRPackageNames { get; }
+  }
+
+  public interface ISelectableOutputViewModel
+  {
+    public string Name { get; }
+    public bool IsSelected { get; set; }
+  }
+
+  public interface IDataExportConfigurationViewModel
+  {
+    DataExportConfiguration DataExportConfiguration { get; set; }
+    string Title { get; }
+    string RootExportDirectory { get; set; }
+    ICommand BrowseForRootExportDirectory { get; }
+    string ExportDirectoryName { get; set; }
+    bool OpenAfterExport { get; set; }
+    Arr<ISelectableOutputViewModel> Outputs { get; }
+    ICommand OK { get; }
+    ICommand Cancel { get; }
+    bool? DialogResult { get; set; }
   }
 }

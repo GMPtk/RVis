@@ -88,8 +88,12 @@ namespace Sensitivity
 
   internal interface IRankingViewModel
   {
-    double? From { get; set; }
-    double? To { get; set; }
+    string FromText { get; set; }
+    double? From { get; }
+
+    string ToText { get; set; }
+    double? To { get; }
+
     string XUnits { get; }
 
     Arr<IOutputViewModel> OutputViewModels { get; }
@@ -115,8 +119,11 @@ namespace Sensitivity
 
     string XUnits { get; }
 
-    double? XBegin { get; set; }
-    double? XEnd { get; set; }
+    string XBeginText { get; set; }
+    double? XBegin { get; }
+
+    string XEndText { get; set; }
+    double? XEnd { get; }
 
     Arr<IRankedParameterViewModel> RankedParameterViewModels { get; }
     Arr<string> RankedUsing { get; }
@@ -170,8 +177,11 @@ namespace Sensitivity
 
     string XUnits { get; }
 
-    double? XBegin { get; set; }
-    double? XEnd { get; set; }
+    string XBeginText { get; set; }
+    double? XBegin { get; }
+
+    string XEndText { get; set; }
+    double? XEnd { get; }
 
     Arr<IRankedParameterViewModel> RankedParameterViewModels { get; }
     Arr<string> RankedUsing { get; }

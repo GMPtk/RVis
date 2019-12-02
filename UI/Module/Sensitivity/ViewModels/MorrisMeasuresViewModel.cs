@@ -22,6 +22,7 @@ using static RVis.Base.Check;
 using static RVis.Base.Extensions.NumExt;
 using static System.Math;
 using DataTable = System.Data.DataTable;
+using static System.Globalization.CultureInfo;
 
 namespace Sensitivity
 {
@@ -93,18 +94,18 @@ namespace Sensitivity
           .Subscribe(ObserveMorrisMeasureType),
 
         this
-          .ObservableForProperty(vm => vm.XBegin)
+          .ObservableForProperty(vm => vm.XBeginText)
           .Subscribe(
             _reactiveSafeInvoke.SuspendAndInvoke<object>(
-              ObserveXBegin
+              ObserveXBeginText
               )
             ),
 
         this
-          .ObservableForProperty(vm => vm.XEnd)
+          .ObservableForProperty(vm => vm.XEndText)
           .Subscribe(
             _reactiveSafeInvoke.SuspendAndInvoke<object>(
-              ObserveXEnd
+              ObserveXEndText
               )
             ),
 
@@ -174,19 +175,25 @@ namespace Sensitivity
     }
     private string _xUnits;
 
-    public double? XBegin
+    public string XBeginText
     {
-      get => _xBegin;
-      set => this.RaiseAndSetIfChanged(ref _xBegin, value, PropertyChanged);
+      get => _xBeginText;
+      set => this.RaiseAndSetIfChanged(ref _xBeginText, value.CheckParseValue<double>(), PropertyChanged);
     }
-    private double? _xBegin;
+    private string _xBeginText;
 
-    public double? XEnd
+    public double? XBegin =>
+      double.TryParse(_xBeginText, out double d) ? d : default(double?);
+
+    public string XEndText
     {
-      get => _xEnd;
-      set => this.RaiseAndSetIfChanged(ref _xEnd, value, PropertyChanged);
+      get => _xEndText;
+      set => this.RaiseAndSetIfChanged(ref _xEndText, value.CheckParseValue<double>(), PropertyChanged);
     }
-    private double? _xEnd;
+    private string _xEndText;
+
+    public double? XEnd =>
+      double.TryParse(_xEndText, out double d) ? d : default(double?);
 
     public Arr<IRankedParameterViewModel> RankedParameterViewModels
     {
@@ -378,13 +385,13 @@ namespace Sensitivity
       PlotModel.InvalidatePlot(updateData: true);
     }
 
-    private void ObserveXBegin(object _)
+    private void ObserveXBeginText(object _)
     {
       PopulateAnnotation();
       PlotModel.InvalidatePlot(updateData: false);
     }
 
-    private void ObserveXEnd(object _)
+    private void ObserveXEndText(object _)
     {
       PopulateAnnotation();
       PlotModel.InvalidatePlot(updateData: false);
@@ -410,8 +417,8 @@ namespace Sensitivity
 
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
-        XBegin = onXScale.ToSigFigs(3);
-        XEnd = onXScale.ToSigFigs(3);
+        XBeginText = onXScale.ToSigFigs(3).ToString(InvariantCulture);
+        XEndText = onXScale.ToSigFigs(3).ToString(InvariantCulture);
       }
 
       PopulateAnnotation();
@@ -438,8 +445,8 @@ namespace Sensitivity
 
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
-        XBegin = minimum.ToSigFigs(3);
-        XEnd = maximum.ToSigFigs(3);
+        XBeginText = minimum.ToSigFigs(3).ToString(InvariantCulture);
+        XEndText = maximum.ToSigFigs(3).ToString(InvariantCulture);
       }
 
       PopulateAnnotation();
@@ -460,8 +467,8 @@ namespace Sensitivity
       OutputNames = default;
       SelectedOutputName = NOT_FOUND;
       MorrisMeasureType = MorrisMeasureType.None;
-      XBegin = default;
-      XEnd = default;
+      XBeginText = default;
+      XEndText = default;
       RankedParameterViewModels = default;
       RankedUsing = default;
       RankedFrom = default;
@@ -557,8 +564,8 @@ namespace Sensitivity
 
     private void PopulateRanking()
     {
-      XBegin = _moduleState.Ranking.XBegin;
-      XEnd = _moduleState.Ranking.XEnd;
+      XBeginText = _moduleState.Ranking.XBegin?.ToString(InvariantCulture);
+      XEndText = _moduleState.Ranking.XEnd?.ToString(InvariantCulture);
 
       RankedParameterViewModels = _moduleState.Ranking.Parameters.Map<IRankedParameterViewModel>(
         p => new RankedParameterViewModel(p.Parameter, p.Score) { IsSelected = p.IsSelected }

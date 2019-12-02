@@ -67,8 +67,6 @@
             <Grid.ColumnDefinitions>
               <ColumnDefinition/>
               <ColumnDefinition Width="Auto"/>
-              <ColumnDefinition Width="Auto"/>
-              <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <StackPanel Orientation="Horizontal">
@@ -78,78 +76,95 @@
                          />
             </StackPanel>
 
-            <Button Grid.Column="1" 
-                    Height="16" 
-                    Width="16"
-                    Margin="5,0,5,0"
-                    Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
-                    Command="{Binding ChangeCommonConfiguration}"
-                    ToolTip="Change module configuration..."
-                    >
-              <md:PackIcon Kind="Wrench"
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+
+              <Button Height="18" 
+                      Width="18"
+                      Margin="5,0,5,0"
+                      Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                      Command="{Binding ChangeCommonConfiguration}"
+                      ToolTip="Change module configuration..."
+                      >
+                <md:PackIcon Kind="Wrench"
                            Height="12"
                            Width="12" 
                            />
-            </Button>
+              </Button>
 
-            <StackPanel Grid.Column="2"
-                        Margin="5,0,5,0"
-                        VerticalAlignment="Center">
+              <StackPanel Margin="5,0,5,0"
+                          VerticalAlignment="Center">
 
-              <Button x:Name="_openSharedStateView"
-                      Height="16" 
-                      Width="16"
+                <Button x:Name="_openSharedStateView"
+                        Height="18" 
+                        Width="18"
+                        Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                        ToolTip="Apply/share state between modules..." 
+                        Command="{Binding SharedStateViewModel.OpenView}"
+                        >
+                  <md:PackIcon Kind="SwapVertical"
+                               Height="16"
+                               Width="16" 
+                               />
+                </Button>
+
+                <Popup Name="_sharedStatePopup" 
+                       IsOpen="{Binding SharedStateViewModel.IsViewOpen, Mode=TwoWay}" 
+                       StaysOpen="False" 
+                       PlacementTarget="{Binding ElementName=_openSharedStateView}"
+                       Placement="Left"
+                       HorizontalOffset="{Binding ActualWidth, ElementName=_openSharedStateView}"
+                       VerticalOffset="{Binding ActualHeight, ElementName=_openSharedStateView}" 
+                       AllowsTransparency="True"
+                       wpf:Behaviour.IsKeyboardInputEnabled="True">
+                  <Popup.CommandBindings>
+                    <CommandBinding Command="Close" Executed="CloseCommandHandler"/>
+                  </Popup.CommandBindings>
+                  <Popup.InputBindings>
+                    <KeyBinding Key="Escape" Command="Close"/>
+                  </Popup.InputBindings>
+                  <ContentControl Content="{Binding SharedStateViewModel}">
+                    <ContentControl.ContentTemplate>
+                      <DataTemplate>
+                        <impl:SharedStateView/>
+                      </DataTemplate>
+                    </ContentControl.ContentTemplate>
+                  </ContentControl>
+                </Popup>
+
+              </StackPanel>
+
+              <Button Height="18" 
+                      Width="18"
+                      Margin="15,0,5,0"
                       Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
-                      ToolTip="Apply/share state between modules..." 
-                      Command="{Binding SharedStateViewModel.OpenView}"
+                      Command="{Binding Export}"
                       >
-                <md:PackIcon Kind="SwapVertical"
-                             Height="12"
-                             Width="12" 
+                <Button.ToolTip>
+                  <ToolTip Content="{Binding Name}" 
+                           ContentStringFormat="Export data from {0}"/>
+                </Button.ToolTip>
+                <md:PackIcon Kind="Export"
+                             Height="14"
+                             Width="14" 
                              />
               </Button>
 
-              <Popup Name="_sharedStatePopup" 
-                     IsOpen="{Binding SharedStateViewModel.IsViewOpen, Mode=TwoWay}" 
-                     StaysOpen="False" 
-                     PlacementTarget="{Binding ElementName=_openSharedStateView}"
-                     Placement="Left"
-                     HorizontalOffset="{Binding ActualWidth, ElementName=_openSharedStateView}"
-                     VerticalOffset="{Binding ActualHeight, ElementName=_openSharedStateView}" 
-                     AllowsTransparency="True"
-                     wpf:Behaviour.IsKeyboardInputEnabled="True">
-                <Popup.CommandBindings>
-                  <CommandBinding Command="Close" Executed="CloseCommandHandler"/>
-                </Popup.CommandBindings>
-                <Popup.InputBindings>
-                  <KeyBinding Key="Escape" Command="Close"/>
-                </Popup.InputBindings>
-                <ContentControl Content="{Binding SharedStateViewModel}">
-                  <ContentControl.ContentTemplate>
-                    <DataTemplate>
-                      <impl:SharedStateView/>
-                    </DataTemplate>
-                  </ContentControl.ContentTemplate>
-                </ContentControl>
-              </Popup>
+              <Button Height="18" 
+                      Width="18"
+                      Margin="15,0,5,0"
+                      Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                      Command="{Binding Close}"
+                      >
+                <Button.ToolTip>
+                  <ToolTip Content="{Binding Name}" ContentStringFormat="Close {0}"/>
+                </Button.ToolTip>
+                <md:PackIcon Kind="Close"
+                             Height="16"
+                             Width="16" 
+                             />
+              </Button>
 
             </StackPanel>
-
-            <Button Grid.Column="3" 
-                    Height="16" 
-                    Width="16"
-                    Margin="15,0,5,0"
-                    Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
-                    Command="{Binding Close}"
-                    >
-              <Button.ToolTip>
-                <ToolTip Content="{Binding Name}" ContentStringFormat="Close {0}"/>
-              </Button.ToolTip>
-              <md:PackIcon Kind="Close"
-                           Height="12"
-                           Width="12" 
-                           />
-            </Button>
 
           </Grid>
 

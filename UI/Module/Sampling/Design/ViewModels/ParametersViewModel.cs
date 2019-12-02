@@ -1,6 +1,7 @@
 ﻿using LanguageExt;
 using RVisUI.AppInf;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using static LanguageExt.Prelude;
 
 namespace Sampling.Design
@@ -20,6 +21,12 @@ namespace Sampling.Design
           Distribution = $"xxx ~ Normal({i},{i * 2})"
         }));
     }
+
+    public LatinHypercubeDesignType LatinHypercubeDesignType => LatinHypercubeDesignType.Randomized;
+
+    public bool CanConfigureLHS => throw new System.NotImplementedException();
+
+    public ICommand ConfigureLHS => throw new System.NotImplementedException();
 
     public int SelectedParameterViewModel { get => 5; set => throw new System.NotImplementedException(); }
 

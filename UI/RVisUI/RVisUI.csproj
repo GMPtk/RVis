@@ -120,6 +120,9 @@
     <Compile Include="Controls\Dialogs\ConfigureModulesDialog.xaml.cs">
       <DependentUpon>ConfigureModulesDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Dialogs\DataExportConfigurationDialog.xaml.cs">
+      <DependentUpon>DataExportConfigurationDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Dialogs\ImportExecDialog.xaml.cs">
       <DependentUpon>ImportExecDialog.xaml</DependentUpon>
     </Compile>
@@ -180,6 +183,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Dialogs\ConfigureModulesDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Dialogs\DataExportConfigurationDialog.xaml">
+      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Dialogs\ImportExecDialog.xaml">

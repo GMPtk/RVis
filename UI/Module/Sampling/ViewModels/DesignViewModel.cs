@@ -1,4 +1,5 @@
-﻿using LanguageExt;
+﻿using CsvHelper;
+using LanguageExt;
 using ReactiveUI;
 using RVis.Base;
 using RVis.Base.Extensions;
@@ -10,22 +11,30 @@ using RVisUI.AppInf.Extensions;
 using RVisUI.Model;
 using RVisUI.Model.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
+using static RVis.Base.Extensions.NumExt;
+using static RVis.Data.FxData;
+using static Sampling.Properties.Resources;
+using static System.Double;
+using static System.Globalization.CultureInfo;
+using static System.IO.Path;
 using static System.String;
 using DataTable = System.Data.DataTable;
 
 namespace Sampling
 {
-  internal sealed class DesignViewModel : IDesignViewModel, INotifyPropertyChanged, IDisposable
+  internal sealed class DesignViewModel : ViewModelBase, IDesignViewModel
   {
     internal DesignViewModel(
       IAppState appState,
@@ -52,7 +61,7 @@ namespace Sampling
         );
 
       GenerateSamples = ReactiveCommand.Create(
-        HandleGenerateSamples,
+        HandleGenerateSamplesAsync,
         this.WhenAny(vm => vm.CanGenerateSamples, _ => CanGenerateSamples)
         );
 
@@ -84,6 +93,14 @@ namespace Sampling
             ObserveParameterStateChange
             )
           ),
+
+        _moduleState
+          .ObservableForProperty(ms => ms.LatinHypercubeDesign)
+          .Subscribe(
+            _reactiveSafeInvoke.SuspendAndInvoke<object>(
+              ObserveModuleStateLatinHypercubeDesign
+              )
+            ),
 
         moduleState
           .ObservableForProperty(vm => vm.SamplingDesign)
@@ -130,14 +147,14 @@ namespace Sampling
     public int? NSamples
     {
       get => _nSamples;
-      set => this.RaiseAndSetIfChanged(ref _nSamples, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _nSamples, value);
     }
     private int? _nSamples;
 
     public int? Seed
     {
       get => _seed;
-      set => this.RaiseAndSetIfChanged(ref _seed, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _seed, value);
     }
     private int? _seed;
 
@@ -146,28 +163,28 @@ namespace Sampling
     public bool CanGenerateSamples
     {
       get => _canGenerateSamples;
-      set => this.RaiseAndSetIfChanged(ref _canGenerateSamples, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _canGenerateSamples, value);
     }
     private bool _canGenerateSamples;
 
     public IDesignActivityViewModel ActivityViewModel
     {
       get => _activityViewModel;
-      set => this.RaiseAndSetIfChanged(ref _activityViewModel, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _activityViewModel, value);
     }
     private IDesignActivityViewModel _activityViewModel;
 
     public DateTime? CreatedOn
     {
       get => _createdOn;
-      set => this.RaiseAndSetIfChanged(ref _createdOn, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _createdOn, value);
     }
     private DateTime? _createdOn;
 
     public string Invariants
     {
       get => _invariants;
-      set => this.RaiseAndSetIfChanged(ref _invariants, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _invariants, value);
     }
     private string _invariants;
 
@@ -179,31 +196,30 @@ namespace Sampling
     public bool CanCreateDesign
     {
       get => _canCreateDesign;
-      set => this.RaiseAndSetIfChanged(ref _canCreateDesign, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _canCreateDesign, value);
     }
     private bool _canCreateDesign;
-
 
     public ICommand AcquireOutputs { get; }
 
     public bool CanAcquireOutputs
     {
       get => _canAcquireOutputs;
-      set => this.RaiseAndSetIfChanged(ref _canAcquireOutputs, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _canAcquireOutputs, value);
     }
     private bool _canAcquireOutputs;
 
     public TimeSpan? EstimatedAcquireDuration
     {
       get => _estimatedAcquireDuration;
-      set => this.RaiseAndSetIfChanged(ref _estimatedAcquireDuration, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _estimatedAcquireDuration, value);
     }
     private TimeSpan? _estimatedAcquireDuration;
 
     public Arr<(int Index, NumDataTable Output)> Outputs
     {
       get => _outputs;
-      set => this.RaiseAndSetIfChanged(ref _outputs, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _outputs, value);
     }
     private Arr<(int Index, NumDataTable Output)> _outputs;
 
@@ -212,43 +228,289 @@ namespace Sampling
     public bool CanCancelAcquireOutputs
     {
       get => _canCancelAcquireOutputs;
-      set => this.RaiseAndSetIfChanged(ref _canCancelAcquireOutputs, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _canCancelAcquireOutputs, value);
     }
     private bool _canCancelAcquireOutputs;
 
     public double Progress
     {
       get => _progress;
-      set => this.RaiseAndSetIfChanged(ref _progress, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _progress, value);
     }
     private double _progress;
 
     public bool IsSelected
     {
       get => _isSelected;
-      set => this.RaiseAndSetIfChanged(ref _isSelected, value, PropertyChanged);
+      set => this.RaiseAndSetIfChanged(ref _isSelected, value);
     }
     private bool _isSelected;
 
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    public void Dispose() => Dispose(true);
-
-    private void Dispose(bool disposing)
+    internal void ExportData(string targetDirectory, Arr<string> targetOutputs)
     {
-      if (!_disposed)
-      {
-        if (disposing)
-        {
-          _subscriptions.Dispose();
-          _outputsDesignActivityViewModel.Dispose();
-        }
+      RequireNotNull(_moduleState.SamplingDesign);
+      RequireFalse(Outputs.IsEmpty);
+      RequireEqual(_moduleState.SamplingDesign.Samples.Rows.Count, Outputs.Count);
+      RequireDirectory(targetDirectory);
 
-        _disposed = true;
+      const string SAMPLES_FILE_NAME = "samples";
+      RequireFalse(targetOutputs.Contains(SAMPLES_FILE_NAME));
+      SaveToCSV<double>(_moduleState.SamplingDesign.Samples, Combine(targetDirectory, $"{SAMPLES_FILE_NAME}.csv"));
+
+      var independentVariable = _simulation.SimConfig.SimOutput.IndependentVariable;
+      var (_, output) = Outputs.Head();
+      var independentData = _simulation.SimConfig.SimOutput.GetIndependentData(output);
+
+      void SaveOutputToCSV(string name)
+      {
+        var pathToCSV = Combine(targetDirectory, $"{name.ToValidFileName()}.csv");
+
+        using var streamWriter = new StreamWriter(pathToCSV);
+        using var csvWriter = new CsvWriter(streamWriter);
+
+        csvWriter.WriteField(independentData.Name);
+
+        Range(1, Outputs.Count).Iter(i => csvWriter.WriteField($"Spl #{i}"));
+
+        csvWriter.NextRecord();
+
+        for (var i = 0; i < independentData.Length; ++i)
+        {
+          csvWriter.WriteField(independentData[i]);
+
+          Outputs.Iter(o =>
+          {
+            var dependentData = o.Output[name];
+            csvWriter.WriteField(dependentData[i]);
+          });
+
+          csvWriter.NextRecord();
+        }
       }
+
+      targetOutputs.Iter(SaveOutputToCSV);
     }
 
-    private void HandleGenerateSamples()
+    protected override void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        _subscriptions.Dispose();
+        _outputsDesignActivityViewModel.Dispose();
+      }
+
+      base.Dispose(disposing);
+    }
+
+    private static DataTable GenerateDistributionSamples(
+      Arr<ParameterState> parameterStates,
+      IReadOnlyList<IParameterSamplingViewModel> parameterSamplingViewModels,
+      int nSamples,
+      int? seed
+      )
+    {
+      RandomNumberGenerator.ResetGenerator(seed);
+
+      var parameterSamples = parameterStates
+        .Filter(ps => ps.IsSelected)
+        .OrderBy(ps => ps.Name.ToUpperInvariant())
+        .Select(ps =>
+        {
+          var samples = new double[nSamples];
+          return (ParameterState: ps, Samples: samples);
+        })
+        .ToArr();
+
+      var dataTable = new DataTable();
+
+      parameterSamples.Iter(t =>
+      {
+        var distribution = t.ParameterState.GetDistribution();
+        RequireTrue(distribution.IsConfigured);
+        distribution.FillSamples(t.Samples);
+
+        dataTable.Columns.Add(
+          new DataColumn(
+            t.ParameterState.Name,
+            typeof(double)
+            )
+          );
+
+        if (distribution.DistributionType != DistributionType.Invariant)
+        {
+          var parameterSamplingViewModel = parameterSamplingViewModels
+            .Find(psvm => psvm.Parameter.Name == t.ParameterState.Name)
+            .AssertSome();
+          RequireTrue(parameterSamplingViewModel.Distribution.DistributionType == distribution.DistributionType);
+          for (var i = 0; i < t.Samples.Length; ++i)
+          {
+            t.Samples[i] = t.Samples[i].ToSigFigs(5);
+          }
+          parameterSamplingViewModel.Samples = t.Samples.ToArr();
+        }
+      });
+
+      var samplesSet = parameterSamples.Map(t => t.Samples);
+
+      for (var row = 0; row < nSamples; ++row)
+      {
+        var dataRow = dataTable.NewRow();
+
+        for (var column = 0; column < dataTable.Columns.Count; ++column)
+        {
+          dataRow[column] = samplesSet[column][row];
+        }
+
+        dataTable.Rows.Add(dataRow);
+      }
+
+      dataTable.AcceptChanges();
+
+      return dataTable;
+    }
+
+    private static DataTable GenerateHypercubeSamples(
+      Arr<ParameterState> parameterStates,
+      LatinHypercubeDesign latinHypercubeDesign,
+      IReadOnlyList<IParameterSamplingViewModel> parameterSamplingViewModels,
+      int nSamples,
+      int? seed,
+      IRVisClient client
+    )
+    {
+      var selectedParameters = parameterStates.Filter(ps => ps.IsSelected);
+
+      RequireTrue(selectedParameters.ForAll(
+        ps => ps.DistributionType == DistributionType.Uniform ||
+              ps.DistributionType == DistributionType.Invariant
+        )
+      );
+
+      var parameterBounds = selectedParameters
+        .Filter(ps => ps.DistributionType == DistributionType.Uniform)
+        .Map(ps =>
+        {
+          var uniformDistribution = RequireInstanceOf<UniformDistribution>(
+            ps.GetDistribution(DistributionType.Uniform)
+            );
+
+          return (ps.Name, uniformDistribution.Lower, uniformDistribution.Upper);
+        });
+
+      var n = nSamples;
+      var dimension = parameterBounds.Count;
+      var randomized =
+        latinHypercubeDesign.LatinHypercubeDesignType == LatinHypercubeDesignType.Randomized
+          ? "TRUE"
+          : "FALSE";
+      var seedValue = seed?.ToString(InvariantCulture) ?? "NULL";
+
+      var code = Format(
+        InvariantCulture,
+        FMT_LHSDESIGN,
+        n,
+        dimension,
+        randomized,
+        seedValue
+        );
+
+      client.EvaluateNonQuery(code);
+
+      var useSimulatedAnnealing = !IsNaN(latinHypercubeDesign.T0);
+
+      NumDataColumn[] design;
+
+      if (useSimulatedAnnealing)
+      {
+        var t0 = latinHypercubeDesign.T0;
+        var c = latinHypercubeDesign.C;
+        var it = latinHypercubeDesign.Iterations;
+        var p = latinHypercubeDesign.P;
+        var profile = latinHypercubeDesign.Profile switch
+        {
+          TemperatureDownProfile.Geometrical => "GEOM",
+          TemperatureDownProfile.GeometricalMorris => "GEOM_MORRIS",
+          TemperatureDownProfile.Linear => "LINEAR",
+          _ => throw new ArgumentOutOfRangeException(nameof(TemperatureDownProfile))
+        };
+        var imax = latinHypercubeDesign.Imax;
+
+        code = Format(
+          InvariantCulture,
+          FMT_MAXIMINSALHS,
+          t0,
+          c,
+          it,
+          p,
+          profile,
+          imax
+          );
+
+        client.EvaluateNonQuery(code);
+        design = client.EvaluateNumData("rvis_lhsDesign_out_opt$design");
+      }
+      else
+      {
+        design = client.EvaluateNumData("rvis_lhsDesign_out$design");
+      }
+
+      var dataTable = new DataTable();
+
+      selectedParameters.Iter(pb =>
+      {
+        dataTable.Columns.Add(
+          new DataColumn(
+            pb.Name,
+            typeof(double)
+            )
+          );
+      });
+
+      var itemArray = Enumerable
+        .Repeat(NaN, selectedParameters.Count)
+        .Cast<object>()
+        .ToArray();
+
+      selectedParameters.Iter((i, ps) =>
+      {
+        if (ps.DistributionType != DistributionType.Invariant) return;
+        var distribution = RequireInstanceOf<InvariantDistribution>(ps.GetDistribution());
+        itemArray[i] = distribution.Value;
+      });
+
+      var targetIndices = itemArray
+        .Cast<double>()
+        .Select((d, i) => IsNaN(d) ? i : NOT_FOUND)
+        .Where(i => i.IsFound())
+        .ToArr();
+
+      RequireTrue(targetIndices.Count == parameterBounds.Count);
+
+      Range(0, nSamples).Iter(i =>
+      {
+        targetIndices.Iter((j, ti) =>
+        {
+          var value = design[j][i];
+          var (_, lower, upper) = parameterBounds[j];
+          value = lower + value * (upper - lower);
+          itemArray[ti] = value.ToSigFigs(5);
+        });
+
+        dataTable.Rows.Add(itemArray);
+      });
+
+      dataTable.AcceptChanges();
+
+      parameterSamplingViewModels.Iter(
+        vm => vm.Samples = Range(0, nSamples)
+          .Map(i => dataTable.Rows[i].Field<double>(vm.Parameter.Name))
+          .ToArr()
+        );
+
+      return dataTable;
+    }
+
+    private async Task HandleGenerateSamplesAsync()
     {
       RequireTrue(NSamples > 0);
 
@@ -257,68 +519,94 @@ namespace Sampling
         UnloadCurrentDesign();
         _moduleState.SamplingDesign = default;
 
-        RandomNumberGenerator.ResetGenerator(Seed);
+        DataTable samples = default;
 
-        var parameterSamples = _moduleState.ParameterStates
-          .Filter(ps => ps.IsSelected)
-          .OrderBy(ps => ps.Name.ToUpperInvariant())
-          .Select(ps =>
-          {
-            var samples = new double[NSamples.Value];
-            return (ParameterState: ps, Samples: samples);
-          })
-          .ToArr();
-
-        var dataTable = new DataTable();
-
-        parameterSamples.Iter(t =>
+        if (_moduleState.LatinHypercubeDesign.LatinHypercubeDesignType == LatinHypercubeDesignType.None)
         {
-          var distribution = t.ParameterState.GetDistribution();
-          RequireTrue(distribution.IsConfigured);
-          distribution.FillSamples(t.Samples);
+          TaskName = "Generating Samples";
+          IsRunningTask = true;
 
-          dataTable.Columns.Add(
-            new DataColumn(
-              t.ParameterState.Name,
-              typeof(double)
-              )
-            );
-
-          if (distribution.DistributionType != DistributionType.Invariant)
+          try
           {
-            var parameterSamplingViewModel = ParameterSamplingViewModels
-              .Find(psvm => psvm.Parameter.Name == t.ParameterState.Name)
-              .AssertSome();
-            RequireTrue(parameterSamplingViewModel.Distribution.DistributionType == distribution.DistributionType);
-            for (var i = 0; i < t.Samples.Length; ++i)
+            samples = await Task.Run(() => GenerateDistributionSamples(
+              _moduleState.ParameterStates,
+              ParameterSamplingViewModels,
+              NSamples.Value,
+              Seed
+            ));
+          }
+          catch (Exception ex)
+          {
+            _appService.Notify(
+              NotificationType.Error,
+              nameof(DesignViewModel),
+              nameof(GenerateDistributionSamples),
+              ex.Message
+              );
+          }
+
+          IsRunningTask = false;
+        }
+        else
+        {
+          async Task<DataTable> SomeServer(ServerLicense serverLicense)
+          {
+            using (serverLicense)
             {
-              t.Samples[i] = t.Samples[i].ToSigFigs(5);
+              return await Task.Run(() => GenerateHypercubeSamples(
+                _moduleState.ParameterStates,
+                _moduleState.LatinHypercubeDesign,
+                ParameterSamplingViewModels,
+                NSamples.Value,
+                Seed,
+                serverLicense.Client
+              ));
             }
-            parameterSamplingViewModel.Samples = t.Samples.ToArr();
           }
-        });
 
-        var samplesSet = parameterSamples.Map(t => t.Samples);
-
-        for (var row = 0; row < NSamples.Value; ++row)
-        {
-          var dataRow = dataTable.NewRow();
-
-          for (var column = 0; column < dataTable.Columns.Count; ++column)
+          Task<DataTable> NoServer()
           {
-            dataRow[column] = samplesSet[column][row];
+            _appService.Notify(
+              NotificationType.Information,
+              nameof(DesignViewModel),
+              nameof(GenerateHypercubeSamples),
+              "No R server available."
+              );
+
+            return default;
           }
 
-          dataTable.Rows.Add(dataRow);
+          TaskName = "Generating Hypercube Samples";
+          IsRunningTask = true;
+
+          try
+          {
+            samples = await _appService.RVisServerPool
+              .RequestServer()
+              .MatchUnsafeAsync(SomeServer, NoServer);
+          }
+          catch (Exception ex)
+          {
+            _appService.Notify(
+              NotificationType.Error,
+              nameof(DesignViewModel),
+              nameof(GenerateHypercubeSamples),
+              ex.Message
+              );
+          }
+
+          IsRunningTask = false;
+
+          if (samples == default) return;
         }
 
         CreatedOn = DateTime.Now;
 
         var (ms, _) = _simData.GetExecutionInterval(_simulation).IfNone((0, 0));
-        var msExecutionTime = ms * dataTable.Rows.Count / _appSettings.RThrottlingUseCores;
+        var msExecutionTime = ms * samples.Rows.Count / _appSettings.RThrottlingUseCores;
         EstimatedAcquireDuration = TimeSpan.FromMilliseconds(msExecutionTime);
 
-        _samplesDesignActivityViewModel.Samples = dataTable.DefaultView;
+        _samplesDesignActivityViewModel.Samples = samples.DefaultView;
         ActivityViewModel = _samplesDesignActivityViewModel;
 
         UpdateEnable();
@@ -558,6 +846,14 @@ namespace Sampling
 
       ActivityViewModel = _noDesignActivityViewModel;
 
+      UpdateEnable();
+    }
+
+    private void ObserveModuleStateLatinHypercubeDesign(object _)
+    {
+      UnloadCurrentDesign();
+      _moduleState.SamplingDesign = default;
+      ActivityViewModel = _noDesignActivityViewModel;
       UpdateEnable();
     }
 
@@ -807,6 +1103,5 @@ namespace Sampling
     private readonly IDisposable _subscriptions;
     private (SimInput Input, bool OutputRequested, NumDataTable Output)[] _outputRequestJob;
     private bool _runOutputRequestJob;
-    private bool _disposed = false;
   }
 }

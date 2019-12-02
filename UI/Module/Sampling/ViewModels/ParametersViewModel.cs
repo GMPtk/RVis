@@ -16,6 +16,7 @@ using System.Reactive.Disposables;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
+using static System.Double;
 
 namespace Sampling
 {
@@ -23,6 +24,8 @@ namespace Sampling
   {
     internal ParametersViewModel(IAppState appState, IAppService appService, IAppSettings appSettings, ModuleState moduleState)
     {
+      _appState = appState;
+      _appService = appService;
       _simulation = appState.Target.AssertSome("No simulation");
       _moduleState = moduleState;
 
@@ -42,7 +45,6 @@ namespace Sampling
         .AssertSome($"Unknown parameter in module state: {ps.Name}");
 
         parameterViewModel.IsSelected = ps.IsSelected;
-        parameterViewModel.Distribution = ps.GetDistribution().ToString(ps.Name);
       });
 
       SelectedParameterViewModels = new ObservableCollection<IParameterViewModel>(
@@ -53,40 +55,63 @@ namespace Sampling
         vm => vm.Name == moduleState.ParametersState.SelectedParameter
         );
 
+      _latinHypercubeDesignType = _moduleState.LatinHypercubeDesign.LatinHypercubeDesignType;
+
+      ConfigureLHS = ReactiveCommand.Create(
+        HandleConfigureLHS,
+        this.WhenAny(vm => vm.CanConfigureLHS, _ => CanConfigureLHS)
+        );
+
       _parameterDistributionViewModel = new ParameterDistributionViewModel(appState, appService, appSettings, true);
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
-      _subscriptions = new CompositeDisposable(
+      using (_reactiveSafeInvoke.SuspendedReactivity)
+      {
+        _subscriptions = new CompositeDisposable(
 
-        this
-          .WhenAny(vm => vm.SelectedParameterViewModel, _ => default(object))
-          .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<object>(
-              ObserveSelectedParameterViewModel
+          this
+            .WhenAny(vm => vm.SelectedParameterViewModel, _ => default(object))
+            .Subscribe(
+              _reactiveSafeInvoke.SuspendAndInvoke<object>(
+                ObserveSelectedParameterViewModel
+                )
+              ),
+
+          _parameterDistributionViewModel
+            .ObservableForProperty(vm => vm.ParameterState)
+            .Subscribe(
+              _reactiveSafeInvoke.SuspendAndInvoke<object>(
+                ObserveParameterDistributionViewModelParameterState
+                )
+              ),
+
+          moduleState.ParameterStateChanges.Subscribe(
+            _reactiveSafeInvoke.SuspendAndInvoke<(Arr<ParameterState>, ObservableQualifier)>(
+              ObserveModuleStateParameterStateChange
               )
-            ),
-
-        _parameterDistributionViewModel
-          .ObservableForProperty(vm => vm.ParameterState)
-          .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<object>(
-              ObserveParameterDistributionViewModelParameterState
-              )
-            ),
-
-        moduleState.ParameterStateChanges.Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<(Arr<ParameterState>, ObservableQualifier)>(
-            ObserveModuleStateParameterStateChange
             )
-          )
 
-      );
+        );
+
+        UpdateParameterViewModelDistributions(moduleState.ParameterStates);
+        UpdateSelectedParameter();
+        UpdateEnable();
+      }
     }
 
     public Arr<IParameterViewModel> AllParameterViewModels { get; }
 
     public ObservableCollection<IParameterViewModel> SelectedParameterViewModels { get; }
+
+    public bool CanConfigureLHS
+    {
+      get => _canConfigureLHS;
+      set => this.RaiseAndSetIfChanged(ref _canConfigureLHS, value, PropertyChanged);
+    }
+    private bool _canConfigureLHS;
+
+    public ICommand ConfigureLHS { get; }
 
     public int SelectedParameterViewModel
     {
@@ -96,6 +121,13 @@ namespace Sampling
     private int _selectedParameterViewModel;
 
     public IParameterDistributionViewModel ParameterDistributionViewModel => _parameterDistributionViewModel;
+
+    public LatinHypercubeDesignType LatinHypercubeDesignType
+    {
+      get => _latinHypercubeDesignType;
+      set => this.RaiseAndSetIfChanged(ref _latinHypercubeDesignType, value, PropertyChanged);
+    }
+    private LatinHypercubeDesignType _latinHypercubeDesignType;
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -139,6 +171,135 @@ namespace Sampling
         }
 
         parameterViewModel.IsSelected = !isSelected;
+
+        UpdateEnable();
+      }
+    }
+
+    private void HandleConfigureLHS()
+    {
+      var view = new LHSConfigurationDialog();
+
+      var latinHypercubeDesign = _moduleState.LatinHypercubeDesign;
+      var variables = _moduleState.ParameterStates.Filter(ps => ps.IsSelected).Map(ps =>
+      {
+        double lower;
+        double upper;
+
+        if (ps.DistributionType == DistributionType.Invariant)
+        {
+          var distribution = RequireInstanceOf<InvariantDistribution>(ps.GetDistribution());
+
+          lower = distribution.Value;
+          upper = lower;
+        }
+        else
+        {
+          var distribution = RequireInstanceOf<UniformDistribution>(ps.GetDistribution(DistributionType.Uniform));
+
+          lower = distribution.Lower;
+          upper = distribution.Upper;
+        }
+
+        var requiresInitialization =
+          IsNaN(lower) || IsInfinity(lower) ||
+          IsNaN(upper) || IsInfinity(upper);
+
+        if (requiresInitialization)
+        {
+          var parameter = _simulation.SimConfig.SimInput.SimParameters.GetParameter(ps.Name);
+          var value = parameter.Scalar;
+
+          if (IsNaN(lower) || IsInfinity(lower))
+          {
+            lower = value.GetPreviousOrderOfMagnitude();
+          }
+
+          if (IsNaN(upper) || IsInfinity(upper))
+          {
+            upper = value.GetNextOrderOfMagnitude();
+          }
+        }
+
+        return (ps.Name, lower, upper);
+      });
+
+      var viewModel = new LHSConfigurationViewModel(_appState, _appService)
+      {
+        Variables = variables,
+        LatinHypercubeDesign = latinHypercubeDesign
+      };
+
+      if (viewModel.LatinHypercubeDesignType == LatinHypercubeDesignType.None)
+      {
+        viewModel.LatinHypercubeDesignType = LatinHypercubeDesignType.Randomized;
+      }
+
+      var didOK = _appService.ShowDialog(view, viewModel, default);
+
+      if (didOK)
+      {
+        _moduleState.LatinHypercubeDesign = viewModel.LatinHypercubeDesign;
+        LatinHypercubeDesignType = _moduleState.LatinHypercubeDesign.LatinHypercubeDesignType;
+
+        var isEnable = LatinHypercubeDesignType != LatinHypercubeDesignType.None;
+
+        if (isEnable)
+        {
+          var parameterStates = _moduleState.ParameterStates.Map(ps =>
+          {
+            if (!ps.IsSelected) return ps;
+
+            var (_, lower, upper) = viewModel.Variables
+              .Find(v => v.Parameter == ps.Name)
+              .AssertSome();
+
+            if (lower == upper)
+            {
+              var index = ps.Distributions.FindIndex(
+                d => d.DistributionType == DistributionType.Invariant
+                );
+
+              RequireTrue(index.IsFound());
+
+              var distributions = ps.Distributions.SetItem(
+                index,
+                new InvariantDistribution(lower)
+                );
+
+              return new ParameterState(
+                ps.Name,
+                DistributionType.Invariant,
+                distributions,
+                ps.IsSelected
+                );
+            }
+            else
+            {
+              var index = ps.Distributions.FindIndex(
+                d => d.DistributionType == DistributionType.Uniform
+                );
+
+              RequireTrue(index.IsFound());
+
+              var distributions = ps.Distributions.SetItem(
+                index,
+                new UniformDistribution(lower, upper)
+                );
+
+              return new ParameterState(
+                ps.Name,
+                DistributionType.Uniform,
+                distributions,
+                ps.IsSelected
+                );
+            }
+          });
+
+          _moduleState.ParameterStates = parameterStates;
+        }
+
+        UpdateParameterViewModelDistributions(_moduleState.ParameterStates);
       }
     }
 
@@ -179,6 +340,22 @@ namespace Sampling
       }
 
       _parameterDistributionViewModel.ParameterState.Match(Some, None);
+
+      UpdateEnable();
+    }
+
+    private void UpdateParameterViewModelDistributions(Arr<ParameterState> parameterStates)
+    {
+      parameterStates
+        .Filter(ps => ps.IsSelected)
+        .Iter(ps =>
+        {
+          var parameterViewModel = AllParameterViewModels
+            .Find(vm => vm.Name == ps.Name)
+            .AssertSome();
+          RequireTrue(parameterViewModel.IsSelected);
+          parameterViewModel.Distribution = ps.GetDistribution().ToString(ps.Name);
+        });
     }
 
     private void ObserveModuleStateParameterStateChange((Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier) change)
@@ -202,8 +379,6 @@ namespace Sampling
             SelectedParameterViewModels.InsertInOrdered(parameterViewModel, pvm => pvm.SortKey);
           }
 
-          parameterViewModel.Distribution = ps.GetDistribution().ToString(ps.Name);
-
           if (parameterViewModel == selectedParameterViewModel)
           {
             ParameterDistributionViewModel.ParameterState = ps;
@@ -226,6 +401,10 @@ namespace Sampling
           }
         }
       });
+
+      UpdateParameterViewModelDistributions(change.ParameterStates);
+
+      UpdateEnable();
     }
 
     private void UpdateSelectedParameter()
@@ -246,6 +425,11 @@ namespace Sampling
       }
     }
 
+    private void UpdateEnable()
+    {
+      CanConfigureLHS = SelectedParameterViewModels.Count > 0;
+    }
+
     private void Dispose(bool disposing)
     {
       if (!_disposed)
@@ -260,6 +444,8 @@ namespace Sampling
       }
     }
 
+    private readonly IAppState _appState;
+    private readonly IAppService _appService;
     private readonly Simulation _simulation;
     private readonly ModuleState _moduleState;
     private readonly ICommand _toggleSelectParameter;

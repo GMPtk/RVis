@@ -6,10 +6,14 @@ using RVisUI.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
+using static RVis.Base.Check;
+using static System.Environment;
+using static System.IO.Path;
 
 namespace RVisUI.Mvvm
 {
@@ -24,6 +28,12 @@ namespace RVisUI.Mvvm
 
       BusyCancel = ReactiveCommand.Create(HandleBusyCancel);
       ChangeCommonConfiguration = ReactiveCommand.Create(HandleChangeCommonConfiguration);
+      Export = ReactiveCommand.Create(
+        HandleExport,
+        appState.WhenAny(
+          @as => @as.ActiveUIComponent,
+          _ => appState.ActiveUIComponent.ViewModel is IExportedDataProvider
+          ));
       Close = ReactiveCommand.Create(HandleClose);
 
       _appState.Simulation.Subscribe(
@@ -57,6 +67,8 @@ namespace RVisUI.Mvvm
     private string _name;
 
     public ICommand ChangeCommonConfiguration { get; }
+
+    public ICommand Export { get; }
 
     public ICommand Close { get; }
 
@@ -102,6 +114,60 @@ namespace RVisUI.Mvvm
       set => this.RaiseAndSetIfChanged(ref _activeUIComponentName, value);
     }
     private string _activeUIComponentName;
+
+    private void HandleExport()
+    {
+      var exportedDataProvider = RequireInstanceOf<IExportedDataProvider>(
+        _appState.ActiveUIComponent.ViewModel
+        );
+
+      try
+      {
+        var rootExportDirectory = Combine(
+          GetFolderPath(SpecialFolder.MyDocuments),
+          "RVisData"
+          );
+
+        var dataExportConfiguration = exportedDataProvider.GetConfiguration(rootExportDirectory);
+
+        var dataExportConfigurationViewModel = new DataExportConfigurationViewModel(
+          _appService
+          )
+        {
+          DataExportConfiguration = dataExportConfiguration
+        };
+
+        var didOK = _appService.ShowDialog(dataExportConfigurationViewModel, default);
+
+        if (didOK)
+        {
+          dataExportConfiguration = dataExportConfigurationViewModel.DataExportConfiguration;
+
+          exportedDataProvider.ExportData(dataExportConfiguration);
+
+          if (dataExportConfiguration.OpenAfterExport)
+          {
+            Process.Start(Combine(
+              dataExportConfiguration.RootExportDirectory,
+              dataExportConfiguration.ExportDirectoryName
+              ));
+          }
+          else
+          {
+            _appState.Status = $"Export succeeded: {dataExportConfiguration.ExportDirectoryName}";
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        _appService.Notify(
+          NotificationType.Error,
+          nameof(SimulationHomeViewModel),
+          nameof(DataExportConfiguration),
+          ex.Message
+          );
+      }
+    }
 
     private void HandleChangeCommonConfiguration()
     {
