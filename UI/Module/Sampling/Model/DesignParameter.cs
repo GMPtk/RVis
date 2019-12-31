@@ -2,7 +2,7 @@
 
 namespace Sampling
 {
-  internal struct DesignParameter
+  internal readonly struct DesignParameter
   {
     internal DesignParameter(string name, IDistribution distribution)
     {

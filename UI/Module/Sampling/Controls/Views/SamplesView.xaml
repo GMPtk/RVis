@@ -1,0 +1,368 @@
+﻿<UserControl x:Class="Sampling.Controls.Views.SamplesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:impl="clr-namespace:Sampling.Controls.Views.Impl"
+             xmlns:local="clr-namespace:Sampling"
+             xmlns:design="clr-namespace:Sampling.Design"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" d:DesignWidth="1366"
+             d:DataContext="{d:DesignInstance Type=design:SamplesViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+
+      <Style x:Key="SamplesDataGridStyle" TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+        <Style.Triggers>
+          <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Items.Count}" Value="0">
+            <Setter Property="Template">
+              <Setter.Value>
+                <ControlTemplate>
+                  <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="NONE" />
+                  </StackPanel>
+                </ControlTemplate>
+              </Setter.Value>
+            </Setter>
+          </DataTrigger>
+        </Style.Triggers>
+      </Style>
+
+      <Style x:Key="ItemsControlStyle" TargetType="ItemsControl">
+        <Style.Triggers>
+          <DataTrigger Binding="{Binding Items.Count, RelativeSource={RelativeSource Self}}" Value="0">
+            <Setter Property="Template">
+              <Setter.Value>
+                <ControlTemplate>
+                  <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="NONE CONFIGURED" />
+                  </StackPanel>
+                </ControlTemplate>
+              </Setter.Value>
+            </Setter>
+          </DataTrigger>
+        </Style.Triggers>
+      </Style>
+
+      <Style x:Key="ItemsControlContainerStyle" TargetType="ContentPresenter">
+        <Setter Property="FrameworkElement.Margin" Value="0,0,0,4"/>
+      </Style>
+
+      <DataTemplate x:Key="PSVMItemTemplate">
+        <impl:ParameterSamplingView Height="300"
+                                    Width="400"
+                                    Margin="0 0 10 0"
+                                    DataContext="{Binding}"
+                                    />
+      </DataTemplate>
+
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+
+    <Grid.RowDefinitions>
+      <RowDefinition Height="200" />
+      <RowDefinition />
+    </Grid.RowDefinitions>
+
+    <Grid Margin="0 0 0 5">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+
+      <GroupBox Margin="0 0 5 0" 
+                Header="DISTRIBUTIONS"
+                >
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                      HorizontalScrollBarVisibility="Hidden"
+                      >
+          <ItemsControl ItemsSource="{Binding Distributions}" 
+                        Style="{StaticResource ItemsControlStyle}"
+                        ItemContainerStyle="{StaticResource ItemsControlContainerStyle}"
+                        />
+        </ScrollViewer>
+
+      </GroupBox>
+
+      <GroupBox Grid.Column="1" 
+                Margin="5 0 5 0" 
+                Header="INVARIANTS"
+                >
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                      HorizontalScrollBarVisibility="Hidden"
+                      >
+          <ItemsControl ItemsSource="{Binding Invariants}" 
+                        Style="{StaticResource ItemsControlStyle}"
+                        ItemContainerStyle="{StaticResource ItemsControlContainerStyle}"
+                        />
+        </ScrollViewer>
+
+      </GroupBox>
+
+      <GroupBox Grid.Column="2"
+                Margin="5 0 0 0"
+                Header="CONFIGURATION"
+                >
+        <GroupBox.Style>
+          <Style TargetType="GroupBox" BasedOn="{StaticResource MaterialDesignGroupBox}">
+            <Setter Property="IsEnabled" Value="False"/>
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsReadOnly}" Value="False">
+                <Setter Property="IsEnabled" Value="True"/>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </GroupBox.Style>
+
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+
+          <Grid VerticalAlignment="Center" Margin="10">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition/>
+              <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition/>
+              <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Margin="10" 
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="No. of samples"
+                       />
+            <TextBox Grid.Column="1" 
+                     Margin="10"
+                     HorizontalAlignment="Left"
+                     Width="100"
+                     Text="{Binding NSamples, TargetNullValue=''}"
+                     />
+            <TextBlock Grid.Row="1"
+                       Margin="10"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Text="Seed"
+                       />
+            <TextBox Grid.Row="1"
+                     Grid.Column="1"
+                     Margin="10"
+                     HorizontalAlignment="Left"
+                     Width="100"
+                     Text="{Binding Seed, TargetNullValue=''}"
+                     />
+          </Grid>
+
+          <StackPanel Grid.Column="1" VerticalAlignment="Center">
+            <Button HorizontalAlignment="Center" 
+                    Margin="10 10 10 5" 
+                    Command="{Binding ConfigureLHS}" 
+                    ToolTip="Configure Latin hypercube sampling"
+                    >
+              <StackPanel Orientation="Horizontal">
+                <md:PackIcon Margin="0,0,2,0" 
+                             VerticalAlignment="Center" 
+                             Kind="Tick" 
+                             Foreground="Green"
+                             >
+                  <md:PackIcon.Style>
+                    <Style TargetType="md:PackIcon">
+                      <Setter Property="Visibility" Value="Visible"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding LatinHypercubeDesignType}" Value="{x:Static local:LatinHypercubeDesignType.None}">
+                          <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </md:PackIcon.Style>
+                </md:PackIcon>
+                <md:PackIcon Margin="0,0,2,0" 
+                             VerticalAlignment="Center" 
+                             Kind="Circle" 
+                             Foreground="Red"
+                             >
+                  <md:PackIcon.Style>
+                    <Style TargetType="md:PackIcon">
+                      <Setter Property="Visibility" Value="Collapsed"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding LatinHypercubeDesignType}" Value="{x:Static local:LatinHypercubeDesignType.None}">
+                          <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </md:PackIcon.Style>
+                </md:PackIcon>
+                <TextBlock Margin="2,0,0,0" VerticalAlignment="Center" Text="Hypercube..."/>
+              </StackPanel>
+            </Button>
+            <Button HorizontalAlignment="Center" 
+                    Margin="10 5 10 10" 
+                    Command="{Binding ConfigureRC}" 
+                    ToolTip="Configure rank correlation"
+                    >
+              <StackPanel Orientation="Horizontal">
+                <md:PackIcon Margin="0,0,2,0" 
+                             VerticalAlignment="Center" 
+                             Kind="Tick" 
+                             Foreground="Green"
+                             >
+                  <md:PackIcon.Style>
+                    <Style TargetType="md:PackIcon">
+                      <Setter Property="Visibility" Value="Visible"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding RankCorrelationDesignType}" Value="{x:Static local:RankCorrelationDesignType.None}">
+                          <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </md:PackIcon.Style>
+                </md:PackIcon>
+                <md:PackIcon Margin="0,0,2,0" 
+                             VerticalAlignment="Center" 
+                             Kind="Circle" 
+                             Foreground="Red"
+                             >
+                  <md:PackIcon.Style>
+                    <Style TargetType="md:PackIcon">
+                      <Setter Property="Visibility" Value="Collapsed"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding RankCorrelationDesignType}" Value="{x:Static local:RankCorrelationDesignType.None}">
+                          <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </md:PackIcon.Style>
+                </md:PackIcon>
+                <TextBlock Margin="2,0,0,0" 
+                           VerticalAlignment="Center" 
+                           Text="Correlation..."
+                           />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+
+          <Button Grid.Column="1" 
+                  Style="{StaticResource HelpButtonStyle}"
+                  VerticalAlignment="Top"
+                  HorizontalAlignment="Right"
+                  ToolTip="Help about sampling configuration" 
+                  Tag="rvis/modules/sampling/samples/#configure-sampling"
+                  />
+
+        </Grid>
+
+      </GroupBox>
+
+    </Grid>
+
+    <GroupBox Grid.Row="1" 
+              Margin="0 5 0 0"
+              Header="SAMPLES"
+              >
+
+      <Grid>
+
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" 
+                    HorizontalAlignment="Right"
+                    >
+
+          <Button ToolTip="Generate samples"
+                  Command="{Binding GenerateSamples}" 
+                  HorizontalAlignment="Left"
+                  Margin="10 0 5 0" 
+                  Padding="0"
+                  Height="36"
+                  Width="36" 
+                  >
+            <md:PackIcon Kind="Flash"
+                         Height="24"
+                         Width="24" 
+                         />
+          </Button>
+
+          <Button ToolTip="View correlation"
+                  Command="{Binding ViewCorrelation}" 
+                  HorizontalAlignment="Left"
+                  Margin="5 0 10 0" 
+                  Padding="0"
+                  Height="36"
+                  Width="36" 
+                  >
+            <md:PackIcon Kind="NumericZeroBoxMultipleOutline"
+                         Height="24"
+                         Width="24" 
+                         />
+          </Button>
+
+        </StackPanel>
+
+        <DataGrid Grid.Row="1"
+                  Margin="0 10 0 0"
+                  ItemsSource="{Binding Samples}" 
+                  Style="{StaticResource SamplesDataGridStyle}" 
+                  IsReadOnly="True"
+                  CanUserSortColumns="False"
+                  />
+
+        <ScrollViewer Grid.Column="1" 
+                      Grid.Row="1"
+                      Margin="0"
+                      HorizontalScrollBarVisibility="Hidden"
+                      VerticalScrollBarVisibility="Auto"
+                      >
+
+          <ItemsControl ItemsSource="{Binding ParameterSamplingViewModels}"
+                        ItemTemplate="{StaticResource PSVMItemTemplate}"
+                        />
+
+        </ScrollViewer>
+
+        <Button Grid.Column="1" 
+                Style="{StaticResource HelpButtonStyle}"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Right"
+                ToolTip="Help about generating samples" 
+                Tag="rvis/modules/sampling/samples/#generate-samples"
+                />
+
+      </Grid>
+
+    </GroupBox>
+
+  </Grid>
+
+</UserControl>

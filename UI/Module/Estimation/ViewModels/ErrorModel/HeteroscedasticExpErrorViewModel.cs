@@ -49,7 +49,7 @@ namespace Estimation
     internal HeteroscedasticExpErrorViewModel()
       : this(new RVisUI.AppInf.Design.AppService())
     {
-      RequireTrue(Splat.ModeDetector.InDesignMode());
+      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
 
       ErrorModel = HeteroscedasticExpErrorModel.Default;
     }

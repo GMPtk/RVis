@@ -8,15 +8,14 @@ using System.Linq;
 using System.Reactive.Linq;
 using static RVis.Base.Check;
 using DataTable = System.Data.DataTable;
+using static LanguageExt.Prelude;
 
 namespace Sensitivity
 {
   internal sealed partial class DesignViewModel
   {
-    private static (SimInput Input, bool OutputRequested, Arr<double> Output)[] CompileOutputRequestJob(
-      string outputName,
+    private static Arr<SimInput> CompileSampleInputs(
       Simulation simulation,
-      ISimData simData,
       Arr<DataTable> samples,
       Arr<DesignParameter> invariants
       )
@@ -25,10 +24,6 @@ namespace Sensitivity
         dp => dp.Distribution.DistributionType == DistributionType.Invariant
         ));
 
-      var totalNoOfRows = samples.Sum(dt => dt.Rows.Count);
-      RequireTrue(totalNoOfRows > 0);
-
-      var job = new (SimInput Input, bool OutputRequested, Arr<double> Output)[totalNoOfRows];
       var defaultInput = simulation.SimConfig.SimInput;
 
       var targetParameters = samples.Head().Columns
@@ -42,11 +37,8 @@ namespace Sensitivity
         return parameter.With(dp.Distribution.Mean);
       });
 
-      var jobItem = 0;
-
-      samples.Iter(dt =>
-      {
-        for (var row = 0; row < dt.Rows.Count; ++row)
+      return samples
+        .Map(dt => Range(0, dt.Rows.Count).Map(row =>
         {
           var dataRow = dt.Rows[row];
 
@@ -54,20 +46,28 @@ namespace Sensitivity
             .Map((i, p) => p.With(dataRow.Field<double>(i)))
             .ToArr();
 
-          var input = defaultInput.With(sampleParameters + invariantParameters);
+          return defaultInput.With(sampleParameters + invariantParameters);
+        }))
+        .Bind(ei => ei)
+        .ToArr();
+    }
 
+    private static (SimInput Input, bool OutputRequested, Arr<double> Output)[] CompileOutputRequestJob(
+      string outputName,
+      Simulation simulation,
+      ISimData simData,
+      Arr<SimInput> inputs
+      ) => inputs
+        .Map(input =>
+        {
           var output = simData.GetOutput(input, simulation).Match(
             o => o[outputName].Data.ToArr(),
             () => default
             );
 
-          job[jobItem] = (input, false, output);
-          ++jobItem;
-        }
-      });
-
-      return job;
-    }
+          return (input, false, output);
+        })
+        .ToArray();
 
     private void Measure(Arr<Arr<double>> designOutputs)
     {

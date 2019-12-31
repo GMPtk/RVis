@@ -282,7 +282,7 @@ namespace Sensitivity
       var omegaFromCukier = false.ToString(InvariantCulture).ToUpperInvariant();
       var qfs = Join(", ", signatures.Map(s => $"\"{s.FunctionName}\""));
 
-      string FuncParamsToListArgs(Arr<(string ArgName, double ArgValue)> funcParams) =>
+      static string FuncParamsToListArgs(Arr<(string ArgName, double ArgValue)> funcParams) =>
         Join(", ", funcParams.Map(fp => $"{fp.ArgName} = {fp.ArgValue.ToString(InvariantCulture)}"));
 
       var qfargs = signatures.Count == 1

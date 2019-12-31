@@ -51,7 +51,7 @@ namespace Estimation
     internal HeteroscedasticPowerErrorViewModel()
       : this(new RVisUI.AppInf.Design.AppService())
     {
-      RequireTrue(Splat.ModeDetector.InDesignMode());
+      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
 
       ErrorModel = HeteroscedasticPowerErrorModel.Default;
     }

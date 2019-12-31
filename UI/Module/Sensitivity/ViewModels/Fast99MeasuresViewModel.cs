@@ -43,6 +43,8 @@ namespace Sensitivity
       _sensitivityDesigns = sensitivityDesigns;
 
       _simulation = appState.Target.AssertSome();
+      var independentVariable = _simulation.SimConfig.SimOutput.IndependentVariable;
+      XUnits = independentVariable.Unit;
 
       RankParameters = ReactiveCommand.Create(
         HandleRankParameters,
@@ -168,12 +170,7 @@ namespace Sensitivity
     }
     private Fast99MeasureType _fast99MeasureType = Fast99MeasureType.None;
 
-    public string XUnits
-    {
-      get => _xUnits;
-      set => this.RaiseAndSetIfChanged(ref _xUnits, value, PropertyChanged);
-    }
-    private string _xUnits;
+    public string XUnits { get; }
 
     public string XBeginText
     {

@@ -7,6 +7,7 @@
              xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
              xmlns:views="clr-namespace:Sampling.Controls.Views"
              xmlns:design="clr-namespace:Sampling.Design"
+             xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
              mc:Ignorable="d" 
              d:DesignHeight="768" d:DesignWidth="1366"
              d:DataContext="{d:DesignInstance Type=design:ViewModel, IsDesignTimeCreatable=True}"
@@ -24,6 +25,8 @@
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
       </ResourceDictionary.MergedDictionaries>
+      
+      <swc:BooleanToVisibilityConverter x:Key="b2v"/>
     </ResourceDictionary>
   </UserControl.Resources>
   
@@ -35,8 +38,16 @@
           <Setter Property="ma:ControlsHelper.HeaderFontSize" Value="13"/>
         </Style>
       </TabControl.Resources>
-      <TabItem Header="PARAMETERS" DataContext="{Binding ParametersViewModel}">
+      <TabItem Header="PARAMETERS" 
+               DataContext="{Binding ParametersViewModel}"
+               Visibility="{Binding IsVisible, Converter={StaticResource b2v}}"
+               >
         <views:ParametersView />
+      </TabItem>
+      <TabItem Header="SAMPLES" 
+               DataContext="{Binding SamplesViewModel}"
+               >
+        <views:SamplesView />
       </TabItem>
       <TabItem Header="DESIGN" 
                DataContext="{Binding DesignViewModel}"
@@ -44,7 +55,15 @@
                >
         <views:DesignView />
       </TabItem>
-      <TabItem Header="SAVED DATA" DataContext="{Binding DesignDigestsViewModel}">
+      <TabItem Header="OUTPUTS" 
+               DataContext="{Binding OutputsViewModel}"
+               Visibility="{Binding IsVisible, Converter={StaticResource b2v}}"
+        >
+        <views:OutputsView />
+      </TabItem>
+      <TabItem Header="SAVED DATA" 
+               DataContext="{Binding DesignDigestsViewModel}"
+               >
         <views:DesignDigestsView />
       </TabItem>
     </TabControl>

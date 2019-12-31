@@ -13,4 +13,10 @@
     GeometricalMorris,
     Linear
   }
+
+  internal enum RankCorrelationDesignType
+  {
+    None,
+    ImanConn
+  }
 }

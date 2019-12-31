@@ -130,6 +130,77 @@ rvis_lhsDesign_out &lt;- DiceDesign::lhsDesign(
   seed = rvis_seed
   )</value>
   </data>
+  <data name="FMT_LOAD_DATA" xml:space="preserve">
+    <value>wd &lt;- getwd()
+data_directory &lt;- "{0}"
+setwd(data_directory)
+
+# load samples and plot histograms
+
+parameter_names &lt;- c({1})
+samples &lt;- read.csv("{2}.csv", header = TRUE)
+
+hist_samples &lt;- function(parameter_name)
+{{
+  hist(
+    samples[,parameter_name], 
+    main = paste(parameter_name, "Samples"), 
+    xlab = parameter_name
+    )
+}}
+
+invisible(capture.output(lapply(parameter_names, hist_samples)))
+
+# load outputs and plot traces
+
+output_names &lt;- c({3})
+
+load_output &lt;- function(output_name)
+{{
+  df &lt;- read.csv(
+    paste(output_name, "csv", sep = "."), 
+    header = TRUE
+    )
+  
+  assign(output_name, df, pos = 1)
+}}
+
+invisible(capture.output(lapply(output_names, load_output)))
+
+plot_output &lt;- function(output_name)
+{{
+  df &lt;- get(output_name)
+
+  selected_columns &lt;- sapply(1:ncol(df), function(i) !any(is.na(df[,i])))  
+  
+  df &lt;- df[, selected_columns]
+
+  plot(
+    range(df[,1]), 
+    range(df[,2:ncol(df)]), 
+    main = paste(output_name, "samples"), 
+    xlab = colnames(df)[1], 
+    ylab = output_name, 
+    type = "n"
+    )
+  
+  for(i in 2:ncol(df))
+  {{
+    lines(
+      df[,1], 
+      df[,i], 
+      type = "l", 
+      col = "black", 
+      pch = ".", 
+      lty = 1
+    )
+  }}
+}}
+
+invisible(capture.output(lapply(output_names, plot_output)))
+
+setwd(wd)</value>
+  </data>
   <data name="FMT_MAXIMINSALHS" xml:space="preserve">
     <value>rvis_T0 &lt;- {0}
 rvis_c &lt;- {1}

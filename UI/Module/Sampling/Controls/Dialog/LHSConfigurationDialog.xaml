@@ -8,7 +8,7 @@
                    xmlns:design="clr-namespace:Sampling.Design"
                    mc:Ignorable="d"
                    Title="Configure Latin Hypercube Sampling"
-                   Height="500" Width="700"
+                   Height="450" Width="500"
                    GlowBrush="{DynamicResource AccentColorBrush}"
                    NonActiveGlowBrush="Red"
                    ResizeMode="CanResizeWithGrip"
@@ -74,44 +74,11 @@
 
     <Grid Visibility="{Binding IsDiceDesignInstalled, Converter={StaticResource nb2vc}}">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition/>
-        <ColumnDefinition Width="Auto"/>
-        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition />
+        <ColumnDefinition />
       </Grid.ColumnDefinitions>
 
-      <GroupBox Margin="10,10,5,0" Header="Parameter Upper/Lower Bounds">
-
-        <ScrollViewer HorizontalScrollBarVisibility="Hidden"
-                    VerticalScrollBarVisibility="Auto">
-
-          <ItemsControl ItemsSource="{Binding LHSParameterViewModels}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <StackPanel Orientation="Horizontal">
-                  <TextBlock VerticalAlignment="Center" 
-                             Margin="0,0,5,0"
-                             Text="{Binding Name, StringFormat={}{0}:}"
-                             />
-                  <TextBox Width="50" 
-                           Text="{Binding Lower, TargetNullValue=''}"
-                           />
-                  <TextBlock VerticalAlignment="Center" 
-                             Margin="5,0,5,0"
-                             Text="to"
-                             />
-                  <TextBox Width="50" 
-                           Text="{Binding Upper, TargetNullValue=''}"
-                           />
-                </StackPanel>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-
-        </ScrollViewer>
-
-      </GroupBox>
-
-      <GroupBox Grid.Column="1" 
+      <GroupBox Grid.Column="0" 
                 Margin="5,10,5,10" 
                 VerticalAlignment="Top"
                 Header="Design">
@@ -152,7 +119,7 @@
 
       </GroupBox>
 
-      <GroupBox Grid.Column="2"
+      <GroupBox Grid.Column="1"
                 VerticalAlignment="Top"
                 Margin="5,10,10,10" 
                 IsEnabled="{Binding UseSimulatedAnnealing}" 

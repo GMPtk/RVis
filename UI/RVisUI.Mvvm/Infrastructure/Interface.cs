@@ -1,6 +1,7 @@
 ﻿using LanguageExt;
 using RVis.Data;
 using RVis.Model;
+using RVisUI.Model;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 

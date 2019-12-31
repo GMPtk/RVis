@@ -2,7 +2,6 @@
 using MathNet.Numerics.Distributions;
 using RVis.Base.Extensions;
 using RVis.Data;
-using RVis.Data.Extensions;
 using RVis.Model;
 using System;
 using System.Collections.Generic;
@@ -137,7 +136,7 @@ namespace Estimation
       try
       {
         proposedLogLikelihood = GetProposalLogLikelihood(
-          independentData, 
+          independentData,
           outputData
           );
       }
@@ -501,9 +500,9 @@ namespace Estimation
           if (IsNaN(logLikelihood))
           {
             HandleInvalidLogLikelihood(
-              modelOutput, 
-              independentData.Data, 
-              predictedOutput.Data, 
+              modelOutput,
+              independentData.Data,
+              predictedOutput.Data,
               observations.X
               );
           }
@@ -608,7 +607,7 @@ namespace Estimation
             for (var i = 0; i < nColumns; ++i)
             {
               posteriorData.Columns.Add(
-                new DataColumn($"{observations.RefName} {i:000}", typeof(double))
+                new DataColumn($"{observations.RefName}/{observations.ID} {i:000}", typeof(double))
                 );
             }
           }

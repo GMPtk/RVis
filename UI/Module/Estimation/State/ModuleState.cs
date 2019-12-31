@@ -122,6 +122,20 @@ namespace Estimation
     }
     private PosteriorState _posteriorState;
 
+    internal string RootExportDirectory
+    {
+      get => _rootExportDirectory;
+      set => this.RaiseAndSetIfChanged(ref _rootExportDirectory, value, PropertyChanged);
+    }
+    private string _rootExportDirectory;
+
+    internal bool OpenAfterExport
+    {
+      get => _openAfterExport;
+      set => this.RaiseAndSetIfChanged(ref _openAfterExport, value, PropertyChanged);
+    }
+    private bool _openAfterExport;
+
     internal bool? AutoApplyParameterSharedState
     {
       get => _autoApplyParameterSharedState;

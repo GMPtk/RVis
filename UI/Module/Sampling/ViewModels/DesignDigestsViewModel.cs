@@ -9,24 +9,36 @@ using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Windows.Input;
 using static RVis.Base.Check;
+using static LanguageExt.Prelude;
+using LanguageExt;
 
 namespace Sampling
 {
   internal sealed class DesignDigestsViewModel : IDesignDigestsViewModel, INotifyPropertyChanged, IDisposable
   {
-    internal DesignDigestsViewModel(IAppService appService, ModuleState moduleState, SamplingDesigns samplingDesigns)
+    internal DesignDigestsViewModel(
+      IAppService appService, 
+      ModuleState moduleState, 
+      SamplingDesigns samplingDesigns
+      )
     {
       _moduleState = moduleState;
       _samplingDesigns = samplingDesigns;
 
       LoadSamplingDesign = ReactiveCommand.Create(
         HandleLoadSamplingDesign,
-        this.WhenAny(vm => vm.SelectedDesignDigestViewModel, _ => SelectedDesignDigestViewModel != default)
+        this.WhenAny(
+          vm => vm.SelectedDesignDigestViewModel, 
+          _ => SelectedDesignDigestViewModel != default
+          )
         );
 
       DeleteSamplingDesign = ReactiveCommand.Create(
         HandleDeleteSamplingDesign,
-        this.WhenAny(vm => vm.SelectedDesignDigestViewModel, _ => SelectedDesignDigestViewModel != default)
+        this.WhenAny(
+          vm => vm.SelectedDesignDigestViewModel, 
+          _ => SelectedDesignDigestViewModel != default
+          )
         );
 
       FollowKeyboardInDesignDigests = ReactiveCommand.Create<(Key Key, bool Control, bool Shift)>(
@@ -34,10 +46,18 @@ namespace Sampling
         );
 
       DesignDigestViewModels = new ObservableCollection<IDesignDigestViewModel>(
-        samplingDesigns.DesignDigests.Map(dd => new DesignDigestViewModel(dd.CreatedOn, dd.Description)
+        samplingDesigns.DesignDigests.Map(
+          dd => new DesignDigestViewModel(dd.CreatedOn, dd.Description)
         ));
 
-      _targetSamplingDesignCreatedOn = _moduleState.SamplingDesign?.CreatedOn;
+      if (_moduleState.SamplingDesign != default)
+      {
+        TargetSamplingDesign = Some((_moduleState.SamplingDesign.CreatedOn, DateTime.Now));
+
+        SelectedDesignDigestViewModel = DesignDigestViewModels
+          .Find(vm => vm.CreatedOn == _moduleState.SamplingDesign.CreatedOn)
+          .Match(vm => vm, () => default);
+      }
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
@@ -75,12 +95,12 @@ namespace Sampling
 
     public ICommand FollowKeyboardInDesignDigests { get; }
 
-    public DateTime? TargetSamplingDesignCreatedOn
+    public Option<(DateTime CreatedOn, DateTime SelectedOn)> TargetSamplingDesign
     {
-      get => _targetSamplingDesignCreatedOn;
-      set => this.RaiseAndSetIfChanged(ref _targetSamplingDesignCreatedOn, value, PropertyChanged);
+      get => _targetSamplingDesign;
+      set => this.RaiseAndSetIfChanged(ref _targetSamplingDesign, value, PropertyChanged);
     }
-    private DateTime? _targetSamplingDesignCreatedOn;
+    private Option<(DateTime CreatedOn, DateTime SelectedOn)> _targetSamplingDesign;
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -103,7 +123,7 @@ namespace Sampling
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
-        TargetSamplingDesignCreatedOn = SelectedDesignDigestViewModel.CreatedOn;
+        TargetSamplingDesign = (SelectedDesignDigestViewModel.CreatedOn, DateTime.Now);
       }
     }
 
@@ -117,10 +137,13 @@ namespace Sampling
 
         _samplingDesigns.Remove(createdOn);
 
-        if (TargetSamplingDesignCreatedOn == createdOn)
+        TargetSamplingDesign.IfSome(t =>
         {
-          TargetSamplingDesignCreatedOn = default;
-        }
+          if (t.CreatedOn == createdOn)
+          {
+            TargetSamplingDesign = default;
+          }
+        });
       }
     }
 
@@ -133,32 +156,60 @@ namespace Sampling
 
     private void ObserveModuleStateSamplingDesign(object _)
     {
-      TargetSamplingDesignCreatedOn = _moduleState.SamplingDesign?.CreatedOn;
+      if (_moduleState.SamplingDesign != default)
+      {
+        _targetSamplingDesign = Some((_moduleState.SamplingDesign.CreatedOn, DateTime.Now));
+
+        SelectedDesignDigestViewModel = DesignDigestViewModels
+          .Find(vm => vm.CreatedOn == _moduleState.SamplingDesign.CreatedOn)
+          .Match(vm => vm, () => default);
+      }
+      else
+      {
+        _targetSamplingDesign = None;
+
+        SelectedDesignDigestViewModel = default;
+      }
     }
 
-    private void ObserveSamplingDesignChange((DesignDigest DesignDigest, ObservableQualifier ObservableQualifier) change)
+    private void ObserveSamplingDesignChange(
+      (DesignDigest DesignDigest, ObservableQualifier ObservableQualifier) change
+      )
     {
       if (change.ObservableQualifier == ObservableQualifier.Add)
       {
-        var designDigestViewModel = new DesignDigestViewModel(change.DesignDigest.CreatedOn, change.DesignDigest.Description);
+        var designDigestViewModel = new DesignDigestViewModel(
+          change.DesignDigest.CreatedOn, 
+          change.DesignDigest.Description
+          );
         DesignDigestViewModels.Insert(0, designDigestViewModel);
       }
       else if (change.ObservableQualifier == ObservableQualifier.Change)
       {
-        var index = DesignDigestViewModels.FindIndex(vm => vm.CreatedOn == change.DesignDigest.CreatedOn);
+        var index = DesignDigestViewModels.FindIndex(
+          vm => vm.CreatedOn == change.DesignDigest.CreatedOn
+          );
         RequireTrue(index.IsFound());
-        var designDigestViewModel = new DesignDigestViewModel(change.DesignDigest.CreatedOn, change.DesignDigest.Description);
+        var designDigestViewModel = new DesignDigestViewModel(
+          change.DesignDigest.CreatedOn, 
+          change.DesignDigest.Description
+          );
         DesignDigestViewModels[index] = designDigestViewModel;
       }
       else if (change.ObservableQualifier == ObservableQualifier.Remove)
       {
-        var index = DesignDigestViewModels.FindIndex(vm => vm.CreatedOn == change.DesignDigest.CreatedOn);
+        var index = DesignDigestViewModels.FindIndex(
+          vm => vm.CreatedOn == change.DesignDigest.CreatedOn
+          );
         RequireTrue(index.IsFound());
-        var designDisgest = DesignDigestViewModels[index];
-        if (TargetSamplingDesignCreatedOn == designDisgest.CreatedOn)
+        var designDigest = DesignDigestViewModels[index];
+        TargetSamplingDesign.IfSome(t =>
         {
-          TargetSamplingDesignCreatedOn = default;
-        }
+          if (t.CreatedOn == designDigest.CreatedOn)
+          {
+            TargetSamplingDesign = default;
+          }
+        });
         DesignDigestViewModels.RemoveAt(index);
       }
     }

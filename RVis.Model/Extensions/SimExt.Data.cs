@@ -3,6 +3,7 @@ using Nett;
 using RVis.Base.Extensions;
 using RVis.Data;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
@@ -60,7 +61,7 @@ namespace RVis.Model.Extensions
         PRIVATE_DATA_FILE_NAME
         );
 
-      if (data == default)
+      if (EqualityComparer<T>.Default.Equals(data, default))
       {
         if (File.Exists(path)) File.Delete(path);
         return;

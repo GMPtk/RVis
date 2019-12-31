@@ -18,6 +18,8 @@ namespace Sampling
     internal static SamplingDesign CreateSamplingDesign(
       DateTime createdOn,
       Arr<(string Name, IDistribution Distribution)> parameterDistributions,
+      LatinHypercubeDesign latinHypercubeDesign,
+      RankCorrelationDesign rankCorrelationDesign,
       int? seed,
       DataTable samples,
       Arr<int> noDataIndices
@@ -32,7 +34,15 @@ namespace Sampling
 
       var designParameters = parameterDistributions.Map(ps => new DesignParameter(ps.Name, ps.Distribution));
 
-      return new SamplingDesign(createdOn, designParameters, seed, samples, noDataIndices);
+      return new SamplingDesign(
+        createdOn, 
+        designParameters, 
+        latinHypercubeDesign,
+        rankCorrelationDesign, 
+        seed, 
+        samples, 
+        noDataIndices
+        );
     }
 
     private class _DesignParameterDTO
@@ -46,6 +56,7 @@ namespace Sampling
       public string CreatedOn { get; set; }
       public _DesignParameterDTO[] DesignParameters { get; set; }
       public _LatinHypercubeDesignDTO LatinHypercubeDesign { get; set; }
+      public _RankCorrelationDesignDTO RankCorrelationDesign { get; set; }
       public int? Seed { get; set; }
       public int[] NoDataIndices { get; set; }
     }
@@ -75,6 +86,7 @@ namespace Sampling
       var pathToDesign = Combine(pathToSamplingDesignDirectory, DESIGN_FILE_NAME);
       Arr<DesignParameter> designParameters;
       LatinHypercubeDesign latinHypercubeDesign;
+      RankCorrelationDesign rankCorrelationDesign;
       int? seed;
       Arr<int> noDataIndices;
 
@@ -89,6 +101,7 @@ namespace Sampling
           )
           .ToArr() ?? default;
         latinHypercubeDesign = dto.LatinHypercubeDesign.FromDTO();
+        rankCorrelationDesign = dto.RankCorrelationDesign.FromDTO();
         seed = dto.Seed;
         noDataIndices = dto.NoDataIndices.ToArr();
       }
@@ -108,12 +121,11 @@ namespace Sampling
 
       try
       {
-        using (var streamReader = new StreamReader(pathToDesignSamples))
-        using (var csvReader = new CsvReader(streamReader))
-        using (var csvDataReader = new CsvDataReader(csvReader))
-        {
-          samples.Load(csvDataReader);
-        }
+        using var streamReader = new StreamReader(pathToDesignSamples);
+        using var csvReader = new CsvReader(streamReader);
+        using var csvDataReader = new CsvDataReader(csvReader);
+        
+        samples.Load(csvDataReader);
       }
       catch (Exception ex)
       {
@@ -122,15 +134,22 @@ namespace Sampling
         throw new Exception(message);
       }
 
-      return designParameters.Count > 0
-        ? new SamplingDesign(createdOn, designParameters, seed, samples, noDataIndices)
-        : new SamplingDesign(createdOn, latinHypercubeDesign, seed, samples, noDataIndices);
+      return new SamplingDesign(
+        createdOn, 
+        designParameters, 
+        latinHypercubeDesign,
+        rankCorrelationDesign, 
+        seed, 
+        samples, 
+        noDataIndices
+        );
     }
 
     private static void SaveDesign(
       DateTime createdOn,
       Arr<DesignParameter> designParameters,
       LatinHypercubeDesign latinHypercubeDesign,
+      RankCorrelationDesign rankCorrelationDesign,
       int? seed,
       Arr<int> noDataIndices,
       string pathToSamplingDesignDirectory
@@ -145,6 +164,7 @@ namespace Sampling
           .Map(dp => new _DesignParameterDTO { Name = dp.Name, Distribution = dp.Distribution.ToString() })
           .ToArray(),
         LatinHypercubeDesign = latinHypercubeDesign.ToDTO(),
+        RankCorrelationDesign = rankCorrelationDesign.ToDTO(),
         Seed = seed,
         NoDataIndices = noDataIndices.ToArray()
       };
@@ -171,25 +191,24 @@ namespace Sampling
 
       try
       {
-        using (var streamWriter = new StreamWriter(pathToDesignSamples))
-        using (var csvWriter = new CsvWriter(streamWriter))
+        using var streamWriter = new StreamWriter(pathToDesignSamples);
+        using var csvWriter = new CsvWriter(streamWriter);
+        
+        foreach (DataColumn column in samples.Columns)
         {
-          foreach (DataColumn column in samples.Columns)
+          csvWriter.WriteField(column.ColumnName);
+        }
+
+        csvWriter.NextRecord();
+
+        foreach (DataRow row in samples.Rows)
+        {
+          for (var i = 0; i < samples.Columns.Count; ++i)
           {
-            csvWriter.WriteField(column.ColumnName);
+            csvWriter.WriteField(row[i]);
           }
 
           csvWriter.NextRecord();
-
-          foreach (DataRow row in samples.Rows)
-          {
-            for (var i = 0; i < samples.Columns.Count; ++i)
-            {
-              csvWriter.WriteField(row[i]);
-            }
-
-            csvWriter.NextRecord();
-          }
         }
       }
       catch (Exception ex)
@@ -214,6 +233,7 @@ namespace Sampling
         instance.CreatedOn,
         instance.DesignParameters,
         instance.LatinHypercubeDesign,
+        instance.RankCorrelationDesign,
         instance.Seed,
         instance.NoDataIndices,
         pathToSamplingDesignDirectory
@@ -238,6 +258,7 @@ namespace Sampling
         instance.CreatedOn,
         instance.DesignParameters,
         instance.LatinHypercubeDesign,
+        instance.RankCorrelationDesign,
         instance.Seed,
         instance.NoDataIndices,
         pathToSamplingDesignDirectory

@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# IDE0002: Simplify Member Access
+dotnet_diagnostic.IDE0002.severity = error
+
+# IDE1006: Naming Styles
+dotnet_diagnostic.IDE1006.severity = none

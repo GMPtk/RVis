@@ -1,22 +1,26 @@
-﻿using LanguageExt;
+﻿using CsvHelper;
+using LanguageExt;
 using ReactiveUI;
 using RVis.Base;
 using RVis.Base.Extensions;
 using RVis.Model;
 using RVis.Model.Extensions;
-using RVisUI;
 using RVisUI.AppInf;
 using RVisUI.AppInf.Extensions;
 using RVisUI.Model;
 using RVisUI.Model.Extensions;
 using System;
 using System.IO;
-using System.Linq;
 using System.Reactive.Disposables;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
+using static RVis.Data.FxData;
 using static Sampling.Logger;
+using static Sampling.Properties.Resources;
+using static System.Double;
+using static System.Globalization.CultureInfo;
 using static System.IO.Path;
+using static System.String;
 
 namespace Sampling
 {
@@ -40,7 +44,9 @@ namespace Sampling
       _moduleState = ModuleState.LoadOrCreate(_simulation, _samplingDesigns);
 
       _parametersViewModel = new ParametersViewModel(appState, appService, appSettings, _moduleState);
+      _samplesViewModel = new SamplesViewModel(appState, appService, appSettings, _moduleState);
       _designViewModel = new DesignViewModel(appState, appService, appSettings, _moduleState, _samplingDesigns);
+      _outputsViewModel = new OutputsViewModel(appState, appService, appSettings, _moduleState);
       _designDigestsViewModel = new DesignDigestsViewModel(appService, _moduleState, _samplingDesigns);
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
@@ -60,11 +66,19 @@ namespace Sampling
           ),
 
         _designDigestsViewModel
-          .ObservableForProperty(vm => vm.TargetSamplingDesignCreatedOn).Subscribe(
+          .ObservableForProperty(vm => vm.TargetSamplingDesign).Subscribe(
             _reactiveSafeInvoke.SuspendAndInvoke<object>(
-              ObserveTargetSamplingDesignCreatedOn
+              ObserveTargetSamplingDesign
               )
           ),
+
+        _moduleState
+          .ObservableForProperty(ms => ms.SamplingDesign)
+          .Subscribe(
+            _reactiveSafeInvoke.SuspendAndInvoke<object>(
+              ObserveModuleStateSamplingDesign
+              )
+            ),
 
         _samplingDesigns.SamplingDesignChanges.Subscribe(
           _reactiveSafeInvoke.SuspendAndInvoke<(DesignDigest, ObservableQualifier)>(
@@ -74,16 +88,22 @@ namespace Sampling
 
         );
 
+      SetActivities();
+
       if (_moduleState.SamplingDesign != default) _designViewModel.IsSelected = true;
     }
 
     public IParametersViewModel ParametersViewModel => _parametersViewModel;
 
+    public ISamplesViewModel SamplesViewModel => _samplesViewModel;
+
     public IDesignViewModel DesignViewModel => _designViewModel;
+
+    public IOutputsViewModel OutputsViewModel => _outputsViewModel;
 
     public IDesignDigestsViewModel DesignDigestsViewModel => _designDigestsViewModel;
 
-    public Arr<ITaskRunner> GetTaskRunners() => Array<ITaskRunner>(_designViewModel);
+    public Arr<ITaskRunner> GetTaskRunners() => Array<ITaskRunner>(_samplesViewModel);
 
     public void ApplyState(
       SimSharedStateApply applyType,
@@ -111,6 +131,9 @@ namespace Sampling
             .Filter(pss => !_moduleState.ParameterStates.Exists(ps => ps.Name == pss.Parameter.Name))
             .Map(pss => CreateAndApplyDistribution(pss));
 
+          UnloadDesign();
+          SetActivities();
+
           _moduleState.ParameterStates = (updated + added)
             .OrderBy(ps => ps.Name.ToUpperInvariant())
             .ToArr();
@@ -122,6 +145,9 @@ namespace Sampling
           var index = _moduleState.ParameterStates.FindIndex(
             ps => ps.Name == parameterSharedState.Parameter.Name
             );
+
+          UnloadDesign();
+          SetActivities();
 
           if (index.IsFound())
           {
@@ -152,10 +178,11 @@ namespace Sampling
       {
         _moduleState.ParameterStates.Filter(ps => ps.IsSelected).Iter(ps =>
         {
-          var (value, minimum, maximum) = _appState.SimSharedState.ParameterSharedStates.GetParameterValueStateOrDefaults(
-            ps.Name,
-            _simulation.SimConfig.SimInput.SimParameters
-            );
+          var (value, minimum, maximum) =
+            _appState.SimSharedState.ParameterSharedStates.GetParameterValueStateOrDefaults(
+              ps.Name,
+              _simulation.SimConfig.SimInput.SimParameters
+              );
 
           var distribution = ps.GetDistribution();
 
@@ -211,7 +238,7 @@ namespace Sampling
       set => _moduleState.AutoShareObservationsSharedState = value;
     }
 
-    public DataExportConfiguration GetConfiguration(
+    public DataExportConfiguration GetDataExportConfiguration(
       string rootExportDirectory
       )
     {
@@ -220,7 +247,7 @@ namespace Sampling
         throw new InvalidOperationException("Load a sampling design");
       }
 
-      if (_designViewModel.Outputs.IsEmpty)
+      if (_moduleState.Outputs.IsEmpty)
       {
         throw new InvalidOperationException("Acquire sampling outputs");
       }
@@ -267,7 +294,7 @@ namespace Sampling
         Directory.CreateDirectory(targetDirectory);
       }
 
-      _designViewModel.ExportData(
+      ExportData(
         targetDirectory,
         dataExportConfiguration.Outputs
           .Filter(o => o.IncludeInExport)
@@ -288,7 +315,9 @@ namespace Sampling
         {
           _subscriptions.Dispose();
           _designDigestsViewModel.Dispose();
+          _outputsViewModel.Dispose();
           _designViewModel.Dispose();
+          _samplesViewModel.Dispose();
           _parametersViewModel.Dispose();
           _moduleState.Dispose();
 
@@ -298,8 +327,17 @@ namespace Sampling
       }
     }
 
-    private void ObserveParameterStateChange((Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier) change)
+    private void ObserveParameterStateChange(
+      (Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier) change
+      )
     {
+      var isUnloading = _moduleState.SamplingDesign != default;
+
+      UnloadDesign();
+      SetActivities();
+
+      if (isUnloading) _designViewModel.IsSelected = true;
+
       if (!_moduleState.AutoShareParameterSharedState.IsTrue()) return;
 
       if (change.ObservableQualifier.IsAddOrChange())
@@ -335,7 +373,9 @@ namespace Sampling
       }
     }
 
-    private void ObserveParameterSharedStateChange((Arr<SimParameterSharedState> ParameterSharedStates, ObservableQualifier ObservableQualifier) change)
+    private void ObserveParameterSharedStateChange(
+      (Arr<SimParameterSharedState> ParameterSharedStates, ObservableQualifier ObservableQualifier) change
+      )
     {
       if (!_moduleState.AutoApplyParameterSharedState.IsTrue()) return;
 
@@ -375,72 +415,26 @@ namespace Sampling
       }
     }
 
-    private void ObserveTargetSamplingDesignCreatedOn(object _)
+    private void ObserveTargetSamplingDesign(object _) =>
+      _designDigestsViewModel.TargetSamplingDesign.IfSome(
+        t => LoadSamplingDesign(t.CreatedOn)
+        );
+
+    private void ObserveModuleStateSamplingDesign(object _)
     {
-      var createdOn = _designDigestsViewModel.TargetSamplingDesignCreatedOn;
-
-      if (createdOn.HasValue)
-      {
-        try
-        {
-          var samplingDesign = _samplingDesigns.Load(createdOn.Value);
-
-          var existingParameterStates = _moduleState.ParameterStates.Map(
-            ps => samplingDesign.DesignParameters
-              .Find(dp => dp.Name == ps.Name)
-              .Match(
-                dp =>
-                {
-                  var index = ps.Distributions.FindIndex(e => e.DistributionType == dp.Distribution.DistributionType);
-                  var distributions = ps.Distributions.SetItem(index, dp.Distribution);
-                  return new ParameterState(ps.Name, dp.Distribution.DistributionType, distributions, true);
-                },
-                () => ps.WithIsSelected(false))
-            );
-
-          var newParameterStates = samplingDesign.DesignParameters
-            .Filter(dp => !existingParameterStates.Exists(ps => ps.Name == dp.Name))
-            .Map(dp =>
-            {
-              var distributions = Distribution.GetDefaults();
-
-              distributions = distributions.SetDistribution(dp.Distribution);
-
-              var parameterState = new ParameterState(
-                dp.Name,
-                dp.Distribution.DistributionType,
-                distributions,
-                true
-                );
-
-              return parameterState;
-            });
-
-          _moduleState.ParameterStates = existingParameterStates + newParameterStates;
-
-          _moduleState.SamplingDesign = samplingDesign;
-
-          _designViewModel.IsSelected = true;
-        }
-        catch (Exception ex)
-        {
-          _appService.Notify(
-            nameof(ViewModel),
-            nameof(ObserveTargetSamplingDesignCreatedOn),
-            ex
-            );
-          Log.Error(ex);
-        }
-      }
+      SetActivities();
     }
 
-    private void ObserveSamplingDesignChange((DesignDigest DesignDigest, ObservableQualifier ObservableQualifier) change)
+    private void ObserveSamplingDesignChange(
+      (DesignDigest DesignDigest, ObservableQualifier ObservableQualifier) change
+      )
     {
       if (change.ObservableQualifier.IsRemove())
       {
         if (change.DesignDigest.CreatedOn == _moduleState.SamplingDesign?.CreatedOn)
         {
-          _moduleState.SamplingDesign = default;
+          UnloadDesign();
+          SetActivities();
         }
       }
     }
@@ -460,15 +454,27 @@ namespace Sampling
       maybeDistribution.Match(
         d =>
         {
-          var index = parameterState.Distributions.FindIndex(e => e.DistributionType == d.DistributionType);
+          var index = parameterState.Distributions.FindIndex(
+            e => e.DistributionType == d.DistributionType
+            );
           var distributions = parameterState.Distributions.SetItem(index, d);
-          return new ParameterState(parameterState.Name, d.DistributionType, distributions, true);
+          return new ParameterState(
+            parameterState.Name,
+            d.DistributionType,
+            distributions,
+            isSelected: true
+            );
         },
         () =>
         {
           var invariantDistribution = new InvariantDistribution(value);
           var distributions = parameterState.Distributions.SetDistribution(invariantDistribution);
-          parameterState = new ParameterState(parameterState.Name, DistributionType.Invariant, distributions, true);
+          parameterState = new ParameterState(
+            parameterState.Name,
+            DistributionType.Invariant,
+            distributions,
+            isSelected: true
+            );
           return parameterState;
         });
 
@@ -513,13 +519,170 @@ namespace Sampling
       return parameterState;
     }
 
+    private void LoadSamplingDesign(DateTime createdOn)
+    {
+      try
+      {
+        var samplingDesign = _samplingDesigns.Load(createdOn);
+
+        var existingParameterStates = _moduleState.ParameterStates.Map(
+          ps => samplingDesign.DesignParameters
+            .Find(dp => dp.Name == ps.Name)
+            .Match(
+              dp =>
+              {
+                var index = ps.Distributions.FindIndex(
+                  e => e.DistributionType == dp.Distribution.DistributionType
+                  );
+                var distributions = ps.Distributions.SetItem(index, dp.Distribution);
+                return new ParameterState(
+                  ps.Name,
+                  dp.Distribution.DistributionType,
+                  distributions,
+                  isSelected: true
+                  );
+              },
+              () => ps.WithIsSelected(false))
+          );
+
+        var newParameterStates = samplingDesign.DesignParameters
+          .Filter(dp => !existingParameterStates.Exists(ps => ps.Name == dp.Name))
+          .Map(dp =>
+          {
+            var distributions = Distribution.GetDefaults();
+
+            distributions = distributions.SetDistribution(dp.Distribution);
+
+            var parameterState = new ParameterState(
+              dp.Name,
+              dp.Distribution.DistributionType,
+              distributions,
+              isSelected: true
+              );
+
+            return parameterState;
+          });
+
+        _moduleState.ParameterStates = existingParameterStates + newParameterStates;
+
+        UnloadDesign();
+
+        _moduleState.SamplesState.NumberOfSamples = samplingDesign.Samples.Rows.Count;
+        _moduleState.SamplesState.Seed = samplingDesign.Seed;
+        _moduleState.SamplesState.LatinHypercubeDesign = samplingDesign.LatinHypercubeDesign;
+        _moduleState.SamplesState.RankCorrelationDesign = samplingDesign.RankCorrelationDesign;
+
+        _moduleState.SamplingDesign = samplingDesign;
+        _moduleState.Samples = samplingDesign.Samples;
+
+        SetActivities();
+
+        _designViewModel.IsSelected = true;
+      }
+      catch (Exception ex)
+      {
+        _appService.Notify(
+          nameof(ViewModel),
+          nameof(LoadSamplingDesign),
+          ex
+          );
+        Log.Error(ex);
+      }
+    }
+
+    private void UnloadDesign()
+    {
+      _moduleState.Outputs = default;
+      _moduleState.Samples = default;
+      _moduleState.SamplingDesign = default;
+    }
+
+    private void SetActivities()
+    {
+      var isInDesignMode = _moduleState.SamplingDesign == default;
+      _parametersViewModel.IsVisible = isInDesignMode;
+      _samplesViewModel.IsReadOnly = !isInDesignMode;
+      _outputsViewModel.IsVisible = !isInDesignMode;
+    }
+
+    internal void ExportData(string targetDirectory, Arr<string> targetOutputs)
+    {
+      RequireNotNull(_moduleState.SamplingDesign);
+      RequireFalse(_moduleState.Outputs.IsEmpty);
+      RequireDirectory(targetDirectory);
+
+      const string SAMPLES_FILE_NAME = "samples";
+      RequireFalse(targetOutputs.Contains(SAMPLES_FILE_NAME));
+      SaveToCSV<double>(
+        _moduleState.SamplingDesign.Samples,
+        Combine(targetDirectory, $"{SAMPLES_FILE_NAME}.csv")
+        );
+
+      var independentVariable = _simulation.SimConfig.SimOutput.IndependentVariable;
+      var (_, output) = _moduleState.Outputs.Head();
+      var independentData = _simulation.SimConfig.SimOutput.GetIndependentData(output);
+
+      void SaveOutputToCSV(string name)
+      {
+        var pathToCSV = Combine(targetDirectory, $"{name.ToValidFileName()}.csv");
+
+        using var streamWriter = new StreamWriter(pathToCSV);
+        using var csvWriter = new CsvWriter(streamWriter);
+
+        csvWriter.WriteField(independentData.Name);
+
+        var nSamples = _moduleState.SamplingDesign.Samples.Rows.Count;
+
+        Range(1, nSamples).Iter(i => csvWriter.WriteField($"Spl #{i}"));
+
+        csvWriter.NextRecord();
+
+        for (var i = 0; i < independentData.Length; ++i)
+        {
+          csvWriter.WriteField(independentData[i]);
+
+          Range(0, nSamples).Iter(j =>
+          {
+            var output = _moduleState.Outputs
+              .Find(o => o.Index == j)
+              .Match(o => o.Output[name][i], () => NaN);
+            
+            csvWriter.WriteField(output);
+          });
+
+          csvWriter.NextRecord();
+        }
+      }
+
+      targetOutputs.Iter(SaveOutputToCSV);
+
+      var parameterNames = _moduleState.SamplingDesign.DesignParameters
+        .Filter(dp => dp.Distribution.DistributionType != DistributionType.Invariant)
+        .Map(dp => $"\"{dp.Name}\"");
+
+      var outputNames = targetOutputs.Map(o => $"\"{o}\"");
+
+      var r = Format(
+        InvariantCulture,
+        FMT_LOAD_DATA,
+        targetDirectory.Replace("\\", "/"),
+        Join(", ", parameterNames),
+        SAMPLES_FILE_NAME,
+        Join(", ", outputNames)
+        );
+
+      File.WriteAllText(Combine(targetDirectory, "load_data.R"), r);
+    }
+
     private readonly IAppState _appState;
     private readonly IAppService _appService;
     private readonly Simulation _simulation;
     private readonly SamplingDesigns _samplingDesigns;
     private readonly ModuleState _moduleState;
     private readonly ParametersViewModel _parametersViewModel;
+    private readonly SamplesViewModel _samplesViewModel;
     private readonly DesignViewModel _designViewModel;
+    private readonly OutputsViewModel _outputsViewModel;
     private readonly DesignDigestsViewModel _designDigestsViewModel;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;

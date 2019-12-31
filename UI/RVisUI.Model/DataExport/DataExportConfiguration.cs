@@ -1,6 +1,6 @@
 ﻿using LanguageExt;
 
-namespace RVisUI
+namespace RVisUI.Model
 {
   public readonly struct DataExportConfiguration
   {

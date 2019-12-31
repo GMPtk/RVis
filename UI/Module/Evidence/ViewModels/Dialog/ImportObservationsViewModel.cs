@@ -128,7 +128,7 @@ namespace Evidence
 
       var lines = ReadAllLines(pathToFile);
       var delimited = Join(NewLine, lines);
-      var refHash = (pathToFile + delimited).ToMD5Hash();
+      var refHash = (pathToFile + delimited).ToHash();
 
       if (_appState.SimEvidence.EvidenceSources.ContainsEvidenceSource(refHash))
       {

@@ -10,18 +10,7 @@ namespace Sampling.Design
   {
     internal const int SAMPLE_SIZE = 100;
 
-    internal static INoDesignActivityViewModel NoDesignActivityViewModel => 
-      new NoDesignActivityViewModel();
-
-    internal static ISamplesDesignActivityViewModel SamplesDesignActivityViewModel =>
-      new SamplesDesignActivityViewModel() { Samples = GetSamples() };
-
-    internal static IOutputsDesignActivityViewModel OutputsDesignActivityViewModel =>
-      new OutputsDesignActivityViewModel(new RVisUI.AppInf.Design.AppService(), new RVisUI.AppInf.Design.AppSettings())
-      {
-        ElementNames = Array("aaa", "bbb", "ccc"),
-        Outputs = GetOutputs()
-      };
+    internal static DataView Samples => GetSamples();
 
     internal static IParameterSamplingViewModel BetaParameterSamplingViewModel
     {
@@ -216,13 +205,6 @@ namespace Sampling.Design
         dataTable.Rows.Add(dataRow);
       }
       return dataTable.DefaultView;
-    }
-
-    private static PlotModel GetOutputs()
-    {
-      var outputs = new PlotModel() { Title = "OUTPUTS" };
-
-      return outputs;
     }
 
     private static readonly double[] _samples = new double[SAMPLE_SIZE];

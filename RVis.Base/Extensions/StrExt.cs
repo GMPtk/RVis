@@ -84,13 +84,13 @@ namespace RVis.Base.Extensions
       return s;
     }
 
-    public static string ToMD5Hash(this string s)
+    public static string ToHash(this string s)
     {
-      if (_md5HashMemo.TryGetValue(s, out string hash)) return hash;
+      if (_sha1HashMemo.TryGetValue(s, out string hash)) return hash;
 
       var bytes = Encoding.UTF8.GetBytes(s);
-      hash = BitConverter.ToString(_md5.ComputeHash(bytes)).Replace("-", Empty);
-      _md5HashMemo.TryAdd(s, hash);
+      hash = BitConverter.ToString(_sha1.ComputeHash(bytes)).Replace("-", Empty);
+      _sha1HashMemo.TryAdd(s, hash);
 
       return hash;
     }
@@ -129,7 +129,7 @@ namespace RVis.Base.Extensions
     private static readonly char[] _separators = new[] { ';', ',' };
     private const string _docsPrefix = "~/";
     private static readonly Regex _invalid = GetInvalid();
-    private static readonly MD5 _md5 = new MD5CryptoServiceProvider();
-    private static readonly ConcurrentDictionary<string, string> _md5HashMemo = new ConcurrentDictionary<string, string>();
+    private static readonly SHA1CryptoServiceProvider _sha1 = new SHA1CryptoServiceProvider();
+    private static readonly ConcurrentDictionary<string, string> _sha1HashMemo = new ConcurrentDictionary<string, string>();
   }
 }

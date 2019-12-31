@@ -65,8 +65,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RVis.Client.Test", "Test\RV
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Test.Shared", "Test\Test.Shared\Test.Shared.shproj", "{C1042840-8833-473B-A4FD-162A68B04D74}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RVis.Model.Test", "Test\RVis.Model.Test\RVis.Model.Test.csproj", "{7C5F15AC-34DC-42B0-A73C-4854B8F95D97}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evidence", "UI\Module\Evidence\Evidence.csproj", "{8CCB549C-60EB-422A-ABD8-0A37B3072EEB}"
 	ProjectSection(ProjectDependencies) = postProject
 		{75DF8B2F-D179-436D-8107-BE640F3C3531} = {75DF8B2F-D179-436D-8107-BE640F3C3531}
@@ -90,6 +88,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Estimation", "UI\Module\Est
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6F7F861D-5083-436D-A074-00D130A2B63A}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		azure-pipelines.yml = azure-pipelines.yml
 		clean.bat = clean.bat
 		clean_x64.bat = clean_x64.bat
@@ -106,13 +105,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RVisUI.Model.Test", "Test\R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Estimation.Test", "Test\Estimation.Test\Estimation.Test.csproj", "{552CCDB7-BA4A-44AB-ADCD-A96951B5767A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sampling.Test", "Test\Sampling.Test\Sampling.Test.csproj", "{CA073BA6-2F99-4C7E-82A8-5A52D274BDF3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RVis.Model.Test", "Test\RVis.Model.Test\RVis.Model.Test.csproj", "{A67C29C1-FE18-42BD-94C2-A09420FEE84D}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Test\Test.Shared\Test.Shared.projitems*{321f566b-48cf-4745-9ecf-0262397b8ec5}*SharedItemsImports = 4
 		WinR\WinR.Shared\WinR.Shared.projitems*{3c465701-751b-4389-af08-2571ab9ebd06}*SharedItemsImports = 13
 		Test\Test.Shared\Test.Shared.projitems*{552ccdb7-ba4a-44ab-adcd-a96951b5767a}*SharedItemsImports = 4
 		WinR\WinR.Shared\WinR.Shared.projitems*{6e77e4d9-4ca7-43ca-92c0-1914ca4997d1}*SharedItemsImports = 4
-		Test\Test.Shared\Test.Shared.projitems*{7c5f15ac-34dc-42b0-a73c-4854b8f95d97}*SharedItemsImports = 4
+		Test\Test.Shared\Test.Shared.projitems*{a67c29c1-fe18-42bd-94c2-a09420fee84d}*SharedItemsImports = 4
 		Test\Test.Shared\Test.Shared.projitems*{c1042840-8833-473b-a4fd-162a68b04d74}*SharedItemsImports = 13
 		WinR\WinR.Shared\WinR.Shared.projitems*{c538987a-1dad-48ca-a3dd-cdd00f75aede}*SharedItemsImports = 4
 		Test\Test.Shared\Test.Shared.projitems*{dc958d41-14f0-4c4d-a5ca-430ddc42fa50}*SharedItemsImports = 4
@@ -252,14 +255,6 @@ Global
 		{321F566B-48CF-4745-9ECF-0262397B8EC5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{321F566B-48CF-4745-9ECF-0262397B8EC5}.Release|x64.ActiveCfg = Release|x64
 		{321F566B-48CF-4745-9ECF-0262397B8EC5}.Release|x64.Build.0 = Release|x64
-		{7C5F15AC-34DC-42B0-A73C-4854B8F95D97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C5F15AC-34DC-42B0-A73C-4854B8F95D97}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C5F15AC-34DC-42B0-A73C-4854B8F95D97}.Debug|x64.ActiveCfg = Debug|x64
-		{7C5F15AC-34DC-42B0-A73C-4854B8F95D97}.Debug|x64.Build.0 = Debug|x64
-		{7C5F15AC-34DC-42B0-A73C-4854B8F95D97}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C5F15AC-34DC-42B0-A73C-4854B8F95D97}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7C5F15AC-34DC-42B0-A73C-4854B8F95D97}.Release|x64.ActiveCfg = Release|x64
-		{7C5F15AC-34DC-42B0-A73C-4854B8F95D97}.Release|x64.Build.0 = Release|x64
 		{8CCB549C-60EB-422A-ABD8-0A37B3072EEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8CCB549C-60EB-422A-ABD8-0A37B3072EEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CCB549C-60EB-422A-ABD8-0A37B3072EEB}.Debug|x64.ActiveCfg = Debug|x64
@@ -316,6 +311,22 @@ Global
 		{552CCDB7-BA4A-44AB-ADCD-A96951B5767A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{552CCDB7-BA4A-44AB-ADCD-A96951B5767A}.Release|x64.ActiveCfg = Release|x64
 		{552CCDB7-BA4A-44AB-ADCD-A96951B5767A}.Release|x64.Build.0 = Release|x64
+		{CA073BA6-2F99-4C7E-82A8-5A52D274BDF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA073BA6-2F99-4C7E-82A8-5A52D274BDF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA073BA6-2F99-4C7E-82A8-5A52D274BDF3}.Debug|x64.ActiveCfg = Debug|x64
+		{CA073BA6-2F99-4C7E-82A8-5A52D274BDF3}.Debug|x64.Build.0 = Debug|x64
+		{CA073BA6-2F99-4C7E-82A8-5A52D274BDF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA073BA6-2F99-4C7E-82A8-5A52D274BDF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA073BA6-2F99-4C7E-82A8-5A52D274BDF3}.Release|x64.ActiveCfg = Release|x64
+		{CA073BA6-2F99-4C7E-82A8-5A52D274BDF3}.Release|x64.Build.0 = Release|x64
+		{A67C29C1-FE18-42BD-94C2-A09420FEE84D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A67C29C1-FE18-42BD-94C2-A09420FEE84D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A67C29C1-FE18-42BD-94C2-A09420FEE84D}.Debug|x64.ActiveCfg = Debug|x64
+		{A67C29C1-FE18-42BD-94C2-A09420FEE84D}.Debug|x64.Build.0 = Debug|x64
+		{A67C29C1-FE18-42BD-94C2-A09420FEE84D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A67C29C1-FE18-42BD-94C2-A09420FEE84D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A67C29C1-FE18-42BD-94C2-A09420FEE84D}.Release|x64.ActiveCfg = Release|x64
+		{A67C29C1-FE18-42BD-94C2-A09420FEE84D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -337,7 +348,6 @@ Global
 		{DC958D41-14F0-4C4D-A5CA-430DDC42FA50} = {0FC737B6-E3F2-42C7-9011-9EA9680E5061}
 		{321F566B-48CF-4745-9ECF-0262397B8EC5} = {0FC737B6-E3F2-42C7-9011-9EA9680E5061}
 		{C1042840-8833-473B-A4FD-162A68B04D74} = {0FC737B6-E3F2-42C7-9011-9EA9680E5061}
-		{7C5F15AC-34DC-42B0-A73C-4854B8F95D97} = {0FC737B6-E3F2-42C7-9011-9EA9680E5061}
 		{8CCB549C-60EB-422A-ABD8-0A37B3072EEB} = {00539EEB-CACE-4335-A0BA-7EED6EC088B6}
 		{0D0B90E8-9F63-4FE7-A3BD-14D2C868DB7B} = {00539EEB-CACE-4335-A0BA-7EED6EC088B6}
 		{11039298-B9BF-4B94-86BB-C6AA6AC8469F} = {0D786350-D0C4-4F5A-ABC2-F6297B25E1F7}
@@ -345,6 +355,8 @@ Global
 		{AB936B83-5699-4412-830C-8353C691F3C0} = {00539EEB-CACE-4335-A0BA-7EED6EC088B6}
 		{1E9E18D7-FF2B-4BF1-A0CF-45E6A655054E} = {0FC737B6-E3F2-42C7-9011-9EA9680E5061}
 		{552CCDB7-BA4A-44AB-ADCD-A96951B5767A} = {0FC737B6-E3F2-42C7-9011-9EA9680E5061}
+		{CA073BA6-2F99-4C7E-82A8-5A52D274BDF3} = {0FC737B6-E3F2-42C7-9011-9EA9680E5061}
+		{A67C29C1-FE18-42BD-94C2-A09420FEE84D} = {0FC737B6-E3F2-42C7-9011-9EA9680E5061}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EF372732-087C-472B-A797-123B7A1B7C34}

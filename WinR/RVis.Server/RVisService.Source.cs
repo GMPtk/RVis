@@ -1,4 +1,5 @@
-﻿using RVis.Data;
+﻿using RVis.Base.Extensions;
+using RVis.Data;
 using RVis.Model;
 using RVis.ROps;
 using System;
@@ -239,6 +240,24 @@ namespace RVis.Server
         try
         {
           ROpsApi.CreateVector(source, objectName);
+        }
+        catch (Exception ex)
+        {
+          _log.Error(ex);
+          return ex;
+        }
+      }
+
+      return Unit;
+    }
+
+    public UnitSvcRes CreateMatrix(double[][] source, string objectName)
+    {
+      lock (_rvisServiceLock)
+      {
+        try
+        {
+          ROpsApi.CreateMatrix(source.ToMultidimensional(), objectName);
         }
         catch (Exception ex)
         {

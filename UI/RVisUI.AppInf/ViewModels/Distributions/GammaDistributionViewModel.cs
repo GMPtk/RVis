@@ -63,7 +63,7 @@ namespace RVisUI.AppInf
     public GammaDistributionViewModel()
       : this(new Design.AppService(), new Design.AppSettings())
     {
-      RequireTrue(Splat.ModeDetector.InDesignMode());
+      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
     }
 
     public DistributionType DistributionType => DistributionType.Gamma;

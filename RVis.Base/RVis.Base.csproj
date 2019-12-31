@@ -43,9 +43,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LanguageExt.Core" Version="3.3.2" />
-    <PackageReference Include="NLog" Version="4.6.6" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
+    <PackageReference Include="LanguageExt.Core" Version="3.3.46" />
+    <PackageReference Include="NLog" Version="4.6.8" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
   </ItemGroup>
 
   <ItemGroup>

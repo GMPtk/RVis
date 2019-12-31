@@ -16,7 +16,7 @@ namespace Sensitivity
   {
     public ChartOptionsViewModel()
     {
-      RequireTrue(ModeDetector.InDesignMode());
+      RequireTrue(PlatformModeDetector.InDesignMode());
 
       _windowTitle = "Options Dialog";
 

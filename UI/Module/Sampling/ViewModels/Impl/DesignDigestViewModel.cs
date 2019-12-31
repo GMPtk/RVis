@@ -2,7 +2,7 @@
 
 namespace Sampling
 {
-  internal class DesignDigestViewModel : IDesignDigestViewModel
+  internal sealed class DesignDigestViewModel : IDesignDigestViewModel
   {
     internal DesignDigestViewModel(DateTime createdOn, string description)
     {

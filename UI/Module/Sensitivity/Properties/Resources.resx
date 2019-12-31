@@ -170,6 +170,143 @@ rvis_sensitivity_design_{6:00000000} &lt;- sensitivity::morris(
     )
   )</value>
   </data>
+  <data name="FMT_LOAD_DATA" xml:space="preserve">
+    <value>wd &lt;- getwd()
+data_directory &lt;- "{0}"
+setwd(data_directory)
+
+# load samples and plot histograms
+
+sample_files &lt;- list.files("./samples", "*.csv")
+samples &lt;- lapply(
+  sample_files, 
+  function(sample_file) read.csv(paste0("./samples/", sample_file), header = TRUE)
+  )
+
+if(length(samples) == 0) stop("No samples")
+
+names(samples) &lt;- lapply(sample_files, tools::file_path_sans_ext)
+
+sample_file_names &lt;- names(samples)
+parameter_names &lt;- colnames(samples[[1]])
+
+hist_samples &lt;- function(parameter_name)
+{{
+  sample_values &lt;- lapply(
+    sample_file_names, 
+    function(sample_file_name) samples[[sample_file_name]][[parameter_name]]
+    )
+  
+  hist(
+    unlist(sample_values), 
+    main = paste(parameter_name, "Samples"), 
+    xlab = parameter_name
+    )
+}}
+
+invisible(capture.output(lapply(parameter_names, hist_samples)))
+
+# load measures and plot trace of first order measure
+
+output_names &lt;- dir("./measures")
+
+load_measures &lt;- function(output_name, measures)
+{{
+  measure &lt;- list()
+  
+  for(measure_name in c({1}))
+  {{
+    measure[[measure_name]] &lt;- 
+      read.csv(paste0("./measures/", output_name, "/", measure_name, ".csv"), header = TRUE)
+  }}
+  
+  measure
+}}
+
+measures &lt;- lapply(output_names, load_measures)
+
+if(length(measures) == 0) stop("No measures")
+
+names(measures) &lt;- output_names
+
+trace_measures &lt;- function(output_name)
+{{
+  first_order &lt;- measures[[output_name]][[{2}]]
+  
+  n_parameters &lt;- length(parameter_names)
+  colors &lt;- rainbow(n_parameters)
+  line_type &lt;- 1:n_parameters
+  plot_char &lt;- seq(18, 18 + n_parameters, 1)
+  
+  plot(
+    range(first_order[,1]), 
+    range(first_order[,2:ncol(first_order)]), 
+    type = "n", 
+    xlab = colnames(first_order)[[1]],
+    ylab = "main effect",
+    main = paste("Main Effect for", output_name)
+    )  
+  
+  for(i in 1:n_parameters)
+  {{
+    lines(
+      first_order[,1], 
+      first_order[,i+1], 
+      type = "b", 
+      lwd = 1,
+      lty = line_type[i], 
+      col = colors[i], 
+      pch = plot_char[i]
+      )
+  }}
+  
+  legend(
+    "right",
+    legend = parameter_names, 
+    cex = 0.8, 
+    col = colors,
+    pch = plot_char, 
+    lty = line_type
+    )
+}}
+
+invisible(capture.output(lapply(output_names, trace_measures)))
+
+# load outputs and plot traces
+
+load_and_trace_outputs &lt;- function(output_name)
+{{
+  file_name &lt;- paste0(output_name, ".csv")
+  if(!file.exists(file_name)) return();
+  
+  output &lt;- read.csv(paste0("./", file_name), header = TRUE)
+  
+  plot(
+    range(output[,1]), 
+    range(output[,2:ncol(output)]), 
+    main = paste(output_name, "trace"), 
+    xlab = colnames(output)[1], 
+    ylab = output_name, 
+    type="n"
+  )
+  
+  for(i in 2:(dim(output)[2]))
+  {{
+    lines(
+      output[,1], 
+      output[,i], 
+      type="l", 
+      col="black", 
+      pch=".", 
+      lty=1
+    )
+  }}
+}}
+
+invisible(capture.output(lapply(output_names, load_and_trace_outputs)))
+
+setwd(wd)</value>
+  </data>
   <data name="FMT_MORRIS_TELL_AND_COLLECT" xml:space="preserve">
     <value>rvis_sensitivity_out_{0:00000000} &lt;- c({1})
 sensitivity::tell(rvis_sensitivity_design_{0:00000000}, rvis_sensitivity_out_{0:00000000})

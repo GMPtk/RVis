@@ -36,11 +36,5 @@ namespace RVis.ROps
       instance.SetSymbol(rawVectorName, instance.CreateRawVector(raw));
       instance.Evaluate(FMT_LOAD_FROM_BINARY);
     }
-
-    public static void CreateVector(double[] source, string objectName)
-    {
-      var instance = REngine.GetInstance();
-      instance.SetSymbol(objectName, instance.CreateNumericVector(source));
-    }
   }
 }

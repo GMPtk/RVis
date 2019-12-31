@@ -80,7 +80,7 @@ namespace Estimation
               ms => ms.SelectedObservations
               )
             .Subscribe(
-              _reactiveSafeInvoke.SuspendAndInvoke<object>(
+              _reactiveSafeInvoke.SuspendAndInvoke<(Arr<ParameterState>, Arr<OutputState>, Arr<SimObservations>)>(
                 ObserveEstimationStateChange
                 )
               ),
@@ -104,7 +104,7 @@ namespace Estimation
           this
             .WhenAnyValue(vm => vm.Iterations, vm => vm.BurnIn, vm => vm.ChainsIndex)
             .Subscribe(
-              _reactiveSafeInvoke.SuspendAndInvoke<object>(
+              _reactiveSafeInvoke.SuspendAndInvoke<(int?, int?, int)>(
                 ObserveInputs
                 )
             )
@@ -314,7 +314,7 @@ namespace Estimation
       }
     }
 
-    private void ObserveEstimationStateChange(object _)
+    private void ObserveEstimationStateChange((Arr<ParameterState>, Arr<OutputState>, Arr<SimObservations>) _)
     {
       _moduleState.PosteriorState = default;
       _moduleState.ChainStates = default;
@@ -347,7 +347,7 @@ namespace Estimation
       _moduleState.DesignState.Chains = ChainsOptions[ChainsIndex];
     }
 
-    private void ObserveInputs(object _)
+    private void ObserveInputs((int?, int?, int) _)
     {
       _moduleState.DesignState.Iterations = Iterations;
       _moduleState.DesignState.BurnIn = BurnIn;

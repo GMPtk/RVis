@@ -58,7 +58,7 @@ namespace RVisUI.AppInf
     public LogUniformDistributionViewModel()
       : this(new Design.AppService(), new Design.AppSettings())
     {
-      RequireTrue(Splat.ModeDetector.InDesignMode());
+      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
     }
 
     public DistributionType DistributionType => DistributionType.LogUniform;

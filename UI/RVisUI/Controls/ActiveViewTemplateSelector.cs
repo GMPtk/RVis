@@ -38,7 +38,7 @@ namespace RVisUI.Controls
       return _templates[viewTypeName];
     }
 
-    private static readonly bool _isInDesignMode = ModeDetector.InDesignMode();
-    private IDictionary<string, DataTemplate> _templates = new SortedDictionary<string, DataTemplate>();
+    private static readonly bool _isInDesignMode = PlatformModeDetector.InDesignMode();
+    private readonly IDictionary<string, DataTemplate> _templates = new SortedDictionary<string, DataTemplate>();
   }
 }

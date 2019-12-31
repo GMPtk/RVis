@@ -49,7 +49,7 @@ namespace RVisUI.Ioc.Mvvm
     }
 
     public AppSettingsViewModel() : this(new AppSettings()) =>
-      RequireTrue(Splat.ModeDetector.InDesignMode());
+      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
 
     public ICommand View { get; }
 
@@ -270,8 +270,9 @@ namespace RVisUI.Ioc.Mvvm
 
     private void SetSecondaryHueHexes()
     {
-      string int2Hex(int i) => i.ToString("X").ToLower();
-      string colorToHex(Color c) => "#" +
+      static string int2Hex(int i) => i.ToString("X").ToLower();
+
+      static string colorToHex(Color c) => "#" +
         int2Hex(c.R) +
         int2Hex(c.G) +
         int2Hex(c.B);

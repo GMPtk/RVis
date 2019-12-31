@@ -1,19 +1,16 @@
-﻿using LanguageExt;
-using ReactiveUI;
+﻿using ReactiveUI;
 using RVis.Base.Extensions;
 using RVisUI.Model;
 using RVisUI.Model.Extensions;
 using System;
 using System.ComponentModel;
-using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using static System.Double;
 
 namespace Sampling
 {
-  internal class LHSConfigurationViewModel : ILHSConfigurationViewModel, INotifyPropertyChanged
+  internal sealed class LHSConfigurationViewModel : ILHSConfigurationViewModel, INotifyPropertyChanged
   {
     internal LHSConfigurationViewModel(IAppState appState, IAppService appService)
     {
@@ -42,8 +39,8 @@ namespace Sampling
           vm => vm.C
         )
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<object>(
-            ObserveInputs
+          _reactiveSafeInvoke.SuspendAndInvoke<(LatinHypercubeDesignType, bool, double?, double?)>(
+            ObserveInputs1
           )
         );
 
@@ -55,18 +52,8 @@ namespace Sampling
           vm => vm.Imax
         )
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<object>(
-            ObserveInputs
-          )
-        );
-
-      this
-        .ObservableForProperty(
-          vm => vm.Variables
-          )
-        .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<object>(
-            ObserveVariables
+          _reactiveSafeInvoke.SuspendAndInvoke<(int?, double?, TemperatureDownProfile, int?)>(
+            ObserveInputs2
           )
         );
 
@@ -82,13 +69,6 @@ namespace Sampling
     }
 
     public bool IsDiceDesignInstalled { get; }
-
-    public Arr<ILHSParameterViewModel> LHSParameterViewModels
-    {
-      get => _lhsParameterViewModels;
-      set => this.RaiseAndSetIfChanged(ref _lhsParameterViewModels, value, PropertyChanged);
-    }
-    private Arr<ILHSParameterViewModel> _lhsParameterViewModels;
 
     public LatinHypercubeDesignType LatinHypercubeDesignType
     {
@@ -166,13 +146,6 @@ namespace Sampling
     }
     private bool? _dialogResult;
 
-    public Arr<(string Parameter, double Lower, double Upper)> Variables
-    {
-      get => _variables;
-      set => this.RaiseAndSetIfChanged(ref _variables, value, PropertyChanged);
-    }
-    private Arr<(string Parameter, double Lower, double Upper)> _variables;
-
     public LatinHypercubeDesign LatinHypercubeDesign
     {
       get => _latinHypercubeDesign;
@@ -196,10 +169,6 @@ namespace Sampling
     {
       if (LatinHypercubeDesignType != LatinHypercubeDesignType.None)
       {
-        var variables = LHSParameterViewModels
-          .Map(vm => (vm.Name, vm.Lower.Value, vm.Upper.Value))
-          .ToArr();
-
         var latinHypercubeDesignType = LatinHypercubeDesignType;
         var t0 = UseSimulatedAnnealing ? T0.Value : NaN;
         var c = UseSimulatedAnnealing ? C.Value : NaN;
@@ -220,7 +189,6 @@ namespace Sampling
 
         using (_reactiveSafeInvoke.SuspendedReactivity)
         {
-          Variables = variables;
           LatinHypercubeDesign = latinHypercubeDesign;
         }
       }
@@ -234,14 +202,13 @@ namespace Sampling
 
     private void HandleCancel() => DialogResult = false;
 
-    private void ObserveInputs(object _)
+    private void ObserveInputs1((LatinHypercubeDesignType, bool, double?, double?) _)
     {
       UpdateEnable();
     }
 
-    private void ObserveVariables(object _)
+    private void ObserveInputs2((int?, double?, TemperatureDownProfile, int?) _)
     {
-      Populate(Variables);
       UpdateEnable();
     }
 
@@ -251,16 +218,9 @@ namespace Sampling
       UpdateEnable();
     }
 
-    private void ObserveParameterViewModel(object _)
-    {
-      UpdateEnable();
-    }
-
     private void UpdateEnable()
     {
       var haveDesignType = LatinHypercubeDesignType != LatinHypercubeDesignType.None;
-
-      var areVariablesPopulated = LHSParameterViewModels.ForAll(vm => vm.Upper >= vm.Lower);
 
       var hasSAConfiguration =
            !UseSimulatedAnnealing
@@ -271,28 +231,10 @@ namespace Sampling
         || Profile != TemperatureDownProfile.GeometricalMorris
         || Imax.HasValue;
 
-      CanOK = 
-        haveDesignType && 
-        areVariablesPopulated && 
-        hasSAConfiguration && 
+      CanOK =
+        haveDesignType &&
+        hasSAConfiguration &&
         hasImax;
-    }
-
-    private void Populate(Arr<(string Parameter, double Lower, double Upper)> variables)
-    {
-      _parameterViewModelSubscriptions?.Dispose();
-
-      LHSParameterViewModels = variables
-        .Map(v => new LHSParameterViewModel(v.Parameter) { Lower = v.Lower, Upper = v.Upper })
-        .ToArr<ILHSParameterViewModel>();
-
-      var subscriptions = LHSParameterViewModels
-        .Map(pvm => pvm
-          .WhenAnyValue(vm => vm.Lower, vm => vm.Upper)
-          .Subscribe(_reactiveSafeInvoke.SuspendAndInvoke<object>(ObserveParameterViewModel))
-          );
-
-      _parameterViewModelSubscriptions = new CompositeDisposable(subscriptions.ToArray());
     }
 
     private void Populate(LatinHypercubeDesign latinHypercubeDesign)
@@ -320,6 +262,5 @@ namespace Sampling
     }
 
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
-    private IDisposable _parameterViewModelSubscriptions;
   }
 }

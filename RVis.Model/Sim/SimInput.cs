@@ -64,7 +64,7 @@ namespace RVis.Model
     {
       var sb = new StringBuilder();
       SimParameters.Iter(p => sb.Append(p.Name + p.Value));
-      return sb.ToString().ToMD5Hash();
+      return sb.ToString().ToHash();
     }
 
     [ProtoBeforeSerialization]

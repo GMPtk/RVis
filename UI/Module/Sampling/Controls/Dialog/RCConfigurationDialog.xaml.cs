@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,17 +11,16 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Sampling.Controls.Views.Impl
+namespace Sampling
 {
   /// <summary>
-  /// Interaction logic for OutputsDesignActivityView.xaml
+  /// Interaction logic for RCConfigurationDialog.xaml
   /// </summary>
-  public partial class OutputsDesignActivityView : UserControl
+  public partial class RCConfigurationDialog : MetroWindow
   {
-    public OutputsDesignActivityView()
+    public RCConfigurationDialog()
     {
       InitializeComponent();
     }

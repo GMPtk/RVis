@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Sampling.Controls.Views.Impl
+namespace Sampling.Controls.Views
 {
   /// <summary>
-  /// Interaction logic for SamplesDesignActivityView.xaml
+  /// Interaction logic for OutputsView.xaml
   /// </summary>
-  public partial class SamplesDesignActivityView : UserControl
+  public partial class OutputsView : UserControl
   {
-    public SamplesDesignActivityView()
+    public OutputsView()
     {
       InitializeComponent();
     }

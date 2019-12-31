@@ -13,7 +13,7 @@ namespace RVisUI.Ioc
   {
     public ViewModelLocator()
     {
-      if (ModeDetector.InDesignMode())
+      if (PlatformModeDetector.InDesignMode())
       {
         NinjectBootstrapper = new Design.NinjectBootstrapper();
       }

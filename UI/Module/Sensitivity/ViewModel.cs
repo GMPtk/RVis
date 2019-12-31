@@ -9,15 +9,22 @@ using RVisUI.AppInf.Extensions;
 using RVisUI.Model;
 using RVisUI.Model.Extensions;
 using System;
-using System.Linq;
+using System.IO;
 using System.Reactive.Disposables;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static Sensitivity.Logger;
+using static System.IO.Path;
 
 namespace Sensitivity
 {
-  internal sealed class ViewModel : IViewModel, ITaskRunnerContainer, ISharedStateProvider, ICommonConfiguration, IDisposable
+  internal sealed class ViewModel :
+    IViewModel,
+    ITaskRunnerContainer,
+    ISharedStateProvider,
+    ICommonConfiguration,
+    IExportedDataProvider,
+    IDisposable
   {
     internal ViewModel(IAppState appState, IAppService appService, IAppSettings appSettings)
     {
@@ -26,7 +33,7 @@ namespace Sensitivity
       _simulation = appState.Target.AssertSome();
 
       var pathToSensitivityDesignsDirectory = _simulation.GetPrivateDirectory(
-        nameof(Sensitivity), 
+        nameof(Sensitivity),
         nameof(SensitivityDesigns)
         );
       _sensitivityDesigns = new SensitivityDesigns(pathToSensitivityDesignsDirectory);
@@ -60,7 +67,7 @@ namespace Sensitivity
         _designDigestsViewModel
           .ObservableForProperty(vm => vm.TargetSensitivityDesign).Subscribe(
             _reactiveSafeInvoke.SuspendAndInvoke<object>(
-              ObserveTargetSensitivityDesignCreatedOn
+              ObserveTargetSensitivityDesign
               )
           ),
 
@@ -174,7 +181,7 @@ namespace Sensitivity
       {
         _moduleState.ParameterStates.Filter(ps => ps.IsSelected).Iter(ps =>
         {
-          var (value, minimum, maximum) = 
+          var (value, minimum, maximum) =
             _appState.SimSharedState.ParameterSharedStates.GetParameterValueStateOrDefaults(
               ps.Name,
               _simulation.SimConfig.SimInput.SimParameters
@@ -232,6 +239,71 @@ namespace Sensitivity
     {
       get => _moduleState.AutoShareObservationsSharedState;
       set => _moduleState.AutoShareObservationsSharedState = value;
+    }
+
+    public DataExportConfiguration GetDataExportConfiguration(
+      string rootExportDirectory
+      )
+    {
+      if (_moduleState.SensitivityDesign == default)
+      {
+        throw new InvalidOperationException("Load a sensitivity design");
+      }
+
+      var title = $"Export from {nameof(Sensitivity)}: {_moduleState.SensitivityDesign.CreatedOn.ToDirectoryName()}";
+
+      if (_moduleState.RootExportDirectory.IsAString())
+      {
+        rootExportDirectory = _moduleState.RootExportDirectory;
+      }
+      else
+      {
+        rootExportDirectory = Combine(
+          rootExportDirectory,
+          nameof(Sensitivity).ToLowerInvariant(),
+          _simulation.SimConfig.Title
+          );
+      }
+
+      var exportDirectoryName = _moduleState.SensitivityDesign.CreatedOn.ToDirectoryName();
+
+      var openAfterExport = _moduleState.OpenAfterExport;
+
+      var outputNames = _moduleState.SensitivityDesign.SensitivityMethod == SensitivityMethod.Morris
+        ? _moduleState.MeasuresState.MorrisOutputMeasures.Keys.ToArr()
+        : _moduleState.MeasuresState.Fast99OutputMeasures.Keys.ToArr();
+
+      var outputs = outputNames.Map(on => (on, true));
+
+      return new DataExportConfiguration(
+        title,
+        rootExportDirectory,
+        exportDirectoryName,
+        openAfterExport,
+        outputs
+        );
+    }
+
+    public void ExportData(DataExportConfiguration dataExportConfiguration)
+    {
+      var targetDirectory = Combine(
+        dataExportConfiguration.RootExportDirectory,
+        dataExportConfiguration.ExportDirectoryName
+        );
+
+      if (!Directory.Exists(targetDirectory))
+      {
+        Directory.CreateDirectory(targetDirectory);
+      }
+
+      var outputNames = dataExportConfiguration.Outputs
+        .Filter(o => o.IncludeInExport)
+        .Map(o => o.Name);
+
+      _designViewModel.Export(outputNames, targetDirectory);
+
+      _moduleState.RootExportDirectory = dataExportConfiguration.RootExportDirectory;
+      _moduleState.OpenAfterExport = dataExportConfiguration.OpenAfterExport;
     }
 
     public void Dispose() => Dispose(true);
@@ -325,7 +397,7 @@ namespace Sensitivity
       }
     }
 
-    private void ObserveTargetSensitivityDesignCreatedOn(object _) => 
+    private void ObserveTargetSensitivityDesign(object _) =>
       _designDigestsViewModel.TargetSensitivityDesign.IfSome(
         t => LoadSensitivityDesign(t.CreatedOn)
         );
@@ -369,9 +441,9 @@ namespace Sensitivity
             );
           var distributions = parameterState.Distributions.SetItem(index, d);
           return new ParameterState(
-            parameterState.Name, 
-            d.DistributionType, 
-            distributions, 
+            parameterState.Name,
+            d.DistributionType,
+            distributions,
             isSelected: true
             );
         },
@@ -380,9 +452,9 @@ namespace Sensitivity
           var invariantDistribution = new InvariantDistribution(value);
           var distributions = parameterState.Distributions.SetDistribution(invariantDistribution);
           parameterState = new ParameterState(
-            parameterState.Name, 
-            DistributionType.Invariant, 
-            distributions, 
+            parameterState.Name,
+            DistributionType.Invariant,
+            distributions,
             isSelected: true
             );
           return parameterState;
@@ -448,9 +520,9 @@ namespace Sensitivity
                   );
                 var distributions = ps.Distributions.SetItem(index, dp.Distribution);
                 return new ParameterState(
-                  ps.Name, 
-                  dp.Distribution.DistributionType, 
-                  distributions, 
+                  ps.Name,
+                  dp.Distribution.DistributionType,
+                  distributions,
                   isSelected: true
                   );
               },
@@ -491,7 +563,7 @@ namespace Sensitivity
       {
         _appService.Notify(
           nameof(ViewModel),
-          nameof(ObserveTargetSensitivityDesignCreatedOn),
+          nameof(LoadSensitivityDesign),
           ex
           );
         Log.Error(ex);

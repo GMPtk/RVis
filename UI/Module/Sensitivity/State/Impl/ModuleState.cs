@@ -76,6 +76,8 @@ namespace Sensitivity
       public _MeasuresStateDTO MeasuresState { get; set; }
       public _ParameterStateDTO[] ParameterStates { get; set; }
       public string SensitivityDesign { get; set; }
+      public string RootExportDirectory { get; set; }
+      public bool OpenAfterExport { get; set; }
       public bool? AutoApplyParameterSharedState { get; set; } = false;
       public bool? AutoShareParameterSharedState { get; set; } = false;
       public bool? AutoApplyElementSharedState { get; set; }
@@ -146,6 +148,9 @@ namespace Sensitivity
           .ToArray(),
 
           SensitivityDesign = instance.SensitivityDesign?.CreatedOn.ToDirectoryName(),
+
+          RootExportDirectory = instance.RootExportDirectory,
+          OpenAfterExport = instance.OpenAfterExport,
 
           AutoApplyParameterSharedState = instance.AutoApplyParameterSharedState,
           AutoShareParameterSharedState = instance.AutoShareParameterSharedState,
@@ -267,6 +272,9 @@ namespace Sensitivity
         }
         catch (Exception) { /* logged elsewhere */ }
       }
+
+      RootExportDirectory = dto.RootExportDirectory;
+      OpenAfterExport = dto.OpenAfterExport;
 
       _autoApplyParameterSharedState = dto.AutoApplyParameterSharedState;
       _autoShareParameterSharedState = dto.AutoShareParameterSharedState;

@@ -162,6 +162,15 @@ namespace Sensitivity
     bool CanPlaySlower { get; }
     ICommand PlayFaster { get; }
     bool CanPlayFaster { get; }
+
+    string XUnits { get; }
+
+    Arr<IRankedParameterViewModel> RankedParameterViewModels { get; }
+    Arr<string> RankedUsing { get; }
+    double? RankedFrom { get; }
+    double? RankedTo { get; }
+    ICommand UseRankedParameters { get; }
+    ICommand ShareRankedParameters { get; }
   }
 
   internal interface IFast99MeasuresViewModel
@@ -226,6 +235,15 @@ namespace Sensitivity
     bool CanPlaySlower { get; }
     ICommand PlayFaster { get; }
     bool CanPlayFaster { get; }
+
+    string XUnits { get; }
+
+    Arr<IRankedParameterViewModel> RankedParameterViewModels { get; }
+    Arr<string> RankedUsing { get; }
+    double? RankedFrom { get; }
+    double? RankedTo { get; }
+    ICommand UseRankedParameters { get; }
+    ICommand ShareRankedParameters { get; }
   }
 
   internal interface IDesignDigestViewModel

@@ -9,15 +9,25 @@ using RVisUI.AppInf.Extensions;
 using RVisUI.Model;
 using RVisUI.Model.Extensions;
 using System;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using static Estimation.Logger;
+using static Estimation.Properties.Resources;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
+using static System.Globalization.CultureInfo;
+using static System.IO.Path;
+using static System.String;
 
 namespace Estimation
 {
-  internal sealed class ViewModel : IViewModel, ISharedStateProvider, ICommonConfiguration, IDisposable
+  internal sealed class ViewModel :
+    IViewModel,
+    ISharedStateProvider,
+    ICommonConfiguration,
+    IExportedDataProvider,
+    IDisposable
   {
     internal ViewModel(IAppState appState, IAppService appService, IAppSettings appSettings)
     {
@@ -333,6 +343,108 @@ namespace Estimation
     {
       get => _moduleState.AutoShareObservationsSharedState;
       set => _moduleState.AutoShareObservationsSharedState = value;
+    }
+
+    public DataExportConfiguration GetDataExportConfiguration(
+      string rootExportDirectory
+    )
+    {
+      if (_moduleState.EstimationDesign == default)
+      {
+        throw new InvalidOperationException("Load an estimation design");
+      }
+
+      if (_moduleState.ChainStates.IsEmpty)
+      {
+        throw new InvalidOperationException("No chain data");
+      }
+
+      if(!(_moduleState.PosteriorState?.BeginIteration > 0))
+      {
+        throw new InvalidOperationException("Convergence not set");
+      }
+
+      var title = $"Export from {nameof(Estimation)}: {_moduleState.EstimationDesign.CreatedOn.ToDirectoryName()}";
+
+      if (_moduleState.RootExportDirectory.IsAString())
+      {
+        rootExportDirectory = _moduleState.RootExportDirectory;
+      }
+      else
+      {
+        rootExportDirectory = Combine(
+          rootExportDirectory,
+          nameof(Estimation).ToLowerInvariant(),
+          _simulation.SimConfig.Title
+          );
+      }
+
+      var exportDirectoryName = _moduleState.EstimationDesign.CreatedOn.ToDirectoryName();
+
+      var openAfterExport = _moduleState.OpenAfterExport;
+
+      var outputs = _moduleState.EstimationDesign.Outputs.Map(e => (e.Name, true));
+
+      return new DataExportConfiguration(
+        title,
+        rootExportDirectory,
+        exportDirectoryName,
+        openAfterExport,
+        outputs
+        );
+    }
+
+    public void ExportData(DataExportConfiguration dataExportConfiguration)
+    {
+      var targetDirectory = Combine(
+        dataExportConfiguration.RootExportDirectory,
+        dataExportConfiguration.ExportDirectoryName
+        );
+
+      if (!Directory.Exists(targetDirectory))
+      {
+        Directory.CreateDirectory(targetDirectory);
+      }
+
+      var exportToTargetDirectory =
+        par<string, Arr<string>, Simulation, ChainState>(
+          ChainState.ExportChainState,
+          targetDirectory,
+          dataExportConfiguration.Outputs
+            .Filter(o => o.IncludeInExport)
+            .Map(o => o.Name),
+          _simulation
+        );
+      _moduleState.ChainStates.Iter(exportToTargetDirectory);
+
+      var chainNos = Range(1, _moduleState.EstimationDesign.Chains)
+        .Map(i => $"\"{i}\"")
+        .ToArr();
+
+      var parameterNames = _moduleState.EstimationDesign.Priors
+        .Map(mp => $"\"{mp.Name}\"")
+        .ToArr();
+
+      var outputNames = _moduleState.EstimationDesign.Outputs
+        .Map(mo => $"\"{mo.Name}\"")
+        .ToArr();
+
+      var convergenceBegin = _moduleState.PosteriorState.BeginIteration;
+
+      var r = Format(
+        InvariantCulture,
+        FMT_LOAD_DATA,
+        targetDirectory.Replace("\\", "/"),
+        Join(", ", chainNos),
+        Join(", ", parameterNames),
+        Join(", ", outputNames),
+        convergenceBegin
+        ); ;
+
+      File.WriteAllText(Combine(targetDirectory, "load_data.R"), r);
+
+      _moduleState.RootExportDirectory = dataExportConfiguration.RootExportDirectory;
+      _moduleState.OpenAfterExport = dataExportConfiguration.OpenAfterExport;
     }
 
     public void Dispose() => Dispose(true);

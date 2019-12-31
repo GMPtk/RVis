@@ -57,5 +57,22 @@ namespace Sensitivity.Design
     public ICommand PlayFaster => throw new NotImplementedException();
 
     public bool CanPlayFaster => throw new NotImplementedException();
+
+    public string XUnits => "secs.secs.secs.secs.secs";
+
+    public Arr<IRankedParameterViewModel> RankedParameterViewModels =>
+      Range(1, 20)
+        .Map(i => new RankedParameterViewModel($"parameter {i:000}", i) { IsSelected = i % 2 != 0 })
+        .ToArr<IRankedParameterViewModel>();
+
+    public Arr<string> RankedUsing => Range(1, 20).Map(i => $"output {i:000}").ToArr();
+
+    public double? RankedFrom => 5.4321;
+
+    public double? RankedTo => 9.8765;
+
+    public ICommand UseRankedParameters => throw new NotImplementedException();
+
+    public ICommand ShareRankedParameters => throw new NotImplementedException();
   }
 }

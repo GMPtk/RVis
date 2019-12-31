@@ -128,7 +128,7 @@ namespace RVisUI.Mvvm
           "RVisData"
           );
 
-        var dataExportConfiguration = exportedDataProvider.GetConfiguration(rootExportDirectory);
+        var dataExportConfiguration = exportedDataProvider.GetDataExportConfiguration(rootExportDirectory);
 
         var dataExportConfigurationViewModel = new DataExportConfigurationViewModel(
           _appService

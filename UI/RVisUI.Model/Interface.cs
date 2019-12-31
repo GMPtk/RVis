@@ -147,7 +147,7 @@ namespace RVisUI.Model
 
   public interface IExportedDataProvider
   {
-    DataExportConfiguration GetConfiguration(
+    DataExportConfiguration GetDataExportConfiguration(
       string rootExportDirectory
       );
 

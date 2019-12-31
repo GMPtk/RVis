@@ -1,11 +1,13 @@
 ﻿using LanguageExt;
 using RVis.Base;
+using RVis.Data;
 using RVisUI.AppInf;
 using RVisUI.Model.Extensions;
 using System;
 using System.ComponentModel;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using DataTable = System.Data.DataTable;
 
 namespace Sampling
 {
@@ -13,7 +15,9 @@ namespace Sampling
   {
     internal ParametersState ParametersState { get; } = new ParametersState();
 
-    internal DesignState DesignState { get; } = new DesignState();
+    internal SamplesState SamplesState { get; } = new SamplesState();
+
+    internal OutputsState OutputsState { get; } = new OutputsState();
 
     internal Arr<ParameterState> ParameterStates
     {
@@ -28,12 +32,19 @@ namespace Sampling
     }
     private Arr<ParameterState> _parameterStates;
 
-    internal LatinHypercubeDesign LatinHypercubeDesign
+    internal DataTable Samples
     {
-      get => _latinHypercubeDesign;
-      set => this.RaiseAndSetIfChanged(ref _latinHypercubeDesign, value, PropertyChanged);
+      get => _samples;
+      set => this.RaiseAndSetIfChanged(ref _samples, value, PropertyChanged);
     }
-    private LatinHypercubeDesign _latinHypercubeDesign = LatinHypercubeDesign.Default;
+    private DataTable _samples;
+
+    internal Arr<(int Index, NumDataTable Output)> Outputs
+    {
+      get => _outputs;
+      set => this.RaiseAndSetIfChanged(ref _outputs, value, PropertyChanged);
+    }
+    private Arr<(int Index, NumDataTable Output)> _outputs;
 
     internal SamplingDesign SamplingDesign
     {

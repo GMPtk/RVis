@@ -65,7 +65,7 @@ namespace RVisUI.AppInf
     public BetaScaledDistributionViewModel()
       : this(new Design.AppService(), new Design.AppSettings())
     {
-      RequireTrue(Splat.ModeDetector.InDesignMode());
+      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
     }
 
     public DistributionType DistributionType => DistributionType.BetaScaled;

@@ -70,6 +70,8 @@ namespace RVis.Model
     void LoadFromBinary(byte[] raw);
 
     void CreateVector(double[] source, string objectName);
+
+    void CreateMatrix(double[][] source, string objectName);
   }
 
   public interface IRVisServiceCallback
@@ -146,5 +148,8 @@ namespace RVis.Model
 
     [OperationContract]
     UnitSvcRes CreateVector(double[] source, string objectName);
+
+    [OperationContract]
+    UnitSvcRes CreateMatrix(double[][] source, string objectName);
   }
 }

@@ -35,6 +35,12 @@
         False="Visible" 
         />
 
+      <wpf:BooleanToVisibilityConverter 
+        x:Key="nb2vc" 
+        True="Visible" 
+        False="Hidden" 
+        />
+
       <ContextMenu x:Key="TraceContextMenu">
         <MenuItem Command="{Binding TraceViewModel.ResetAxes}">
           <MenuItem.Icon>
@@ -167,6 +173,132 @@
             <Button Command="{Binding PlayFaster}">
               <md:PackIcon Kind="FastForward"/>
             </Button>
+          </StackPanel>
+
+        </StackPanel>
+      </GroupBox>
+
+      <GroupBox Header="Ranking" Margin="0,10,0,0" IsEnabled="{Binding IsReady}">
+
+        <StackPanel>
+          <StackPanel>
+            <StackPanel.Style>
+              <Style TargetType="StackPanel">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding RankedParameterViewModels.Count}" Value="0">
+                    <Setter Property="Visibility" Value="Visible"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </StackPanel.Style>
+
+            <StackPanel Orientation="Horizontal" 
+                        Margin="0, 30" 
+                        HorizontalAlignment="Center"
+                        >
+              <TextBlock VerticalAlignment="Center" 
+                         Text="Not ranked"
+                         />
+            </StackPanel>
+
+          </StackPanel>
+
+          <StackPanel Margin="0,10,0,0">
+            <StackPanel.Style>
+              <Style TargetType="StackPanel">
+                <Setter Property="Visibility" Value="Visible"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding RankedParameterViewModels.Count}" Value="0">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </StackPanel.Style>
+
+            <ScrollViewer MaxHeight="120"
+                          VerticalScrollBarVisibility="Auto" 
+                          HorizontalScrollBarVisibility="Hidden"
+                          >
+              <ItemsControl ItemsSource="{Binding RankedParameterViewModels}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                      <md:PackIcon Kind="Tick" 
+                                   Foreground="Green"
+                                   Height="10"
+                                   Width="10"
+                                   Margin="2,0"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding IsSelected, Converter={StaticResource nb2vc}}"
+                                   />
+                      <TextBlock MaxWidth="160" 
+                                 TextTrimming="CharacterEllipsis" 
+                                 >
+                        <TextBlock.Text>
+                          <MultiBinding StringFormat="{}{0} ({1:G3})">
+                            <Binding Path="Name" />
+                            <Binding Path="Score" />
+                          </MultiBinding>
+                        </TextBlock.Text></TextBlock>
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+
+            <TextBlock MaxWidth="200"
+                       Margin="0,10,0,0"
+                       HorizontalAlignment="Left"
+                       FontSize="7"
+                       TextTrimming="CharacterEllipsis">
+              <TextBlock.Inlines>
+                <Run Text="Ranked over"/>
+                <Run Text="{Binding RankedFrom, Mode=OneWay, StringFormat={}{0:G3}}"/>
+                <Run Text="to"/>
+                <Run Text="{Binding RankedTo, Mode=OneWay, StringFormat={}{0:G3}}"/>
+                <Run Text="{Binding XUnits, Mode=OneWay}"/>
+              </TextBlock.Inlines>
+            </TextBlock>
+
+            <StackPanel Margin="0,10,0,0" 
+                        Orientation="Horizontal"
+                        >
+              <TextBlock FontSize="7" 
+                         HorizontalAlignment="Left"
+                         Text="Ranked using "
+                         />
+              <TextBlock FontSize="7"
+                         HorizontalAlignment="Left"
+                         MaxWidth="160" 
+                         TextWrapping="Wrap"
+                         TextTrimming="CharacterEllipsis"
+                         Tag=", "
+                         wpf:Content.TextBlockRuns="{Binding RankedUsing}"
+                         />
+            </StackPanel>
+
+            <Grid Margin="0,10,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+
+              <Button Grid.Column="1"
+                      Margin="0,0,5,0" 
+                      Content="Use"
+                      ToolTip="Use selected parameters in new design"
+                      Command="{Binding UseRankedParameters}"
+                      />
+              <Button Grid.Column="2"
+                      Margin="5,0,0,0" 
+                      Content="Share"
+                      ToolTip="Upload selected parameters into shared state"
+                      Command="{Binding ShareRankedParameters}"
+                      />
+            </Grid>
+
           </StackPanel>
 
         </StackPanel>

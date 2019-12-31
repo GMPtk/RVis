@@ -46,7 +46,7 @@
     
     mimetype: application/x-microsoft.net.object.binary.base64
     value   : The object must be serialized with 
-            : System.Serialization.Formatters.Binary.BinaryFormatter
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
     
     mimetype: application/x-microsoft.net.object.soap.base64
@@ -60,6 +60,7 @@
             : and then encoded with base64 encoding.
     -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
@@ -68,9 +69,10 @@
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="name" use="required" type="xsd:string" />
               <xsd:attribute name="type" type="xsd:string" />
               <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
@@ -85,9 +87,10 @@
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -109,9 +112,133 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="FMT_LOAD_DATA" xml:space="preserve">
+    <value>wd &lt;- getwd()
+data_directory &lt;- "{0}"
+setwd(data_directory)
+
+chain_nos &lt;- c({1})
+parameter_names &lt;- c({2})
+output_names &lt;- c({3})
+
+# load data
+
+chain_datas &lt;- list()
+posteriors &lt;- list()
+
+for (chain_no in chain_nos)
+{{
+  chain_data &lt;-
+    read.csv(paste(".", chain_no, "chaindata.csv", sep = "/"),
+             header = TRUE)
+  chain_datas[[chain_no]] &lt;- chain_data
+  
+  posterior &lt;- list()
+  
+  for (output_name in output_names)
+  {{
+    outputs &lt;-
+      read.csv(paste(".", chain_no, paste0(output_name, ".csv"), sep = "/"),
+               header = TRUE)
+    posterior[[output_name]] &lt;- outputs
+  }}
+  
+  posteriors[[chain_no]] &lt;- posterior
+}}
+
+setwd(wd)
+
+convergence_begin &lt;- {4}
+
+nrows &lt;- lapply(chain_datas, function(df)
+  nrow(df))
+convergence_end &lt;- min(as.numeric(nrows))
+
+if (convergence_begin &gt;= convergence_end)
+  stop("Invalid convergence begin!")
+
+# plot proposal histograms
+
+for (parameter_name in parameter_names)
+{{
+  all_values &lt;- sapply(
+    chain_nos,
+    function(chain_no)
+    {{
+     parameter_data &lt;- chain_datas[[chain_no]][[parameter_name]]
+     return(parameter_data[convergence_begin:convergence_end])
+    }},
+    simplify = T
+    )
+  
+  all_values &lt;- unlist(all_values)
+  
+  hist(all_values,
+       main = paste(parameter_name, "Values"),
+       xlab = parameter_name)
+}}
+
+# trace outputs across chains
+
+for (output_name in output_names)
+{{
+  for (chain_no in chain_nos)
+  {{
+    output_data &lt;- posteriors[[chain_no]][[output_name]]
+    
+    x &lt;- output_data[, 1]
+    y &lt;- output_data[, convergence_begin]
+    xlab &lt;- colnames(output_data)[0]
+    ylab &lt;- output_name
+    main &lt;- paste0("Trace of ", output_name, " for chain #", chain_no)
+    
+    plot(
+      x,
+      y,
+      xlab = xlab,
+      ylab = ylab,
+      main = main,
+      type = "l",
+      col = "black",
+      pch = ".",
+      lty = 1
+    )
+    
+    for (i in (convergence_begin + 1):convergence_end)
+    {{
+      y &lt;- output_data[, i]
+      lines(x, y, col = "black", lty = 1)
+    }}
+  }}
+}}
+
+# MCMC diagnostics
+
+if (!require(coda))
+  stop("Install CODA package!")
+
+coda_lists &lt;- lapply(chain_datas, function(chain_data)
+{{
+  parameter_columns &lt;-
+    lapply(parameter_names, function(parameter_name)
+    {{
+      chain_data[1:convergence_end, parameter_name]
+    }})
+  parameter_matrix &lt;- do.call(cbind, parameter_columns)
+  colnames(parameter_matrix) &lt;- parameter_names
+  return (mcmc(parameter_matrix))
+}})
+
+coda_list &lt;- as.mcmc.list(coda_lists)
+
+plot(coda_list)
+gelman.diag(coda_list)
+gelman.plot(coda_list)
+</value>
+  </data>
 </root>

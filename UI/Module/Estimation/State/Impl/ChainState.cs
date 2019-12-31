@@ -9,6 +9,7 @@ using System.Linq;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static RVis.Data.FxData;
+using static System.Double;
 using static System.Globalization.CultureInfo;
 using static System.IO.Path;
 
@@ -40,6 +41,78 @@ namespace Estimation
       var chainStates = chainStateDirectories.Select(LoadChainState);
 
       return chainStates.Somes().ToArr();
+    }
+
+    internal static void ExportChainState(
+      string targetDirectory,
+      Arr<string> targetOutputs,
+      Simulation simulation,
+      ChainState chainState
+      )
+    {
+      var pathToChainState = Combine(targetDirectory, chainState.No.ToString(InvariantCulture));
+      Directory.CreateDirectory(pathToChainState);
+
+      using var chainData = chainState.ChainData.Copy();
+      var rowsToRemove = chainData.Rows
+        .Cast<DataRow>()
+        .Where(dr => IsNaN(dr.Field<double>(0)))
+        .ToArr();
+      rowsToRemove.Iter(chainData.Rows.Remove);
+      chainData.AcceptChanges();
+      SaveChainData(chainData, pathToChainState);
+
+      using var errorData = chainState.ErrorData.Copy();
+      rowsToRemove = errorData.Rows
+        .Cast<DataRow>()
+        .Where(dr => IsNaN(dr.Field<double>(0)))
+        .ToArr();
+      rowsToRemove.Iter(errorData.Rows.Remove);
+      errorData.AcceptChanges();
+      SaveErrorData(errorData, pathToChainState);
+
+      var independentName = simulation.SimConfig.SimOutput.IndependentVariable.Name;
+
+      targetOutputs.Iter(o =>
+      {
+        var posteriorData = chainState.PosteriorData[o];
+
+        var lastRow = 0;
+        for (; lastRow < posteriorData.Rows.Count; ++lastRow)
+        {
+          if (IsNaN(posteriorData.Rows[lastRow].Field<double>(0))) break;
+        }
+
+        if (lastRow < 2) return;
+
+        var independentData = posteriorData.Rows[0].ItemArray
+        .Cast<double>()
+        .ToArray();
+
+        using var dataTable = new DataTable();
+        dataTable.Columns.Add(new DataColumn(independentName, typeof(double)));
+        Range(1, lastRow - 1).Iter(
+          i => dataTable.Columns.Add(new DataColumn($"it #{i:00000000}", typeof(double)))
+          );
+
+        for (var i = 0; i < posteriorData.Columns.Count; ++i)
+        {
+          var destinationRow = dataTable.NewRow();
+          destinationRow[0] = independentData[i];
+
+          for (var j = 1; j < lastRow; ++j)
+          {
+            destinationRow[j] = posteriorData.Rows[j][i];
+          }
+
+          dataTable.Rows.Add(destinationRow);
+        }
+
+        dataTable.AcceptChanges();
+
+        var pathToPosteriorData = Combine(pathToChainState, $"{o}.csv");
+        SaveToCSV<double>(dataTable, pathToPosteriorData);
+      });
     }
 
     private static void SaveChainState(ChainState chainState, string pathToChainState)

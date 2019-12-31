@@ -61,7 +61,7 @@ namespace RVisUI.AppInf
     public InverseGammaDistributionViewModel()
       : this(new Design.AppService(), new Design.AppSettings())
     {
-      RequireTrue(Splat.ModeDetector.InDesignMode());
+      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
     }
 
     public DistributionType DistributionType => DistributionType.InverseGamma;

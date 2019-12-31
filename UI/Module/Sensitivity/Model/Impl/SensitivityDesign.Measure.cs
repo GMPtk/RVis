@@ -38,6 +38,23 @@ namespace Sensitivity
         sensitivityDesignDirectory
         );
 
+      SaveMorrisOutputMeasures(
+        outputName,
+        mu,
+        muStar, 
+        sigma, 
+        pathToSensitivityDesignDirectory
+        );
+    }
+
+    internal static void SaveMorrisOutputMeasures(
+      string outputName,
+      DataTable mu,
+      DataTable muStar,
+      DataTable sigma,
+      string pathToSensitivityDesignDirectory
+      )
+    {
       RequireDirectory(pathToSensitivityDesignDirectory);
 
       var pathToOutputMeasuresDirectory = Combine(
@@ -85,11 +102,28 @@ namespace Sensitivity
         sensitivityDesignDirectory
         );
 
+      SaveFast99OutputMeasures(
+        outputName, 
+        firstOrder, 
+        totalOrder, 
+        variance, 
+        pathToSensitivityDesignDirectory
+        );
+    }
+
+    internal static void SaveFast99OutputMeasures(
+      string outputName,
+      DataTable firstOrder,
+      DataTable totalOrder,
+      DataTable variance,
+      string pathToSensitivityDesignDirectory
+      )
+    {
       RequireDirectory(pathToSensitivityDesignDirectory);
 
       var pathToOutputMeasuresDirectory = Combine(
         pathToSensitivityDesignDirectory,
-        MEASURES_DIRECTORY_NAME, 
+        MEASURES_DIRECTORY_NAME,
         outputName
         );
 

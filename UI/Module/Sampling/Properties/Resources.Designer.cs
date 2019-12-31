@@ -80,6 +80,39 @@ namespace Sampling.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to wd &lt;- getwd()
+        ///data_directory &lt;- &quot;{0}&quot;
+        ///setwd(data_directory)
+        ///
+        ///# load samples and plot histograms
+        ///
+        ///parameter_names &lt;- c({1})
+        ///samples &lt;- read.csv(&quot;{2}.csv&quot;, header = TRUE)
+        ///
+        ///hist_samples &lt;- function(parameter_name)
+        ///{{
+        ///  hist(
+        ///    samples[,parameter_name], 
+        ///    main = paste(parameter_name, &quot;Samples&quot;), 
+        ///    xlab = parameter_name
+        ///    )
+        ///}}
+        ///
+        ///invisible(capture.output(lapply(parameter_names, hist_samples)))
+        ///
+        ///# load outputs and plot traces
+        ///
+        ///output_names &lt;- c({3})
+        ///
+        ///load_output &lt;- function(output_ [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string FMT_LOAD_DATA {
+            get {
+                return ResourceManager.GetString("FMT_LOAD_DATA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to rvis_T0 &lt;- {0}
         ///rvis_c &lt;- {1}
         ///rvis_it &lt;- {2}

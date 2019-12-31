@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LanguageExt;
+using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
@@ -20,6 +21,6 @@ namespace Sampling.Design
 
     public ICommand FollowKeyboardInDesignDigests => throw new NotImplementedException();
 
-    public DateTime? TargetSamplingDesignCreatedOn { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public Option<(DateTime CreatedOn, DateTime SelectedOn)> TargetSamplingDesign { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
   }
 }

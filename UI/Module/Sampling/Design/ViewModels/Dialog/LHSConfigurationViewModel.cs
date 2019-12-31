@@ -1,17 +1,16 @@
 ﻿using LanguageExt;
 using System;
+using System.Linq;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
+using static System.String;
+using static System.Linq.Enumerable;
 
 namespace Sampling.Design
 {
   internal class LHSConfigurationViewModel : ILHSConfigurationViewModel
   {
     public bool IsDiceDesignInstalled => true;
-
-    public Arr<ILHSParameterViewModel> LHSParameterViewModels => Range(1, 50)
-      .Map(i => new LHSParameterViewModel($"parameter {i:0000}") { Lower = i * 10, Upper = i * 20 })
-      .ToArr<ILHSParameterViewModel>();
 
     public LatinHypercubeDesignType LatinHypercubeDesignType { get => LatinHypercubeDesignType.Centered; set => throw new NotImplementedException(); }
     public bool UseSimulatedAnnealing { get => true; set => throw new NotImplementedException(); }
@@ -33,7 +32,6 @@ namespace Sampling.Design
 
     public bool? DialogResult { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-    public Arr<(string Parameter, double Lower, double Upper)> Variables { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     public LatinHypercubeDesign LatinHypercubeDesign { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
   }
 }

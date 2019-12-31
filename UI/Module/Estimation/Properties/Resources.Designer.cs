@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace Estimation.Properties {
+    using System;
     
     
     /// <summary>
@@ -18,7 +19,7 @@ namespace Estimation.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -37,7 +38,7 @@ namespace Estimation.Properties {
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
-                if ((resourceMan == null)) {
+                if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Estimation.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
@@ -56,6 +57,40 @@ namespace Estimation.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to wd &lt;- getwd()
+        ///data_directory &lt;- &quot;{0}&quot;
+        ///setwd(data_directory)
+        ///
+        ///chain_nos &lt;- c({1})
+        ///parameter_names &lt;- c({2})
+        ///output_names &lt;- c({3})
+        ///
+        ///# load data
+        ///
+        ///chain_datas &lt;- list()
+        ///posteriors &lt;- list()
+        ///
+        ///for (chain_no in chain_nos)
+        ///{{
+        ///  chain_data &lt;-
+        ///    read.csv(paste(&quot;.&quot;, chain_no, &quot;chaindata.csv&quot;, sep = &quot;/&quot;),
+        ///             header = TRUE)
+        ///  chain_datas[[chain_no]] &lt;- chain_data
+        ///  
+        ///  posterior &lt;- list()
+        ///  
+        ///  for (output_name in output_names)
+        ///  {{
+        ///    outputs &lt;-
+        ///      read.csv(paste(&quot;.&quot;, chain_no, p [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string FMT_LOAD_DATA {
+            get {
+                return ResourceManager.GetString("FMT_LOAD_DATA", resourceCulture);
             }
         }
     }

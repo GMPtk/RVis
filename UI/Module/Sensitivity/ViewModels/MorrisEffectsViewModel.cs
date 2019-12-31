@@ -3,6 +3,7 @@ using ReactiveUI;
 using RVis.Base.Extensions;
 using RVis.Model;
 using RVis.Model.Extensions;
+using RVisUI.AppInf.Extensions;
 using RVisUI.Model;
 using RVisUI.Model.Extensions;
 using System;
@@ -30,8 +31,12 @@ namespace Sensitivity
       ModuleState moduleState
       )
     {
+      _appState = appState;
       _simulation = appState.Target.AssertSome();
       _moduleState = moduleState;
+
+      var independentVariable = _simulation.SimConfig.SimOutput.IndependentVariable;
+      XUnits = independentVariable.Unit;
 
       _muStarSigmaViewModel = new MuStarSigmaViewModel(appService, appSettings);
       _traceViewModel = new TraceViewModel(appService, appSettings, moduleState.TraceState);
@@ -60,6 +65,16 @@ namespace Sensitivity
         this.ObservableForProperty(vm => vm.CanPlayFaster, _ => CanPlayFaster)
         );
 
+      UseRankedParameters = ReactiveCommand.Create(
+        HandleUseRankedParameters,
+        this.ObservableForProperty(vm => vm.RankedParameterViewModels, _ => RankedParameterViewModels.Count > 0)
+        );
+
+      ShareRankedParameters = ReactiveCommand.Create(
+        HandleShareRankedParameters,
+        this.ObservableForProperty(vm => vm.RankedParameterViewModels, _ => RankedParameterViewModels.Count > 0)
+        );
+
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
       _subscriptions = new CompositeDisposable(
@@ -75,6 +90,10 @@ namespace Sensitivity
         moduleState.MeasuresState
           .ObservableForProperty(ms => ms.SelectedOutputName)
           .Subscribe(ObserveMeasuresStateSelectedOutputName),
+
+        moduleState
+          .ObservableForProperty(ms => ms.Ranking)
+          .Subscribe(ObserveModuleStateRanking),
 
         this
           .ObservableForProperty(vm => vm.IsVisible)
@@ -93,6 +112,7 @@ namespace Sensitivity
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
         Populate();
+        PopulateRanking();
         UpdateEnable();
       }
     }
@@ -178,6 +198,40 @@ namespace Sensitivity
       set => this.RaiseAndSetIfChanged(ref _canPlayFaster, value, PropertyChanged);
     }
     private bool _canPlayFaster;
+
+    public string XUnits { get; }
+
+    public Arr<IRankedParameterViewModel> RankedParameterViewModels
+    {
+      get => _rankedParameterViewModels;
+      set => this.RaiseAndSetIfChanged(ref _rankedParameterViewModels, value, PropertyChanged);
+    }
+    private Arr<IRankedParameterViewModel> _rankedParameterViewModels;
+
+    public Arr<string> RankedUsing
+    {
+      get => _rankedUsing;
+      set => this.RaiseAndSetIfChanged(ref _rankedUsing, value, PropertyChanged);
+    }
+    private Arr<string> _rankedUsing;
+
+    public double? RankedFrom
+    {
+      get => _rankedFrom;
+      set => this.RaiseAndSetIfChanged(ref _rankedFrom, value, PropertyChanged);
+    }
+    private double? _rankedFrom;
+
+    public double? RankedTo
+    {
+      get => _rankedTo;
+      set => this.RaiseAndSetIfChanged(ref _rankedTo, value, PropertyChanged);
+    }
+    private double? _rankedTo;
+
+    public ICommand UseRankedParameters { get; }
+
+    public ICommand ShareRankedParameters { get; }
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -265,11 +319,40 @@ namespace Sensitivity
       }
     }
 
+    private void HandleUseRankedParameters()
+    {
+      var toUse = _moduleState.Ranking.Parameters
+        .Filter(p => p.IsSelected)
+        .Map(p => p.Parameter);
+
+      RequireFalse(toUse.IsEmpty);
+
+      var parameterStates = _moduleState.ParameterStates.Map(
+        ps => ps.WithIsSelected(toUse.Contains(ps.Name))
+        );
+
+      _moduleState.ParameterStates = parameterStates;
+    }
+
+    private void HandleShareRankedParameters()
+    {
+      var toUse = _moduleState.Ranking.Parameters
+        .Filter(p => p.IsSelected)
+        .Map(p => p.Parameter);
+
+      RequireFalse(toUse.IsEmpty);
+
+      _moduleState.ParameterStates
+        .Filter(ps => toUse.Contains(ps.Name))
+        .ShareStates(_appState);
+    }
+
     private void ObserveModuleStateSensitivityDesign(object _)
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
         Populate();
+        PopulateRanking();
         UpdateEnable();
       }
     }
@@ -292,11 +375,20 @@ namespace Sensitivity
       }
     }
 
+    private void ObserveModuleStateRanking(object _)
+    {
+      using (_reactiveSafeInvoke.SuspendedReactivity)
+      {
+        PopulateRanking();
+      }
+    }
+
     private void ObserveIsVisible(object _)
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
         Populate();
+        PopulateRanking();
         UpdateEnable();
       }
     }
@@ -335,6 +427,10 @@ namespace Sensitivity
       OutputNames = default;
       SelectedOutputName = NOT_FOUND;
       _compiledOutputMeasures.Clear();
+      RankedParameterViewModels = default;
+      RankedUsing = default;
+      RankedFrom = default;
+      RankedTo = default;
       IsReady = false;
     }
 
@@ -427,6 +523,16 @@ namespace Sensitivity
       SelectedOutputName = OutputNames.IndexOf(_moduleState.MeasuresState.SelectedOutputName);
     }
 
+    private void PopulateRanking()
+    {
+      RankedParameterViewModels = _moduleState.Ranking.Parameters.Map<IRankedParameterViewModel>(
+        p => new RankedParameterViewModel(p.Parameter, p.Score) { IsSelected = p.IsSelected }
+        );
+      RankedUsing = _moduleState.Ranking.Outputs;
+      RankedFrom = _moduleState.Ranking.XBegin;
+      RankedTo = _moduleState.Ranking.XEnd;
+    }
+
     private IDictionary<double, MuStarSigmaOutputMeasures> GetPlotData(string outputName)
     {
       if (!_compiledOutputMeasures.ContainsKey(outputName))
@@ -448,6 +554,7 @@ namespace Sensitivity
 
     private static readonly Arr<int> _playSpeeds = Array(1, 2, 5, 10, 20, 50, 100);
 
+    private readonly IAppState _appState;
     private readonly Simulation _simulation;
     private readonly ModuleState _moduleState;
     private readonly MuStarSigmaViewModel _muStarSigmaViewModel;

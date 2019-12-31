@@ -1,14 +1,12 @@
 ﻿<UserControl x:Class="Sampling.Controls.Views.ParametersView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Sampling.Controls.Views"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:appinf="clr-namespace:RVisUI.AppInf;assembly=RVisUI.AppInf"
-             xmlns:sampling="clr-namespace:Sampling"
-             xmlns:design="clr-namespace:Sampling.Design"
              xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             xmlns:design="clr-namespace:Sampling.Design"
              mc:Ignorable="d" 
              d:DesignHeight="768" d:DesignWidth="1366"
              d:DataContext="{d:DesignInstance Type=design:ParametersViewModel, IsDesignTimeCreatable=True}"
@@ -85,7 +83,6 @@
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition/>
-        <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
 
       <Expander HorizontalAlignment="Stretch"
@@ -156,50 +153,12 @@
 
       </ScrollViewer>
 
-      <StackPanel Grid.Row="2">
-        <Button HorizontalAlignment="Left"
-                Margin="10"
-                ToolTip="Sample using a Latin hypercube design instead of individual distributions"
-                Content="Configure LHS..." 
-                Command="{Binding ConfigureLHS}"
-                />
-      </StackPanel>
-
     </Grid>
 
     <appinf:ParameterDistributionView Grid.Column="1"
                                       Margin="10 0 0 0"
                                       DataContext="{Binding ParameterDistributionViewModel}"
-                                      >
-      <appinf:ParameterDistributionView.Style>
-        <Style TargetType="{x:Type appinf:ParameterDistributionView}">
-          <Setter Property="Visibility" Value="Hidden"/>
-          <Style.Triggers>
-            <DataTrigger Binding="{Binding DataContext.LatinHypercubeDesignType, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" Value="{x:Static sampling:LatinHypercubeDesignType.None}">
-              <Setter Property="Visibility" Value="Visible"/>
-            </DataTrigger>
-          </Style.Triggers>
-        </Style>
-      </appinf:ParameterDistributionView.Style>
-    </appinf:ParameterDistributionView>
-
-    <TextBlock Grid.Column="1"
-               VerticalAlignment="Center"
-               HorizontalAlignment="Center">
-      <TextBlock.Style>
-        <Style TargetType="TextBlock">
-          <Setter Property="Visibility" Value="Visible"/>
-          <Style.Triggers>
-            <DataTrigger Binding="{Binding LatinHypercubeDesignType}" Value="{x:Static sampling:LatinHypercubeDesignType.None}">
-              <Setter Property="Visibility" Value="Hidden"/>
-            </DataTrigger>
-          </Style.Triggers>
-        </Style>
-      </TextBlock.Style>
-      <TextBlock.Inlines>
-        <Run Text="Hypercube sampling is enabled"/>
-      </TextBlock.Inlines>
-    </TextBlock>
+                                      />
 
   </Grid>
 

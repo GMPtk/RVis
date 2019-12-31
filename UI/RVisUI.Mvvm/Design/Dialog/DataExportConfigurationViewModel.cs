@@ -1,4 +1,5 @@
 ﻿using LanguageExt;
+using RVisUI.Model;
 using System;
 using System.Windows.Input;
 using static LanguageExt.Prelude;

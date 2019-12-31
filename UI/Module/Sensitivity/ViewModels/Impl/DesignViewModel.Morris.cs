@@ -55,14 +55,19 @@ namespace Sensitivity
         _moduleState.MeasuresState.SelectedOutputName = firstDependentVariable.Name;
       }
 
-      var outputRequestJob = CompileOutputRequestJob(
-        _moduleState.MeasuresState.SelectedOutputName,
+      _sampleInputs = CompileSampleInputs(
         _simulation,
-        _simData,
         samples,
         sensitivityDesign.DesignParameters.Filter(
           dp => dp.Distribution.DistributionType == DistributionType.Invariant
           )
+        );
+
+      var outputRequestJob = CompileOutputRequestJob(
+        _moduleState.MeasuresState.SelectedOutputName,
+        _simulation,
+        _simData,
+        _sampleInputs
         );
 
       if (!outputRequestJob[0].Output.IsEmpty)

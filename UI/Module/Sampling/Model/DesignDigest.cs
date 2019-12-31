@@ -2,7 +2,7 @@
 
 namespace Sampling
 {
-  internal struct DesignDigest
+  internal readonly struct DesignDigest
   {
     internal DesignDigest(DateTime createdOn, string description)
     {

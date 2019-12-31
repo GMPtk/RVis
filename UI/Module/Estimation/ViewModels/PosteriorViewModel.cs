@@ -61,7 +61,7 @@ namespace Estimation
               ms => ms.PosteriorState
               )
             .Subscribe(
-              _reactiveSafeInvoke.SuspendAndInvoke<object>(
+              _reactiveSafeInvoke.SuspendAndInvoke<(Arr<ChainState>, PosteriorState)>(
                 ObserveModuleStateEstimationDataChange
                 )
               ),
@@ -315,7 +315,7 @@ namespace Estimation
       PopulateControls();
     }
 
-    private void ObserveModuleStateEstimationDataChange(object _)
+    private void ObserveModuleStateEstimationDataChange((Arr<ChainState>, PosteriorState) _)
     {
       PopulatePosterior();
     }

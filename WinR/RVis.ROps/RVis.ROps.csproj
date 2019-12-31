@@ -76,6 +76,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ROpsApi.Create.cs" />
     <Compile Include="ROpsApi.Persistence.cs" />
     <Compile Include="ROpsApi.Sim.cs" />
     <Compile Include="ROpsApi.cs" />

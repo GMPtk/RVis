@@ -16,11 +16,17 @@ namespace Sampling
       public string SelectedParameter { get; set; }
     }
 
-    private class _DesignStateDTO
+    private class _SamplesStateDTO
     {
       public int? NumberOfSamples { get; set; }
       public int? Seed { get; set; }
-      public string SelectedElementName { get; set; }
+      public _LatinHypercubeDesignDTO LatinHypercubeDesign { get; set; }
+      public _RankCorrelationDesignDTO RankCorrelationDesign { get; set; }
+    }
+
+    private class _OutputsStateDTO
+    {
+      public string SelectedOutputName { get; set; }
     }
 
     private class _ParameterStateDTO
@@ -34,9 +40,9 @@ namespace Sampling
     private class _ModuleStateDTO
     {
       public _ParametersStateDTO ParametersState { get; set; }
-      public _DesignStateDTO DesignState { get; set; }
+      public _SamplesStateDTO SamplesState { get; set; }
+      public _OutputsStateDTO OutputsState { get; set; }
       public _ParameterStateDTO[] ParameterStates { get; set; }
-      public _LatinHypercubeDesignDTO LatinHypercubeDesign { get; set; }
       public string SamplingDesign { get; set; }
       public string RootExportDirectory { get; set; }
       public bool OpenAfterExport { get; set; }
@@ -58,11 +64,17 @@ namespace Sampling
             SelectedParameter = instance.ParametersState.SelectedParameter
           },
 
-          DesignState = new _DesignStateDTO
+          SamplesState = new _SamplesStateDTO
           {
-            NumberOfSamples = instance.DesignState.NumberOfSamples,
-            Seed = instance.DesignState.Seed,
-            SelectedElementName = instance.DesignState.SelectedElementName
+            NumberOfSamples = instance.SamplesState.NumberOfSamples,
+            Seed = instance.SamplesState.Seed,
+            LatinHypercubeDesign = instance.SamplesState.LatinHypercubeDesign.ToDTO(),
+            RankCorrelationDesign = instance.SamplesState.RankCorrelationDesign.ToDTO()
+          },
+
+          OutputsState = new _OutputsStateDTO
+          {
+            SelectedOutputName = instance.OutputsState.SelectedOutputName
           },
 
           ParameterStates = instance.ParameterStates
@@ -74,8 +86,6 @@ namespace Sampling
             IsSelected = ps.IsSelected
           })
           .ToArray(),
-
-          LatinHypercubeDesign = instance.LatinHypercubeDesign.ToDTO(),
 
           SamplingDesign = instance.SamplingDesign?.CreatedOn.ToDirectoryName(),
 
@@ -113,9 +123,12 @@ namespace Sampling
     {
       ParametersState.SelectedParameter = dto.ParametersState?.SelectedParameter;
 
-      DesignState.NumberOfSamples = dto.DesignState?.NumberOfSamples;
-      DesignState.Seed = dto.DesignState?.Seed;
-      DesignState.SelectedElementName = dto.DesignState?.SelectedElementName;
+      SamplesState.NumberOfSamples = dto.SamplesState?.NumberOfSamples;
+      SamplesState.Seed = dto.SamplesState?.Seed;
+      SamplesState.LatinHypercubeDesign = dto.SamplesState?.LatinHypercubeDesign.FromDTO() ?? default;
+      SamplesState.RankCorrelationDesign = dto.SamplesState?.RankCorrelationDesign.FromDTO() ?? default;
+
+      OutputsState.SelectedOutputName = dto.OutputsState?.SelectedOutputName;
 
       if (!dto.ParameterStates.IsNullOrEmpty())
       {
@@ -131,14 +144,13 @@ namespace Sampling
           .ToArr();
       }
 
-      LatinHypercubeDesign = dto.LatinHypercubeDesign.FromDTO();
-
       if (dto.SamplingDesign.IsAString())
       {
         try
         {
           var createdOn = dto.SamplingDesign.FromDirectoryName();
           SamplingDesign = samplingDesigns.Load(createdOn);
+          Samples = SamplingDesign.Samples;
         }
         catch (Exception) { /* logged elsewhere */ }        
       }

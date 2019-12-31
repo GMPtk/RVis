@@ -24,7 +24,7 @@ namespace Sampling
       return new LatinHypercubeDesign(
         Enum.TryParse(dto.LatinHypercubeDesignType, out LatinHypercubeDesignType latinHypercubeDesignType)
           ? latinHypercubeDesignType
-          : LatinHypercubeDesignType.Randomized,
+          : LatinHypercubeDesignType.None,
         dto.T0.FromNullable(),
         dto.C.FromNullable(),
         dto.Iterations,

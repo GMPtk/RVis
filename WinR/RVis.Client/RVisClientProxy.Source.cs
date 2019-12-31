@@ -1,4 +1,5 @@
-﻿using RVis.Data;
+﻿using RVis.Base.Extensions;
+using RVis.Data;
 using RVis.Model;
 using System.Collections.Generic;
 using static RVis.Base.Check;
@@ -162,6 +163,18 @@ namespace RVis.Client
           RequireFalse(_real._service.IsBusy(), "Call in progress");
 
           var svcRes = _real._service.CreateVector(source, objectName);
+
+          svcRes.Void();
+        }
+      }
+
+      public void CreateMatrix(double[][] source, string objectName)
+      {
+        lock (_real._serviceLock)
+        {
+          RequireFalse(_real._service.IsBusy(), "Call in progress");
+
+          var svcRes = _real._service.CreateMatrix(source, objectName);
 
           svcRes.Void();
         }

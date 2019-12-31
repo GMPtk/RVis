@@ -42,7 +42,7 @@ namespace Estimation
     internal NormalErrorViewModel()
       : this(new RVisUI.AppInf.Design.AppService())
     {
-      RequireTrue(Splat.ModeDetector.InDesignMode());
+      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
       ErrorModel = NormalErrorModel.Default;
     }
 

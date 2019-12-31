@@ -102,10 +102,10 @@ namespace RVis.Base.Test
     }
 
     [TestMethod]
-    public void TestToMD5Hash()
+    public void TestToHash()
     {
-      Assert.AreEqual("12345678901234567890".ToMD5Hash(), "12345678901234567890".ToMD5Hash());
-      Assert.AreNotEqual("12345678901234567890".ToMD5Hash(), "12345678901234567891".ToMD5Hash());
+      Assert.AreEqual("12345678901234567890".ToHash(), "12345678901234567890".ToHash());
+      Assert.AreNotEqual("12345678901234567890".ToHash(), "12345678901234567891".ToHash());
     }
 
     [TestMethod]

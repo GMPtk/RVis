@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static MathNet.Numerics.Statistics.SortedArrayStatistics;
 using static RVis.Base.Check;
-using static Splat.ModeDetector;
+using static Splat.PlatformModeDetector;
 using static System.Array;
 using static System.Convert;
 using static System.Double;

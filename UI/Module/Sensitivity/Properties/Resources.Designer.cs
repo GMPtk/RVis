@@ -19,7 +19,7 @@ namespace Sensitivity.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -112,6 +112,34 @@ namespace Sensitivity.Properties {
         internal static string FMT_CREATE_MORRIS_DESIGN {
             get {
                 return ResourceManager.GetString("FMT_CREATE_MORRIS_DESIGN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to wd &lt;- getwd()
+        ///data_directory &lt;- &quot;{0}&quot;
+        ///setwd(data_directory)
+        ///
+        ///# load samples and plot histograms
+        ///
+        ///sample_files &lt;- list.files(&quot;./samples&quot;, &quot;*.csv&quot;)
+        ///samples &lt;- lapply(
+        ///  sample_files, 
+        ///  function(sample_file) read.csv(paste0(&quot;./samples/&quot;, sample_file), header = TRUE)
+        ///  )
+        ///
+        ///if(length(samples) == 0) stop(&quot;No samples&quot;)
+        ///
+        ///names(samples) &lt;- lapply(sample_files, tools::file_path_sans_ext)
+        ///
+        ///sample_file_names &lt;- names(samples)
+        ///parameter_names &lt;- colnames(samples[[1]])
+        ///
+        ///hist_samples &lt;- function(paramet [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string FMT_LOAD_DATA {
+            get {
+                return ResourceManager.GetString("FMT_LOAD_DATA", resourceCulture);
             }
         }
         
