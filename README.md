@@ -1,4 +1,5 @@
-# RVis [![Build Status](https://dev.azure.com/GMPtk/RVis/_apis/build/status/GMPtk.RVis?branchName=master)](https://dev.azure.com/GMPtk/RVis/_build/latest?definitionId=1&branchName=master)
+# RVis 
+[![Build Status](https://dev.azure.com/GMPtk/RVis/_apis/build/status/GMPtk.RVis?branchName=master)](https://dev.azure.com/GMPtk/RVis/_build/latest?definitionId=1&branchName=master) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ![RVis](https://repository-images.githubusercontent.com/217533905/edffd200-f72f-11e9-9750-0cdb2c75dadf "RVis")
 
