@@ -47,7 +47,7 @@
                      KeyboardNavigation.IsTabStop="False"
                      FocusManager.IsFocusScope="False"
                      TextAlignment="Center"
-                     Text="{Binding Correlation}" 
+                     Text="{Binding CorrelationN}" 
                      />
         </Border>
       </DataTemplate>
@@ -65,7 +65,7 @@
                      KeyboardNavigation.IsTabStop="False"
                      FocusManager.IsFocusScope="False"
                      TextAlignment="Center" 
-                     Text="{Binding Correlation}" 
+                     Text="{Binding CorrelationN}" 
                      />
         </Border>
       </DataTemplate>
