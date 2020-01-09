@@ -1,5 +1,9 @@
 # Beta Release
 
+Further fixes to v0.9:
+
+* Ensured ordering of sampling design parameters
+
 Fixes to v0.9:
 
 * Corrected binding error in samples correlation dialog

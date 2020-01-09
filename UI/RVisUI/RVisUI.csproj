@@ -248,6 +248,7 @@
     <Compile Include="AppImpl\App.Startup.cs" />
     <Compile Include="AppImpl\App.Window.cs" />
     <Compile Include="DepProps\Layout\Layout.cs" />
+    <Compile Include="Extensions\ThemeExt.cs" />
     <Compile Include="Extensions\SettingsExt.cs" />
     <Compile Include="Interop\SafeNativeMethods.cs" />
     <Compile Include="Ioc\AppModule.cs" />

@@ -1,12 +1,12 @@
 ﻿using RVisUI.Interop;
 using System.Linq;
-using System.Windows.Interop;
+using System.Windows;
 
 namespace RVisUI
 {
   public partial class App
   {
-    public void RunDialog<T>(object viewModel = null) where T : System.Windows.Window, new()
+    public void RunDialog<T>(object viewModel = null) where T : Window, new()
     {
       var dialog = new T();
       if (null != viewModel)
@@ -17,12 +17,14 @@ namespace RVisUI
       dialog.ShowDialog();
     }
 
-    public System.Windows.Window GetActiveWindow()
+    public Window GetActiveWindow()
     {
       var window = SafeNativeMethods.GetActiveApplicationWindow();
       if (null == window)
       {
-        window = this.Windows.OfType<System.Windows.Window>().SingleOrDefault(x => x.IsActive);
+        window = Windows
+          .OfType<Window>()
+          .SingleOrDefault(x => x.IsActive);
       }
       return window;
     }

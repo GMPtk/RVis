@@ -99,6 +99,7 @@ namespace Sampling
             Distribution.DeserializeDistribution(dp.Distribution).AssertSome()
             )
           )
+          .OrderBy(dp => dp.Name.ToUpperInvariant())
           .ToArr() ?? default;
         latinHypercubeDesign = dto.LatinHypercubeDesign.FromDTO();
         rankCorrelationDesign = dto.RankCorrelationDesign.FromDTO();
@@ -156,6 +157,7 @@ namespace Sampling
       )
     {
       RequireDirectory(pathToSamplingDesignDirectory);
+      RequireOrdered(designParameters, dp => dp.Name.ToUpperInvariant());
 
       var dto = new _SamplingDesignDTO
       {
@@ -186,6 +188,10 @@ namespace Sampling
     internal static void SaveSamples(DataTable samples, string pathToSamplingDesignDirectory)
     {
       RequireDirectory(pathToSamplingDesignDirectory);
+      RequireOrdered(
+        samples.Columns.Cast<DataColumn>(), 
+        dc => dc.ColumnName.ToUpperInvariant()
+        );
 
       var pathToDesignSamples = Combine(pathToSamplingDesignDirectory, DESIGN_SAMPLES_FILE_NAME);
 

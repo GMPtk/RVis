@@ -34,7 +34,6 @@ namespace Sampling
 
       var parameterSamples = selectedParameters
         .Filter(ps => ps.DistributionType != DistributionType.Invariant)
-        .OrderBy(ps => ps.Name.ToUpperInvariant())
         .Select(ps => (ParameterState: ps, Samples: new double[_nSamples]))
         .ToArr();
 

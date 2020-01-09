@@ -37,8 +37,8 @@ namespace Sampling
       moduleState.ParameterStates.Iter(ps =>
       {
         var parameterViewModel = AllParameterViewModels
-        .Find(vm => vm.Name == ps.Name)
-        .AssertSome($"Unknown parameter in module state: {ps.Name}");
+          .Find(vm => vm.Name == ps.Name)
+          .AssertSome($"Unknown parameter in module state: {ps.Name}");
 
         parameterViewModel.IsSelected = ps.IsSelected;
       });
@@ -131,7 +131,10 @@ namespace Sampling
           var parameters = _simulation.SimConfig.SimInput.SimParameters;
           var parameter = parameters.GetParameter(parameterViewModel.Name);
           parameterState = ParameterState.Create(parameter.Name, parameter.Scalar);
-          _moduleState.ParameterStates += parameterState;
+          var parameterStates = _moduleState.ParameterStates + parameterState;
+          _moduleState.ParameterStates = parameterStates
+            .OrderBy(ps => ps.Name.ToUpperInvariant())
+            .ToArr();
         }
 
         if (isSelected)

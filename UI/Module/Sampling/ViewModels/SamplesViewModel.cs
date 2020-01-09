@@ -266,12 +266,13 @@ namespace Sampling
 
     private void HandleConfigureRC()
     {
+      RequireOrdered(_moduleState.ParameterStates, ps => ps.Name.ToUpperInvariant());
+
       var view = new RCConfigurationDialog();
 
       var selectedParameters = _moduleState.ParameterStates
         .Filter(ps => ps.IsSelected && ps.DistributionType != DistributionType.Invariant)
         .Map(ps => ps.Name)
-        .OrderBy(n => n)
         .ToArr();
 
       var correlations = _moduleState.SamplesState.RankCorrelationDesign.Correlations.CorrelationsFor(
@@ -311,6 +312,7 @@ namespace Sampling
     {
       RequireTrue(NSamples > 0);
       RequireTrue(_moduleState.ParameterStates.Exists(ps => ps.IsSelected));
+      RequireOrdered(_moduleState.ParameterStates, ps => ps.Name.ToUpperInvariant());
 
       if (_moduleState.SamplesState.RankCorrelationDesign.RankCorrelationDesignType != RankCorrelationDesignType.None)
       {
@@ -502,14 +504,12 @@ namespace Sampling
         .Filter(ps => ps.IsSelected)
         .Map(ps => (ps.Name, Distribution: ps.GetDistribution()))
         .Filter(t => t.Distribution.DistributionType != DistributionType.Invariant)
-        .OrderBy(t => t.Name.ToUpperInvariant())
         .Select(t => t.Distribution.ToString(t.Name))
         .ToArr();
 
     private void PopulateDistributions(Arr<DesignParameter> designParameters) =>
       Distributions = designParameters
         .Filter(dp => dp.Distribution.DistributionType != DistributionType.Invariant)
-        .OrderBy(dp => dp.Name.ToUpperInvariant())
         .Select(dp => dp.Distribution.ToString(dp.Name))
         .ToArr();
 
@@ -518,14 +518,12 @@ namespace Sampling
         .Filter(ps => ps.IsSelected)
         .Map(ps => (ps.Name, Distribution: ps.GetDistribution()))
         .Filter(t => t.Distribution.DistributionType == DistributionType.Invariant)
-        .OrderBy(t => t.Name.ToUpperInvariant())
         .Select(t => t.Distribution.ToString(t.Name))
         .ToArr();
 
     private void PopulateInvariants(Arr<DesignParameter> designParameters) =>
       Invariants = designParameters
         .Filter(dp => dp.Distribution.DistributionType == DistributionType.Invariant)
-        .OrderBy(dp => dp.Name.ToUpperInvariant())
         .Select(dp => dp.Distribution.ToString(dp.Name))
         .ToArr();
 

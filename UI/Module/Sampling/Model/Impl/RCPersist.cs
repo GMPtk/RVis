@@ -24,7 +24,7 @@ namespace Sampling
 
       var correlations = dto.Correlations
         .Select(kvp => (Parameter: kvp.Key, Correlations: kvp.Value.ToArr()))
-        .OrderBy(t => t.Parameter)
+        .OrderBy(t => t.Parameter.ToUpperInvariant())
         .ToArr();
 
       var nCorrelations = correlations.Count;

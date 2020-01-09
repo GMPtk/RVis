@@ -563,7 +563,10 @@ namespace Sampling
             return parameterState;
           });
 
-        _moduleState.ParameterStates = existingParameterStates + newParameterStates;
+        var parameterStates = existingParameterStates + newParameterStates;
+        _moduleState.ParameterStates = parameterStates
+          .OrderBy(ps => ps.Name.ToUpperInvariant())
+          .ToArr();
 
         UnloadDesign();
 

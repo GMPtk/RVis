@@ -39,7 +39,6 @@ namespace RVisUI.DepProps
 
       if (!e.NewValue.Resolve(out Arr<(string ID, string DisplayName, string DisplayIcon, object View, object ViewModel)> newUIComponents)) return;
 
-      var selectedID = (tabControl.SelectedItem as TabItem)?.Tag as string;
       tabControl.Items.Clear();
 
       var tabItems = newUIComponents.Map(c =>

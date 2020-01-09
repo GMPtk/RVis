@@ -584,6 +584,20 @@ namespace RVis.Base
       throw new ArgumentException(message, nameof(enumerable));
     }
 
+    [DebuggerStepThrough]
+    public static void RequireOrdered<T, U>(IEnumerable<T> enumerable, Func<T, U> keySelector) =>
+      RequireOrdered(enumerable, keySelector, $"Expecting ordered sequence of {typeof(T).Name}");
+
+    [DebuggerStepThrough]
+    public static void RequireOrdered<T, U>(IEnumerable<T> enumerable, Func<T, U> keySelector, [Localizable(false)] string message)
+    {
+      var ordered = enumerable.OrderBy(keySelector);
+      
+      if (enumerable.SequenceEqual(ordered)) return;
+
+      throw new ArgumentException(message, nameof(enumerable));
+    }
+
     #endregion
 
     #region Defaults

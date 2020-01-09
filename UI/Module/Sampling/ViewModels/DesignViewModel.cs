@@ -174,10 +174,10 @@ namespace Sampling
     {
       RequireTrue(CreatedOn.HasValue);
       RequireFalse(_moduleState.Samples == default);
+      RequireOrdered(_moduleState.ParameterStates, ps => ps.Name.ToUpperInvariant());
 
       var parameterDistributions = _moduleState.ParameterStates
         .Filter(ps => ps.IsSelected)
-        .OrderBy(ps => ps.Name.ToUpperInvariant())
         .Select(ps => (ps.Name, Distribution: ps.GetDistribution()))
         .ToArr();
 

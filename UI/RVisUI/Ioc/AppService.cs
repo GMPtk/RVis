@@ -153,7 +153,7 @@ namespace RVisUI.Ioc
         }
       }
 
-      owner = owner ?? App.Current.GetActiveWindow() ?? App.Current.MainWindow;
+      owner ??= App.Current.GetActiveWindow() ?? App.Current.MainWindow;
 
       void DoNotify(object _, EventArgs __)
       {
@@ -235,7 +235,7 @@ namespace RVisUI.Ioc
         catch (Exception ex)
         {
           _logger.Error(ex, $"Observer fault. Subject: {subject}.");
-          _appService.Notify("Observer Fault via SafeInvoke", subject, ex);
+          _appService.Notify("Observer fault via SafeInvoke", subject, ex);
         }
         finally
         {
@@ -257,7 +257,7 @@ namespace RVisUI.Ioc
         catch (Exception ex)
         {
           App.Current.Log.Error(ex, $"Observer fault. Subject: {subject}.");
-          Notify("Observer Fault via SafeInvoke", subject, ex);
+          Notify("Observer fault via SafeInvoke", subject, ex);
         }
       };
 

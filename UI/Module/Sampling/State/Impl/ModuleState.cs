@@ -85,6 +85,7 @@ namespace Sampling
             DistributionStates = Distribution.SerializeDistributions(ps.Distributions),
             IsSelected = ps.IsSelected
           })
+          .OrderBy(ps => ps.Name.ToUpperInvariant())
           .ToArray(),
 
           SamplingDesign = instance.SamplingDesign?.CreatedOn.ToDirectoryName(),

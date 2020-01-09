@@ -24,6 +24,8 @@ namespace Sampling
       IRVisServerPool serverPool
       )
     {
+      RequireOrdered(parameterStates, ps => ps.Name.ToUpperInvariant());
+
       _parameterStates = parameterStates;
       _rankCorrelationDesign = rankCorrelationDesign;
       _nSamples = nSamples;

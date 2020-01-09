@@ -59,7 +59,7 @@ namespace Sampling
     {
       var parameters = correlations.Map(c => c.Parameter);
 
-      var isInAscendingOrder = parameters.SequenceEqual(parameters.OrderBy(n => n));
+      var isInAscendingOrder = parameters.SequenceEqual(parameters.OrderBy(n => n.ToUpperInvariant()));
       if (!isInAscendingOrder) return false;
 
       var hasExpectedArrayLengths = correlations
@@ -141,7 +141,7 @@ namespace Sampling
       RequireFalse(correlations.Exists(c => c.Parameter == parameter));
 
       var parameters = correlations.Map(c => c.Parameter) + parameter;
-      parameters = parameters.OrderBy(n => n).ToArr();
+      parameters = parameters.OrderBy(n => n.ToUpperInvariant()).ToArr();
 
       var nParameters = parameters.Count;
       var indexInserted = parameters.IndexOf(parameter);
