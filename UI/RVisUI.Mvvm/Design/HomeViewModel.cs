@@ -8,6 +8,8 @@ namespace RVisUI.Mvvm.Design
 
     public IImportSimulationViewModel ImportSimulationViewModel => throw new NotImplementedException();
 
+    public IImportMCSimViewModel ImportMCSimViewModel => new ImportMCSimViewModel();
+
     public ILibraryViewModel LibraryViewModel => throw new NotImplementedException();
   }
 }

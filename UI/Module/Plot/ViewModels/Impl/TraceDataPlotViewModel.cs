@@ -41,6 +41,7 @@ namespace Plot
         traceDataPlotState.DepVarConfigState
         );
 
+      _isSeriesTypeLine = traceDataPlotState.IsSeriesTypeLine;
       _isAxesOriginLockedToZeroZero = traceDataPlotState.IsAxesOriginLockedToZeroZero;
 
       _xAbsoluteMinimum = _isAxesOriginLockedToZeroZero ? 0.0 : double.MinValue;
@@ -50,6 +51,8 @@ namespace Plot
       _yAbsoluteMinimum = _isAxesOriginLockedToZeroZero ? 0.0 : double.MinValue;
       _yMinimum = traceDataPlotState.YMinimum ?? (_isAxesOriginLockedToZeroZero ? 0.0 : double.NaN);
       _yMaximum = traceDataPlotState.YMaximum ?? double.NaN;
+
+      ToggleSeriesType = ReactiveCommand.Create(HandleToggleSeriesType);
 
       ToggleLockAxesOriginToZeroZero = ReactiveCommand.Create(HandleToggleIsAxesOriginLockedToZeroZero);
 
@@ -123,6 +126,15 @@ namespace Plot
     }
     private PlotModel _plotModel;
 
+    public ICommand ToggleSeriesType { get; }
+
+    public bool IsSeriesTypeLine
+    {
+      get => _isSeriesTypeLine;
+      set => this.RaiseAndSetIfChanged(ref _isSeriesTypeLine, value);
+    }
+    private bool _isSeriesTypeLine;
+
     public ICommand ToggleLockAxesOriginToZeroZero { get; }
 
     public bool IsAxesOriginLockedToZeroZero
@@ -166,6 +178,19 @@ namespace Plot
         ConfigureLegend();
         PlotModel.InvalidatePlot(true);
       }
+    }
+
+    private void HandleToggleSeriesType()
+    {
+      State.IsSeriesTypeLine = !IsSeriesTypeLine;
+      IsSeriesTypeLine = State.IsSeriesTypeLine;
+
+      PlotModel.Series.Clear();
+      PlotDepVar();
+      PlotSupplementaryTraces();
+      PlotObservations();
+      ConfigureLegend();
+      PlotModel.InvalidatePlot(true);
     }
 
     private void HandleToggleIsAxesOriginLockedToZeroZero()
@@ -409,23 +434,20 @@ namespace Plot
         .Find(a => a.Position == AxisPosition.Left)
         .AssertSome("Missing vertical axis");
 
-      var nPoints = independentVariable.Length;
-
-      var useScatterPlot = nPoints >= SCATTER_THRESHOLD;
-      var interpolatePoints = nPoints <= INTERPOLATION_THRESHOLD;
-
       Series series;
 
-      if (useScatterPlot)
+      if (lineStyle == LineStyle.None)
       {
         var scatterSeries = new ScatterSeries
         {
           YAxisKey = verticalAxis.Key,
-          MarkerType = MarkerType.Circle,
-          MarkerSize = 2
+          Title = serieTitle,
+          MarkerType = MarkerType.Plus,
+          MarkerStroke = plotModel.DefaultColors[plotModel.Series.Count % plotModel.DefaultColors.Count],
+          MarkerSize = 1
         };
 
-        for (var i = 0; i < nPoints; ++i)
+        for (var i = 0; i < independentVariable.Length; ++i)
         {
           scatterSeries.Points.Add(new ScatterPoint(independentVariable[i], dependentVariable[i]));
         }
@@ -434,6 +456,8 @@ namespace Plot
       }
       else
       {
+        var interpolatePoints = independentVariable.Length < INTERPOLATION_LIMIT;
+
         var lineSeries = new LineSeries
         {
           YAxisKey = verticalAxis.Key,
@@ -442,7 +466,7 @@ namespace Plot
           InterpolationAlgorithm = interpolatePoints ? InterpolationAlgorithms.CatmullRomSpline : default
         };
 
-        for (var i = 0; i < nPoints; ++i)
+        for (var i = 0; i < independentVariable.Length; ++i)
         {
           lineSeries.Points.Add(new DataPoint(independentVariable[i], dependentVariable[i]));
         }
@@ -475,7 +499,7 @@ namespace Plot
           nSerie > 1 ? serieName : dependentVariable.Name,
           independentVariable,
           dependentVariable,
-          LineStyle.Solid,
+          IsSeriesTypeLine ? LineStyle.Solid : LineStyle.None,
           PlotModel
           );
         verticalAxis.Title = dependentVariable.Name;
@@ -494,7 +518,7 @@ namespace Plot
             serieName,
             independentVariable,
             dependentVariable,
-            LineStyle.Solid,
+            IsSeriesTypeLine ? LineStyle.Solid : LineStyle.None,
             PlotModel
             );
         }
@@ -576,7 +600,7 @@ namespace Plot
           serieTitle,
           independentVariable,
           dependentVariable,
-          LineStyle.Dash,
+          IsSeriesTypeLine ? LineStyle.Solid : LineStyle.None,
           PlotModel
           );
       }
@@ -602,7 +626,7 @@ namespace Plot
         : OxyPalettes.Rainbow(numberOfColors);
 
     private const int SCATTER_THRESHOLD = 100;
-    private const int INTERPOLATION_THRESHOLD = 30;
+    private const int INTERPOLATION_LIMIT = 30;
 
     private readonly IAppState _appState;
     private readonly IAppSettings _appSettings;

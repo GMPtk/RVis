@@ -23,7 +23,7 @@ namespace RVis.Model
       RequireTrue(_serverSlots.IsEmpty);
 
       var servers = Range(0, size).Map(_ => serverFactory()).ToArr();
-      var serverSlots = servers.Map(s => new ServerSlot(s) { IsFree = true });
+      var serverSlots = servers.Map(s => new ServerSlot(++_id, s) { IsFree = true });
 
       lock (_syncLock)
       {
@@ -46,12 +46,18 @@ namespace RVis.Model
         return freeServerSlot.Match(
           serverSlot =>
           {
-            var client = serverSlot.Server.OpenChannel();
-            var serverLicense = new ServerLicense(client, (sl) => ExpireLicense(serverSlot, sl));
-            serverSlot.IsFree = false;
-            _serverLicenses.OnNext((serverSlot.Server.ID, serverLicense, HasExpired: false));
+            var serverLicense = new ServerLicense(
+              serverSlot.ID, 
+              serverSlot.Server, 
+              serverSlot.MCSimExecutors,
+              (sl) => ExpireLicense(serverSlot, sl)
+              );
 
-            Log.Debug($"Issued license for server {serverSlot.Server.ID}");
+            serverSlot.IsFree = false;
+            
+            _serverLicenses.OnNext((serverLicense, HasExpired: false));
+
+            Log.Debug($"Issued license for server {serverSlot.ID}");
 
             return Some(serverLicense);
           },
@@ -68,26 +74,32 @@ namespace RVis.Model
       lock (_syncLock)
       {
         var serverSlot = _serverSlots
-          .Find(s => s.Server.ID == serverLicense.Client.ID)
-          .AssertSome($"Trying to renew license for defunct server {serverLicense.Client.ID}");
+          .Find(s => s.ID == serverLicense.ID)
+          .AssertSome($"Trying to renew license for defunct server {serverLicense.ID}");
 
         if (!serverSlot.IsFree) return None;
 
-        var client = serverSlot.Server.OpenChannel();
-        var renewedServerLicense = new ServerLicense(client, (sl) => ExpireLicense(serverSlot, sl));
-        serverSlot.IsFree = false;
-        _serverLicenses.OnNext((serverSlot.Server.ID, renewedServerLicense, HasExpired: false));
+        var renewedServerLicense = new ServerLicense(
+          serverSlot.ID, 
+          serverSlot.Server,
+          serverSlot.MCSimExecutors,
+          (sl) => ExpireLicense(serverSlot, sl)
+          );
 
-        Log.Debug($"Renewed license for server {serverSlot.Server.ID}");
+        serverSlot.IsFree = false;
+        
+        _serverLicenses.OnNext((renewedServerLicense, HasExpired: false));
+
+        Log.Debug($"Renewed license for server {serverSlot.ID}");
 
         return renewedServerLicense;
       }
     }
 
-    public IObservable<(int ServerID, ServerLicense ServerLicense, bool HasExpired)> ServerLicenses =>
+    public IObservable<(ServerLicense ServerLicense, bool HasExpired)> ServerLicenses =>
       _serverLicenses.AsObservable();
-    private readonly Subject<(int ServerID, ServerLicense ServerLicense, bool HasExpired)> _serverLicenses =
-      new Subject<(int ServerID, ServerLicense ServerLicense, bool HasExpired)>();
+    private readonly Subject<(ServerLicense ServerLicense, bool HasExpired)> _serverLicenses =
+      new Subject<(ServerLicense ServerLicense, bool HasExpired)>();
 
     public void Dispose() => Dispose(disposing: true);
 
@@ -110,8 +122,7 @@ namespace RVis.Model
     {
       lock (_syncLock)
       {
-        _serverLicenses.OnNext((serverSlot.Server.ID, serverLicense, HasExpired: true));
-        serverLicense.Client.Dispose();
+        _serverLicenses.OnNext((serverLicense, HasExpired: true));
         serverSlot.IsFree = true;
 
         if (_serverSlots.IndexOf(serverSlot).IsFound()) _mreServerSlots.Set();
@@ -133,15 +144,17 @@ namespace RVis.Model
         {
           if (!ss.IsFree)
             _serverLicenses.OnNext(
-              (ss.Server.ID, ServerLicense.NullLicense, HasExpired: true)
+              (ServerLicense.NullLicense, HasExpired: true)
               );
         });
 
         void StopDisposeServers() =>
-          serverSlots.Map(ss => ss.Server).Iter(s =>
+          serverSlots.Iter(ss =>
           {
-            s.Stop();
-            (s as IDisposable).Dispose();
+            ss.Server.Stop();
+            (ss.Server as IDisposable).Dispose();
+            ss.MCSimExecutors.Values.Iter(me => me.Dispose());
+            ss.MCSimExecutors.Clear();
           });
 
         if (disposing)
@@ -162,6 +175,7 @@ namespace RVis.Model
     private Arr<ServerSlot> _serverSlots;
     private readonly object _syncLock = new object();
     private readonly ManualResetEventSlim _mreServerSlots = new ManualResetEventSlim(true);
+    private int _id;
     private bool _disposed = false;
   }
 }

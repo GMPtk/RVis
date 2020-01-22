@@ -130,8 +130,8 @@ namespace RVisUI.Ioc
     {
       try
       {
-        RVersion = serverLicense.Client.GetRversion();
-        InstalledRPackages = serverLicense.Client.GetInstalledPackages();
+        RVersion = serverLicense.GetRClient().GetRversion();
+        InstalledRPackages = serverLicense.GetRClient().GetInstalledPackages();
       }
       catch (Exception ex)
       {

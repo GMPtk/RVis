@@ -35,7 +35,7 @@ namespace RVis.Model.Test
       var expected = DateTime.Now.Ticks.ToString("X");
       using (serverLicense)
       {
-        var client = serverLicense.Client;
+        var client = serverLicense.GetRClient();
         client.Clear();
         client.EvaluateNonQuery($"expected <- \"{expected}\"");
       }
@@ -47,7 +47,7 @@ namespace RVis.Model.Test
       Dictionary<string, string[]> dictionary;
       using (var renewedServerLicense = maybeRenewedServerLicense.AssertSome())
       {
-        var client = renewedServerLicense.Client;
+        var client = renewedServerLicense.GetRClient();
         dictionary = client.EvaluateStrings("expected");
       }
 

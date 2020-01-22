@@ -364,14 +364,14 @@ namespace Sensitivity
               {
                 CreateMorrisDesign(
                   parameterDistributions,
-                  serverLicense.Client
+                  serverLicense.GetRClient()
                   );
               }
               else
               {
                 CreateFast99Design(
                   parameterDistributions,
-                  serverLicense.Client
+                  serverLicense.GetRClient()
                   );
               }
             }

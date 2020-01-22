@@ -1,6 +1,7 @@
 ﻿using LanguageExt;
 using Nett;
 using RVis.Base.Extensions;
+using System;
 using System.Diagnostics;
 using System.IO;
 using static LanguageExt.Prelude;
@@ -11,6 +12,12 @@ namespace RVis.Model.Extensions
 {
   public static partial class SimExt
   {
+    internal static bool IsRSimulation(this Simulation simulation) =>
+      simulation.SimConfig.SimCode.File.EndsWith(".R", StringComparison.InvariantCultureIgnoreCase);
+
+    internal static bool IsMCSimSimulation(this Simulation simulation) =>
+      simulation.SimConfig.SimCode.File.EndsWith(".exe", StringComparison.InvariantCultureIgnoreCase);
+
     internal static Option<SimConfig> LoadConfig(this Simulation simulation, string inputHash)
     {
       if (simulation.SimConfig.SimInput.Hash == inputHash) return Some(simulation.SimConfig);
@@ -37,7 +44,7 @@ namespace RVis.Model.Extensions
     public static bool IsTmplType(this Simulation simulation) =>
       !simulation.IsExecType();
 
-    internal static void WriteToFile(this SimConfig config, string pathToSimulation)
+    public static void WriteToFile(this SimConfig config, string pathToSimulation)
     {
       var pathToPrivate = Path.Combine(pathToSimulation, PRIVATE_SUBDIRECTORY);
       if (!Directory.Exists(pathToPrivate)) Directory.CreateDirectory(pathToPrivate);

@@ -17,6 +17,7 @@ namespace Plot
     public bool IsVisible { get; set; }
     public _DepVarConfigStateDTO DepVarConfigState { get; set; }
     public double ViewHeight { get; set; }
+    public bool IsSeriesTypeLine { get; set; }
     public bool IsAxesOriginLockedToZeroZero { get; set; }
     public double? XMinimum { get; set; }
     public double? XMaximum { get; set; }

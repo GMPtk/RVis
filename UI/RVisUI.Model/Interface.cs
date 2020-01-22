@@ -22,6 +22,7 @@ namespace RVisUI.Model
     string ModuleConfiguration { get; set; }
     int RThrottlingUseCores { get; set; }
     string PathToSimLibrary { get; set; }
+    double Zoom { get; set; }
     T Get<T>(string name);
     void Set<T>(string name, T value);
   }

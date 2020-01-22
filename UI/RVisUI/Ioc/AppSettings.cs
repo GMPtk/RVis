@@ -195,6 +195,20 @@ namespace RVisUI.Ioc
       }
     }
 
+    public double Zoom
+    {
+      get => Settings.Default.Zoom;
+      set
+      {
+        if (value != Settings.Default.Zoom)
+        {
+          Settings.Default.Zoom = value;
+          Settings.Default.Save();
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
     public T Get<T>(string name)
     {
       ApplicationSettingsBase applicationSettingsBase = Settings.Default;

@@ -27,6 +27,7 @@ namespace Sampling
     private class _OutputsStateDTO
     {
       public string SelectedOutputName { get; set; }
+      public bool IsSeriesTypeLine { get; set; }
     }
 
     private class _ParameterStateDTO
@@ -74,7 +75,8 @@ namespace Sampling
 
           OutputsState = new _OutputsStateDTO
           {
-            SelectedOutputName = instance.OutputsState.SelectedOutputName
+            SelectedOutputName = instance.OutputsState.SelectedOutputName,
+            IsSeriesTypeLine = instance.OutputsState.IsSeriesTypeLine
           },
 
           ParameterStates = instance.ParameterStates
@@ -130,6 +132,7 @@ namespace Sampling
       SamplesState.RankCorrelationDesign = dto.SamplesState?.RankCorrelationDesign.FromDTO() ?? default;
 
       OutputsState.SelectedOutputName = dto.OutputsState?.SelectedOutputName;
+      OutputsState.IsSeriesTypeLine = dto.OutputsState?.IsSeriesTypeLine ?? false;
 
       if (!dto.ParameterStates.IsNullOrEmpty())
       {

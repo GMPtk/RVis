@@ -12,10 +12,26 @@ namespace RVisUI.Mvvm
 
   }
 
+  public interface IZoomViewModel
+  {
+    public ICommand Open { get; }
+    public bool IsOpen { get; }
+    public ICommand Shrink { get; }
+    public bool CanShrink { get; }
+    public ICommand Enlarge { get; }
+    public bool CanEnlarge { get; }
+    public double MinZoom { get; }
+    public double MaxZoom { get; }
+    public double Zoom { get; set; }
+    public string PercentZoom { get; }
+    public ICommand Reset { get; }
+  }
+
   public interface IHomeViewModel
   {
     ISelectSimulationViewModel SelectSimulationViewModel { get; }
     IImportSimulationViewModel ImportSimulationViewModel { get; }
+    IImportMCSimViewModel ImportMCSimViewModel { get; }
     ILibraryViewModel LibraryViewModel { get; }
   }
 
@@ -32,6 +48,7 @@ namespace RVisUI.Mvvm
     string Description { get; }
     string DirectoryName { get; }
   }
+
 
   public interface ISelectSimulationViewModel
   {
@@ -147,6 +164,26 @@ namespace RVisUI.Mvvm
     ObservableCollection<string> BusyMessages { get; }
     bool EnableBusyCancel { get; set; }
     ICommand BusyCancel { get; }
+  }
+
+  public interface IImportMCSimViewModel
+  {
+    ICommand BrowseForExecutable { get; }
+    string PathToExecutable { get; set; }
+
+    ICommand BrowseForConfigurationFile { get; }
+    string PathToConfigurationFile { get; set; }
+
+    ICommand BrowseForTemplateInFile { get; }
+    string PathToTemplateInFile { get; set; }
+
+    bool OpenOnImport { get; set; }
+
+    ICommand Import { get; }
+    bool CanImport { get; }
+
+    bool IsBusy { get; set; }
+    string BusyWith { get; set; }
   }
 
   public interface ISharedStateViewModel

@@ -12,12 +12,13 @@ using static LanguageExt.Prelude;
 using static RVis.Model.Logger;
 using static System.Double;
 using static System.String;
+using static RVis.Base.Check;
 
 namespace RVis.Model
 {
   public sealed partial class SimData
   {
-    private static Arr<SimInput> EvaluateNonScalars(SimInput seriesInput, SimInput defaultInput, IRVisClient client)
+    private static Arr<SimInput> EvaluateNonScalars(SimInput seriesInput, SimInput defaultInput, ServerLicense serverLicense)
     {
       var nonScalarParameters = seriesInput.SimParameters.Filter(p =>
       {
@@ -27,6 +28,10 @@ namespace RVis.Model
       });
 
       if (nonScalarParameters.IsEmpty) return Array(seriesInput);
+
+      RequireTrue(serverLicense.IsCurrent);
+
+      var client = serverLicense.GetRClient();
 
       var evaluations = nonScalarParameters.Map(
         p => new
@@ -78,12 +83,12 @@ namespace RVis.Model
       return OutputRequest.Create(serieInput, Array(serieInput));
     }
 
-    private OutputRequest FulfilRequest(Simulation simulation, SimInput seriesInput, IRVisClient client, bool persist)
+    private OutputRequest FulfilRequest(Simulation simulation, SimInput seriesInput, ServerLicense serverLicense, bool persist)
     {
       var serieInputs = EvaluateNonScalars(
         seriesInput,
         simulation.SimConfig.SimInput,
-        client
+        serverLicense
         );
 
       Log.Debug($"Evaluating non-scalar parameter values produced n={serieInputs.Count} series");
@@ -106,16 +111,26 @@ namespace RVis.Model
 
         var stopWatch = Stopwatch.StartNew();
 
-        if (useExec)
+        if (simulation.IsRSimulation())
         {
-          client.RunExec(simulation.PathToCodeFile, serieConfig);
-          serie = client.TabulateExecOutput(serieConfig);
+          var client = serverLicense.GetRClient();
+
+          if (useExec)
+          {
+            client.RunExec(simulation.PathToCodeFile, serieConfig);
+            serie = client.TabulateExecOutput(serieConfig);
+          }
+          else
+          {
+            var pathToCodeFile = simulation.PopulateTemplate(serieConfig.SimInput.SimParameters);
+            client.SourceFile(pathToCodeFile);
+            serie = client.TabulateTmplOutput(serieConfig);
+          }
         }
         else
         {
-          var pathToCodeFile = simulation.PopulateTemplate(serieConfig.SimInput.SimParameters);
-          client.SourceFile(pathToCodeFile);
-          serie = client.TabulateTmplOutput(serieConfig);
+          var mcsimExecutor = serverLicense.GetMCSimExecutor(simulation);
+          serie = mcsimExecutor.Execute(serieConfig.SimInput.SimParameters);
         }
 
         stopWatch.Stop();
@@ -191,13 +206,13 @@ namespace RVis.Model
               return FulfilRequest(
                 simulation,
                 seriesInput,
-                serverLicense.Client,
+                serverLicense,
                 simDataItem.Item.Persist
                 );
             }
           }, cancellationToken);
 
-        Task<OutputRequest> NoServerLicense() =>
+        static Task<OutputRequest> NoServerLicense() =>
           Task.FromResult(default(OutputRequest));
 
         _serverPool.SlotFree.WaitOne(50);

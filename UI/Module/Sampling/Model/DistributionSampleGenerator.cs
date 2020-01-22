@@ -56,7 +56,7 @@ namespace Sampling
           _ => throw new Exception("No R server available")
         };
 
-        parameterSamples = DoRankCorrelation(parameterSamples, serverLicense.Client);
+        parameterSamples = DoRankCorrelation(parameterSamples, serverLicense.GetRClient());
       }
 
       var samples = MakeSamples(selectedParameters, parameterSamples);

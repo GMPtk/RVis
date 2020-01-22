@@ -353,6 +353,8 @@ namespace Plot
 
       void WithException(Exception ex)
       {
+        Logger.Log.Error(ex, nameof(ObserveOutputRequest));
+
         _appService.Notify(
           nameof(TraceViewModel),
           nameof(ObserveOutputRequest),

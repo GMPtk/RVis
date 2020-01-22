@@ -48,6 +48,7 @@ namespace Sampling
       PopulateVerticalAxis();
       PopulateOutputs();
 
+      ToggleSeriesType = ReactiveCommand.Create(HandleToggleSeriesType);
       ResetAxes = ReactiveCommand.Create(HandleResetAxes);
 
       ShareParameterValues = ReactiveCommand.Create(
@@ -136,6 +137,15 @@ namespace Sampling
 
     public PlotModel Outputs { get; }
 
+    public ICommand ToggleSeriesType { get; }
+
+    public bool IsSeriesTypeLine
+    {
+      get => _isSeriesTypeLine;
+      set => this.RaiseAndSetIfChanged(ref _isSeriesTypeLine, value, PropertyChanged);
+    }
+    private bool _isSeriesTypeLine;
+
     public ICommand ResetAxes { get; }
 
     public int SelectedSample
@@ -165,6 +175,16 @@ namespace Sampling
 
     public void Dispose() =>
       Dispose(true);
+
+    private void HandleToggleSeriesType()
+    {
+      _moduleState.OutputsState.IsSeriesTypeLine = !IsSeriesTypeLine;
+      IsSeriesTypeLine = _moduleState.OutputsState.IsSeriesTypeLine;
+
+      Outputs.Series.Clear();
+      PopulateOutputs();
+      Outputs.InvalidatePlot(updateData: true);
+    }
 
     private void HandleResetAxes()
     {
@@ -295,20 +315,50 @@ namespace Sampling
           var independentData = t.Output[independentVariableName];
           var dependentData = t.Output[outputName];
 
-          var series = new LineSeries()
-          {
-            Title = $"#{t.Index + 1}",
-            StrokeThickness = 1,
-            LineStyle = LineStyle.Solid,
-            Tag = t.Index
-          };
+          Series series;
+          var seriesTitle = $"#{t.Index + 1}";
 
-          for (var row = 0; row < independentData.Length; ++row)
+          if (IsSeriesTypeLine)
           {
-            var x = independentData[row];
-            var y = dependentData[row];
-            var point = new DataPoint(x, y);
-            series.Points.Add(point);
+            var lineSeries = new LineSeries()
+            {
+              Title = seriesTitle,
+              StrokeThickness = 1,
+              LineStyle = LineStyle.Solid, 
+              Color = Outputs.DefaultColors[Outputs.Series.Count % Outputs.DefaultColors.Count],
+              Tag = t.Index
+            };
+
+            for (var row = 0; row < independentData.Length; ++row)
+            {
+              var x = independentData[row];
+              var y = dependentData[row];
+              var point = new DataPoint(x, y);
+              lineSeries.Points.Add(point);
+            }
+
+            series = lineSeries;
+          }
+          else
+          {
+            var scatterSeries = new ScatterSeries()
+            {
+              Title = seriesTitle,
+              MarkerType = MarkerType.Plus,
+              MarkerStroke = Outputs.DefaultColors[Outputs.Series.Count % Outputs.DefaultColors.Count],
+              MarkerSize = 1,
+              Tag = t.Index
+            };
+
+            for (var row = 0; row < independentData.Length; ++row)
+            {
+              var x = independentData[row];
+              var y = dependentData[row];
+              var point = new ScatterPoint(x, y);
+              scatterSeries.Points.Add(point);
+            }
+
+            series = scatterSeries;
           }
 
           Outputs.Series.Add(series);

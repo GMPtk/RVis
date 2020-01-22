@@ -10,6 +10,7 @@
                  xmlns:app="clr-namespace:RVisUI"
                  xmlns:ctrls="clr-namespace:RVisUI.Controls"
                  xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+                 xmlns:vi="clr-namespace:RVisUI.Controls.Views.Impl"
                  mc:Ignorable="d"
                  FontFamily="{StaticResource MaterialDesignFont}"
                  TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -53,6 +54,15 @@
     <KeyBinding Key="F11" 
                 Command="{Binding ToggleFullScreenCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                 />
+    <KeyBinding Key="OemMinus" Modifiers="Ctrl"
+                Command="{Binding [Zoom].Shrink, Source={StaticResource Locator}}"
+                />
+    <KeyBinding Key="OemPlus" Modifiers="Ctrl"
+                Command="{Binding [Zoom].Enlarge, Source={StaticResource Locator}}"
+                />
+    <KeyBinding Key="D0" Modifiers="Ctrl"
+                Command="{Binding [Zoom].Reset, Source={StaticResource Locator}}"
+                />
   </Window.InputBindings>
 
   <mmc:MetroWindow.Flyouts>
@@ -60,8 +70,17 @@
       <ctrls:AppSettingsFlyout DataContext="{Binding [AppSettings], Source={StaticResource Locator}}" />
     </mmc:FlyoutsControl>
   </mmc:MetroWindow.Flyouts>
-  
-  <Grid>
+
+  <Grid SizeChanged="HandleSizeChanged">
+
+    <Grid.LayoutTransform>
+      <ScaleTransform CenterX="0"
+                      CenterY="0"
+                      ScaleX="{Binding ElementName=_mainWindow, Path=ClientScale}"
+                      ScaleY="{Binding ElementName=_mainWindow, Path=ClientScale}" 
+                      />
+    </Grid.LayoutTransform>
+
     <Grid.RowDefinitions>
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
@@ -79,6 +98,8 @@
           <Grid>
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="Auto" />
@@ -139,33 +160,43 @@
       <Separator Grid.Column="2"/>
 
       <StatusBarItem Grid.Column="3">
-        <Button Click="HandleConfigureModules"
-                ToolTip="Configure modules...">
-          <md:PackIcon Kind="Sitemap"/>
+        <Button x:Name="_zoomOpen"
+                Command="{Binding [Zoom].Open, Source={StaticResource Locator}}"
+                ToolTip="Adjust zoom" >
+          <md:PackIcon Kind="ZoomInOutline"/>
         </Button>
       </StatusBarItem>
 
       <Separator Grid.Column="4"/>
 
       <StatusBarItem Grid.Column="5">
-        <Button Command="{Binding [AppSettings].View, Source={StaticResource Locator}}"
-                ToolTip="Adjust application settings (Ctrl+Shift+S)" >
-          <md:PackIcon Kind="Settings"/>
+        <Button Click="HandleConfigureModules"
+                ToolTip="Configure modules...">
+          <md:PackIcon Kind="Sitemap"/>
         </Button>
       </StatusBarItem>
 
       <Separator Grid.Column="6"/>
 
       <StatusBarItem Grid.Column="7">
-        <Button Click="HandleOpenLogDirectory"
-                ToolTip="Open directory containing application log files">
-          <md:PackIcon Kind="Bug"/>
+        <Button Command="{Binding [AppSettings].View, Source={StaticResource Locator}}"
+                ToolTip="Adjust application settings (Ctrl+Shift+S)" >
+          <md:PackIcon Kind="Settings"/>
         </Button>
       </StatusBarItem>
 
       <Separator Grid.Column="8"/>
 
       <StatusBarItem Grid.Column="9">
+        <Button Click="HandleOpenLogDirectory"
+                ToolTip="Open directory containing application log files">
+          <md:PackIcon Kind="Bug"/>
+        </Button>
+      </StatusBarItem>
+
+      <Separator Grid.Column="10"/>
+
+      <StatusBarItem Grid.Column="11">
         <Button Click="HandleResetRServices"
                 ToolTip="Reset R services">
           <TextBlock x:Name="_tbResetRServices" 
@@ -173,15 +204,32 @@
         </Button>
       </StatusBarItem>
 
-      <Separator Grid.Column="10"/>
+      <Separator Grid.Column="12"/>
 
-      <StatusBarItem Grid.Column="11">
+      <StatusBarItem Grid.Column="13">
         <Button Click="HandleToggleFullScreen"
                 ToolTip="Toggle full screen (F11)">
           <md:PackIcon Kind="OpenInNew"/>
         </Button>
       </StatusBarItem>
     </StatusBar>
+
+    <Popup IsOpen="{Binding IsOpen}" 
+           PlacementTarget="{Binding ElementName=_zoomOpen}"
+           Placement="Top"
+           PopupAnimation="Fade" 
+           AllowsTransparency="True"
+           StaysOpen="False"
+           DataContext="{Binding [Zoom], Source={StaticResource Locator}}"
+           >
+
+      <Popup.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding Open}"/>
+      </Popup.InputBindings>
+
+      <vi:ZoomView/>
+
+    </Popup>
 
   </Grid>
 

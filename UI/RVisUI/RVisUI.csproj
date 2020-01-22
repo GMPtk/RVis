@@ -147,6 +147,12 @@
     <Compile Include="Controls\Views\Impl\SharedStateView.xaml.cs">
       <DependentUpon>SharedStateView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Views\Impl\ZoomView.xaml.cs">
+      <DependentUpon>ZoomView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Views\ImportMCSimView.xaml.cs">
+      <DependentUpon>ImportMCSimView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Views\ImportSimulationView.xaml.cs">
       <DependentUpon>ImportSimulationView.xaml</DependentUpon>
     </Compile>
@@ -213,6 +219,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Views\Impl\SharedStateView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Views\Impl\ZoomView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Views\ImportMCSimView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

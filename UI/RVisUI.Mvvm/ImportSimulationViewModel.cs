@@ -194,7 +194,7 @@ namespace RVisUI.Mvvm
 
     private async Task RunInspectionAsync(ServerLicense serverLicense)
     {
-      _busyCancelHandler = () => serverLicense.Client.StopServer();
+      _busyCancelHandler = () => serverLicense.GetRClient().StopServer();
 
       BusyWith = "RUN AND INSPECT";
       EnableBusyCancel = true;
@@ -206,7 +206,7 @@ namespace RVisUI.Mvvm
 
       try
       {
-        await managedImport.InspectAsync(serverLicense.Client);
+        await managedImport.InspectAsync(serverLicense.GetRClient());
         UnaryFuncs = managedImport.UnaryFunctions;
         Scalars = managedImport.Scalars;
         ScalarSets = managedImport.ScalarSets;
@@ -285,7 +285,7 @@ namespace RVisUI.Mvvm
 
     private async Task SetExecAsync(ISymbolInfo function, ISymbolInfo formal, ServerLicense serverLicense)
     {
-      _busyCancelHandler = () => serverLicense.Client.StopServer();
+      _busyCancelHandler = () => serverLicense.GetRClient().StopServer();
 
       BusyWith = "RUN EXECUTIVE FUNCTION";
       EnableBusyCancel = true;
@@ -295,7 +295,7 @@ namespace RVisUI.Mvvm
 
       try
       {
-        await ManagedImport.SetExecutorAsync(function, formal, serverLicense.Client);
+        await ManagedImport.SetExecutorAsync(function, formal, serverLicense.GetRClient());
         ExecutiveFunction = ManagedImport.ExecutorFunction;
         ExecutiveFormal = ManagedImport.ExecutorFormal;
         ExecutiveOutput = ManagedImport.ExecutorOutput;
@@ -329,7 +329,7 @@ namespace RVisUI.Mvvm
 
     private async Task DoImportUsingExecAsync(ServerLicense serverLicense)
     {
-      _busyCancelHandler = () => serverLicense.Client.StopServer();
+      _busyCancelHandler = () => serverLicense.GetRClient().StopServer();
 
       BusyWith = "IMPORT EXEC";
       EnableBusyCancel = true;
@@ -341,7 +341,7 @@ namespace RVisUI.Mvvm
       {
         var destinationDirectoryName = 
           await _managedImport.ImportExecToLibraryAsync(
-            serverLicense.Client
+            serverLicense.GetRClient()
             );
 
         _simLibrary.Refresh();
@@ -435,7 +435,7 @@ namespace RVisUI.Mvvm
 
     private async Task DoImportUsingTmplAsync(ServerLicense serverLicense)
     {
-      _busyCancelHandler = () => serverLicense.Client.StopServer();
+      _busyCancelHandler = () => serverLicense.GetRClient().StopServer();
 
       BusyWith = "IMPORT TMPL";
       EnableBusyCancel = true;
@@ -447,7 +447,7 @@ namespace RVisUI.Mvvm
       {
         var destinationDirectoryName = 
           await _managedImport.ImportTmplToLibraryAsync(
-            serverLicense.Client
+            serverLicense.GetRClient()
             );
 
         _simLibrary.Refresh();

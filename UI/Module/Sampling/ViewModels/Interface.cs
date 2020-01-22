@@ -153,6 +153,8 @@ namespace Sampling
     Arr<string> OutputNames { get; }
     int SelectedOutputName { get; set; }
     PlotModel Outputs { get; }
+    ICommand ToggleSeriesType { get; }
+    bool IsSeriesTypeLine { get; }
     ICommand ResetAxes { get; }
     int SelectedSample { get; }
     string SampleIdentifier { get; }

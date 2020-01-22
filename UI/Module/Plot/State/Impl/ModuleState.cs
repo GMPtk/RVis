@@ -28,6 +28,7 @@ namespace Plot
                 IsScaleLogarithmic = tdps.DepVarConfigState.IsScaleLogarithmic
               },
               ViewHeight = tdps.ViewHeight,
+              IsSeriesTypeLine = tdps.IsSeriesTypeLine,
               IsAxesOriginLockedToZeroZero = tdps.IsAxesOriginLockedToZeroZero,
               XMinimum = tdps.XMinimum,
               XMaximum = tdps.XMaximum,
@@ -73,6 +74,7 @@ namespace Plot
       {
         IsVisible = tdpsDTO.IsVisible,
         ViewHeight = tdpsDTO.ViewHeight,
+        IsSeriesTypeLine = tdpsDTO.IsSeriesTypeLine,
         IsAxesOriginLockedToZeroZero = tdpsDTO.IsAxesOriginLockedToZeroZero,
         XMinimum = tdpsDTO.XMinimum,
         XMaximum = tdpsDTO.XMaximum,

@@ -4,6 +4,7 @@ using RVis.Base;
 using RVis.Model;
 using RVis.Model.Extensions;
 using RVisUI.Controls.Dialogs;
+using RVisUI.Properties;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -16,6 +17,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using static System.Double;
+using static System.Math;
 
 namespace RVisUI
 {
@@ -51,6 +53,10 @@ namespace RVisUI
       {
         _maximumMemoryPressure = IsNaN(d) ? 0.95 : d;
       }
+
+      App.Current.AppSettings
+        .ObservableForProperty(@as => @as.Zoom)
+        .Subscribe(_ => ScaleClient());
     }
 
     public double FrameRate
@@ -107,6 +113,20 @@ namespace RVisUI
       set { SetValue(FullScreenProperty, value); }
     }
 
+    public static readonly DependencyProperty ClientScaleProperty =
+      DependencyProperty.Register(
+        nameof(ClientScale),
+        typeof(double),
+        typeof(MainWindow),
+        new UIPropertyMetadata(1.0)
+        );
+
+    public double ClientScale
+    {
+      get => (double)GetValue(ClientScaleProperty);
+      set => SetValue(ClientScaleProperty, value);
+    }
+
     private void HandleToggleFullScreen(object sender, RoutedEventArgs e) =>
       FullScreen = !FullScreen;
 
@@ -138,17 +158,17 @@ namespace RVisUI
       }
     }
 
-    private void ObserveServerLicense((int ServerID, ServerLicense ServerLicense, bool HasExpired) item)
+    private void ObserveServerLicense((ServerLicense ServerLicense, bool HasExpired) item)
     {
-      var (serverID, serverLicense, hasExpired) = item;
+      var (serverLicense, hasExpired) = item;
 
       if (hasExpired)
       {
-        _currentLicenses.Remove(serverID);
+        _currentLicenses.Remove(serverLicense.ID);
       }
       else
       {
-        _currentLicenses.Add(serverID, serverLicense);
+        _currentLicenses.Add(serverLicense.ID, serverLicense);
       }
 
       _tbResetRServices.Foreground = _currentLicenses.Any() ? Brushes.Red : _tbResetRServicesFG;
@@ -184,7 +204,7 @@ namespace RVisUI
     {
       if (++_memoryEventCount % MEMORY_PRESSURE_CHECK_INTERVAL != 0) return;
 
-      _process = _process ?? Process.GetCurrentProcess();
+      _process ??= Process.GetCurrentProcess();
 
       _process.Refresh();
 
@@ -197,6 +217,20 @@ namespace RVisUI
         App.Current.AppState.SimData.Clear(includePendingRequests: false);
         GC.Collect();
       }
+    }
+
+    private void HandleSizeChanged(object sender, EventArgs e)
+    {
+      ScaleClient();
+    }
+
+    private void ScaleClient()
+    {
+      var zoom = Settings.Default.Zoom;
+      var yScale = zoom * ActualHeight / 768d;
+      var xScale = zoom * ActualWidth / 1366d;
+      var value = Min(xScale, yScale);
+      ClientScale = IsNaN(value) ? 1d : value;
     }
 
     private const int MEMORY_PRESSURE_CHECK_INTERVAL = 200;

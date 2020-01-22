@@ -43,6 +43,8 @@ namespace Plot
 
     PlotModel PlotModel { get; set; }
 
+    ICommand ToggleSeriesType { get; }
+    bool IsSeriesTypeLine { get; set; }
     ICommand ToggleLockAxesOriginToZeroZero { get; }
     bool IsAxesOriginLockedToZeroZero { get; set; }
     ICommand ResetAxisRanges { get; }

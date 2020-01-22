@@ -18,6 +18,10 @@ namespace Sampling.Design
 
     public PlotModel Outputs => CreatePlotModel();
 
+    public ICommand ToggleSeriesType => throw new NotImplementedException();
+
+    public bool IsSeriesTypeLine => true;
+
     public ICommand ResetAxes => throw new NotImplementedException();
 
     public int SelectedSample => throw new NotImplementedException();

@@ -84,7 +84,7 @@ namespace Sampling
         seedValue
         );
 
-      serverLicense.Client.EvaluateNonQuery(code);
+      serverLicense.GetRClient().EvaluateNonQuery(code);
 
       var useSimulatedAnnealing = !IsNaN(_latinHypercubeDesign.T0);
 
@@ -116,12 +116,12 @@ namespace Sampling
           imax
           );
 
-        serverLicense.Client.EvaluateNonQuery(code);
-        design = serverLicense.Client.EvaluateNumData("rvis_lhsDesign_out_opt$design");
+        serverLicense.GetRClient().EvaluateNonQuery(code);
+        design = serverLicense.GetRClient().EvaluateNumData("rvis_lhsDesign_out_opt$design");
       }
       else
       {
-        design = serverLicense.Client.EvaluateNumData("rvis_lhsDesign_out$design");
+        design = serverLicense.GetRClient().EvaluateNumData("rvis_lhsDesign_out$design");
       }
 
       var parameterSamples = selectedParameters
@@ -151,7 +151,7 @@ namespace Sampling
 
       if (doRankCorrelation)
       {
-        parameterSamples = DoRankCorrelation(parameterSamples, serverLicense.Client);
+        parameterSamples = DoRankCorrelation(parameterSamples, serverLicense.GetRClient());
       }
 
       var samples = MakeSamples(selectedParameters, parameterSamples);

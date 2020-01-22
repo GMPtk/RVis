@@ -120,7 +120,7 @@ namespace Sensitivity
               _moduleState.SensitivityDesign.Samples,
               designOutputs,
               _simulation.SimConfig.SimOutput.GetIndependentData(_moduleState.Trace),
-              serverLicense.Client,
+              serverLicense.GetRClient(),
               _cancellationTokenSource.Token,
               s => _appService.ScheduleLowPriorityAction(() => RaiseTaskMessageEvent(s))
             ),

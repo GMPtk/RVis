@@ -9,6 +9,7 @@ namespace RVisUI.Ioc
     {
       Bind<IHomeViewModel>().To<HomeViewModel>().InSingletonScope();
       Bind<ISimulationHomeViewModel>().To<SimulationHomeViewModel>().InSingletonScope();
+      Bind<IZoomViewModel>().To<ZoomViewModel>().InSingletonScope();
     }
   }
 }

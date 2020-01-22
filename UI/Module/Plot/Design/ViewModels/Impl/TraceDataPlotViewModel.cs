@@ -104,6 +104,10 @@ namespace Plot.Design
       set { }
     }
 
+    public ICommand ToggleSeriesType => default;
+
+    public bool IsSeriesTypeLine { get => true; set { } }
+
     public ICommand ToggleLockAxesOriginToZeroZero => default;
 
     public bool IsAxesOriginLockedToZeroZero { get => true; set { } }

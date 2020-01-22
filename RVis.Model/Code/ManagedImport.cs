@@ -200,7 +200,7 @@ namespace RVis.Model
 
       CheckTrace(trace);
 
-      return _simLibrary.Import(_pathToContainingDirectory);
+      return _simLibrary.ImportRSimulation(_pathToContainingDirectory);
     }
 
     public async Task<string> ImportTmplToLibraryAsync(IRVisClient rVisClient)
@@ -266,7 +266,7 @@ namespace RVis.Model
 
       File.WriteAllLines(pathToRFile, codeLines);
 
-      return _simLibrary.Import(_pathToContainingDirectory);
+      return _simLibrary.ImportRSimulation(_pathToContainingDirectory);
     }
 
     protected virtual void Dispose(bool disposing)
@@ -289,9 +289,14 @@ namespace RVis.Model
 
     private void SetUpStaging()
     {
-      var containingDirectoryName = DateTime.UtcNow.ToString("o", InvariantCulture).ToValidFileName();
-      var pathToContainingDirectory = Path.Combine(Path.GetTempPath(), containingDirectoryName);
-      Directory.CreateDirectory(pathToContainingDirectory);
+      string pathToContainingDirectory;
+      do
+      {
+        pathToContainingDirectory = Combine(GetTempPath(), GetRandomFileName());
+      }
+      while (Directory.Exists(pathToContainingDirectory));
+
+      RequireNotNull(Directory.CreateDirectory(pathToContainingDirectory));
 
       var pathToRFile = Path.Combine(pathToContainingDirectory, _codeFileName);
 

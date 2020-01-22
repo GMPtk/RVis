@@ -33,6 +33,13 @@ namespace Plot
     }
     private double _viewHeight;
 
+    public bool IsSeriesTypeLine
+    {
+      get => _isSeriesTypeLine;
+      set => this.RaiseAndSetIfChanged(ref _isSeriesTypeLine, value, PropertyChanged);
+    }
+    private bool _isSeriesTypeLine;
+
     public bool IsAxesOriginLockedToZeroZero
     {
       get => _isAxesOriginLockedToZeroZero;

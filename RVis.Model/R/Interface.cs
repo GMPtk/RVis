@@ -15,7 +15,7 @@ namespace RVis.Model
 
     WaitHandle SlotFree { get; }
 
-    IObservable<(int ServerID, ServerLicense ServerLicense, bool HasExpired)> ServerLicenses { get; }
+    IObservable<(ServerLicense ServerLicense, bool HasExpired)> ServerLicenses { get; }
   }
 
   public interface IRVisServer

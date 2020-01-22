@@ -12,6 +12,13 @@ namespace Sampling
     }
     private string _selectedOutputName;
 
+    public bool IsSeriesTypeLine
+    {
+      get => _isSeriesTypeLine;
+      set => this.RaiseAndSetIfChanged(ref _isSeriesTypeLine, value, PropertyChanged);
+    }
+    private bool _isSeriesTypeLine;
+
     public event PropertyChangedEventHandler PropertyChanged;
   }
 }

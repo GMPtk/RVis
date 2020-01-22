@@ -2,6 +2,7 @@
 using RVis.Base.Extensions;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static RVis.Model.Logger;
@@ -54,7 +55,7 @@ namespace RVis.Model
       return (simulations.Count, failures);
     }
 
-    public string Import(string location)
+    public string ImportRSimulation(string location)
     {
       RequireDirectory(location);
 
@@ -71,14 +72,34 @@ namespace RVis.Model
       return libraryDirectoryName;
     }
 
+    public string ImportExeSimulation(string location, string libraryDirectoryName)
+    {
+      RequireDirectory(location);
+
+      var diSimulation = new DirectoryInfo(location);
+      var exeFiles = diSimulation.GetFiles("*.exe");
+      RequireEqual(exeFiles.Length, 1);
+
+      var pathToSimulation = Path.Combine(Location, libraryDirectoryName);
+
+      RequireFalse(
+        Directory.Exists(pathToSimulation), 
+        $"Already exists in library: {pathToSimulation}"
+        );
+
+      Directory.Move(location, pathToSimulation);
+
+      return pathToSimulation;
+    }
+
     public void Delete(Simulation simulation)
     {
       var containingDirectoryName = DateTime.UtcNow.ToString("o", InvariantCulture).ToValidFileName();
       var pathToContainingDirectory = Path.Combine(Path.GetTempPath(), containingDirectoryName);
       Directory.Move(simulation.PathToSimulation, pathToContainingDirectory);
+      Task.Run(() => Directory.Delete(pathToContainingDirectory, true));
       try
       {
-        Directory.Delete(pathToContainingDirectory, true);
         Directory.Delete(simulation.PathToSimulation);
       }
       catch (Exception)

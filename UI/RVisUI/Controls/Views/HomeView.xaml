@@ -20,8 +20,12 @@
         <local:SelectSimulationView DataContext="{Binding SelectSimulationViewModel}"/>
       </TabItem>
 
-      <TabItem Header="IMPORT" ma:ControlsHelper.HeaderFontSize="14">
+      <TabItem Header="IMPORT R" ma:ControlsHelper.HeaderFontSize="14">
         <local:ImportSimulationView DataContext="{Binding ImportSimulationViewModel}"/>
+      </TabItem>
+
+      <TabItem Header="IMPORT MCSIM" ma:ControlsHelper.HeaderFontSize="14">
+        <local:ImportMCSimView DataContext="{Binding ImportMCSimViewModel}"/>
       </TabItem>
 
       <TabItem Header="LIBRARY" ma:ControlsHelper.HeaderFontSize="14">
