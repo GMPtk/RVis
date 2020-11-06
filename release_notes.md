@@ -1,12 +1,9 @@
 # Beta Release
 
-Changes in v0.10:
+Changes in v0.11:
 
-* Added MCSim as an alternative simulation engine
-* Added scatter/line chart series toggle
-* Added client zoom capability
-* Various bug fixes and minor enhancements
+(none)
 
-Issues fixed in v0.10: [#12](https://github.com/GMPtk/RVis/issues/12)
+Issues fixed in v0.11: [#17](https://github.com/GMPtk/RVis/issues/17)
 
 Please submit bug reports, feature requests and other technical matters to the [issue tracker](https://github.com/GMPtk/RVis/issues) in this repository.

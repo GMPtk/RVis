@@ -1,8 +1,11 @@
 ﻿using NLog;
 using RDotNet;
 using RVis.Base;
+using RVis.Base.Extensions;
 using System;
 using System.Collections.Generic;
+using static System.Configuration.ConfigurationManager;
+using static System.Environment;
 
 namespace RVis.ROps
 {
@@ -10,7 +13,23 @@ namespace RVis.ROps
   {
     static ROpsApi()
     {
-      REngine.SetEnvironmentVariables();
+      var rHome = AppSettings["ROpsApi.RHome"];
+
+      if (rHome.IsAString())
+      {
+        var binDir = Is64BitProcess
+          ? @"\bin\x64"
+          : @"\bin\i386"
+          ;
+
+        var rPath = rHome + binDir;
+
+        REngine.SetEnvironmentVariables(rPath, rHome);
+      }
+      else
+      {
+        REngine.SetEnvironmentVariables();
+      }
     }
 
     public static (string Name, string Value)[] GetRversion()
