@@ -47,7 +47,7 @@ namespace Sensitivity
     internal void SaveTrace(SensitivityDesign sensitivityDesign, NumDataTable trace) => 
       SaveSensitivityDesignTrace(sensitivityDesign, trace, _pathToSensitivityDesignsDirectory);
 
-    internal NumDataTable LoadTrace(SensitivityDesign sensitivityDesign) => 
+    internal NumDataTable? LoadTrace(SensitivityDesign sensitivityDesign) => 
       LoadSensitivityDesignTrace(sensitivityDesign, _pathToSensitivityDesignsDirectory);
 
     internal void SaveRanking(SensitivityDesign sensitivityDesign, Ranking ranking) =>

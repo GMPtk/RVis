@@ -3,6 +3,8 @@ using System;
 using System.Globalization;
 using System.Windows.Data;
 
+#nullable disable
+
 namespace RVisUI.Wpf
 {
   public class SigFigsConverter : IValueConverter
@@ -16,9 +18,9 @@ namespace RVisUI.Wpf
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      if (!(value is double d)) return default;
+      if (value is not double d) return default;
 
-      if (!(parameter is int digits)) return default;
+      if (parameter is not int digits) return default;
 
       return d.ToSigFigs(digits);
     }

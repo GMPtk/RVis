@@ -62,7 +62,7 @@ namespace Sampling
           this
             .WhenAny(vm => vm.SelectedParameterViewModel, _ => default(object))
             .Subscribe(
-              _reactiveSafeInvoke.SuspendAndInvoke<object>(
+              _reactiveSafeInvoke.SuspendAndInvoke<object?>(
                 ObserveSelectedParameterViewModel
                 )
               ),
@@ -108,7 +108,7 @@ namespace Sampling
 
     public IParameterDistributionViewModel ParameterDistributionViewModel => _parameterDistributionViewModel;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -156,7 +156,7 @@ namespace Sampling
       }
     }
 
-    private void ObserveSelectedParameterViewModel(object _)
+    private void ObserveSelectedParameterViewModel(object? _)
     {
       UpdateSelectedParameter();
     }

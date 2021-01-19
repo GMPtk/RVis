@@ -6,12 +6,12 @@ using RVisUI.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
+using static RVis.Base.ProcessHelper;
 using static System.Environment;
 using static System.IO.Path;
 
@@ -59,12 +59,12 @@ namespace RVisUI.Mvvm
       MonitorTaskRunners();
     }
 
-    public string Name
+    public string? Name
     {
       get => _name;
       set => this.RaiseAndSetIfChanged(ref _name, value);
     }
-    private string _name;
+    private string? _name;
 
     public ICommand ChangeCommonConfiguration { get; }
 
@@ -81,12 +81,12 @@ namespace RVisUI.Mvvm
     }
     private bool _isBusy;
 
-    public string BusyWith
+    public string? BusyWith
     {
       get => _busyWith;
       set => this.RaiseAndSetIfChanged(ref _busyWith, value);
     }
-    private string _busyWith;
+    private string? _busyWith;
 
     public ObservableCollection<string> BusyMessages { get; } = new ObservableCollection<string>();
 
@@ -108,12 +108,12 @@ namespace RVisUI.Mvvm
     }
     private int _uiComponentIndex;
 
-    public string ActiveUIComponentName
+    public string? ActiveUIComponentName
     {
       get => _activeUIComponentName;
       set => this.RaiseAndSetIfChanged(ref _activeUIComponentName, value);
     }
-    private string _activeUIComponentName;
+    private string? _activeUIComponentName;
 
     private void HandleExport()
     {
@@ -147,7 +147,7 @@ namespace RVisUI.Mvvm
 
           if (dataExportConfiguration.OpenAfterExport)
           {
-            Process.Start(Combine(
+            OpenUrl(Combine(
               dataExportConfiguration.RootExportDirectory,
               dataExportConfiguration.ExportDirectoryName
               ));
@@ -191,14 +191,14 @@ namespace RVisUI.Mvvm
 
     private void HandleBusyCancel()
     {
-      _taskRunners
+      var cancelableTasks = _taskRunners
         .Where(kvp => kvp.Key.CanCancelTask)
         .Select(kvp => new { kvp.Value.AddedOn, kvp.Key })
         .OrderByDescending(a => a.AddedOn);
 
-      if (!_taskRunners.Any()) return;
+      if (!cancelableTasks.Any()) return;
 
-      _taskRunners.First().Key.HandleCancelTask();
+      cancelableTasks.First().Key.HandleCancelTask();
     }
 
     private void ObserveSimulation(Option<Simulation> simulation)
@@ -226,7 +226,7 @@ namespace RVisUI.Mvvm
       ActiveUIComponentName = _appState.ActiveUIComponent.DisplayName;
     }
 
-    private void ObserveActiveUIComponent(object _)
+    private void ObserveActiveUIComponent(object? _)
     {
       UIComponentIndex = _appState.UIComponents.FindIndex(uic => uic.ID == _appState.ActiveUIComponent.ID);
       ActiveUIComponentName = _appState.ActiveUIComponent.DisplayName;
@@ -323,7 +323,7 @@ namespace RVisUI.Mvvm
 
     private readonly IAppState _appState;
     private readonly IAppService _appService;
-    private CompositeDisposable _taskRunnerSubscriptions;
+    private CompositeDisposable? _taskRunnerSubscriptions;
     private readonly IDictionary<ITaskRunner, (DateTime AddedOn, int NRunningTasks, IDisposable MessageSubscription)> _taskRunners =
       new Dictionary<ITaskRunner, (DateTime AddedOn, int NRunningTasks, IDisposable MessageSubscription)>();
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;

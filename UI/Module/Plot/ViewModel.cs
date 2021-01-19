@@ -9,11 +9,11 @@ using RVisUI.Model.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using static LanguageExt.Prelude;
+using static RVis.Base.Check;
 using static System.Double;
 using static System.Globalization.CultureInfo;
 
@@ -75,7 +75,7 @@ namespace Plot
                 pes.Minimum = pss.Minimum;
                 pes.Maximum = pss.Maximum;
               },
-              () => pes.IsSelected = applyType.IsSingle() ? pes.IsSelected : false);
+              () => pes.IsSelected = applyType.IsSingle() && pes.IsSelected);
           });
         }
 
@@ -145,6 +145,9 @@ namespace Plot
         {
           if (!pes.IsSelected) return;
           if (!TryParse(pes.Value, NumberStyles.Float, InvariantCulture, out double value)) return;
+
+          RequireNotNullEmptyWhiteSpace(pes.Name);
+
           sharedStateBuilder.AddParameter(pes.Name, value, pes.Minimum, pes.Maximum, None);
         });
 
@@ -156,7 +159,7 @@ namespace Plot
           if (!tdps.IsVisible) return;
           var name = tdps.DepVarConfigState.SelectedElementName;
           var isElement = elements.Exists(e => e.Name == name);
-          if (isElement) sharedStateBuilder.AddOutput(name);
+          if (isElement) sharedStateBuilder.AddOutput(name!);
 
           tdps.DepVarConfigState.ObservationsReferences.Iter(
             sharedStateBuilder.AddObservations
@@ -233,6 +236,8 @@ namespace Plot
       {
         if (TryParse(parameterEditState.Value, NumberStyles.Float, InvariantCulture, out double value))
         {
+          RequireNotNullEmptyWhiteSpace(parameterEditState.Name);
+
           var distribution = _sharedState.ParameterSharedStates
             .Find(pss => pss.Name == parameterEditState.Name)
             .Match(pss => pss.Distribution, () => None);
@@ -248,6 +253,8 @@ namespace Plot
       }
       else
       {
+        RequireNotNullEmptyWhiteSpace(parameterEditState.Name);
+
         _sharedState.UnshareParameterState(parameterEditState.Name);
       }
     }
@@ -255,6 +262,8 @@ namespace Plot
     private void ObserveDepVarConfigStateSelectedElementName(DepVarConfigState depVarConfigState)
     {
       if (!_moduleState.AutoShareElementSharedState.IsTrue()) return;
+
+      RequireNotNullEmptyWhiteSpace(depVarConfigState.SelectedElementName);
 
       _sharedState.ShareElementState(depVarConfigState.SelectedElementName);
     }
@@ -380,7 +389,7 @@ namespace Plot
     private void ObserveOutputRequest(SimDataItem<OutputRequest> item)
     {
       if (item.IsSimDataEvent(out SimDataEvent _)) return;
-      if (!(item.RequestToken is DataRequestType dataRequestType)) return;
+      if (item.RequestToken is not DataRequestType dataRequestType) return;
       if (dataRequestType != DataRequestType.LogEntry) return;
       if (item.Item.SerieInputs.IsLeft) return;
 
@@ -402,12 +411,14 @@ namespace Plot
 
     private IEnumerable<IDisposable> SubscribeToObservables()
     {
+      RequireNotNull(SynchronizationContext.Current);
+
       var subscriptions = _moduleState.ParameterEditStates
         .Map(pes => pes
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(
-              s => ObserveParameterEditStatePropertyChanged(pes)
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(
+              _ => ObserveParameterEditStatePropertyChanged(pes)
               )
             )
         )

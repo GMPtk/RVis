@@ -1,4 +1,5 @@
 ﻿using LanguageExt;
+using RVis.Base.Extensions;
 using RVis.Model;
 using RVisUI.Model;
 using RVisUI.Mvvm;
@@ -6,6 +7,7 @@ using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using static LanguageExt.Prelude;
+using static RVis.Base.Check;
 
 namespace RVisUI.Ioc
 {
@@ -22,18 +24,22 @@ namespace RVisUI.Ioc
     private readonly BehaviorSubject<Option<Simulation>> _targetSimulation =
       new BehaviorSubject<Option<Simulation>>(None);
 
-    public ISimData SimData => _simData;
+    public ISimData SimData => _simData.AssertNotNull();
 
-    public ISimSharedState SimSharedState => _simSharedState;
+    public ISimSharedState SimSharedState => _simSharedState.AssertNotNull();
 
-    public SimDataSessionLog SimDataSessionLog => _simDataSessionLog;
+    public SimDataSessionLog SimDataSessionLog => _simDataSessionLog.AssertNotNull();
 
-    public ISimEvidence SimEvidence => _simEvidence;
+    public ISimEvidence SimEvidence => _simEvidence.AssertNotNull();
 
-    public void ResetSimDataService() => _simData.ResetService();
+    public void ResetSimDataService() => _simData.AssertNotNull().ResetService();
 
     private void ObserveSimulation(Option<Simulation> observed)
     {
+      RequireNotNull(_simDataSessionLog);
+      RequireNotNull(_simEvidence);
+      RequireNotNull(_simSharedState);
+
       DisposeUIComponents();
 
       Type WithSome(Simulation simulation)
@@ -58,7 +64,7 @@ namespace RVisUI.Ioc
       {
         var type = observed.Match(WithSome, WithNone);
 
-        var viewModel = App.Current.NinjectKernel.GetService(type);
+        var viewModel = App.Current.NinjectKernel.GetService(type).AssertNotNull();
 
         CreateUIComponents(viewModel);
 
@@ -77,9 +83,9 @@ namespace RVisUI.Ioc
       }
     }
 
-    private SimData _simData;
-    private SimSharedState _simSharedState;
-    private SimDataSessionLog _simDataSessionLog;
-    private SimEvidence _simEvidence;
+    private SimData? _simData;
+    private SimSharedState? _simSharedState;
+    private SimDataSessionLog? _simDataSessionLog;
+    private SimEvidence? _simEvidence;
   }
 }

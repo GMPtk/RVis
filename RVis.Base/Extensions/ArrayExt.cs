@@ -1,4 +1,6 @@
-﻿using static RVis.Base.Check;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using static RVis.Base.Check;
 
 namespace RVis.Base.Extensions
 {
@@ -6,7 +8,7 @@ namespace RVis.Base.Extensions
   {
     public static T[][] Transpose<T>(this T[][] t)
     {
-      if (t.Length == 0) return new T[0][];
+      if (t.Length == 0) return Array.Empty<T[]>();
 
       RequireTrue(t.AllSame(a => a.Length));
 
@@ -69,7 +71,7 @@ namespace RVis.Base.Extensions
       return u;
     }
 
-    public static bool IsNullOrEmpty<T>(this T[] t) =>
+    public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this T[]? t) =>
       t == default || t.Length == 0;
 
     public static bool IsEmpty<T>(this T[] t) =>

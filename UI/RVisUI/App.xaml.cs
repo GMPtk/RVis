@@ -10,9 +10,9 @@ namespace RVisUI
   /// </summary>
   public partial class App : Application
   {
-    internal new static App Current => Application.Current as App;
+    internal new static App Current => (App)Application.Current;
 
-    internal ViewModelLocator ViewModelLocator => Resources["Locator"] as ViewModelLocator;
+    internal ViewModelLocator ViewModelLocator => (ViewModelLocator)Resources["Locator"];
 
     internal IKernel NinjectKernel => ViewModelLocator.NinjectBootstrapper.Kernel;
 

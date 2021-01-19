@@ -126,7 +126,7 @@ namespace Sensitivity
               );
 
           var updated = paired.Map(p => p.PSS.Match(
-            pss => ApplyDistributionAndSelect(pss.Parameter, p.PS, pss.Distribution),
+            pss => ApplyDistributionAndSelect(pss.Parameter, p.PS, pss.Minimum, pss.Maximum, pss.Distribution),
             () => p.PS.WithIsSelected(false)
             ));
 
@@ -157,6 +157,8 @@ namespace Sensitivity
             var parameterState = ApplyDistributionAndSelect(
               parameterSharedState.Parameter,
               _moduleState.ParameterStates[index],
+              parameterSharedState.Minimum,
+              parameterSharedState.Maximum,
               parameterSharedState.Distribution
               );
             _moduleState.ParameterStates = _moduleState.ParameterStates.SetItem(index, parameterState);
@@ -371,7 +373,7 @@ namespace Sensitivity
           .Map(pss => _moduleState.ParameterStates
             .Find(ps => ps.Name == pss.Name)
             .Match(
-              ps => ApplyDistributionAndSelect(ps, pss.Value, pss.Distribution),
+              ps => ApplyDistributionAndSelect(ps, pss.Value, pss.Minimum, pss.Maximum, pss.Distribution),
               () => CreateAndApplyDistribution(pss)
             )
           );
@@ -424,22 +426,33 @@ namespace Sensitivity
     private static ParameterState ApplyDistributionAndSelect(
       SimParameter parameter,
       ParameterState parameterState,
+      double minimum,
+      double maximum,
       Option<IDistribution> maybeDistribution
       ) =>
-      ApplyDistributionAndSelect(parameterState, parameter.Scalar, maybeDistribution);
+      ApplyDistributionAndSelect(parameterState, parameter.Scalar, minimum, maximum, maybeDistribution);
 
     private static ParameterState ApplyDistributionAndSelect(
       ParameterState parameterState,
       double value,
+      double minimum,
+      double maximum,
       Option<IDistribution> maybeDistribution
-      ) =>
-      maybeDistribution.Match(
+      )
+    {
+      var distributions = parameterState.Distributions.Map(
+        d => d.WithLowerUpper(minimum, maximum)
+        );
+      var invariantDistribution = new InvariantDistribution(value);
+      distributions = distributions.SetDistribution(invariantDistribution);
+
+      return maybeDistribution.Match(
         d =>
         {
-          var index = parameterState.Distributions.FindIndex(
+          var index = distributions.FindIndex(
             e => e.DistributionType == d.DistributionType
             );
-          var distributions = parameterState.Distributions.SetItem(index, d);
+          distributions = distributions.SetItem(index, d);
           return new ParameterState(
             parameterState.Name,
             d.DistributionType,
@@ -449,16 +462,14 @@ namespace Sensitivity
         },
         () =>
         {
-          var invariantDistribution = new InvariantDistribution(value);
-          var distributions = parameterState.Distributions.SetDistribution(invariantDistribution);
-          parameterState = new ParameterState(
+          return new ParameterState(
             parameterState.Name,
-            DistributionType.Invariant,
+            parameterState.DistributionType,
             distributions,
             isSelected: true
             );
-          return parameterState;
         });
+    }
 
     private static ParameterState CreateAndApplyDistribution(
       (SimParameter Parameter, double Minimum, double Maximum, Option<IDistribution> Distribution) parameterSharedState
@@ -581,14 +592,22 @@ namespace Sensitivity
 
     private void SetActivities()
     {
-      var isInDesignMode = _moduleState.SensitivityDesign == default;
-      _parametersViewModel.IsVisible = isInDesignMode;
+      if (_moduleState.SensitivityDesign is null)
+      {
+        // in design mode
+        _parametersViewModel.IsVisible = true;
+        _morrisMeasuresViewModel.IsVisible = false;
+        _morrisEffectsViewModel.IsVisible = false;
+        _fast99MeasuresViewModel.IsVisible = false;
+        _fast99EffectsViewModel.IsVisible = false;
+        return;
+      }
 
-      var isInMorrisMode = !isInDesignMode && _moduleState.SensitivityDesign.SensitivityMethod == SensitivityMethod.Morris;
+      var isInMorrisMode = _moduleState.SensitivityDesign.SensitivityMethod == SensitivityMethod.Morris;
       _morrisMeasuresViewModel.IsVisible = isInMorrisMode;
       _morrisEffectsViewModel.IsVisible = isInMorrisMode;
 
-      var isInFast99Mode = !isInDesignMode && _moduleState.SensitivityDesign.SensitivityMethod == SensitivityMethod.Fast99;
+      var isInFast99Mode = _moduleState.SensitivityDesign.SensitivityMethod == SensitivityMethod.Fast99;
       _fast99MeasuresViewModel.IsVisible = isInFast99Mode;
       _fast99EffectsViewModel.IsVisible = isInFast99Mode;
     }

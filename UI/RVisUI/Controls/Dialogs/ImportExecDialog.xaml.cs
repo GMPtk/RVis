@@ -16,7 +16,7 @@ namespace RVisUI.Controls.Dialogs
 
     private void HandleParametersMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-      var dataGrid = sender as DataGrid;
+      var dataGrid = (DataGrid)sender;
       if (dataGrid.SelectedItem is IParameterCandidateViewModel vm && vm.IsUsed)
       {
         vm.ChangeUnitDescription.Execute(vm);
@@ -25,7 +25,7 @@ namespace RVisUI.Controls.Dialogs
 
     private void HandleOutputMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-      var dataGrid = sender as DataGrid;
+      var dataGrid = (DataGrid)sender;
       if (dataGrid.SelectedItem is IElementCandidateViewModel vm && vm.IsUsed)
       {
         vm.ChangeUnitDescription.Execute(vm);

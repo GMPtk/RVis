@@ -58,33 +58,25 @@ namespace Estimation
     public IErrorModel ApplyBias(double bias) => 
       new NormalErrorModel(Sigma, Step * bias, StepInitializer);
 
-    public bool Equals(NormalErrorModel rhs) =>
-      ReferenceEquals(rhs, null)
-        ? false
-        : Sigma.Equals(rhs.Sigma) && 
-          Step.Equals(rhs.Step) && 
-          StepInitializer.Equals(rhs.StepInitializer);
+    public bool Equals(NormalErrorModel? rhs) =>
+      rhs is not null &&
+      Sigma.Equals(rhs.Sigma) && 
+      Step.Equals(rhs.Step) && 
+      StepInitializer.Equals(rhs.StepInitializer);
 
-    public override bool Equals(object obj) =>
-      obj is NormalErrorModel rhs ? Equals(rhs) : false;
+    public override bool Equals(object? obj) =>
+      obj is NormalErrorModel rhs && Equals(rhs);
 
     public static bool operator ==(NormalErrorModel left, NormalErrorModel right) =>
-      ReferenceEquals(left, null)
-        ? ReferenceEquals(right, null)
+      left is null
+        ? right is null
         : left.Equals(right);
 
     public static bool operator !=(NormalErrorModel left, NormalErrorModel right) =>
       !(left == right);
 
-    public override int GetHashCode()
-    {
-      var hashCode = 1206835793;
-      hashCode = hashCode * -1521134295 + Sigma.GetHashCode();
-      hashCode = hashCode * -1521134295 + Step.GetHashCode();
-      hashCode = hashCode * -1521134295 + StepInitializer.GetHashCode();
-      hashCode = hashCode * -1521134295 + ErrorModelType.GetHashCode();
-      return hashCode;
-    }
+    public override int GetHashCode() => 
+      HashCode.Combine(Sigma, Step, StepInitializer, ErrorModelType);
 
     public override string ToString() =>
       SerializeErrorModel(

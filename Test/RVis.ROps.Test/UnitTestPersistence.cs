@@ -26,7 +26,8 @@ namespace RVis.ROps.Test
       var evaluated = ROpsApi.Evaluate($"all.equal(copy_of_list_{nameof(TestSerializeRoundTrip)}, list_{nameof(TestSerializeRoundTrip)})");
 
       // assert
-      Assert.IsTrue(evaluated.First().Value.First().Resolve(out bool allEqual) && allEqual);
+      Assert.IsNotNull(evaluated.First().Value);
+      Assert.IsTrue(evaluated.First().Value!.First().Resolve(out bool allEqual) && allEqual);
     }
 #endif
 
@@ -49,7 +50,8 @@ namespace RVis.ROps.Test
       var evaluated = ROpsApi.Evaluate($"all.equal(copy_of_list_{nameof(TestBinaryRoundTrip)}, list_{nameof(TestBinaryRoundTrip)})");
 
       // assert
-      Assert.IsTrue(evaluated.First().Value.First().Resolve(out bool allEqual) && allEqual);
+      Assert.IsNotNull(evaluated.First().Value);
+      Assert.IsTrue(evaluated.First().Value!.First().Resolve(out bool allEqual) && allEqual);
     }
 #endif
   }

@@ -25,6 +25,7 @@ namespace RVis.Model
     public MCSimExecutor(string pathToSimulation, SimConfig config)
     {
       RequireDirectory(pathToSimulation);
+      RequireNotNullEmptyWhiteSpace(config.SimCode.File);
 
       var pathToExecutable = Combine(pathToSimulation, config.SimCode.File);
       RequireFile(pathToExecutable);
@@ -94,7 +95,7 @@ namespace RVis.Model
 
     public void Dispose() => Dispose(true);
 
-    public NumDataTable Execute(Arr<SimParameter> parameters)
+    public NumDataTable? Execute(Arr<SimParameter> parameters)
     {
       if (!Monitor.TryEnter(_syncLock))
       {
@@ -111,7 +112,7 @@ namespace RVis.Model
       }
     }
 
-    private NumDataTable _Execute(Arr<SimParameter> parameters)
+    private NumDataTable? _Execute(Arr<SimParameter> parameters)
     {
       File.Delete(_pathToOutFile);
 
@@ -131,6 +132,8 @@ namespace RVis.Model
 
       using var run = Process.Start(_processStartInfo);
 
+      RequireNotNull(run, "Failed to start MCSim process");
+
       run.WaitForExit();
 
       if (run.ExitCode != 0)
@@ -149,7 +152,7 @@ namespace RVis.Model
       return ProcessOutFile();
     }
 
-    private NumDataTable ProcessOutFile()
+    private NumDataTable? ProcessOutFile()
     {
       var @out = ReadAllLines(_pathToOutFile);
 
@@ -207,7 +210,7 @@ namespace RVis.Model
       return table;
     }
 
-    private NumDataTable HandleFailure(int exitCode, string stdOut, string stdErr)
+    private static NumDataTable HandleFailure(int exitCode, string stdOut, string stdErr)
     {
       static Arr<string> ExtractErrors(string s)
       {
@@ -217,7 +220,7 @@ namespace RVis.Model
 
         return lines
           .Where(l => l.StartsWith(PREFIX))
-          .Select(l => l.Substring(PREFIX.Length).Trim())
+          .Select(l => l[PREFIX.Length..].Trim())
           .ToArr();
       }
 
@@ -231,7 +234,7 @@ namespace RVis.Model
         );
     }
 
-    private NumDataTable HandleIntegrationFailure(string stdOut)
+    private static NumDataTable HandleIntegrationFailure(string stdOut)
     {
       const string START_PREFIX = "Doing analysis";
 

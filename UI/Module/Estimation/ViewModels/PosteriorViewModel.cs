@@ -21,6 +21,7 @@ using static RVis.Base.Check;
 using static RVis.Base.Extensions.NumExt;
 using static System.Double;
 using static Estimation.McmcChain;
+using OxyPlot.Legends;
 
 namespace Estimation
 {
@@ -33,7 +34,38 @@ namespace Estimation
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
-      PlotModel = CreatePlotModel();
+      PlotModel = new PlotModel();
+
+      PlotModel.Legends.Add(new Legend
+      {
+        LegendPlacement = LegendPlacement.Inside,
+        LegendPosition = LegendPosition.RightTop,
+        LegendOrientation = LegendOrientation.Vertical
+      });
+
+      _horizontalAxis = new LinearAxis
+      {
+        Position = AxisPosition.Bottom
+      };
+      PlotModel.Axes.Add(_horizontalAxis);
+
+      _leftVerticalAxis = new LinearAxis
+      {
+        Title = "Frequency",
+        Position = AxisPosition.Left,
+        Key = nameof(_leftVerticalAxis)
+      };
+      PlotModel.Axes.Add(_leftVerticalAxis);
+
+      _rightVerticalAxis = new LinearAxis
+      {
+        Title = "Probability",
+        Position = AxisPosition.Right,
+        Key = nameof(_rightVerticalAxis)
+      };
+      PlotModel.Axes.Add(_rightVerticalAxis);
+
+      PlotModel.ApplyThemeToPlotModelAndAxes();
 
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
@@ -42,7 +74,7 @@ namespace Estimation
           appSettings
             .GetWhenPropertyChanged()
             .Subscribe(
-              _reactiveSafeInvoke.SuspendAndInvoke<string>(
+              _reactiveSafeInvoke.SuspendAndInvoke<string?>(
                 ObserveAppSettingsPropertyChange
                 )
               ),
@@ -61,7 +93,7 @@ namespace Estimation
               ms => ms.PosteriorState
               )
             .Subscribe(
-              _reactiveSafeInvoke.SuspendAndInvoke<(Arr<ChainState>, PosteriorState)>(
+              _reactiveSafeInvoke.SuspendAndInvoke<(Arr<ChainState>, PosteriorState?)>(
                 ObserveModuleStateEstimationDataChange
                 )
               ),
@@ -118,7 +150,7 @@ namespace Estimation
     }
     private bool _isVisible;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -183,7 +215,9 @@ namespace Estimation
         .OrderBy(n => n)
         .ToArr();
 
-      var index = ParameterNames.IndexOf(selectedParameterName);
+      var index = selectedParameterName.IsAString() 
+        ? ParameterNames.IndexOf(selectedParameterName) 
+        : NOT_FOUND;
 
       SelectedParameterName = index.IsFound() ? index : 0;
     }
@@ -210,8 +244,10 @@ namespace Estimation
         return;
       }
 
+      RequireNotNull(_moduleState.PosteriorState);
+
       var selectedChainStates = _moduleState.ChainStates.Filter(cs => selectedChainNos.Contains(cs.No));
-      var chainData = selectedChainStates.Map(cs => cs.ChainData);
+      var chainData = selectedChainStates.Map(cs => cs.ChainData.AssertNotNull());
 
       var parameterData = new List<double>();
 
@@ -257,7 +293,8 @@ namespace Estimation
           new HistogramItem(
             bucket.LowerBound,
             bucket.UpperBound,
-            bucket.Count / histogram.DataCount
+            bucket.Count / histogram.DataCount,
+            (int)bucket.Count
             )
           );
       }
@@ -302,7 +339,7 @@ namespace Estimation
       PlotModel.InvalidatePlot(updateData: true);
     }
 
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (!propertyName.IsThemeProperty()) return;
 
@@ -315,7 +352,7 @@ namespace Estimation
       PopulateControls();
     }
 
-    private void ObserveModuleStateEstimationDataChange((Arr<ChainState>, PosteriorState) _)
+    private void ObserveModuleStateEstimationDataChange((Arr<ChainState>, PosteriorState?) _)
     {
       PopulatePosterior();
     }
@@ -330,50 +367,14 @@ namespace Estimation
       PopulatePosterior();
     }
 
-    private PlotModel CreatePlotModel()
-    {
-      var plotModel = new PlotModel
-      {
-        LegendPlacement = LegendPlacement.Inside,
-        LegendPosition = LegendPosition.RightTop,
-        LegendOrientation = LegendOrientation.Vertical
-      };
-
-      _horizontalAxis = new LinearAxis
-      {
-        Position = AxisPosition.Bottom
-      };
-      plotModel.Axes.Add(_horizontalAxis);
-
-      _leftVerticalAxis = new LinearAxis
-      {
-        Title = "Frequency",
-        Position = AxisPosition.Left,
-        Key = nameof(_leftVerticalAxis)
-      };
-      plotModel.Axes.Add(_leftVerticalAxis);
-
-      _rightVerticalAxis = new LinearAxis
-      {
-        Title = "Probability",
-        Position = AxisPosition.Right,
-        Key = nameof(_rightVerticalAxis)
-      };
-      plotModel.Axes.Add(_rightVerticalAxis);
-
-      plotModel.ApplyThemeToPlotModelAndAxes();
-
-      return plotModel;
-    }
-
     private readonly IAppState _appState;
     private readonly ModuleState _moduleState;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private IDisposable _chainViewModelsSubscription;
-    private LinearAxis _horizontalAxis;
-    private LinearAxis _leftVerticalAxis;
-    private LinearAxis _rightVerticalAxis;
+    private IDisposable? _chainViewModelsSubscription;
+    private readonly LinearAxis _horizontalAxis;
+    private readonly LinearAxis _leftVerticalAxis;
+    private readonly LinearAxis _rightVerticalAxis;
     private bool _disposed = false;
   }
 }

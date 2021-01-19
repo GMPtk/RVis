@@ -16,6 +16,6 @@ namespace Plot
     }
     private bool _isWorkingSetPanelOpen;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

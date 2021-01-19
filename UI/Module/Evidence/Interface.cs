@@ -31,9 +31,9 @@ namespace Evidence
 
   public interface IBrowseViewModel
   {
-    PlotModel PlotModel { get; set; }
+    PlotModel? PlotModel { get; set; }
     Arr<ISubjectViewModel> SubjectViewModels { get; set; }
-    ISubjectViewModel SelectedSubjectViewModel { get; set; }
+    ISubjectViewModel? SelectedSubjectViewModel { get; set; }
     Arr<IObservationsViewModel> ObservationsViewModels { get; set; }
   }
 
@@ -41,17 +41,17 @@ namespace Evidence
   {
     int ID { get; }
     string Name { get; }
-    string Description { get; }
+    string? Description { get; }
   }
 
   public interface IManageViewModel
   {
     ObservableCollection<IEvidenceSourceViewModel> EvidenceSourceViewModels { get; }
-    IEvidenceSourceViewModel SelectedEvidenceSourceViewModel { get; set; }
+    IEvidenceSourceViewModel? SelectedEvidenceSourceViewModel { get; set; }
     ICommand DeleteEvidenceSource { get; }
 
-    ObservableCollection<IObservationsViewModel> ObservationsViewModels { get; set; }
-    IObservationsViewModel SelectedObservationsViewModel { get; set; }
+    ObservableCollection<IObservationsViewModel>? ObservationsViewModels { get; set; }
+    IObservationsViewModel? SelectedObservationsViewModel { get; set; }
     ICommand DeleteObservations { get; }
   }
 
@@ -60,22 +60,22 @@ namespace Evidence
     string ColumnName { get; }
     Arr<string> Subjects { get; }
     string Subject { get; set; }
-    string RefName { get; set; }
+    string? RefName { get; set; }
     Arr<double> Observations { get; }
     string Content { get; }
   }
 
   public interface IImportObservationsViewModel
   {
-    string SelectedFile { get; set; }
+    string? SelectedFile { get; set; }
     ICommand SelectFile { get; }
-    string FQIndependentVariable { get; }
-    string EvidenceName { get; set; }
-    string EvidenceDescription { get; set; }
-    string RefName { get; set; }
-    string RefHash { get; set; }
+    string? FQIndependentVariable { get; }
+    string? EvidenceName { get; set; }
+    string? EvidenceDescription { get; set; }
+    string? RefName { get; set; }
+    string? RefHash { get; set; }
     Arr<IObservationsColumnViewModel> ObservationsColumnViewModels { get; set; }
-    string ErrorMessage { get; set; }
+    string? ErrorMessage { get; set; }
     ICommand OK { get; }
     ICommand Cancel { get; }
     bool? DialogResult { get; set; }

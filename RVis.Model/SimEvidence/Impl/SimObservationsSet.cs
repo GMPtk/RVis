@@ -1,6 +1,6 @@
 ﻿using LanguageExt;
 using RVis.Base.Extensions;
-using System.IO;
+using System;
 using System.Linq;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
@@ -17,7 +17,7 @@ namespace RVis.Model
     internal static SimObservationsSet LoadOrCreate(string pathToEvidenceDirectory, string subject)
     {
       var pathToCsvFile = Combine(pathToEvidenceDirectory, subject + ".csv");
-      if (!File.Exists(pathToCsvFile))
+      if (!Exists(pathToCsvFile))
       {
         return new SimObservationsSet(subject, Arr<SimObservations>.Empty);
       }
@@ -30,7 +30,7 @@ namespace RVis.Model
 
       var id = NOT_FOUND;
       var evidenceSourceID = NOT_FOUND;
-      string refName = default;
+      string? refName = default;
 
       var triples = lines
         .Skip(1) // header
@@ -83,18 +83,18 @@ namespace RVis.Model
           g.Key,
           g.First().EvidenceSourceID,
           subject,
-          g.First().RefName,
+          g.First().RefName ?? throw new Exception("null evidence source RefName"),
           g.Select(t => t.X).ToArr(),
           g.Select(t => t.Y).ToArr()
           ))
         .ToArr();
 
       RequireTrue(
-        observations.IsEmpty || observations.AllUnique(o => o.ID), 
+        observations.IsEmpty || observations.AllUnique(o => o.ID),
         "Found duplicate IDs"
         );
       RequireTrue(
-        observations.IsEmpty || observations.AllUnique(o => (o.EvidenceSourceID, o.RefName)), 
+        observations.IsEmpty || observations.AllUnique(o => (o.EvidenceSourceID, o.RefName)),
         "Found duplicate RefNames"
         );
 
@@ -106,9 +106,9 @@ namespace RVis.Model
       RequireDirectory(pathToEvidenceDirectory);
 
       var pathToCsvFile = Combine(pathToEvidenceDirectory, observationsSet.Subject + ".csv");
-      if (File.Exists(pathToCsvFile)) File.Delete(pathToCsvFile);
+      if (Exists(pathToCsvFile)) Delete(pathToCsvFile);
 
-      string ObservationToLine(SimObservations observations, int row)
+      static string ObservationToLine(SimObservations observations, int row)
       {
         var s = $"{observations.X[row]},{observations.Y[row]}";
         if (0 == row)
@@ -119,7 +119,7 @@ namespace RVis.Model
       }
 
       var lines = observationsSet.Observations
-        .Map(o => Range(0, o.X.Count).Select(i => ObservationToLine(o,i)).ToArr())
+        .Map(o => Range(0, o.X.Count).Select(i => ObservationToLine(o, i)).ToArr())
         .Bind(ss => ss);
 
       var csv =
@@ -146,11 +146,11 @@ namespace RVis.Model
         : observationsSet.Observations.Max(o => o.ID) + 1;
 
       var observations = new SimObservations(
-        id, 
-        evidenceSourceID, 
-        observationsSet.Subject, 
-        refName, 
-        x, 
+        id,
+        evidenceSourceID,
+        observationsSet.Subject,
+        refName,
+        x,
         y
         );
 

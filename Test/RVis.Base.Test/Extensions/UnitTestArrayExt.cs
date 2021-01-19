@@ -12,7 +12,7 @@ namespace RVis.Base.Test
     {
       // arrange
       var subject1 = new int[][] { new[] { 1, 2 }, new[] { 3, 4 }, new[] { 5, 6 } };
-      var subject2 = new int[0][];
+      var subject2 = Array.Empty<int[]>();
       var expected1 = new int[][] { new[] { 1, 3, 5 }, new[] { 2, 4, 6 } };
 
       // act
@@ -72,7 +72,7 @@ namespace RVis.Base.Test
     public void TestIsNullOrEmpty()
     {
       // arrange
-      object[] subject1 = default;
+      object[]? subject1 = default;
       object[] subject2 = Array.Empty<object>();
 
       // act

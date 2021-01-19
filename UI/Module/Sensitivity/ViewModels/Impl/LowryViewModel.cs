@@ -1,10 +1,12 @@
 ﻿using LanguageExt;
 using OxyPlot;
 using OxyPlot.Axes;
+using OxyPlot.Legends;
 using OxyPlot.Series;
 using ReactiveUI;
 using RVis.Base.Extensions;
 using RVisUI.AppInf;
+using RVisUI.AppInf.Design;
 using RVisUI.AppInf.Extensions;
 using RVisUI.Model;
 using RVisUI.Model.Extensions;
@@ -14,6 +16,8 @@ using System.IO;
 using System.Reactive.Disposables;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
+using static RVis.Base.Check;
+using static RVisUI.Wpf.WpfTools;
 using static Sensitivity.ChartOptionsViewModel;
 using static System.Convert;
 using static System.IO.Path;
@@ -22,10 +26,10 @@ namespace Sensitivity
 {
   internal sealed class LowryViewModel : ILowryViewModel, INotifyPropertyChanged, IDisposable
   {
-    internal LowryViewModel()
+
+    internal LowryViewModel() : this(new AppService(), new AppSettings(), new LowryState())
     {
-      _lowryState = new LowryState { };
-      PlotModel = CreatePlotModel();
+      RequireTrue(IsInDesignMode);
     }
 
     internal LowryViewModel(IAppService appService, IAppSettings appSettings, LowryState lowryState)
@@ -34,7 +38,103 @@ namespace Sensitivity
       _appSettings = appSettings;
       _lowryState = lowryState;
 
-      PlotModel = CreatePlotModel();
+      PlotModel = new PlotModel
+      {
+        Title = _lowryState.ChartTitle,
+        IsLegendVisible = true,
+      };
+      PlotModel.Legends.Add(new Legend
+      {
+        LegendPosition = LegendPosition.BottomRight
+      });
+#pragma warning disable CS0618 // Type or member is obsolete
+      PlotModel.MouseDown += HandlePlotModelMouseDown;
+#pragma warning restore CS0618 // Type or member is obsolete
+
+      _lowryStackAxis = new CategoryAxis
+      {
+        Position = AxisPosition.Bottom,
+        Key = "stack",
+        Title = _lowryState.XAxisTitle,
+        Angle = -35,
+        IsZoomEnabled = false,
+        IsPanEnabled = false
+      };
+      PlotModel.Axes.Add(_lowryStackAxis);
+
+      _lowrySmokeAxis = new LinearAxis
+      {
+        Position = AxisPosition.Bottom,
+        MinimumPadding = 0,
+        MaximumPadding = 0.06,
+        AbsoluteMinimum = 0,
+        Minimum = 0,
+        Key = "smoke",
+        IsAxisVisible = false,
+        IsZoomEnabled = false,
+        IsPanEnabled = false
+      };
+      PlotModel.Axes.Add(_lowrySmokeAxis);
+
+      _lowryVerticalAxis = new LinearAxis
+      {
+        Position = AxisPosition.Left,
+        MinimumPadding = 0,
+        MaximumPadding = 0.06,
+        AbsoluteMinimum = 0,
+        AbsoluteMaximum = 1.0,
+        Minimum = 0.0,
+        Maximum = 1.0,
+        Title = _lowryState.YAxisTitle,
+        IsZoomEnabled = false,
+        IsPanEnabled = false
+      };
+      PlotModel.Axes.Add(_lowryVerticalAxis);
+
+      _mainEffectsSeries = new BarSeries
+      {
+        Title = "Main Effects",
+        IsStacked = true,
+        StrokeColor = OxyColors.Black,
+        StrokeThickness = 1,
+        FillColor = _lowryState.MainEffectsFillColor ?? OxyColors.ForestGreen,
+        XAxisKey = "stack"
+      };
+#pragma warning disable CS0618 // Type or member is obsolete
+      _mainEffectsSeries.MouseDown += HandleMainEffectsSeriesMouseDown;
+#pragma warning restore CS0618 // Type or member is obsolete
+      PlotModel.Series.Add(_mainEffectsSeries);
+
+      _interactionsSeries = new BarSeries
+      {
+        Title = "Interactions",
+        IsStacked = true,
+        StrokeColor = OxyColors.Black,
+        StrokeThickness = 1,
+        FillColor = _lowryState.InteractionsFillColor ?? OxyColors.DarkGoldenrod,
+        XAxisKey = "stack"
+      };
+#pragma warning disable CS0618 // Type or member is obsolete
+      _interactionsSeries.MouseDown += HandleInteractionsSeriesMouseDown;
+#pragma warning restore CS0618 // Type or member is obsolete
+      PlotModel.Series.Add(_interactionsSeries);
+
+      _smokeSeries = new AreaSeries
+      {
+        DataFieldX2 = "IndependentVar",
+        DataFieldY2 = "Minimum",
+        Fill = _lowryState.SmokeFill ?? OxyColors.LightBlue,
+        Color = OxyColors.Red,
+        MarkerFill = OxyColors.Transparent,
+        StrokeThickness = 0,
+        DataFieldX = "IndependentVar",
+        DataFieldY = "Maximum",
+        Title = "Maximum/Minimum",
+        XAxisKey = "smoke",
+        RenderInLegend = false
+      };
+      PlotModel.Series.Add(_smokeSeries);
+
       PlotModel.ApplyThemeToPlotModelAndAxes();
 
       UpdateSize = ReactiveCommand.Create(HandleUpdateSize);
@@ -49,7 +149,7 @@ namespace Sensitivity
         _appSettings
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(
               ObserveAppSettingsPropertyChange
               )
             )
@@ -79,7 +179,7 @@ namespace Sensitivity
     public ICommand ShowOptions { get; }
     public ICommand ExportImage { get; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     internal void PlotParameterData(Arr<LowryParameterMeasure> parameterMeasures)
     {
@@ -115,8 +215,8 @@ namespace Sensitivity
         _interactionsSeries.Items.Clear();
         foreach (var parameterDatum in parameterMeasures)
         {
-          _mainEffectsSeries.Items.Add(new ColumnItem { Value = parameterDatum.MainEffect });
-          _interactionsSeries.Items.Add(new ColumnItem { Value = parameterDatum.Interaction });
+          _mainEffectsSeries.Items.Add(new BarItem { Value = parameterDatum.MainEffect });
+          _interactionsSeries.Items.Add(new BarItem { Value = parameterDatum.Interaction });
         }
       }
 
@@ -169,110 +269,17 @@ namespace Sensitivity
       }
     }
 
-    private PlotModel CreatePlotModel()
-    {
-      var plotModel = new PlotModel
-      {
-        Title = _lowryState.ChartTitle,
-        IsLegendVisible = true,
-        LegendPosition = LegendPosition.RightMiddle
-      };
-      plotModel.MouseDown += HandlePlotModelMouseDown;
-
-      _lowryStackAxis = new CategoryAxis
-      {
-        Position = AxisPosition.Bottom,
-        Key = "stack",
-        Title = _lowryState.XAxisTitle,
-        Angle = -35,
-        IsZoomEnabled = false,
-        IsPanEnabled = false
-      };
-      plotModel.Axes.Add(_lowryStackAxis);
-
-      _lowrySmokeAxis = new LinearAxis
-      {
-        Position = AxisPosition.Bottom,
-        MinimumPadding = 0,
-        MaximumPadding = 0.06,
-        AbsoluteMinimum = 0,
-        Minimum = 0,
-        Key = "smoke",
-        IsAxisVisible = false,
-        IsZoomEnabled = false,
-        IsPanEnabled = false
-      };
-      plotModel.Axes.Add(_lowrySmokeAxis);
-
-      _lowryVerticalAxis = new LinearAxis
-      {
-        Position = AxisPosition.Left,
-        MinimumPadding = 0,
-        MaximumPadding = 0.06,
-        AbsoluteMinimum = 0,
-        AbsoluteMaximum = 1.0,
-        Minimum = 0.0,
-        Maximum = 1.0,
-        Title = _lowryState.YAxisTitle,
-        IsZoomEnabled = false,
-        IsPanEnabled = false
-      };
-      plotModel.Axes.Add(_lowryVerticalAxis);
-
-      _mainEffectsSeries = new ColumnSeries
-      {
-        Title = "Main Effects",
-        IsStacked = true,
-        StrokeColor = OxyColors.Black,
-        StrokeThickness = 1,
-        FillColor = _lowryState.MainEffectsFillColor ?? OxyColors.ForestGreen,
-        XAxisKey = "stack"
-      };
-      _mainEffectsSeries.MouseDown += HandleMainEffectsSeriesMouseDown;
-      plotModel.Series.Add(_mainEffectsSeries);
-
-      _interactionsSeries = new ColumnSeries
-      {
-        Title = "Interactions",
-        IsStacked = true,
-        StrokeColor = OxyColors.Black,
-        StrokeThickness = 1,
-        FillColor = _lowryState.InteractionsFillColor ?? OxyColors.DarkGoldenrod,
-        XAxisKey = "stack"
-      };
-      _interactionsSeries.MouseDown += HandleInteractionsSeriesMouseDown;
-      plotModel.Series.Add(_interactionsSeries);
-
-      _smokeSeries = new AreaSeries
-      {
-        DataFieldX2 = "IndependentVar",
-        DataFieldY2 = "Minimum",
-        Fill = _lowryState.SmokeFill ?? OxyColors.LightBlue,
-        Color = OxyColors.Red,
-        MarkerFill = OxyColors.Transparent,
-        StrokeThickness = 0,
-        DataFieldX = "IndependentVar",
-        DataFieldY = "Maximum",
-        Title = "Maximum/Minimum",
-        XAxisKey = "smoke",
-        RenderInLegend = false
-      };
-      plotModel.Series.Add(_smokeSeries);
-
-      return plotModel;
-    }
-
-    private void HandleInteractionsSeriesMouseDown(object sender, OxyMouseDownEventArgs e)
+    private void HandleInteractionsSeriesMouseDown(object? sender, OxyMouseDownEventArgs e)
     {
       _lastElementRightClick = INTERACTION_ELEMENT;
     }
 
-    private void HandleMainEffectsSeriesMouseDown(object sender, OxyMouseDownEventArgs e)
+    private void HandleMainEffectsSeriesMouseDown(object? sender, OxyMouseDownEventArgs e)
     {
       _lastElementRightClick = MAIN_EFFECT_ELEMENT;
     }
 
-    private void HandlePlotModelMouseDown(object sender, OxyMouseDownEventArgs e)
+    private void HandlePlotModelMouseDown(object? sender, OxyMouseDownEventArgs e)
     {
       var dataPoint = _smokeSeries.InverseTransform(e.Position);
 
@@ -317,12 +324,12 @@ namespace Sensitivity
         _initialSaveDirectory,
         "TIFF Files|*.tiff",
         "tiff",
-        out string pathToFile
+        out string? pathToFile
         );
 
       if (!didSave) return;
 
-      using (var stream = new FileStream(pathToFile, FileMode.Create))
+      using (var stream = new FileStream(pathToFile!, FileMode.Create))
       {
         TiffExporter.Export(PlotModel, stream, Width, Height, OxyColors.White, 300);
       }
@@ -330,7 +337,7 @@ namespace Sensitivity
       _initialSaveDirectory = GetDirectoryName(pathToFile);
     }
 
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (!propertyName.IsThemeProperty()) return;
 
@@ -399,13 +406,13 @@ namespace Sensitivity
     private readonly LowryState _lowryState;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private ColumnSeries _mainEffectsSeries;
-    private ColumnSeries _interactionsSeries;
-    private AreaSeries _smokeSeries;
-    private CategoryAxis _lowryStackAxis;
-    private LinearAxis _lowrySmokeAxis;
-    private LinearAxis _lowryVerticalAxis;
-    private string _initialSaveDirectory;
+    private readonly BarSeries _mainEffectsSeries;
+    private readonly BarSeries _interactionsSeries;
+    private readonly AreaSeries _smokeSeries;
+    private readonly CategoryAxis _lowryStackAxis;
+    private readonly LinearAxis _lowrySmokeAxis;
+    private readonly LinearAxis _lowryVerticalAxis;
+    private string? _initialSaveDirectory;
     private int _lastElementRightClick;
     private bool _disposed = false;
   }

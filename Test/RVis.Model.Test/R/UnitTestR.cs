@@ -4,6 +4,7 @@ using RVis.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace RVis.Model.Test
 {
@@ -20,24 +21,24 @@ namespace RVis.Model.Test
     [TestCleanup]
     public void TestCleanup()
     {
-      serverPool.DestroyPool();
+      serverPool!.DestroyPool();
     }
 
-    private RVisServerPool serverPool;
+    private RVisServerPool? serverPool;
 
 #if !IS_PIPELINES_BUILD
     [TestMethod]
-    public void TestServerPoolRenewServerLicense()
+    public async Task TestServerPoolRenewServerLicense()
     {
       // arrange
-      var maybeServerLicense = serverPool.RequestServer();
+      var maybeServerLicense = serverPool!.RequestServer();
       var serverLicense = maybeServerLicense.AssertSome();
       var expected = DateTime.Now.Ticks.ToString("X");
       using (serverLicense)
       {
-        var client = serverLicense.GetRClient();
-        client.Clear();
-        client.EvaluateNonQuery($"expected <- \"{expected}\"");
+        var client = await serverLicense.GetRClientAsync();
+        await client.ClearAsync();
+        await client.EvaluateNonQueryAsync($"expected <- \"{expected}\"");
       }
 
       // act
@@ -47,8 +48,8 @@ namespace RVis.Model.Test
       Dictionary<string, string[]> dictionary;
       using (var renewedServerLicense = maybeRenewedServerLicense.AssertSome())
       {
-        var client = renewedServerLicense.GetRClient();
-        dictionary = client.EvaluateStrings("expected");
+        var client = await renewedServerLicense.GetRClientAsync();
+        dictionary = await client.EvaluateStringsAsync("expected");
       }
 
       // assert
@@ -58,7 +59,7 @@ namespace RVis.Model.Test
       var strings = dictionary.Values.First();
       Assert.AreEqual(strings?.Length, 1);
 
-      var actual = strings[0] as string;
+      var actual = strings?[0];
       Assert.AreEqual(actual, expected);
     }
 #endif

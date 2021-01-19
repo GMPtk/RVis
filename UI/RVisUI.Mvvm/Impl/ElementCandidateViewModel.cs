@@ -14,8 +14,8 @@ namespace RVisUI.Mvvm
       string valueName,
       bool isIndependentVarable,
       IReadOnlyList<double> values,
-      string unit,
-      string description,
+      string? unit,
+      string? description,
       ICommand changeDescriptionUnit
       )
     {
@@ -64,19 +64,19 @@ namespace RVisUI.Mvvm
     }
     private string _values;
 
-    public string Unit
+    public string? Unit
     {
       get => _unit;
       set => this.RaiseAndSetIfChanged(ref _unit, value);
     }
-    private string _unit;
+    private string? _unit;
 
-    public string Description
+    public string? Description
     {
       get => _description;
       set => this.RaiseAndSetIfChanged(ref _description, value);
     }
-    private string _description;
+    private string? _description;
 
     public ICommand ChangeUnitDescription
     {

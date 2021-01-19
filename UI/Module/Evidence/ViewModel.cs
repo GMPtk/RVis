@@ -11,6 +11,7 @@ using System;
 using System.Reactive.Disposables;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
+using static RVis.Base.Check;
 
 namespace Evidence
 {
@@ -159,6 +160,10 @@ namespace Evidence
 
       if (ok)
       {
+        RequireNotNullEmptyWhiteSpace(importObservationsViewModel.EvidenceName);
+        RequireNotNullEmptyWhiteSpace(importObservationsViewModel.RefName);
+        RequireNotNullEmptyWhiteSpace(importObservationsViewModel.RefHash);
+
         var x = importObservationsViewModel.ObservationsColumnViewModels.Head().Observations;
 
         var observationsSets = importObservationsViewModel.ObservationsColumnViewModels

@@ -17,15 +17,7 @@
   <UserControl.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </UserControl.Resources>
@@ -176,7 +168,7 @@
             <RowDefinition/>
           </Grid.RowDefinitions>
 
-          <TextBlock Style="{StaticResource MaterialDesignHeadlineTextBlock}"
+          <TextBlock Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                      Text="USE EXECUTIVE FUNCTION"
                      HorizontalAlignment="Center"
                      />
@@ -257,7 +249,7 @@
                   Content="Import..."
                   />
 
-          <TextBlock Style="{StaticResource MaterialDesignHeadlineTextBlock}"
+          <TextBlock Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                      Text="USE TEMPLATE"
                      HorizontalAlignment="Center"
                      Grid.Column="1"

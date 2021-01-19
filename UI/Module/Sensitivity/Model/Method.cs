@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static Sensitivity.Properties.Resources;
@@ -20,7 +21,7 @@ namespace Sensitivity
 {
   internal static class Method
   {
-    internal static (Arr<DataTable> Samples, Arr<byte[]> SerializedDesigns) GetMorrisSamples(
+    internal static async Task<(Arr<DataTable> Samples, Arr<byte[]> SerializedDesigns)> GetMorrisSamplesAsync(
       Arr<(string Name, IDistribution Distribution)> parameterDistributions,
       int noOfRuns,
       IRVisClient rVisClient
@@ -86,9 +87,9 @@ namespace Sensitivity
           i + 1
           );
 
-        rVisClient.EvaluateNonQuery(code);
+        await rVisClient.EvaluateNonQueryAsync(code);
 
-        var X = rVisClient.EvaluateDoubles(
+        var X = await rVisClient.EvaluateDoublesAsync(
           $"rvis_sensitivity_design_{(i + 1):00000000}[[\"X\"]]"
           );
 
@@ -120,7 +121,7 @@ namespace Sensitivity
           dataTable.Rows.Add(values);
         }
 
-        var serializedDesign = rVisClient.SaveObjectToBinary(
+        var serializedDesign = await rVisClient.SaveObjectToBinaryAsync(
           $"rvis_sensitivity_design_{(i + 1):00000000}"
           );
 
@@ -133,14 +134,14 @@ namespace Sensitivity
       return (samples.ToArr(), serializedDesigns.ToArr());
     }
 
-    internal static (DataTable Mu, DataTable MuStar, DataTable Sigma) GenerateMorrisOutputMeasures(
+    internal static async Task<(DataTable Mu, DataTable MuStar, DataTable Sigma)> GenerateMorrisOutputMeasuresAsync(
       Arr<byte[]> serializedDesigns,
       Arr<DataTable> samples,
       Arr<Arr<double>> designOutputs,
       NumDataColumn independentVariable,
       IRVisClient client,
-      CancellationToken cancellationToken,
-      Action<string> progressHandler
+      Action<string> progressHandler,
+      CancellationToken cancellationToken
       )
     {
       RequireFalse(serializedDesigns.IsEmpty);
@@ -156,7 +157,7 @@ namespace Sensitivity
       var nMeasures = independentVariable.Length;
       RequireTrue(designOutputs.ForAll(a => a.Count == nMeasures));
 
-      serializedDesigns.Iter(b => client.LoadFromBinary(b));
+      serializedDesigns.Iter(async b => await client.LoadFromBinaryAsync(b, cancellationToken));
 
       cancellationToken.ThrowIfCancellationRequested();
 
@@ -205,11 +206,11 @@ namespace Sensitivity
 
         var code = Join(NewLine, tellAndCollects);
 
-        client.EvaluateNonQuery(code);
+        await client.EvaluateNonQueryAsync(code, cancellationToken);
 
         for (var run = 0; run < noOfRuns; ++run)
         {
-          var results = client.EvaluateDoubles($"rvis_p_{(run + 1):00000000}");
+          var results = await client.EvaluateDoublesAsync($"rvis_p_{(run + 1):00000000}", cancellationToken);
 
           factors.Iter((i, f) =>
           {
@@ -239,7 +240,7 @@ namespace Sensitivity
       return (mu, muStar, sigma);
     }
 
-    internal static (DataTable Samples, byte[] SerializedDesign) GetFast99Samples(
+    internal static async Task<(DataTable Samples, byte[] SerializedDesign)> GetFast99SamplesAsync(
       Arr<(string Name, IDistribution Distribution)> parameterDistributions,
       int noOfSamples,
       IRVisClient rVisClient
@@ -299,9 +300,9 @@ namespace Sensitivity
         qfargs
         );
 
-      rVisClient.EvaluateNonQuery(code);
+      await rVisClient.EvaluateNonQueryAsync(code);
 
-      var X = rVisClient.EvaluateDoubles("rvis_sensitivity_design[[\"X\"]]");
+      var X = await rVisClient.EvaluateDoublesAsync("rvis_sensitivity_design[[\"X\"]]");
 
       var samples = new DataTable();
 
@@ -333,19 +334,19 @@ namespace Sensitivity
 
       samples.AcceptChanges();
 
-      var serializedDesign = rVisClient.SaveObjectToBinary("rvis_sensitivity_design");
+      var serializedDesign = await rVisClient.SaveObjectToBinaryAsync("rvis_sensitivity_design");
 
       return (samples, serializedDesign);
     }
 
-    internal static (DataTable FirstOrder, DataTable TotalOrder, DataTable Variance) GenerateFast99OutputMeasures(
+    internal static async Task<(DataTable FirstOrder, DataTable TotalOrder, DataTable Variance)> GenerateFast99OutputMeasuresAsync(
       byte[] serializedDesign,
       DataTable samples,
       Arr<Arr<double>> designOutputs,
       NumDataColumn independentVariable,
       IRVisClient client,
-      CancellationToken cancellationToken,
-      Action<string> progressHandler
+      Action<string> progressHandler,
+      CancellationToken cancellationToken
       )
     {
       RequireEqual(samples.Rows.Count, designOutputs.Count);
@@ -353,7 +354,7 @@ namespace Sensitivity
       const string modelResponses = "rvis_sensitivity_out";
       const string sensitivityMeasures = "rvis_sensitivity_measures";
 
-      client.LoadFromBinary(serializedDesign);
+      await client.LoadFromBinaryAsync(serializedDesign, cancellationToken);
 
       cancellationToken.ThrowIfCancellationRequested();
 
@@ -372,9 +373,9 @@ namespace Sensitivity
         var outputs = Range(0, nSamples).Map(
           sample => designOutputs[sample][measure]
           );
-        client.CreateVector(outputs.ToArray(), modelResponses);
-        client.EvaluateNonQuery(FAST99_TELL_AND_COLLECT);
-        measures.Add(client.EvaluateDoubles(sensitivityMeasures));
+        await client.CreateVectorAsync(outputs.ToArray(), modelResponses, cancellationToken);
+        await client.EvaluateNonQueryAsync(FAST99_TELL_AND_COLLECT, cancellationToken);
+        measures.Add(await client.EvaluateDoublesAsync(sensitivityMeasures, cancellationToken));
 
         if (measure % progressInterval == 0)
         {

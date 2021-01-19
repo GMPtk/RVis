@@ -101,12 +101,12 @@ namespace Estimation
       SelectedObservations = SelectedObservations.Filter(o => !observations.ContainsObservations(o));
     }
 
-    internal EstimationDesign EstimationDesign
+    internal EstimationDesign? EstimationDesign
     {
       get => _estimationDesign;
       set => this.RaiseAndSetIfChanged(ref _estimationDesign, value, PropertyChanged);
     }
-    private EstimationDesign _estimationDesign;
+    private EstimationDesign? _estimationDesign;
 
     internal Arr<ChainState> ChainStates
     {
@@ -115,19 +115,19 @@ namespace Estimation
     }
     private Arr<ChainState> _chainStates;
 
-    internal PosteriorState PosteriorState
+    internal PosteriorState? PosteriorState
     {
       get => _posteriorState;
       set => this.RaiseAndSetIfChanged(ref _posteriorState, value, PropertyChanged);
     }
-    private PosteriorState _posteriorState;
+    private PosteriorState? _posteriorState;
 
-    internal string RootExportDirectory
+    internal string? RootExportDirectory
     {
       get => _rootExportDirectory;
       set => this.RaiseAndSetIfChanged(ref _rootExportDirectory, value, PropertyChanged);
     }
-    private string _rootExportDirectory;
+    private string? _rootExportDirectory;
 
     internal bool OpenAfterExport
     {
@@ -178,7 +178,7 @@ namespace Estimation
     }
     private bool? _autoShareObservationsSharedState;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 

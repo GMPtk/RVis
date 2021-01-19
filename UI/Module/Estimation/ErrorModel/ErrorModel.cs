@@ -27,7 +27,7 @@ namespace Estimation
         dt => errorModels.Exists(ds => ds.ErrorModelType == dt)
         ));
 
-      return errorModels.Map(ds => ds.ToString()).ToArray();
+      return errorModels.Map(ds => ds.ToString()!).ToArray();
     }
 
     internal static Arr<IErrorModel> DeserializeErrorModels(string[] serialized)
@@ -62,10 +62,12 @@ namespace Estimation
 
       var parseMethod = _errorModelParserMap[errorModelType];
 
-      var maybeErrorModel = (Option<IErrorModel>)parseMethod.Invoke(
-        null,
-        new object[] { parts.Skip(1).ToArr() }
-        );
+      var maybeErrorModel = (Option<IErrorModel>)parseMethod
+        .Invoke(
+          null,
+          new object[] { parts.Skip(1).ToArr() }
+        )
+        .AssertNotNull();
 
       if (maybeErrorModel.IsNone)
       {
@@ -76,7 +78,7 @@ namespace Estimation
     }
 
     internal static string SerializeErrorModel(ErrorModelType errorModelType, Arr<object> state) =>
-      $"{errorModelType.ToString()}{PROP_SEP}{Join(PROP_SEP, state.Map(o => Convert.ToString(o, InvariantCulture)))}";
+      $"{errorModelType}{PROP_SEP}{Join(PROP_SEP, state.Map(o => Convert.ToString(o, InvariantCulture)))}";
 
     internal static IErrorModel GetDefault(ErrorModelType errorModelType)
     {
@@ -96,6 +98,7 @@ namespace Estimation
         dt => typeof(ErrorModel)
           .Assembly
           .GetType($"{nameof(Estimation)}.{dt}{nameof(ErrorModel)}")
+          .AssertNotNull()
         );
 
       _errorModelDefaultMap = _errorModelTypeMap
@@ -105,7 +108,7 @@ namespace Estimation
           {
             var defaultProperty = kvp.Value.GetField(nameof(NormalErrorModel.Default), BindingFlags.NonPublic | BindingFlags.Static);
             RequireNotNull(defaultProperty, $"Default property not found on type {kvp.Value.Name}");
-            return defaultProperty.GetValue(null) as IErrorModel;
+            return (IErrorModel)defaultProperty.GetValue(null).AssertNotNull();
           });
 
       _errorModelParserMap = _errorModelTypeMap

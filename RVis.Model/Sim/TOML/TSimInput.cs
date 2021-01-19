@@ -2,7 +2,7 @@
 {
   public sealed class TSimInput
   {
-    public TSimParameter[] Parameters { get; set; }
+    public TSimParameter[]? Parameters { get; set; }
     public bool IsDefault { get; set; }
   }
 }

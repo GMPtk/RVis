@@ -56,7 +56,7 @@ namespace RVisUI
       }
     }
 
-    internal ILogger Log => _logger ?? (_logger = RVis.Base.Logging.Create($"{nameof(RVisUI)}{nameof(App)}.All"));
-    private ILogger _logger;
+    internal ILogger Log => _logger ??= RVis.Base.Logging.Create($"{nameof(RVisUI)}{nameof(App)}.All");
+    private ILogger? _logger;
   }
 }

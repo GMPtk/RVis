@@ -27,9 +27,9 @@ namespace RVis.Data
     public override IReadOnlyList<double> Data => _data;
 
     [ProtoMember(1)]
-    private readonly string _name;
+    private readonly string _name = null!;
 
     [ProtoMember(2)]
-    private readonly double[] _data;
+    private readonly double[] _data = null!;
   }
 }

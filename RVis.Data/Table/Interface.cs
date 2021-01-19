@@ -6,10 +6,10 @@ namespace RVis.Data
   public interface IDataTable
   {
     IDataColumn this[int index] { get; }
-    IDataColumn this[string name] { get; }
+    IDataColumn? this[string name] { get; }
     IReadOnlyList<string> ColumnNames { get; }
     IReadOnlyList<IDataColumn> DataColumns { get; }
-    string Name { get; }
+    string? Name { get; }
     int NColumns { get; }
     int NRows { get; }
     bool HasColumn(string name);
@@ -19,7 +19,7 @@ namespace RVis.Data
   {
     string Name { get; }
     int Length { get; }
-    object this[int row] { get; }
+    object? this[int row] { get; }
     IReadOnlyList<object> Data { get; }
     Type GetDataType();
   }

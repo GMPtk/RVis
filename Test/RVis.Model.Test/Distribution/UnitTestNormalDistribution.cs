@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
+using System.Threading.Tasks;
 using static LanguageExt.Prelude;
 using static RVis.Model.Test.DistributionImpl;
 using static System.Double;
@@ -11,12 +12,12 @@ namespace RVis.Model.Test
   {
 #if !IS_PIPELINES_BUILD
     [TestMethod()]
-    public void TestNormalCumulativeDistributionAtBounds()
+    public async Task TestNormalCumulativeDistributionAtBounds()
     {
       // arrange
       var subject = new NormalDistribution(0.5, 1d, 0.3, 0.7);
-      var expectedLowerP = GetNumData("pnorm(0.3, 0.5, 1.0)")[0].Data[0];
-      var expectedUpperP = GetNumData("pnorm(0.7, 0.5, 1.0)")[0].Data[0];
+      var expectedLowerP = (await GetNumDataAsync("pnorm(0.3, 0.5, 1.0)"))[0].Data[0];
+      var expectedUpperP = (await GetNumDataAsync("pnorm(0.7, 0.5, 1.0)"))[0].Data[0];
 
       // act
       var (actualLowerP, actualUpperP) = subject.CumulativeDistributionAtBounds;
@@ -56,13 +57,13 @@ namespace RVis.Model.Test
 
 #if !IS_PIPELINES_BUILD
     [TestMethod()]
-    public void TestNormalGetDensities()
+    public async Task TestNormalGetDensities()
     {
       // arrange
       var subject = new NormalDistribution(0.5, 1d);
-      var expected = GetNumData(
+      var expected = (await GetNumDataAsync(
         "sapply(seq(qnorm(0.3, 0.5, 1.0), qnorm(0.7, 0.5, 1.0), length.out = 5), function(cd){dnorm(cd, 0.5, 1.0)})"
-        )[0].Data.ToArr();
+        ))[0].Data.ToArr();
 
       // act
       var (_, actual) = subject.GetDensities(0.3, 0.7, 5);
@@ -82,7 +83,7 @@ namespace RVis.Model.Test
       // act
       var serialized = expected.ToString();
       var deserialized = Distribution.DeserializeDistribution(serialized);
-      var distribution = deserialized.IfNone(() => { Assert.Fail(); return default; });
+      var distribution = deserialized.IfNone(() => { Assert.Fail(); return default!; });
 
       // assert
       var actual = Base.Check.RequireInstanceOf<NormalDistribution>(distribution);

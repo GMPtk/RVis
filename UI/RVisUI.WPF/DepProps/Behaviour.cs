@@ -1,6 +1,4 @@
 ﻿using RVis.Base.Extensions;
-using System.Configuration;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -9,15 +7,16 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Navigation;
 using System.Windows.Threading;
+using static RVis.Base.ProcessHelper;
 
 namespace RVisUI.Wpf
 {
   public static class Behaviour
   {
-    public static bool GetSelectedListItemView(DependencyObject o) => 
+    public static bool GetSelectedListItemView(DependencyObject o) =>
       (bool)o.GetValue(SelectedListItemViewProperty);
 
-    public static void SetSelectedListItemView(DependencyObject o, bool value) => 
+    public static void SetSelectedListItemView(DependencyObject o, bool value) =>
       o.SetValue(SelectedListItemViewProperty, value);
 
     public static readonly DependencyProperty SelectedListItemViewProperty =
@@ -33,7 +32,7 @@ namespace RVisUI.Wpf
       if (d is ListBox listBox && null != listBox.SelectedItem)
       {
         listBox.Dispatcher.InvokeAsync(
-          () => listBox.ScrollIntoView(listBox.SelectedItem), 
+          () => listBox.ScrollIntoView(listBox.SelectedItem),
           DispatcherPriority.ApplicationIdle
           );
       }
@@ -55,7 +54,7 @@ namespace RVisUI.Wpf
 
     private static void HandleUpdateOnEnterPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      if (!(d is UIElement element)) return;
+      if (d is not UIElement element) return;
 
       if (e.OldValue != default)
       {
@@ -75,7 +74,7 @@ namespace RVisUI.Wpf
 
     static void DoUpdateSource(object source)
     {
-      if (!(source is DependencyObject dependencyObject)) return;
+      if (source is not DependencyObject dependencyObject) return;
 
       var dependencyProperty = GetUpdateOnEnter(dependencyObject);
 
@@ -107,6 +106,8 @@ namespace RVisUI.Wpf
       if (d is Window window) window.DialogResult = e.NewValue as bool?;
     }
 
+    public static string? DocRoot { get; set; }
+
     public static bool? GetOpenInBrowser(DependencyObject o) =>
       (bool?)o.GetValue(OpenInBrowserProperty);
 
@@ -122,7 +123,7 @@ namespace RVisUI.Wpf
 
     private static void HandleOpenInBrowserChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      if (!d.Resolve(out Hyperlink hyperlink)) return;
+      if (!d.Resolve(out Hyperlink? hyperlink)) return;
 
       var openInBrowser = (bool?)e.NewValue == true && (bool?)e.OldValue != true;
       var desist = (bool?)e.NewValue != true && (bool?)e.OldValue == true;
@@ -138,7 +139,7 @@ namespace RVisUI.Wpf
     }
 
     private static void HandleRequestNavigate(object _, RequestNavigateEventArgs e) =>
-      Process.Start(e.Uri.ToString());
+      OpenUrl(e.Uri.ToString());
 
     public static bool? GetShowDoc(DependencyObject o) =>
       (bool?)o.GetValue(ShowDocProperty);
@@ -155,7 +156,7 @@ namespace RVisUI.Wpf
 
     private static void HandleShowDocChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      if (!d.Resolve(out Button button)) return;
+      if (!d.Resolve(out Button? button)) return;
 
       var showDoc = (bool?)e.NewValue == true && (bool?)e.OldValue != true;
       var desist = (bool?)e.NewValue != true && (bool?)e.OldValue == true;
@@ -174,10 +175,10 @@ namespace RVisUI.Wpf
 
     private static void ExecuteShowDoc(object sender, ExecutedRoutedEventArgs e)
     {
-      var button = e.Source as Button;
+      var button = (FrameworkElement)e.Source;
       var relUrl = button.Tag as string;
-      var url = _docRoot + relUrl;
-      Process.Start(url);
+      var url = DocRoot + relUrl;
+      if (url.IsAString()) OpenUrl(url);
 
       e.Handled = true;
     }
@@ -199,8 +200,8 @@ namespace RVisUI.Wpf
 
     private static void HandleIsKeyboardInputEnabledChanged(DependencyObject sender, DependencyPropertyChangedEventArgs ea)
     {
-      if (!(sender is Popup popup)) return;
-      if (!(ea.NewValue is bool enable)) return;
+      if (sender is not Popup popup) return;
+      if (ea.NewValue is not bool enable) return;
 
       EnableKeyboardInput(popup, enable);
     }
@@ -209,7 +210,7 @@ namespace RVisUI.Wpf
     {
       if (enable)
       {
-        IInputElement restoreFocusToOnClose = null;
+        IInputElement? restoreFocusToOnClose = null;
 
         popup.Loaded += (_, __) =>
         {
@@ -227,9 +228,6 @@ namespace RVisUI.Wpf
         popup.Closed += (_, __) => Keyboard.Focus(restoreFocusToOnClose);
       }
     }
-
-    private static readonly string _docRoot =
-      ConfigurationManager.AppSettings[$"{nameof(RVisUI)}.{nameof(Wpf)}.{nameof(Behaviour)}.DocRoot"];
 
     private static readonly ICommand _showDoc =
       new RoutedCommand();

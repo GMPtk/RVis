@@ -22,15 +22,15 @@ namespace RVisUI.Mvvm
       ImportSimulationViewModel = new ImportSimulationViewModel(simLibrary, appState, appService);
       ImportMCSimViewModel = new ImportMCSimViewModel(simLibrary, appState, appService);
       LibraryViewModel = new LibraryViewModel(simLibrary, appState, appService, appSettings);
+      RunControlViewModel = new RunControlViewModel(appState, appService);
 
       simLibrary.LoadFrom(pathToSimLibrary);
     }
 
     public ISelectSimulationViewModel SelectSimulationViewModel { get; }
-
     public IImportSimulationViewModel ImportSimulationViewModel { get; }
     public IImportMCSimViewModel ImportMCSimViewModel { get; }
-
     public ILibraryViewModel LibraryViewModel { get; }
+    public IRunControlViewModel RunControlViewModel { get; }
   }
 }

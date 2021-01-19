@@ -61,6 +61,12 @@ namespace Sampling
     internal SamplingDesign Load(DateTime createdOn) =>
       LoadSamplingDesign(_pathToSamplingDesignsDirectory, createdOn);
 
+    internal void SaveFilterConfig(SamplingDesign instance, FilterConfig filterConfig) =>
+      SamplingDesign.SaveFilterConfig(instance, filterConfig, _pathToSamplingDesignsDirectory);
+
+    internal FilterConfig LoadFilterConfig(SamplingDesign instance) =>
+      SamplingDesign.LoadFilterConfig(instance, _pathToSamplingDesignsDirectory);
+
     internal bool Remove(DateTime createdOn)
     {
       var index = DesignDigests.FindIndex(dd => dd.CreatedOn == createdOn);

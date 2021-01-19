@@ -199,7 +199,7 @@ namespace Sensitivity
     }
     private bool _canPlayFaster;
 
-    public string XUnits { get; }
+    public string? XUnits { get; }
 
     public Arr<IRankedParameterViewModel> RankedParameterViewModels
     {
@@ -229,13 +229,11 @@ namespace Sensitivity
     }
     private double? _rankedTo;
 
-    public ICommand RankParameters { get; }
-
     public ICommand UseRankedParameters { get; }
 
     public ICommand ShareRankedParameters { get; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() =>
       Dispose(disposing: true);
@@ -266,7 +264,7 @@ namespace Sensitivity
       CanPlayFaster = _playTicker.IsEnabled && _playSpeedIndex < _playSpeeds.Count - 1;
     }
 
-    private void HandlePlayTick(object sender, EventArgs e)
+    private void HandlePlayTick(object? sender, EventArgs e)
     {
       var xs = _traceViewModel.XValues;
       var index = xs.IndexOf(_traceViewModel.SelectedX);
@@ -407,6 +405,8 @@ namespace Sensitivity
     {
       if (!_reactiveSafeInvoke.React) return;
 
+      RequireNotNullEmptyWhiteSpace(_moduleState.MeasuresState.SelectedOutputName);
+
       var outputMeasureMap = GetPlotData(_moduleState.MeasuresState.SelectedOutputName);
 
       if (outputMeasureMap.ContainsKey(_traceViewModel.SelectedX))
@@ -446,6 +446,7 @@ namespace Sensitivity
 
       IsReady =
         _moduleState.SensitivityDesign != default &&
+        _moduleState.MeasuresState.SelectedOutputName != default &&
         _moduleState.MeasuresState.Fast99OutputMeasures.ContainsKey(
           _moduleState.MeasuresState.SelectedOutputName
         )
@@ -454,10 +455,10 @@ namespace Sensitivity
 
       if (!IsReady) return;
 
-      var compiledOutputMeasures = GetPlotData(_moduleState.MeasuresState.SelectedOutputName);
+      var compiledOutputMeasures = GetPlotData(_moduleState.MeasuresState.SelectedOutputName!);
 
       var x = _traceViewModel.SelectedX;
-      var trace = _moduleState.Trace;
+      var trace = _moduleState.Trace!;
       var independent = _simulation.SimConfig.SimOutput.GetIndependentData(trace);
       if (!independent.Data.Contains(x)) x = independent[0];
 
@@ -490,7 +491,7 @@ namespace Sensitivity
 
       _traceViewModel.PlotTraceData(
         independent,
-        trace[_moduleState.MeasuresState.SelectedOutputName]
+        trace[_moduleState.MeasuresState.SelectedOutputName!]
         );
 
       _traceViewModel.SelectedX = x;
@@ -507,7 +508,7 @@ namespace Sensitivity
 
       RequireFalse(OutputNames.IsEmpty);
 
-      SelectedOutputName = OutputNames.IndexOf(_moduleState.MeasuresState.SelectedOutputName);
+      SelectedOutputName = OutputNames.IndexOf(_moduleState.MeasuresState.SelectedOutputName!);
     }
 
     private void PopulateRanking()
@@ -524,6 +525,8 @@ namespace Sensitivity
     {
       if (!_compiledOutputMeasures.ContainsKey(outputName))
       {
+        RequireNotNull(_moduleState.Trace);
+
         var outputMeasures = _moduleState.MeasuresState.Fast99OutputMeasures[outputName];
         var trace = _moduleState.Trace;
         var traceIndependent = _simulation.SimConfig.SimOutput.GetIndependentData(trace);

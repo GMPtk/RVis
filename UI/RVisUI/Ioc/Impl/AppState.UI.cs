@@ -7,35 +7,36 @@ using RVisUI.Model.Extensions;
 using RVisUI.Mvvm;
 using System;
 using System.Linq;
-using static RVis.Base.Extensions.NumExt;
 using static LanguageExt.Prelude;
+using static RVis.Base.Extensions.NumExt;
+using static RVisUI.Model.ModuleInfo;
 
 namespace RVisUI.Ioc
 {
   public partial class AppState
   {
-    public object ActiveViewModel
+    public object? ActiveViewModel
     {
       get => _activeViewModel;
       set => this.RaiseAndSetIfChanged(ref _activeViewModel, value, PropertyChanged);
     }
-    private object _activeViewModel;
+    private object? _activeViewModel;
 
-    public Arr<(string ID, string DisplayName, string DisplayIcon, object View, object ViewModel)> UIComponents
+    public Arr<(string ID, string DisplayName, string? DisplayIcon, object View, object ViewModel)> UIComponents
     {
       get => _uiComponents;
       set => this.RaiseAndSetIfChanged(ref _uiComponents, value, PropertyChanged);
     }
-    private Arr<(string ID, string DisplayName, string DisplayIcon, object View, object ViewModel)> _uiComponents;
+    private Arr<(string ID, string DisplayName, string? DisplayIcon, object View, object ViewModel)> _uiComponents;
 
-    public (string ID, string DisplayName, string DisplayIcon, object View, object ViewModel) ActiveUIComponent
+    public (string ID, string DisplayName, string? DisplayIcon, object View, object ViewModel) ActiveUIComponent
     {
       get => _activeUIComponent;
       set => this.RaiseAndSetIfChanged(ref _activeUIComponent, value, PropertyChanged);
     }
-    private (string ID, string DisplayName, string DisplayIcon, object View, object ViewModel) _activeUIComponent;
+    private (string ID, string DisplayName, string? DisplayIcon, object View, object ViewModel) _activeUIComponent;
 
-    private Either<Exception, (string ID, string DisplayName, string DisplayIcon, object View, object ViewModel)> CreateUIComponent(ModuleInfo mi)
+    private Either<Exception, (string ID, string DisplayName, string? DisplayIcon, object View, object ViewModel)> CreateUIComponent(ModuleInfo mi)
     {
       var missingPackages = mi.RequiredRPackageNames.Filter(n => !InstalledRPackages.Exists(p => p.Package == n));
 
@@ -66,21 +67,24 @@ namespace RVisUI.Ioc
         );
     }
 
-    private void CreateUIComponents(object viewModel)
+    private void CreateUIComponents(object? viewModel)
     {
       var existingUIComponents = UIComponents;
-      Arr<(string ID, string DisplayName, string DisplayIcon, object View, object ViewModel)> updatedUIComponents = default;
+      Arr<(string ID, string DisplayName, string? DisplayIcon, object View, object ViewModel)> updatedUIComponents = default;
 
       if (viewModel is ISimulationHomeViewModel)
       {
-        var moduleInfos = LoadModules().Filter(mi => mi.IsEnabled);
+        var services = GetServices(rebind: true);
+        var moduleInfos = GetModuleInfos(services);
+        moduleInfos = SortAndEnable(moduleInfos, _appSettings.ModuleConfiguration);
+        moduleInfos = moduleInfos.Filter(mi => mi.IsEnabled);
 
         var updatedUIComponentTries = moduleInfos
           .Map(
             mi => existingUIComponents
               .Find(c => c.ID == mi.ID)
               .Match(c => c, CreateUIComponent(mi))
-          );  
+          );
 
         var errors = lefts(updatedUIComponentTries).ToArr();
         var components = rights(updatedUIComponentTries).ToArr();

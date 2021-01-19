@@ -5,13 +5,13 @@ namespace Sampling
 {
   internal class _LatinHypercubeDesignDTO
   {
-    public string LatinHypercubeDesignType { get; set; }
+    public string? LatinHypercubeDesignType { get; set; }
 
     public double? T0 { get; set; }
     public double? C { get; set; }
     public int Iterations { get; set; }
     public double? P { get; set; }
-    public string Profile { get; set; }
+    public string? Profile { get; set; }
     public int Imax { get; set; }
   }
 

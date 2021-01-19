@@ -5,18 +5,20 @@ using System.Windows.Input;
 using static System.Linq.Enumerable;
 using static LanguageExt.Prelude;
 
+#nullable disable
+
 namespace RVisUI.Mvvm.Design
 {
   public class ImportTmplViewModel : IImportTmplViewModel
   {
     public string FileName => "abc.R";
 
-    public Arr<IParameterCandidateViewModel> ParameterCandidates => Array(
+    public Arr<IParameterCandidateViewModel> ParameterCandidates => Array<IParameterCandidateViewModel>(
       new ParameterCandidateViewModel(false, "P1", 1.23, "unit", "Desc", null),
       new ParameterCandidateViewModel(false, "P2_withamuchlongernamethanP1", 4.56, "Very, very, very, very long unit", "Very, very, very, very, very, very, very, very, very, very long description", null)
       ).AddRange(
         Range(3, 18).Select(i => new ParameterCandidateViewModel(i % 2 == 1, $"P{i:00}", i, $"unit{i:00}", $"Desc{i:00}", null))
-      ).ToArray();
+      );
 
     public ICommand UseAllParameters => throw new System.NotImplementedException();
 
@@ -30,7 +32,8 @@ namespace RVisUI.Mvvm.Design
 
     public ICommand SetIndependentVariable { get; }
 
-    public ObservableCollection<IElementCandidateViewModel> ElementCandidates => new ObservableCollection<IElementCandidateViewModel>(_elementCandidates);
+    public ObservableCollection<IElementCandidateViewModel> ElementCandidates => 
+      new ObservableCollection<IElementCandidateViewModel>(_elementCandidates);
 
     public IElementCandidateViewModel SelectedElementCandidate
     {

@@ -13,7 +13,7 @@ namespace Sampling
 
     public string Name { get; }
 
-    public ICommand SetKeyboardTarget { get; }
+    public ICommand SetKeyboardTarget { get; } = null!;
 
     public double? CorrelationN
     {
@@ -21,7 +21,7 @@ namespace Sampling
       set => throw new InvalidOperationException(nameof(CorrelationN));
     }
     
-    public string CorrelationT 
+    public string? CorrelationT 
     { 
       get => throw new InvalidOperationException(nameof(CorrelationT));
       set => throw new InvalidOperationException(nameof(CorrelationT));

@@ -1,6 +1,4 @@
-﻿using Microsoft.Win32;
-using Microsoft.WindowsAPICodePack.Dialogs;
-using NLog;
+﻿using NLog;
 using ReactiveUI;
 using RVis.Base.Extensions;
 using RVis.Client;
@@ -9,6 +7,7 @@ using RVisUI.Controls.Dialogs;
 using RVisUI.Model;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
@@ -16,6 +15,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Threading;
 using static RVis.Base.Check;
 
@@ -33,12 +33,12 @@ namespace RVisUI.Ioc
 
     public bool CheckAccess() => App.Current.Dispatcher.CheckAccess();
 
-    public bool ShowDialog(object view, object viewModel, object parentViewModel)
+    public bool ShowDialog(object view, object viewModel, object? parentViewModel)
     {
       RequireNotNull(view);
       RequireNotNull(viewModel);
 
-      if (!(view is Window window))
+      if (view is not Window window)
       {
         throw new ArgumentException(
           $"Expecting Window instance; got {view.GetType().Name}",
@@ -52,7 +52,7 @@ namespace RVisUI.Ioc
       return window.ShowDialog() == true;
     }
 
-    public bool ShowDialog(object viewModel, object parentViewModel)
+    public bool ShowDialog(object viewModel, object? parentViewModel)
     {
       var typeName = viewModel.GetType().Name;
 
@@ -62,7 +62,7 @@ namespace RVisUI.Ioc
       RequireTrue(_dialogViews.ContainsKey(dialogViewName));
       var viewType = _dialogViews[dialogViewName];
 
-      var view = Activator.CreateInstance(viewType) as Window;
+      var view = (Window)Activator.CreateInstance(viewType).AssertNotNull();
       view.DataContext = viewModel;
       view.Owner = GetWindowForDataContext(parentViewModel);
 
@@ -79,14 +79,14 @@ namespace RVisUI.Ioc
       return dialog.ShowDialog() == true;
     }
 
-    public bool BrowseForDirectory(string startPath, out string pathToDirectory)
+    public bool BrowseForDirectory(string? startPath, [NotNullWhen(true)] out string? pathToDirectory)
     {
-      using (var dialog = new CommonOpenFileDialog { IsFolderPicker = true, InitialDirectory = startPath })
+      using (var dialog = new FolderBrowserDialog { SelectedPath = startPath })
       {
-        if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+        if (dialog.ShowDialog() == DialogResult.OK)
         {
-          pathToDirectory = dialog.FileName;
-          return true;
+          pathToDirectory = dialog.SelectedPath;
+          return pathToDirectory.IsAString();
         }
       }
 
@@ -94,9 +94,9 @@ namespace RVisUI.Ioc
       return false;
     }
 
-    public bool OpenFile(string purpose, string initialDirectory, string filter, out string pathToFile)
+    public bool OpenFile(string purpose, string? initialDirectory, string filter, [NotNullWhen(true)] out string? pathToFile)
     {
-      var openFileDialog = new OpenFileDialog()
+      var openFileDialog = new Microsoft.Win32.OpenFileDialog()
       {
         InitialDirectory = initialDirectory,
         Filter = filter,
@@ -114,9 +114,15 @@ namespace RVisUI.Ioc
       return false;
     }
 
-    public bool SaveFile(string purpose, string initialDirectory, string filter, string extension, out string pathToFile)
+    public bool SaveFile(
+      string purpose,
+      string? initialDirectory,
+      string filter,
+      string extension,
+      [NotNullWhen(true)] out string? pathToFile
+      )
     {
-      var saveFileDialog = new SaveFileDialog
+      var saveFileDialog = new Microsoft.Win32.SaveFileDialog
       {
         DefaultExt = "." + extension,
         Filter = filter,
@@ -135,12 +141,12 @@ namespace RVisUI.Ioc
       return false;
     }
 
-    public void Notify(string about, string subject, Exception ex, object originatingViewModel = default) => 
+    public void Notify(string about, string subject, Exception ex, object? originatingViewModel = default) =>
       Notify(NotificationType.Error, about, subject, ex.Message, originatingViewModel);
 
-    public void Notify(NotificationType notificationType, string about, string subject, string detail, object originatingViewModel = default)
+    public void Notify(NotificationType notificationType, string about, string subject, string detail, object? originatingViewModel = default)
     {
-      Window owner = default;
+      Window? owner = default;
       if (originatingViewModel != default)
       {
         foreach (Window window in App.Current.Windows)
@@ -155,7 +161,7 @@ namespace RVisUI.Ioc
 
       owner ??= App.Current.GetActiveWindow() ?? App.Current.MainWindow;
 
-      void DoNotify(object _, EventArgs __)
+      void DoNotify(object? _, EventArgs? __)
       {
         if (owner != null) owner.ContentRendered -= DoNotify;
 
@@ -247,7 +253,7 @@ namespace RVisUI.Ioc
       private readonly IAppService _appService;
     }
 
-    public Action<T> SafeInvoke<T>(Action<T> action, [CallerMemberName]string subject = "") =>
+    public Action<T> SafeInvoke<T>(Action<T> action, [CallerMemberName] string subject = "") =>
       t =>
       {
         try
@@ -295,7 +301,10 @@ namespace RVisUI.Ioc
       var classes = assembly.GetTypes().Where(t => t.IsClass);
       foreach (var @class in classes)
       {
+        if (@class.FullName is null) continue;
+
         var match = reDialogViewTypeName.Match(@class.FullName);
+
         if (match.Success)
         {
           var dialogViewName = match.Groups[1].Value;
@@ -304,7 +313,7 @@ namespace RVisUI.Ioc
       }
     }
 
-    private Window GetWindowForDataContext(object dataContext)
+    private static Window GetWindowForDataContext(object? dataContext)
     {
       if (dataContext != default)
       {

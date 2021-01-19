@@ -19,7 +19,10 @@ using System.Windows.Input;
 using static LanguageExt.Prelude;
 using static MathNet.Numerics.Statistics.Correlation;
 using static RVis.Base.Check;
+using static RVis.Base.Extensions.LangExt;
 using static RVis.Base.Extensions.NumExt;
+using static MathNet.Numerics.Statistics.SortedArrayStatistics;
+using stats = MathNet.Numerics.Statistics.Statistics;
 
 namespace Sampling
 {
@@ -38,6 +41,16 @@ namespace Sampling
       _moduleState = moduleState;
 
       _simulation = appState.Target.AssertSome();
+
+      ShareParameters = ReactiveCommand.Create(
+        HandleShareParameters,
+        this.WhenAny(
+          vm => vm.Distributions,
+          _ => _moduleState.FilterConfig.IsEnabled &&
+               !_moduleState.FilterConfig.Filters.IsEmpty &&
+               !_moduleState.Outputs.IsEmpty &&
+               Distributions.Count > 0)
+        );
 
       ConfigureLHS = ReactiveCommand.Create(
         HandleConfigureLHS,
@@ -63,7 +76,7 @@ namespace Sampling
 
       _subscriptions = new CompositeDisposable(
 
-        moduleState.ParameterStateChanges.Subscribe(
+        _moduleState.ParameterStateChanges.Subscribe(
           _reactiveSafeInvoke.SuspendAndInvoke<(Arr<ParameterState>, ObservableQualifier)>(
             ObserveParameterStateChange
             )
@@ -78,6 +91,22 @@ namespace Sampling
             ),
 
         _moduleState
+          .ObservableForProperty(ms => ms.FilterConfig)
+          .Subscribe(
+            _reactiveSafeInvoke.SuspendAndInvoke<object>(
+              ObserveModuleStateFilterConfig
+              )
+            ),
+
+        _moduleState
+          .ObservableForProperty(ms => ms.OutputFilters)
+          .Subscribe(
+            _reactiveSafeInvoke.SuspendAndInvoke<object>(
+              ObserveModuleStateOutputFilters
+              )
+            ),
+
+        _moduleState
           .ObservableForProperty(ms => ms.SamplesState.RankCorrelationDesign)
           .Subscribe(
             _reactiveSafeInvoke.SuspendAndInvoke<object>(
@@ -85,7 +114,7 @@ namespace Sampling
               )
             ),
 
-        moduleState
+        _moduleState
           .ObservableForProperty(vm => vm.SamplingDesign)
           .Subscribe(
             _reactiveSafeInvoke.SuspendAndInvoke<object>(
@@ -93,10 +122,10 @@ namespace Sampling
               )
             ),
 
-        appSettings
+        _appSettings
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(
               ObserveAppSettingsPropertyChange
               )
             ),
@@ -150,6 +179,8 @@ namespace Sampling
       set => this.RaiseAndSetIfChanged(ref _distributions, value);
     }
     private Arr<string> _distributions;
+
+    public ICommand ShareParameters { get; }
 
     public Arr<string> Invariants
     {
@@ -213,12 +244,19 @@ namespace Sampling
     }
     private bool _canGenerateSamples;
 
-    public DataView Samples
+    public DataView? Samples
     {
       get => _samples;
       set => this.RaiseAndSetIfChanged(ref _samples, value);
     }
-    private DataView _samples;
+    private DataView? _samples;
+
+    public string[][]? Statistics
+    {
+      get => _statistics;
+      set => this.RaiseAndSetIfChanged(ref _statistics, value);
+    }
+    private string[][]? _statistics;
 
     public ICommand ViewCorrelation { get; }
 
@@ -240,6 +278,29 @@ namespace Sampling
       }
 
       base.Dispose(disposing);
+    }
+
+    private void HandleShareParameters()
+    {
+      RequireNotNull(Samples?.Table);
+
+      var columnNames = Samples.Table.Columns.OfType<DataColumn>().Select(dc => dc.ColumnName);
+      var rowIndices = Range(0, Samples.Table.Rows.Count);
+      var columnData = columnNames.Select(cn => (
+        Name: cn,
+        Data: rowIndices.Select(ri => (double)Samples.Table.Rows[ri][cn]).ToArray()
+        ));
+      var states = columnData
+        .Select(cd => (
+          cd.Name,
+          Value: cd.Data.Average(),
+          Minimum: cd.Data.Min(),
+          Maximum: cd.Data.Max(),
+          Distribution: NoneOf<IDistribution>()
+        ))
+        .ToArr();
+
+      _appState.SimSharedState.ShareParameterState(states);
     }
 
     private void HandleConfigureLHS()
@@ -380,7 +441,7 @@ namespace Sampling
         using (_reactiveSafeInvoke.SuspendedReactivity)
         {
           _moduleState.Samples = samples;
-          Samples = samples.DefaultView;
+          PopulateSamples(samples);
           PopulateHistograms();
           UpdateEnable();
         }
@@ -407,6 +468,7 @@ namespace Sampling
         .Map(ps => ps.Name);
 
       RequireTrue(parameterNames.Count > 1);
+      RequireNotNull(Samples?.Table);
 
       var vectors = parameterNames.Map(
         pn => Range(0, Samples.Table.Rows.Count)
@@ -426,6 +488,7 @@ namespace Sampling
       PopulateDistributions(_moduleState.ParameterStates);
       PopulateInvariants(_moduleState.ParameterStates);
       Samples = default;
+      Statistics = default;
       PopulateHistograms();
 
       UpdateEnable();
@@ -435,14 +498,38 @@ namespace Sampling
     {
       LatinHypercubeDesignType = _moduleState.SamplesState.LatinHypercubeDesign.LatinHypercubeDesignType;
       Samples = default;
+      Statistics = default;
       PopulateHistograms();
       UpdateEnable();
+    }
+
+    private void ObserveModuleStateFilterConfig(object _)
+    {
+      RequireNotNull(_moduleState.SamplingDesign);
+
+      PopulateSamples(
+        _moduleState.SamplingDesign.Samples
+        );
+      PopulateDistributions(_moduleState.SamplingDesign.DesignParameters);
+      PopulateHistograms();
+    }
+
+    private void ObserveModuleStateOutputFilters(object _)
+    {
+      RequireNotNull(_moduleState.SamplingDesign);
+
+      PopulateSamples(
+        _moduleState.SamplingDesign.Samples
+        );
+      PopulateDistributions(_moduleState.SamplingDesign.DesignParameters);
+      PopulateHistograms();
     }
 
     private void ObserveSamplesStateRankCorrelationDesign(object _)
     {
       RankCorrelationDesignType = _moduleState.SamplesState.RankCorrelationDesign.RankCorrelationDesignType;
       Samples = default;
+      Statistics = default;
       PopulateHistograms();
       UpdateEnable();
     }
@@ -461,7 +548,7 @@ namespace Sampling
       UpdateEnable();
     }
 
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (!propertyName.IsThemeProperty()) return;
 
@@ -477,6 +564,7 @@ namespace Sampling
       _moduleState.SamplesState.NumberOfSamples = NSamples;
       _moduleState.SamplesState.Seed = Seed;
       Samples = default;
+      Statistics = default;
       PopulateHistograms();
 
       UpdateEnable();
@@ -507,11 +595,36 @@ namespace Sampling
         .Select(t => t.Distribution.ToString(t.Name))
         .ToArr();
 
-    private void PopulateDistributions(Arr<DesignParameter> designParameters) =>
-      Distributions = designParameters
-        .Filter(dp => dp.Distribution.DistributionType != DistributionType.Invariant)
-        .Select(dp => dp.Distribution.ToString(dp.Name))
-        .ToArr();
+    private void PopulateDistributions(Arr<DesignParameter> designParameters)
+    {
+      var isFiltered =
+        _moduleState.FilterConfig.IsEnabled &&
+        !_moduleState.FilterConfig.Filters.IsEmpty &&
+        !_moduleState.Outputs.IsEmpty;
+
+      if (!isFiltered)
+      {
+        Distributions = designParameters
+          .Filter(dp => dp.Distribution.DistributionType != DistributionType.Invariant)
+          .Select(dp => dp.Distribution.ToString(dp.Name))
+          .ToArr();
+        return;
+      }
+
+      if (Samples?.Table is null || Samples.Table.Rows.Count == 0)
+      {
+        Distributions = default;
+        return;
+      }
+
+      var columnNames = Samples.Table.Columns.OfType<DataColumn>().Select(dc => dc.ColumnName);
+      var rowIndices = Range(0, Samples.Table.Rows.Count);
+      var columnData = columnNames.Select(cn => (
+        Name: cn,
+        Data: rowIndices.Select(ri => (double)Samples.Table.Rows[ri][cn]).ToArray()
+        ));
+      Distributions = columnData.Select(cd => $"{cd.Name} = {cd.Data.Average():G4} [{cd.Data.Min():G4}, {cd.Data.Max():G4}]").ToArr();
+    }
 
     private void PopulateInvariants(Arr<ParameterState> parameterStates) =>
       Invariants = parameterStates
@@ -537,22 +650,76 @@ namespace Sampling
       LatinHypercubeDesignType = samplesState.LatinHypercubeDesign.LatinHypercubeDesignType;
       RankCorrelationDesignType = samplesState.RankCorrelationDesign.RankCorrelationDesignType;
       Samples = default;
+      Statistics = default;
 
       PopulateHistograms();
     }
 
     private void Populate(SamplingDesign samplingDesign)
     {
-      PopulateDistributions(samplingDesign.DesignParameters);
-      PopulateInvariants(samplingDesign.DesignParameters);
-
       NSamples = samplingDesign.Samples.Rows.Count;
       Seed = samplingDesign.Seed;
       LatinHypercubeDesignType = samplingDesign.LatinHypercubeDesign.LatinHypercubeDesignType;
       RankCorrelationDesignType = samplingDesign.RankCorrelationDesign.RankCorrelationDesignType;
-      Samples = samplingDesign.Samples.DefaultView;
 
+      PopulateSamples(samplingDesign.Samples);
       PopulateHistograms();
+
+      PopulateDistributions(samplingDesign.DesignParameters);
+      PopulateInvariants(samplingDesign.DesignParameters);
+    }
+
+    private void PopulateSamples(DataTable? samples)
+    {
+      if (samples is null)
+      {
+        Samples = default;
+        Statistics = default;
+        return;
+      }
+
+      DataTable dataTable;
+
+      if (!_moduleState.FilterConfig.IsEnabled || _moduleState.OutputFilters.IsEmpty)
+      {
+        dataTable = samples;
+      }
+      else
+      {
+        dataTable = samples.Clone();
+        _moduleState.OutputFilters.Filter(f => f.IsInFilteredSet).Iter(f =>
+        {
+          dataTable.ImportRow(samples.Rows[f.Index]);
+        });
+      }
+
+      Samples = dataTable.DefaultView;
+
+      var columnNames = dataTable.Columns.OfType<DataColumn>().Select(dc => dc.ColumnName);
+      var rowIndices = Range(0, dataTable.Rows.Count);
+      var columnData = columnNames
+        .Select(cn => (
+          Name: cn,
+          Data: rowIndices.Select(ri => (double)dataTable.Rows[ri][cn]).OrderBy(d => d).ToArray()
+        ))
+        .Select(t => (
+          t.Name,
+          t.Data,
+          Median: Median(t.Data),
+          Mean: stats.Mean(t.Data),
+          SD: stats.StandardDeviation(t.Data)
+        ));
+
+      Statistics = columnData.Select(cd => new[] { 
+        cd.Name, 
+        cd.Median.ToString("G4"),
+        cd.Mean.ToString("G4"), 
+        $"{(cd.Mean - cd.SD):G4} - {(cd.Mean + cd.SD):G4}",
+        $"{(cd.Mean - 2d * cd.SD):G4} - {(cd.Mean + 2d * cd.SD):G4}",
+        $"{(cd.Mean - 3d * cd.SD):G4} - {(cd.Mean + 3d * cd.SD):G4}"
+      }).ToArray();
+
+      Distributions = columnData.Select(cd => $"{cd.Name} = {cd.Data.Average():G4} [{cd.Data.Min():G4}, {cd.Data.Max():G4}]").ToArr();
     }
 
     private void PopulateHistograms()
@@ -574,7 +741,7 @@ namespace Sampling
 
         if (parameterSamplingViewModel == default)
         {
-          parameterSamplingViewModel = new ParameterSamplingViewModel(sp.Parameter);
+          parameterSamplingViewModel = new ParameterSamplingViewModel(sp.Parameter, _moduleState);
           parameterSamplingViewModel.Histogram.ApplyThemeToPlotModelAndAxes();
           ParameterSamplingViewModels.InsertInOrdered(parameterSamplingViewModel, vm => vm.SortKey);
         }
@@ -583,6 +750,7 @@ namespace Sampling
 
         if (Samples != default)
         {
+          RequireNotNull(Samples.Table);
           var columnIndex = Samples.Table.Columns.IndexOf(sp.Name);
           RequireTrue(columnIndex.IsFound());
           var samples = Samples.Table

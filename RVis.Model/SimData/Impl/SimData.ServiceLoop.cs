@@ -7,6 +7,7 @@ using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
 using static RVis.Model.Logger;
+using static RVis.Base.Check;
 
 namespace RVis.Model
 {
@@ -46,7 +47,7 @@ namespace RVis.Model
 
         Log.Debug($"{nameof(SimData)} persisted {inputHash} output on {persistedOn}");
 
-        if (_outputRequests.Count > 0) break;
+        if (!_outputRequests.IsEmpty) break;
       }
     }
 
@@ -65,7 +66,7 @@ namespace RVis.Model
         try
         {
           Log.Debug($"{nameof(SimData)} processing {simDataItem.Item.SeriesInput.Hash} output request...");
-          var outcome = Process(simDataItem, cancellationToken, out Task<OutputRequest> outputRequestTask);
+          var outcome = Process(simDataItem, cancellationToken, out Task<OutputRequest?> outputRequestTask);
 
           cancellationToken.ThrowIfCancellationRequested();
 
@@ -77,6 +78,8 @@ namespace RVis.Model
               OutputRequest outputRequest;
               if (task.IsFaulted)
               {
+                RequireNotNull(task.Exception?.InnerException);
+
                 outputRequest = OutputRequest.Create(
                   simDataItem.Item.SeriesInput,
                   task.Exception.InnerException
@@ -84,6 +87,7 @@ namespace RVis.Model
               }
               else
               {
+                RequireNotNull(task.Result);
                 outputRequest = task.Result;
               }
 
@@ -111,7 +115,7 @@ namespace RVis.Model
         catch (Exception ex)
         {
           _outputRequests.TryRemove(item.Key, out SimDataItem<OutputRequest> _);
-          if (ex is FaultException) ex = new Exception("Output not acquired (service failure)", ex);
+          
           var fulfilled = SimDataItem.Create(
             OutputRequest.Create(simDataItem.Item.SeriesInput, ex),
             simDataItem.Simulation,
@@ -127,19 +131,19 @@ namespace RVis.Model
       return nAwaitingServerLicense;
     }
 
-    private void ServeDataImpl(Object stateInfo)
+    private void ServeDataImpl(Object? stateInfo)
     {
-      var cancellationToken = (CancellationToken)stateInfo;
+      var cancellationToken = RequireInstanceOf<CancellationToken>(stateInfo);
 
       while (!cancellationToken.IsCancellationRequested)
       {
-        if (_outputRequests.Count == 0)
+        if (_outputRequests.IsEmpty)
         {
           Log.Debug("Checking for items to persist");
           PersistOutputsImpl(cancellationToken);
         }
 
-        if (_outputRequests.Count == 0)
+        if (_outputRequests.IsEmpty)
         {
           Log.Debug("Waiting for service activation");
           WaitHandle.WaitAny(

@@ -1,8 +1,11 @@
 ﻿using LanguageExt;
+using RVisUI.AppInf;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
+
+#nullable disable
 
 namespace Plot.Design
 {
@@ -30,15 +33,19 @@ namespace Plot.Design
       Range('a', 'z').Map(c => new SelectableItemViewModel<string>(default, new string(c, c % 10), default, default, false)).ToArr<ISelectableItemViewModel>()
       );
 
+    public Arr<string> InsetOptions => Range(1, 30).Map(i => $"InsetOption{new string((char)('A' + (i % 26)), i % 8 + 1)}").ToArr();
+
+    public int SelectedInsetOption { get => 2; set => throw new NotImplementedException(); }
+
     public Arr<ISelectableItemViewModel> SupplementaryElements
     {
-      get => Range(1, 30).Map(i => new SelectableItemViewModel<string>(default, $"supplementary{i:0000}", default, default, false) { Use = 0 == i % 2 }).ToArr<ISelectableItemViewModel>();
+      get => Range(1, 30).Map(i => new SelectableItemViewModel<string>(default, $"supplementary{i:0000}", default, default, false) { IsSelected = 0 == i % 2 }).ToArr<ISelectableItemViewModel>();
       set => throw new NotImplementedException();
     }
 
     public Arr<ISelectableItemViewModel> Observations
     {
-      get => Range('a', 'z').Map(c => new SelectableItemViewModel<string>(default, "observations " + new string(c, c % 10), default, default, false) { Use = 0 == c % 2 }).ToArr<ISelectableItemViewModel>();
+      get => Range('a', 'z').Map(c => new SelectableItemViewModel<string>(default, "observations " + new string(c, c % 10), default, default, false) { IsSelected = 0 == c % 2 }).ToArr<ISelectableItemViewModel>();
       set => throw new NotImplementedException();
     }
 

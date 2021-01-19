@@ -34,7 +34,7 @@ namespace RVis.Model
     public double Lower { get; }
     public double Upper { get; }
 
-    public ContinuousUniform Implementation => IsConfigured
+    public ContinuousUniform? Implementation => IsConfigured
       ? new ContinuousUniform(Lower, Upper, Generator)
       : default;
 
@@ -44,6 +44,9 @@ namespace RVis.Model
 
     public bool IsTruncated => false;
 
+    IDistribution IDistribution.WithLowerUpper(double lower, double upper) =>
+      new UniformDistribution(lower, upper);
+
     public bool IsConfigured => !IsNaN(Lower) && !IsNaN(Upper);
 
     public double Mean
@@ -51,7 +54,7 @@ namespace RVis.Model
       get
       {
         RequireTrue(IsConfigured);
-        return Implementation.Mean;
+        return Implementation!.Mean;
       }
     }
 
@@ -60,7 +63,7 @@ namespace RVis.Model
       get
       {
         RequireTrue(IsConfigured);
-        return Implementation.Variance;
+        return Implementation!.Variance;
       }
     }
 
@@ -68,7 +71,9 @@ namespace RVis.Model
     {
       get
       {
-        var implementation = Implementation;
+        RequireTrue(IsConfigured);
+
+        var implementation = Implementation!;
         var lowerP = implementation.CumulativeDistribution(Lower);
         var upperP = implementation.CumulativeDistribution(Upper);
         return (lowerP, upperP);
@@ -80,7 +85,7 @@ namespace RVis.Model
       RequireTrue(IsConfigured);
       RequireNotNull(samples);
 
-      var implementation = Implementation;
+      var implementation = Implementation!;
       implementation.Samples(samples);
     }
 
@@ -92,8 +97,10 @@ namespace RVis.Model
 
     public double GetProposal(double value, double step)
     {
+      RequireTrue(!IsNaN(step) || IsConfigured);
+
       if (IsNaN(value)) value = Mean;
-      if (IsNaN(step)) step = Implementation.Variance;
+      if (IsNaN(step)) step = Implementation!.Variance;
 
       var sample = GetSample();
       value += (sample - value) * step;
@@ -162,7 +169,7 @@ namespace RVis.Model
     public bool Equals(UniformDistribution rhs) =>
       Lower.Equals(rhs.Lower) && Upper.Equals(rhs.Upper);
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
       if (obj is UniformDistribution rhs)
       {
@@ -172,14 +179,8 @@ namespace RVis.Model
       return false;
     }
 
-    public override int GetHashCode()
-    {
-      var hashCode = -774459404;
-      hashCode = hashCode * -1521134295 + DistributionType.GetHashCode();
-      hashCode = hashCode * -1521134295 + Lower.GetHashCode();
-      hashCode = hashCode * -1521134295 + Upper.GetHashCode();
-      return hashCode;
-    }
+    public override int GetHashCode() => 
+      HashCode.Combine(DistributionType, Lower, Upper);
 
     public static bool operator ==(UniformDistribution left, UniformDistribution right)
     {

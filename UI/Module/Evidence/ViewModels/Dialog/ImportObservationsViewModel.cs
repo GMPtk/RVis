@@ -45,44 +45,44 @@ namespace Evidence
       UpdateErrorMessage();
     }
 
-    public string SelectedFile
+    public string? SelectedFile
     {
       get => _selectedFile;
       set => this.RaiseAndSetIfChanged(ref _selectedFile, value, PropertyChanged);
     }
-    private string _selectedFile;
+    private string? _selectedFile;
 
     public ICommand SelectFile { get; }
 
     public string FQIndependentVariable { get; }
 
-    public string EvidenceName
+    public string? EvidenceName
     {
       get => _evidenceName;
       set => this.RaiseAndSetIfChanged(ref _evidenceName, value, PropertyChanged);
     }
-    private string _evidenceName;
+    private string? _evidenceName;
 
-    public string EvidenceDescription
+    public string? EvidenceDescription
     {
       get => _evidenceDescription;
       set => this.RaiseAndSetIfChanged(ref _evidenceDescription, value, PropertyChanged);
     }
-    private string _evidenceDescription;
+    private string? _evidenceDescription;
 
-    public string RefName
+    public string? RefName
     {
       get => _refName;
       set => this.RaiseAndSetIfChanged(ref _refName, value, PropertyChanged);
     }
-    private string _refName;
+    private string? _refName;
 
-    public string RefHash
+    public string? RefHash
     {
       get => _refHash;
       set => this.RaiseAndSetIfChanged(ref _refHash, value, PropertyChanged);
     }
-    private string _refHash;
+    private string? _refHash;
 
     public Arr<IObservationsColumnViewModel> ObservationsColumnViewModels
     {
@@ -91,12 +91,12 @@ namespace Evidence
     }
     private Arr<IObservationsColumnViewModel> _observationsColumnViewModels;
 
-    public string ErrorMessage
+    public string? ErrorMessage
     {
       get => _errorMessage;
       set => this.RaiseAndSetIfChanged(ref _errorMessage, value, PropertyChanged);
     }
-    private string _errorMessage;
+    private string? _errorMessage;
 
     public ICommand OK { get; }
 
@@ -109,7 +109,7 @@ namespace Evidence
     }
     private bool? _dialogResult;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void HandleSelectFile()
     {
@@ -117,7 +117,7 @@ namespace Evidence
         "Select Observations",
         _importDirectory,
         "Data files|*.csv;*.txt|All files|*.*",
-        out string pathToFile
+        out string? pathToFile
         );
 
       if (!didOpen) return;
@@ -218,7 +218,7 @@ namespace Evidence
       UpdateErrorMessage();
     }
 
-    private void ObserveColumnSubjectRefName((string, string) _) => UpdateErrorMessage();
+    private void ObserveColumnSubjectRefName((string, string?) _) => UpdateErrorMessage();
 
     private static bool ParseDelimited(
       string delimited,
@@ -232,7 +232,7 @@ namespace Evidence
       var rows = new List<Arr<double>>();
 
       using (var reader = new StringReader(delimited))
-      using (var csv = new CsvReader(reader))
+      using (var csv = new CsvReader(reader, InvariantCulture))
       {
         csv.Configuration.Delimiter = delimiter.ToString(InvariantCulture);
         while (csv.Read())
@@ -284,7 +284,7 @@ namespace Evidence
 
     private void UpdateErrorMessage()
     {
-      string errorMessage = default;
+      string? errorMessage = default;
 
       if (SelectedFile.IsntAString())
       {
@@ -308,7 +308,7 @@ namespace Evidence
 
     private readonly IAppState _appState;
     private readonly IAppService _appService;
-    private string _importDirectory;
-    private IDisposable _columnSubjectSubscriptions;
+    private string? _importDirectory;
+    private IDisposable? _columnSubjectSubscriptions;
   }
 }

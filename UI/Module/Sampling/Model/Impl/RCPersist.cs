@@ -6,9 +6,9 @@ namespace Sampling
 {
   internal class _RankCorrelationDesignDTO
   {
-    public string RankCorrelationDesignType { get; set; }
+    public string? RankCorrelationDesignType { get; set; }
 
-    public Dictionary<string, double[]> Correlations { get; set; }
+    public Dictionary<string, double[]>? Correlations { get; set; }
   }
 
   internal static class RCPersist
@@ -22,10 +22,10 @@ namespace Sampling
           ? rcdt
           : RankCorrelationDesignType.None;
 
-      var correlations = dto.Correlations
+      var correlations = dto.Correlations?
         .Select(kvp => (Parameter: kvp.Key, Correlations: kvp.Value.ToArr()))
         .OrderBy(t => t.Parameter.ToUpperInvariant())
-        .ToArr();
+        .ToArr() ?? default;
 
       var nCorrelations = correlations.Count;
 

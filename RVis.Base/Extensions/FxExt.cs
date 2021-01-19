@@ -20,9 +20,11 @@ namespace RVis.Base.Extensions
     {
       RequireNotNull(assembly);
 
-      var uri = new UriBuilder(assembly.CodeBase);
+      var uri = new UriBuilder(assembly.Location);
       var path = Uri.UnescapeDataString(uri.Path);
-      return Path.GetDirectoryName(path);
+      var directory = Path.GetDirectoryName(path);
+      RequireDirectory(directory);
+      return directory;
     }
 
     public static string AsMmbrString(this Version version) =>

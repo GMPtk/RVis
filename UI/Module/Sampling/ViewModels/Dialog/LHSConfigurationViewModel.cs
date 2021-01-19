@@ -6,6 +6,7 @@ using System;
 using System.ComponentModel;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using static RVis.Base.Check;
 using static System.Double;
 
 namespace Sampling
@@ -17,8 +18,6 @@ namespace Sampling
       Cancel = ReactiveCommand.Create(HandleCancel);
 
       IsDiceDesignInstalled = appState.InstalledRPackages.Exists(p => p.Package == "DiceDesign");
-
-      if (!IsDiceDesignInstalled) return;
 
       Disable = ReactiveCommand.Create(HandleDisable);
 
@@ -153,7 +152,7 @@ namespace Sampling
     }
     private LatinHypercubeDesign _latinHypercubeDesign;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void HandleDisable()
     {
@@ -170,12 +169,12 @@ namespace Sampling
       if (LatinHypercubeDesignType != LatinHypercubeDesignType.None)
       {
         var latinHypercubeDesignType = LatinHypercubeDesignType;
-        var t0 = UseSimulatedAnnealing ? T0.Value : NaN;
-        var c = UseSimulatedAnnealing ? C.Value : NaN;
-        var iterations = UseSimulatedAnnealing ? Iterations.Value : default;
-        var p = UseSimulatedAnnealing ? P.Value : NaN;
+        var t0 = UseSimulatedAnnealing ? T0!.Value : NaN;
+        var c = UseSimulatedAnnealing ? C!.Value : NaN;
+        var iterations = UseSimulatedAnnealing ? Iterations!.Value : default;
+        var p = UseSimulatedAnnealing ? P!.Value : NaN;
         var profile = Profile;
-        var imax = UseSimulatedAnnealing ? Imax.Value : default;
+        var imax = UseSimulatedAnnealing ? Imax!.Value : default;
 
         var latinHypercubeDesign = new LatinHypercubeDesign(
           latinHypercubeDesignType,

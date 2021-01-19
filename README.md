@@ -2,20 +2,20 @@
 
 ![RVis](https://repository-images.githubusercontent.com/217533905/edffd200-f72f-11e9-9750-0cdb2c75dadf "RVis")
 
-RVis is a modeller's tool for loading and exercising simulation code written in R.
+RVis is a modeller's tool for loading and exercising simulation code written in R or MCSim.
 
 ## Prerequisites
 
 RVis is a desktop application for Microsoft Windows. You will need:
 
-- Microsoft Windows 8 or later
-- Microsoft .NET Framework v4.7.1 or later
+- Microsoft Windows 10 (April 2018 Update or later)
 - R v3.1 or later
 
 RVis depends on various R packages to provide functionality:
 
 - To use the sensitivity analysis feature in RVis, you will need to install the R [sensitivity](https://cran.r-project.org/web/packages/sensitivity/) package
-- The MCMC feature in RVis can provide diagnostics, for which you will need to install the [coda](https://cran.r-project.org/web/packages/coda/) package 
+- The MCMC feature in RVis can provide diagnostics, for which you will need to install the [coda](https://cran.r-project.org/web/packages/coda/) package
+- To use all of the features of the sampling module, you will need to install the [dicedesign](https://cran.r-project.org/web/packages/DiceDesign/) and [mc2d](https://cran.r-project.org/web/packages/mc2d/) packages.
 
 ## Installation
 

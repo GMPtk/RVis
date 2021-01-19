@@ -15,16 +15,20 @@ namespace RVis.Model
       Toml.ReadFile<TSimConfig>(pathToFile);
 
     public static void SerializeConfig(SimConfig config, Stream stream) =>
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
       new BinaryFormatter().Serialize(stream, config);
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
 
     public static SimConfig DeserializeConfig(Stream stream) =>
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
       (SimConfig)new BinaryFormatter().Deserialize(stream);
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
 
     internal static SimInput FromToml(TSimInput input)
     {
       var parameters = input.Parameters?.IsNullOrEmpty() == true
         ? default
-        : input.Parameters
+        : input.Parameters!
             .Select(p => new SimParameter(p.Name, p.Value, p.Unit, p.Description))
             .ToArr();
       return new SimInput(parameters, input.IsDefault);
@@ -81,7 +85,7 @@ namespace RVis.Model
 
       var parameters = config.Input?.Parameters?.IsNullOrEmpty() == true
         ? default
-        : config.Input.Parameters
+        : config.Input!.Parameters!
             .Select(p => new SimParameter(p.Name, p.Value, p.Unit, p.Description))
             .ToArr();
 
@@ -89,10 +93,10 @@ namespace RVis.Model
 
       var values = config.Output?.Values?.IsNullOrEmpty() == true
         ? default
-        : config.Output.Values
+        : config.Output!.Values!
             .Select(v => new SimValue(v.Name, v.Elements?.IsNullOrEmpty() == true
               ? default
-              : v.Elements
+              : v.Elements!
                   .Select(e => new SimElement(e.Name, e.IsIndependentVariable, e.Unit, e.Description))
                   .ToArr()
               ))

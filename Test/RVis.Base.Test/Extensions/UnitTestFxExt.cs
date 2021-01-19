@@ -54,14 +54,14 @@ namespace RVis.Base.Extensions.Tests
     {
       // arrange
       var assembly = Assembly.GetExecutingAssembly();
-      var fileName = Path.GetFileName(assembly.CodeBase);
+      var fileName = Path.GetFileName(assembly.Location);
 
       // act
       var directory = assembly.GetDirectory();
       var codeBase = Path.Combine(directory, fileName);
 
       // assert
-      Assert.AreEqual(NormalizePath(codeBase), NormalizePath(assembly.CodeBase));
+      Assert.AreEqual(NormalizePath(codeBase), NormalizePath(assembly.Location));
     }
 
     [TestMethod()]

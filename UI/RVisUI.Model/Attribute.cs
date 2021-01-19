@@ -35,4 +35,15 @@ namespace RVisUI.Model
 
     public Arr<string> PackageNames { get; }
   }
+
+  [AttributeUsage(AttributeTargets.Class)]
+  public class SupportedTasksAttribute : Attribute
+  {
+    public SupportedTasksAttribute(params string[] taskNames) : base()
+    {
+      TaskNames = taskNames;
+    }
+
+    public Arr<string> TaskNames { get; }
+  }
 }

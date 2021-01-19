@@ -19,12 +19,12 @@ namespace Plot
 
     public DepVarConfigState DepVarConfigState { get; } = new DepVarConfigState();
 
-    public string SelectedSeriesName
+    public string? SelectedSeriesName
     {
       get => _selectedSeriesName;
       set => this.RaiseAndSetIfChanged(ref _selectedSeriesName, value, PropertyChanged);
     }
-    private string _selectedSeriesName;
+    private string? _selectedSeriesName;
 
     public double ViewHeight
     {
@@ -75,6 +75,6 @@ namespace Plot
     }
     private double? _yMaximum;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

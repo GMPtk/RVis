@@ -4,7 +4,6 @@ using ProtoBuf;
 using RVis.Base.Extensions;
 using RVis.Model.Extensions;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using static RVis.Base.Check;
@@ -48,7 +47,9 @@ namespace RVis.Model
     public SimConfig SimConfig => _simConfig;
 
     [ProtoIgnore]
-    public string PathToCodeFile => Path.Combine(PathToSimulation, SimConfig.SimCode.File);
+    public string? PathToCodeFile => SimConfig.SimCode.File.IsAString()
+      ? Path.Combine(PathToSimulation, SimConfig.SimCode.File)
+      : default;
 
     public string PopulateTemplate(Arr<SimParameter> parameters)
     {
@@ -98,7 +99,7 @@ namespace RVis.Model
           .AssertSome($"Template specifies unknown parameter: {name}");
 
         sb.Append(parameter.GetRValue());
-        sb.Append(part.Substring(posRBrace + 1));
+        sb.Append(part[(posRBrace + 1)..]);
       }
 
       return sb.ToString();
@@ -107,16 +108,11 @@ namespace RVis.Model
     public bool Equals(Simulation rhs) =>
       _pathToSimulation == rhs._pathToSimulation && _simConfig == rhs._simConfig;
 
-    public override bool Equals(object obj) =>
-      obj is Simulation simulation ? Equals(simulation) : false;
+    public override bool Equals(object? obj) =>
+      obj is Simulation simulation && Equals(simulation);
 
-    public override int GetHashCode()
-    {
-      var hashCode = 1016786274;
-      hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_pathToSimulation);
-      hashCode = hashCode * -1521134295 + EqualityComparer<SimConfig>.Default.GetHashCode(_simConfig);
-      return hashCode;
-    }
+    public override int GetHashCode() =>
+      HashCode.Combine(_pathToSimulation, _simConfig);
 
     private Simulation(string pathToSimulation, SimConfig simConfig)
     {

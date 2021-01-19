@@ -15,12 +15,12 @@ namespace Estimation
 
     public string Name { get; }
 
-    public string ErrorModel
+    public string? ErrorModel
     {
       get => _errorModel;
       set => this.RaiseAndSetIfChanged(ref _errorModel, value, PropertyChanged);
     }
-    private string _errorModel;
+    private string? _errorModel;
 
     public bool IsSelected
     {
@@ -33,6 +33,6 @@ namespace Estimation
 
     public string SortKey { get; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

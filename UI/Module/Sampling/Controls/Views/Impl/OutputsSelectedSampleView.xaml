@@ -1,0 +1,89 @@
+﻿<UserControl x:Class="Sampling.Controls.Views.Impl.OutputsSelectedSampleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             xmlns:design="clr-namespace:Sampling.Design"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="200"
+             d:DataContext="{d:DesignInstance Type=design:OutputsSelectedSampleViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+  
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition/>
+      <ColumnDefinition Width="Auto"/>
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+
+    <TextBlock Text="{Binding SampleIdentifier}"/>
+
+    <Button Grid.Column="1" Width="Auto" 
+                  Height="Auto" 
+                  Padding="2"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Top"
+                  Command="{Binding ShareParameterValues}"
+                  ToolTip="Share sample parameter values">
+      <md:PackIcon Width="12" 
+                         Height="12" 
+                         Kind="Upload"/>
+    </Button>
+
+    <ScrollViewer Grid.Row="1" 
+                        Grid.ColumnSpan="2" 
+                        HorizontalScrollBarVisibility="Disabled"
+                        VerticalScrollBarVisibility="Auto"
+                        Margin="0,10,0,0"
+                        >
+
+      <ItemsControl ItemsSource="{Binding ParameterValues}">
+        <ItemsControl.Style>
+          <Style TargetType="ItemsControl">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Items.Count, RelativeSource={RelativeSource Self}}" Value="0">
+                <Setter Property="Template">
+                  <Setter.Value>
+                    <ControlTemplate>
+                      <StackPanel VerticalAlignment="Center" 
+                                        HorizontalAlignment="Center"
+                                        >
+                        <TextBlock Text="NONE SELECTED" />
+                      </StackPanel>
+                    </ControlTemplate>
+                  </Setter.Value>
+                </Setter>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </ItemsControl.Style>
+      </ItemsControl>
+
+    </ScrollViewer>
+
+  </Grid>
+
+</UserControl>

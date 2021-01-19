@@ -2,7 +2,6 @@
 using RVis.Base.Extensions;
 using RVis.Model;
 using System;
-using System.Collections.Generic;
 using static RVis.Base.Check;
 
 namespace RVisUI.AppInf
@@ -78,7 +77,7 @@ namespace RVisUI.AppInf
 
     public bool IsSelected { get; }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
       if (obj is ParameterState rhs) return Equals(rhs);
       return false;
@@ -90,15 +89,8 @@ namespace RVisUI.AppInf
       Distributions == rhs.Distributions &&
       IsSelected == rhs.IsSelected;
 
-    public override int GetHashCode()
-    {
-      var hashCode = 26619685;
-      hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
-      hashCode = hashCode * -1521134295 + DistributionType.GetHashCode();
-      hashCode = hashCode * -1521134295 + Distributions.GetHashCode();
-      hashCode = hashCode * -1521134295 + IsSelected.GetHashCode();
-      return hashCode;
-    }
+    public override int GetHashCode() =>
+      HashCode.Combine(Name, DistributionType, Distributions, IsSelected);
 
     public static bool operator ==(ParameterState left, ParameterState right) =>
       left.Equals(right);

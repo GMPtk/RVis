@@ -8,6 +8,7 @@ using System.Reactive.Disposables;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static System.Double;
+using static RVisUI.Wpf.WpfTools;
 
 namespace Estimation
 {
@@ -23,7 +24,7 @@ namespace Estimation
       this
         .WhenAny(vm => vm.ErrorModel, _ => default(object))
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<object>(
+          _reactiveSafeInvoke.SuspendAndInvoke<object?>(
             ObserveErrorModel
             )
           ),
@@ -38,7 +39,7 @@ namespace Estimation
           (_,__,___, ____, _____) => default(object)
           )
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<object>(
+          _reactiveSafeInvoke.SuspendAndInvoke<object?>(
             ObserveErrorModelParameters
             )
           )
@@ -46,10 +47,10 @@ namespace Estimation
         );
     }
 
-    internal HeteroscedasticExpErrorViewModel()
+    public HeteroscedasticExpErrorViewModel()
       : this(new RVisUI.AppInf.Design.AppService())
     {
-      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
+      RequireTrue(IsInDesignMode);
 
       ErrorModel = HeteroscedasticExpErrorModel.Default;
     }
@@ -105,29 +106,29 @@ namespace Estimation
     }
     private Option<HeteroscedasticExpErrorModel> _errorModel;
 
-    public IErrorModel ErrorModelUnsafe
+    public IErrorModel? ErrorModelUnsafe
     {
       get => _errorModel.Match(em => em, () => default(IErrorModel));
       set => ErrorModel = value == default ? None : Some(RequireInstanceOf<HeteroscedasticExpErrorModel>(value));
     }
 
-    public string Variable
+    public string? Variable
     {
       get => _variable;
       set => this.RaiseAndSetIfChanged(ref _variable, value, PropertyChanged);
     }
-    private string _variable;
+    private string? _variable;
 
-    public string Unit
+    public string? Unit
     {
       get => _unit;
       set => this.RaiseAndSetIfChanged(ref _unit, value, PropertyChanged);
     }
-    private string _unit;
+    private string? _unit;
 
     public void Dispose() => Dispose(true);
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void Dispose(bool disposing)
     {
@@ -142,7 +143,7 @@ namespace Estimation
       }
     }
 
-    private void ObserveErrorModel(object _)
+    private void ObserveErrorModel(object? _)
     {
       ErrorModel.Match(
         errorModel =>
@@ -167,16 +168,16 @@ namespace Estimation
         });
     }
 
-    private void ObserveErrorModelParameters(object _)
+    private void ObserveErrorModelParameters(object? _)
     {
       if (IsConfigured)
       {
         ErrorModel = new HeteroscedasticExpErrorModel(
-          Delta.Value,
-          DeltaStepInitializer.Value,
-          Sigma.Value,
-          SigmaStepInitializer.Value,
-          Lower.Value
+          Delta!.Value,
+          DeltaStepInitializer!.Value,
+          Sigma!.Value,
+          SigmaStepInitializer!.Value,
+          Lower!.Value
           );
       }
 

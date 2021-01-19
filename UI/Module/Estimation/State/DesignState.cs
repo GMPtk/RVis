@@ -26,6 +26,6 @@ namespace Estimation
     }
     private int? _chains;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

@@ -2,6 +2,9 @@
 using System;
 using System.ComponentModel;
 
+#nullable disable
+#pragma warning disable 0067
+
 namespace RVisUI.AppInf.Design
 {
   public sealed class AppSettings : IAppSettings
@@ -21,9 +24,10 @@ namespace RVisUI.AppInf.Design
     public string ModuleConfiguration { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     public int RThrottlingUseCores { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     public string PathToSimLibrary { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public string PathToRunControlDrop { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     public double Zoom { get => 0.5; set => throw new NotImplementedException(); }
 
-    public event PropertyChangedEventHandler PropertyChanged = delegate { };
+    public event PropertyChangedEventHandler PropertyChanged;
 
     public T Get<T>(string name)
     {

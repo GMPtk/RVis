@@ -21,22 +21,22 @@ namespace Estimation
       Cancel = ReactiveCommand.Create(HandleCancel);
     }
 
-    public string IterationsToAddText
+    public string? IterationsToAddText
     {
       get => _iterationsToAddText;
       set => this.RaiseAndSetIfChanged(ref _iterationsToAddText, value.CheckParseValue<int>(), PropertyChanged);
     }
-    private string _iterationsToAddText;
+    private string? _iterationsToAddText;
 
     public int? IterationsToAdd => 
       int.TryParse(_iterationsToAddText, out int i) ? i : default(int?);
 
-    public string TargetAcceptRateText
+    public string? TargetAcceptRateText
     {
       get => _targetAcceptRateText;
       set => this.RaiseAndSetIfChanged(ref _targetAcceptRateText, value.CheckParseValue<double>(), PropertyChanged);
     }
-    private string _targetAcceptRateText;
+    private string? _targetAcceptRateText;
 
     public double? TargetAcceptRate => 
       double.TryParse(_targetAcceptRateText, out double d) ? d : default(double?);
@@ -59,7 +59,7 @@ namespace Estimation
     }
     private bool? _dialogResult;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private bool CanHandleOK(object _, object __) =>
       (!IterationsToAdd.HasValue || IterationsToAdd.Value > 0) &&

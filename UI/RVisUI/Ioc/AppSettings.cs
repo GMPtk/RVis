@@ -83,7 +83,7 @@ namespace RVisUI.Ioc
       }
     }
 
-    public string PrimaryForegroundColorName
+    public string? PrimaryForegroundColorName
     {
       get => Settings.Default.PrimaryForegroundColorName;
       set
@@ -111,7 +111,7 @@ namespace RVisUI.Ioc
       }
     }
 
-    public string SecondaryForegroundColorName
+    public string? SecondaryForegroundColorName
     {
       get => Settings.Default.SecondaryForegroundColorName;
       set
@@ -195,6 +195,20 @@ namespace RVisUI.Ioc
       }
     }
 
+    public string PathToRunControlDrop
+    {
+      get => Settings.Default.PathToRunControlDrop;
+      set
+      {
+        if (value != Settings.Default.PathToRunControlDrop)
+        {
+          Settings.Default.PathToRunControlDrop = value;
+          Settings.Default.Save();
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
     public double Zoom
     {
       get => Settings.Default.Zoom;
@@ -225,12 +239,12 @@ namespace RVisUI.Ioc
       applicationSettingsBase.Save();
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void NotifyPropertyChanged([CallerMemberName] string propertyName = "") => 
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-    private void EnsureProperty<T>(ApplicationSettingsBase applicationSettingsBase, string name)
+    private static void EnsureProperty<T>(ApplicationSettingsBase applicationSettingsBase, string name)
     {
       if (!applicationSettingsBase.Properties.OfType<SettingsProperty>().Any(sp => sp.Name == name))
       {

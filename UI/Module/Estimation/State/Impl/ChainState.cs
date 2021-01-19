@@ -50,6 +50,10 @@ namespace Estimation
       ChainState chainState
       )
     {
+      RequireNotNull(chainState.ChainData);
+      RequireNotNull(chainState.ErrorData);
+      RequireNotNull(chainState.PosteriorData);
+
       var pathToChainState = Combine(targetDirectory, chainState.No.ToString(InvariantCulture));
       Directory.CreateDirectory(pathToChainState);
 
@@ -117,6 +121,10 @@ namespace Estimation
 
     private static void SaveChainState(ChainState chainState, string pathToChainState)
     {
+      RequireNotNull(chainState.ChainData);
+      RequireNotNull(chainState.ErrorData);
+      RequireNotNull(chainState.PosteriorData);
+
       pathToChainState = Combine(pathToChainState, chainState.No.ToString(InvariantCulture));
 
       SaveModelParameters(chainState.ModelParameters, pathToChainState);
@@ -141,26 +149,26 @@ namespace Estimation
 
     private class _ModelParameterDTO
     {
-      public string Name { get; set; }
-      public string Distribution { get; set; }
+      public string? Name { get; set; }
+      public string? Distribution { get; set; }
       public double? Value { get; set; }
       public double? Step { get; set; }
     }
 
     private class _ModelParametersDTO
     {
-      public _ModelParameterDTO[] ModelParameters { get; set; }
+      public _ModelParameterDTO[]? ModelParameters { get; set; }
     }
 
     private class _ModelOutputDTO
     {
-      public string Name { get; set; }
-      public string ErrorModel { get; set; }
+      public string? Name { get; set; }
+      public string? ErrorModel { get; set; }
     }
 
     private class _ModelOutputsDTO
     {
-      public _ModelOutputDTO[] ModelOutputs { get; set; }
+      public _ModelOutputDTO[]? ModelOutputs { get; set; }
     }
 
     private static void SaveModelParameters(Arr<ModelParameter> modelParameters, string pathToChainState)
@@ -188,9 +196,11 @@ namespace Estimation
 
       var modelParameters = Toml.ReadFile<_ModelParametersDTO>(pathToModelParameters);
 
+      RequireNotNull(modelParameters.ModelParameters);
+
       return modelParameters.ModelParameters
         .Select(dto => new ModelParameter(
-          dto.Name,
+          dto.Name.AssertNotNull(),
           Distribution.DeserializeDistribution(dto.Distribution).AssertSome(),
           dto.Value.FromNullable(),
           dto.Step.FromNullable()
@@ -221,8 +231,13 @@ namespace Estimation
 
       var modelOutputs = Toml.ReadFile<_ModelOutputsDTO>(pathToModelOutputs);
 
+      RequireNotNull(modelOutputs.ModelOutputs);
+
       return modelOutputs.ModelOutputs
-        .Select(dto => new ModelOutput(dto.Name, ErrorModel.DeserializeErrorModel(dto.ErrorModel).AssertSome()))
+        .Select(dto => new ModelOutput(
+          dto.Name.AssertNotNull(), 
+          ErrorModel.DeserializeErrorModel(dto.ErrorModel.AssertNotNull()
+          ).AssertSome()))
         .ToArr();
     }
 
@@ -232,7 +247,7 @@ namespace Estimation
       SaveToCSV<double>(chainData, pathToChainData);
     }
 
-    private static DataTable LoadChainData(DirectoryInfo chainStateDirectory)
+    private static DataTable? LoadChainData(DirectoryInfo chainStateDirectory)
     {
       var pathToChainData = Combine(chainStateDirectory.FullName, $"{nameof(ChainData).ToLowerInvariant()}.csv");
       if (!File.Exists(pathToChainData)) return default;
@@ -255,7 +270,7 @@ namespace Estimation
       }
     }
 
-    private static DataTable LoadErrorData(DirectoryInfo chainStateDirectory)
+    private static DataTable? LoadErrorData(DirectoryInfo chainStateDirectory)
     {
       var pathToErrorData = Combine(chainStateDirectory.FullName, $"{nameof(ErrorData).ToLowerInvariant()}.csv");
       if (!File.Exists(pathToErrorData)) return default;
@@ -263,7 +278,7 @@ namespace Estimation
       return LoadFromCSV<double>(pathToErrorData);
     }
 
-    private static IDictionary<string, DataTable> LoadPosteriorData(DirectoryInfo chainStateDirectory, Arr<string> outputNames)
+    private static IDictionary<string, DataTable>? LoadPosteriorData(DirectoryInfo chainStateDirectory, Arr<string> outputNames)
     {
       var loaded = outputNames
         .Map(n =>

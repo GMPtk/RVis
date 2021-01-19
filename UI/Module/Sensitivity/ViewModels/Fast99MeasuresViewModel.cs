@@ -2,6 +2,7 @@
 using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Axes;
+using OxyPlot.Legends;
 using OxyPlot.Series;
 using ReactiveUI;
 using RVis.Base.Extensions;
@@ -20,9 +21,9 @@ using System.Windows.Input;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static RVis.Base.Extensions.NumExt;
+using static System.Double;
 using static System.Globalization.CultureInfo;
 using static System.Math;
-using DataTable = System.Data.DataTable;
 
 namespace Sensitivity
 {
@@ -61,7 +62,40 @@ namespace Sensitivity
         this.ObservableForProperty(vm => vm.RankedParameterViewModels, _ => RankedParameterViewModels.Count > 0)
         );
 
-      PlotModel = CreatePlotModel();
+      PlotModel = new PlotModel();
+
+      PlotModel.Legends.Add(new Legend
+      {
+        LegendPosition = LegendPosition.RightMiddle,
+        LegendPlacement = LegendPlacement.Outside
+      });
+
+      PlotModel.Axes.Add(new LinearAxis
+      {
+        Position = AxisPosition.Bottom,
+        Title = independentVariable.GetFQName()
+      });
+
+      PlotModel.Axes.Add(new LinearAxis
+      {
+        Position = AxisPosition.Left,
+      });
+
+      _annotation = new RectangleAnnotation
+      {
+        Fill = OxyColor.FromAColor(120, OxyColors.SkyBlue),
+        MinimumX = 0,
+        MaximumX = 0
+      };
+      PlotModel.Annotations.Add(_annotation);
+
+#pragma warning disable CS0618 // Type or member is obsolete
+      PlotModel.MouseDown += HandlePlotModelMouseDown;
+      PlotModel.MouseMove += HandlePlotModelMouseMove;
+      PlotModel.MouseUp += HandlePlotModelMouseUp;
+#pragma warning restore CS0618 // Type or member is obsolete
+
+      PlotModel.ApplyThemeToPlotModelAndAxes();
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
@@ -114,7 +148,7 @@ namespace Sensitivity
         _appSettings
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(
               ObserveAppSettingsPropertyChange
               )
             )
@@ -170,27 +204,27 @@ namespace Sensitivity
     }
     private Fast99MeasureType _fast99MeasureType = Fast99MeasureType.None;
 
-    public string XUnits { get; }
+    public string? XUnits { get; }
 
-    public string XBeginText
+    public string? XBeginText
     {
       get => _xBeginText;
       set => this.RaiseAndSetIfChanged(ref _xBeginText, value.CheckParseValue<double>(), PropertyChanged);
     }
-    private string _xBeginText;
+    private string? _xBeginText;
 
     public double? XBegin =>
-      double.TryParse(_xBeginText, out double d) ? d : default(double?);
+      TryParse(_xBeginText, out double d) ? d : default(double?);
 
-    public string XEndText
+    public string? XEndText
     {
       get => _xEndText;
       set => this.RaiseAndSetIfChanged(ref _xEndText, value.CheckParseValue<double>(), PropertyChanged);
     }
-    private string _xEndText;
+    private string? _xEndText;
 
     public double? XEnd =>
-      double.TryParse(_xEndText, out double d) ? d : default(double?);
+      TryParse(_xEndText, out double d) ? d : default(double?);
 
     public Arr<IRankedParameterViewModel> RankedParameterViewModels
     {
@@ -228,7 +262,7 @@ namespace Sensitivity
 
     public PlotModel PlotModel { get; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() =>
       Dispose(disposing: true);
@@ -277,6 +311,8 @@ namespace Sensitivity
 
       if (didOK)
       {
+        RequireNotNull(_moduleState.SensitivityDesign);
+
         var ranking = new Ranking(
           rankingViewModel.From,
           rankingViewModel.To,
@@ -394,7 +430,7 @@ namespace Sensitivity
       PlotModel.InvalidatePlot(updateData: false);
     }
 
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (!propertyName.IsThemeProperty()) return;
 
@@ -402,7 +438,7 @@ namespace Sensitivity
       PlotModel.InvalidatePlot(updateData: false);
     }
 
-    private void HandlePlotModelMouseDown(object sender, OxyMouseDownEventArgs e)
+    private void HandlePlotModelMouseDown(object? sender, OxyMouseDownEventArgs e)
     {
       if (!IsReady) return;
 
@@ -427,7 +463,7 @@ namespace Sensitivity
       e.Handled = true;
     }
 
-    private void HandlePlotModelMouseMove(object sender, OxyMouseEventArgs e)
+    private void HandlePlotModelMouseMove(object? sender, OxyMouseEventArgs e)
     {
       if (_annotation.Tag == default) return;
 
@@ -453,7 +489,7 @@ namespace Sensitivity
       e.Handled = true;
     }
 
-    private void HandlePlotModelMouseUp(object sender, OxyMouseEventArgs e)
+    private void HandlePlotModelMouseUp(object? sender, OxyMouseEventArgs e)
     {
       _annotation.Tag = default;
     }
@@ -492,6 +528,7 @@ namespace Sensitivity
     {
       IsReady =
         _moduleState.SensitivityDesign != default &&
+        _moduleState.MeasuresState.SelectedOutputName != default &&
         _moduleState.MeasuresState.Fast99OutputMeasures.ContainsKey(
           _moduleState.MeasuresState.SelectedOutputName
         )
@@ -504,7 +541,7 @@ namespace Sensitivity
 
       if (isInitializing)
       {
-        var factors = _moduleState.SensitivityDesign.DesignParameters
+        var factors = _moduleState.SensitivityDesign!.DesignParameters
           .Filter(dp => dp.Distribution.DistributionType != DistributionType.Invariant)
           .Map(dp => dp.Name);
 
@@ -519,24 +556,25 @@ namespace Sensitivity
             });
         }
 
-        OutputNames = _moduleState.Trace.ColumnNames
+        OutputNames = _moduleState.Trace!.ColumnNames
           .Skip(1)
           .OrderBy(cn => cn.ToUpperInvariant())
           .ToArr();
-        SelectedOutputName = OutputNames.IndexOf(_moduleState.MeasuresState.SelectedOutputName);
+        SelectedOutputName = OutputNames.IndexOf(_moduleState.MeasuresState.SelectedOutputName!);
         Fast99MeasureType = Fast99MeasureType.MainEffect;
         IsSelected = true;
       }
 
       var (firstOrder, _, _) = _moduleState.MeasuresState.Fast99OutputMeasures[
-        _moduleState.MeasuresState.SelectedOutputName
+        _moduleState.MeasuresState.SelectedOutputName!
         ];
 
-      var x = Range(0, firstOrder.Rows.Count)
+      var xs = Range(0, firstOrder.Rows.Count)
+        .SkipWhile(i => firstOrder.Rows[i].ItemArray.Cast<double>().Any(IsNaN))
         .Map(i => firstOrder.Rows[i].Field<double>(0))
         .ToArray();
-      _xMinimum = x.Min();
-      _xMaximum = x.Max();
+      _xMinimum = xs.Min();
+      _xMaximum = xs.Max();
 
       SetVerticalAxisTitle();
       PopulateSeries();
@@ -572,53 +610,16 @@ namespace Sensitivity
       RankedTo = _moduleState.Ranking.XEnd;
     }
 
-    private PlotModel CreatePlotModel()
-    {
-      var plotModel = new PlotModel
-      {
-        LegendPosition = LegendPosition.RightMiddle,
-        LegendPlacement = LegendPlacement.Outside
-      };
-
-      var independentVariable = _simulation.SimConfig.SimOutput.IndependentVariable;
-
-      plotModel.Axes.Add(new LinearAxis
-      {
-        Position = AxisPosition.Bottom,
-        Title = independentVariable.GetFQName()
-      });
-
-      plotModel.Axes.Add(new LinearAxis
-      {
-        Position = AxisPosition.Left,
-      });
-
-      _annotation = new RectangleAnnotation
-      {
-        Fill = OxyColor.FromAColor(120, OxyColors.SkyBlue),
-        MinimumX = 0,
-        MaximumX = 0
-      };
-      plotModel.Annotations.Add(_annotation);
-
-      plotModel.MouseDown += HandlePlotModelMouseDown;
-      plotModel.MouseMove += HandlePlotModelMouseMove;
-      plotModel.MouseUp += HandlePlotModelMouseUp;
-
-      plotModel.ApplyThemeToPlotModelAndAxes();
-
-      return plotModel;
-    }
-
     private void SetVerticalAxisTitle()
     {
       RequireFalse(Fast99MeasureType == Fast99MeasureType.None);
 
-      PlotModel.GetAxis(AxisPosition.Left).Title = _fast99MeasureNames[Fast99MeasureType];
+      PlotModel.GetAxis(AxisPosition.Left).AssertNotNull().Title = _fast99MeasureNames[Fast99MeasureType];
     }
 
     private void PopulateSeries()
     {
+      RequireNotNullEmptyWhiteSpace(_moduleState.MeasuresState.SelectedOutputName);
       RequireTrue(
         _moduleState.MeasuresState.Fast99OutputMeasures.ContainsKey(
           _moduleState.MeasuresState.SelectedOutputName
@@ -629,30 +630,19 @@ namespace Sensitivity
         _moduleState.MeasuresState.SelectedOutputName
         ];
 
-      DataTable seriesSource;
-
-      switch (Fast99MeasureType)
+      var seriesSource = Fast99MeasureType switch
       {
-        case Fast99MeasureType.MainEffect:
-          seriesSource = firstOrder;
-          break;
-
-        case Fast99MeasureType.TotalEffect:
-          seriesSource = totalOrder;
-          break;
-
-        case Fast99MeasureType.Variance:
-          seriesSource = variance;
-          break;
-
-        default: throw new InvalidOperationException(nameof(Fast99MeasureType));
-      }
+        Fast99MeasureType.MainEffect => firstOrder,
+        Fast99MeasureType.TotalEffect => totalOrder,
+        Fast99MeasureType.Variance => variance,
+        _ => throw new InvalidOperationException(nameof(Fast99MeasureType)),
+      };
 
       foreach (LineSeries lineSeries in PlotModel.Series)
       {
         lineSeries.Points.Clear();
 
-        var factor = lineSeries.Tag as string;
+        var factor = (string)lineSeries.Tag;
 
         for (var row = 0; row < seriesSource.Rows.Count; ++row)
         {
@@ -680,7 +670,7 @@ namespace Sensitivity
     private readonly Simulation _simulation;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private RectangleAnnotation _annotation;
+    private readonly RectangleAnnotation _annotation;
     private double? _xMinimum;
     private double? _xMaximum;
     private bool _disposed = false;

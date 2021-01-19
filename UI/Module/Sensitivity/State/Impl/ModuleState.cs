@@ -15,25 +15,25 @@ namespace Sensitivity
   {
     private class _ParametersStateDTO
     {
-      public string SelectedParameter { get; set; }
+      public string? SelectedParameter { get; set; }
     }
 
     private class _DesignStateDTO
     {
-      public string SensitivityMethod { get; set; }
+      public string? SensitivityMethod { get; set; }
       public int? NoOfRuns { get; set; }
       public int? NoOfSamples { get; set; }
-      public string SelectedElementName { get; set; }
+      public string? SelectedElementName { get; set; }
     }
 
     private class _TraceStateDTO
     {
       public double? ViewHeight { get; set; }
-      public string ChartTitle { get; set; }
-      public string YAxisTitle { get; set; }
-      public string XAxisTitle { get; set; }
-      public string MarkerFill { get; set; }
-      public string SeriesColor { get; set; }
+      public string? ChartTitle { get; set; }
+      public string? YAxisTitle { get; set; }
+      public string? XAxisTitle { get; set; }
+      public string? MarkerFill { get; set; }
+      public string? SeriesColor { get; set; }
       public double? HorizontalAxisMinimum { get; set; }
       public double? HorizontalAxisMaximum { get; set; }
       public double? HorizontalAxisAbsoluteMinimum { get; set; }
@@ -46,37 +46,37 @@ namespace Sensitivity
 
     private class _LowryStateDTO
     {
-      public string ChartTitle { get; set; }
-      public string YAxisTitle { get; set; }
-      public string XAxisTitle { get; set; }
-      public string InteractionsFillColor { get; set; }
-      public string MainEffectsFillColor { get; set; }
-      public string SmokeFill { get; set; }
+      public string? ChartTitle { get; set; }
+      public string? YAxisTitle { get; set; }
+      public string? XAxisTitle { get; set; }
+      public string? InteractionsFillColor { get; set; }
+      public string? MainEffectsFillColor { get; set; }
+      public string? SmokeFill { get; set; }
     }
 
     private class _MeasuresStateDTO
     {
-      public string SelectedOutputName { get; set; }
+      public string? SelectedOutputName { get; set; }
     }
 
     private class _ParameterStateDTO
     {
-      public string Name { get; set; }
-      public string DistributionType { get; set; }
-      public string[] DistributionStates { get; set; }
+      public string? Name { get; set; }
+      public string? DistributionType { get; set; }
+      public string[]? DistributionStates { get; set; }
       public bool IsSelected { get; set; }
     }
 
     private class _ModuleStateDTO
     {
-      public _ParametersStateDTO ParametersState { get; set; }
-      public _DesignStateDTO DesignState { get; set; }
-      public _TraceStateDTO TraceState { get; set; }
-      public _LowryStateDTO LowryState { get; set; }
-      public _MeasuresStateDTO MeasuresState { get; set; }
-      public _ParameterStateDTO[] ParameterStates { get; set; }
-      public string SensitivityDesign { get; set; }
-      public string RootExportDirectory { get; set; }
+      public _ParametersStateDTO? ParametersState { get; set; }
+      public _DesignStateDTO? DesignState { get; set; }
+      public _TraceStateDTO? TraceState { get; set; }
+      public _LowryStateDTO? LowryState { get; set; }
+      public _MeasuresStateDTO? MeasuresState { get; set; }
+      public _ParameterStateDTO[]? ParameterStates { get; set; }
+      public string? SensitivityDesign { get; set; }
+      public string? RootExportDirectory { get; set; }
       public bool OpenAfterExport { get; set; }
       public bool? AutoApplyParameterSharedState { get; set; } = false;
       public bool? AutoShareParameterSharedState { get; set; } = false;
@@ -208,18 +208,18 @@ namespace Sensitivity
         {
           TraceState.MarkerFill = OxyColor.Parse(dto.TraceState.MarkerFill);
         }
-        if (dto.TraceState.SeriesColor.IsAString() == true)
+        if (dto.TraceState?.SeriesColor.IsAString() == true)
         {
           TraceState.SeriesColor = OxyColor.Parse(dto.TraceState.SeriesColor);
         }
-        TraceState.HorizontalAxisMinimum = dto.TraceState.HorizontalAxisMinimum ?? TraceState.HorizontalAxisMinimum;
-        TraceState.HorizontalAxisMaximum = dto.TraceState.HorizontalAxisMaximum ?? TraceState.HorizontalAxisMaximum;
-        TraceState.HorizontalAxisAbsoluteMinimum = dto.TraceState.HorizontalAxisAbsoluteMinimum ?? TraceState.HorizontalAxisAbsoluteMinimum;
-        TraceState.HorizontalAxisAbsoluteMaximum = dto.TraceState.HorizontalAxisAbsoluteMaximum ?? TraceState.HorizontalAxisAbsoluteMaximum;
-        TraceState.VerticalAxisMinimum = dto.TraceState.VerticalAxisMinimum ?? TraceState.VerticalAxisMinimum;
-        TraceState.VerticalAxisMaximum = dto.TraceState.VerticalAxisMaximum ?? TraceState.VerticalAxisMaximum;
-        TraceState.VerticalAxisAbsoluteMinimum = dto.TraceState.VerticalAxisAbsoluteMinimum ?? TraceState.VerticalAxisAbsoluteMinimum;
-        TraceState.VerticalAxisAbsoluteMaximum = dto.TraceState.VerticalAxisAbsoluteMaximum ?? TraceState.VerticalAxisAbsoluteMaximum;
+        TraceState.HorizontalAxisMinimum = dto.TraceState?.HorizontalAxisMinimum ?? TraceState.HorizontalAxisMinimum;
+        TraceState.HorizontalAxisMaximum = dto.TraceState?.HorizontalAxisMaximum ?? TraceState.HorizontalAxisMaximum;
+        TraceState.HorizontalAxisAbsoluteMinimum = dto.TraceState?.HorizontalAxisAbsoluteMinimum ?? TraceState.HorizontalAxisAbsoluteMinimum;
+        TraceState.HorizontalAxisAbsoluteMaximum = dto.TraceState?.HorizontalAxisAbsoluteMaximum ?? TraceState.HorizontalAxisAbsoluteMaximum;
+        TraceState.VerticalAxisMinimum = dto.TraceState?.VerticalAxisMinimum ?? TraceState.VerticalAxisMinimum;
+        TraceState.VerticalAxisMaximum = dto.TraceState?.VerticalAxisMaximum ?? TraceState.VerticalAxisMaximum;
+        TraceState.VerticalAxisAbsoluteMinimum = dto.TraceState?.VerticalAxisAbsoluteMinimum ?? TraceState.VerticalAxisAbsoluteMinimum;
+        TraceState.VerticalAxisAbsoluteMaximum = dto.TraceState?.VerticalAxisAbsoluteMaximum ?? TraceState.VerticalAxisAbsoluteMaximum;
       }
 
       if (dto.LowryState == default)
@@ -252,9 +252,9 @@ namespace Sensitivity
         _parameterStates = dto.ParameterStates
           .Select(ps =>
           {
-            var name = ps.Name;
+            var name = ps.Name.AssertNotNull();
             var distributionType = Enum.TryParse(ps.DistributionType, out DistributionType dt) ? dt : DistributionType.None;
-            var distributionStates = Distribution.DeserializeDistributions(ps.DistributionStates);
+            var distributionStates = Distribution.DeserializeDistributions(ps.DistributionStates.AssertNotNull());
             var isSelected = ps.IsSelected;
             return new ParameterState(name, distributionType, distributionStates, isSelected);
           })

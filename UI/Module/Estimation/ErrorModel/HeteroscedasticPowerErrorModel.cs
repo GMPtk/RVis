@@ -152,20 +152,19 @@ namespace Estimation
         Lower
         );
 
-    public bool Equals(HeteroscedasticPowerErrorModel rhs) =>
-      ReferenceEquals(rhs, null)
-        ? false
-        : Delta1.Equals(rhs.Delta1) && Delta1Step.Equals(rhs.Delta1Step) && Delta1StepInitializer.Equals(rhs.Delta1StepInitializer) &&
-          Delta2.Equals(rhs.Delta2) && Delta2Step.Equals(rhs.Delta2Step) && Delta2StepInitializer.Equals(rhs.Delta2StepInitializer) &&
-          Sigma.Equals(rhs.Sigma) && SigmaStep.Equals(rhs.SigmaStep) && SigmaStepInitializer.Equals(rhs.SigmaStepInitializer) &&
-          Lower.Equals(rhs.Lower);
+    public bool Equals(HeteroscedasticPowerErrorModel? rhs) =>
+      rhs is not null &&
+      Delta1.Equals(rhs.Delta1) && Delta1Step.Equals(rhs.Delta1Step) && Delta1StepInitializer.Equals(rhs.Delta1StepInitializer) &&
+      Delta2.Equals(rhs.Delta2) && Delta2Step.Equals(rhs.Delta2Step) && Delta2StepInitializer.Equals(rhs.Delta2StepInitializer) &&
+      Sigma.Equals(rhs.Sigma) && SigmaStep.Equals(rhs.SigmaStep) && SigmaStepInitializer.Equals(rhs.SigmaStepInitializer) &&
+      Lower.Equals(rhs.Lower);
 
-    public override bool Equals(object obj) =>
-      obj is HeteroscedasticPowerErrorModel rhs ? Equals(rhs) : false;
+    public override bool Equals(object? obj) =>
+      obj is HeteroscedasticPowerErrorModel rhs && Equals(rhs);
 
     public static bool operator ==(HeteroscedasticPowerErrorModel left, HeteroscedasticPowerErrorModel right) =>
-      ReferenceEquals(left, null)
-        ? ReferenceEquals(right, null)
+      left is null
+        ? right is null
         : left.Equals(right);
 
     public static bool operator !=(HeteroscedasticPowerErrorModel left, HeteroscedasticPowerErrorModel right) =>
@@ -173,19 +172,19 @@ namespace Estimation
 
     public override int GetHashCode()
     {
-      var hashCode = 1371233633;
-      hashCode = hashCode * -1521134295 + Delta1.GetHashCode();
-      hashCode = hashCode * -1521134295 + Delta1Step.GetHashCode();
-      hashCode = hashCode * -1521134295 + Delta1StepInitializer.GetHashCode();
-      hashCode = hashCode * -1521134295 + Delta2.GetHashCode();
-      hashCode = hashCode * -1521134295 + Delta2Step.GetHashCode();
-      hashCode = hashCode * -1521134295 + Delta2StepInitializer.GetHashCode();
-      hashCode = hashCode * -1521134295 + Sigma.GetHashCode();
-      hashCode = hashCode * -1521134295 + SigmaStep.GetHashCode();
-      hashCode = hashCode * -1521134295 + SigmaStepInitializer.GetHashCode();
-      hashCode = hashCode * -1521134295 + Lower.GetHashCode();
-      hashCode = hashCode * -1521134295 + ErrorModelType.GetHashCode();
-      return hashCode;
+      var hash = new HashCode();
+      hash.Add(Delta1);
+      hash.Add(Delta1Step);
+      hash.Add(Delta1StepInitializer);
+      hash.Add(Delta2);
+      hash.Add(Delta2Step);
+      hash.Add(Delta2StepInitializer);
+      hash.Add(Sigma);
+      hash.Add(SigmaStep);
+      hash.Add(SigmaStepInitializer);
+      hash.Add(Lower);
+      hash.Add(ErrorModelType);
+      return hash.ToHashCode();
     }
 
     public override string ToString() =>

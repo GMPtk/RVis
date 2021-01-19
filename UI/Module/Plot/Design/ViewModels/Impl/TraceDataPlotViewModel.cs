@@ -1,10 +1,13 @@
 ﻿using LanguageExt;
 using OxyPlot;
 using OxyPlot.Axes;
+using OxyPlot.Legends;
 using OxyPlot.Series;
 using RVis.Data;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
+
+#nullable disable
 
 namespace Plot.Design
 {
@@ -49,9 +52,13 @@ namespace Plot.Design
 
         var plotModel = new PlotModel
         {
-          LegendPosition = LegendPosition.BottomRight,
           Background = OxyColors.Transparent
         };
+
+        plotModel.Legends.Add(new Legend
+        {
+          LegendPosition = LegendPosition.BottomRight
+        });
 
         var traceHorizontalAxis = new LinearAxis
         {

@@ -7,6 +7,7 @@
              xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
              xmlns:design="clr-namespace:Sampling.Design"
+             xmlns:impl="clr-namespace:Sampling.Controls.Views.Impl"
              xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
              mc:Ignorable="d" 
              d:DesignHeight="768" d:DesignWidth="1366"
@@ -18,12 +19,14 @@
       <ResourceDictionary.MergedDictionaries>
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <swc:BooleanToVisibilityConverter x:Key="b2vc"/>
@@ -51,14 +54,15 @@
     </Grid.ColumnDefinitions>
 
     <oxy:PlotView x:Name="_plotView" 
-                  Model="{Binding Outputs}" 
+                  Model="{Binding Outputs}"
+                  Controller="{Binding PlotController}"
                   Background="Transparent"
                   />
 
     <StackPanel Orientation="Horizontal"
                 VerticalAlignment="Top"
                 HorizontalAlignment="Right"
-                Margin="0,18,15,0"
+                Margin="0,25,30,0"
                 >
 
       <Button ToolTip="Toggle line/scatter"
@@ -117,68 +121,23 @@
                   />
       </GroupBox>
 
-      <GroupBox Grid.Row="1" 
-                Margin="0,10,0,0" 
-                Header="Selected Sample"
-                >
-        <Grid>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="Auto"/>
-          </Grid.ColumnDefinitions>
-          <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-          </Grid.RowDefinitions>
-
-          <TextBlock Text="{Binding SampleIdentifier}"/>
-
-          <Button Grid.Column="1" Width="Auto" 
-                  Height="Auto" 
-                  Padding="2"
-                  HorizontalAlignment="Right"
-                  VerticalAlignment="Top"
-                  Command="{Binding ShareParameterValues}"
-                  ToolTip="Share sample parameter values">
-            <md:PackIcon Width="12" 
-                         Height="12" 
-                         Kind="Upload"/>
-          </Button>
-
-          <ScrollViewer Grid.Row="1" 
-                        Grid.ColumnSpan="2" 
-                        HorizontalScrollBarVisibility="Disabled"
-                        VerticalScrollBarVisibility="Auto"
-                        Margin="0,10,0,0"
-                        Height="300"
-                        >
-
-            <ItemsControl ItemsSource="{Binding ParameterValues}">
-              <ItemsControl.Style>
-                <Style TargetType="ItemsControl">
-                  <Style.Triggers>
-                    <DataTrigger Binding="{Binding Items.Count, RelativeSource={RelativeSource Self}}" Value="0">
-                      <Setter Property="Template">
-                        <Setter.Value>
-                          <ControlTemplate>
-                            <StackPanel VerticalAlignment="Center" 
-                                        HorizontalAlignment="Center"
-                                        >
-                              <TextBlock Text="NONE SELECTED" />
-                            </StackPanel>
-                          </ControlTemplate>
-                        </Setter.Value>
-                      </Setter>
-                    </DataTrigger>
-                  </Style.Triggers>
-                </Style>
-              </ItemsControl.Style>
-            </ItemsControl>
-
-          </ScrollViewer>
-
-        </Grid>
-      </GroupBox>
+      <TabControl Grid.Row="1"
+                  Margin="0,10,0,0"
+                  Height="400"
+                  >
+        <TabItem Header="Sample" 
+                 DataContext="{Binding OutputsSelectedSampleViewModel}">
+          <impl:OutputsSelectedSampleView />
+        </TabItem>
+        <TabItem Header="Filter"
+                 DataContext="{Binding OutputsFilteredSamplesViewModel}">
+          <impl:OutputsFilteredSamplesView/>
+        </TabItem>
+        <TabItem Header="Evidence"
+                 DataContext="{Binding OutputsEvidenceViewModel}">
+          <impl:OutputsEvidenceView/>
+        </TabItem>
+      </TabControl>
 
     </StackPanel>
 

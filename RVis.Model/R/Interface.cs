@@ -2,8 +2,8 @@
 using RVis.Data;
 using System;
 using System.Collections.Generic;
-using System.ServiceModel;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace RVis.Model
 {
@@ -22,56 +22,37 @@ namespace RVis.Model
   {
     int ID { get; }
 
-    IRVisClient OpenChannel();
-
     bool IsUp { get; }
 
-    void Stop();
+    Task<IRVisClient> OpenChannelAsync(CancellationToken cancellationToken = default);
+
+    Task StopAsync(CancellationToken cancellationToken = default);
   }
 
-  public interface IRVisClient : IDisposable
+  public interface IRVisClient
   {
     int ID { get; }
 
-    (string Name, string Value)[] GetRversion();
-
-    (string Package, string Version)[] GetInstalledPackages();
-
-    void Clear();
-
-    void GarbageCollect();
-
-    void StopServer();
-
-    Dictionary<string, string[]> EvaluateStrings(string code);
-
-    Dictionary<string, double[]> EvaluateDoubles(string code);
-
-    NumDataColumn[] EvaluateNumData(string code);
-
-    void EvaluateNonQuery(string code);
-
-    void RunExec(string pathToCode, SimConfig config);
-
-    void SourceFile(string pathToCode);
-
-    NumDataTable TabulateExecOutput(SimConfig config);
-
-    NumDataTable TabulateTmplOutput(SimConfig config);
-
-    ISymbolInfo[] InspectSymbols(string pathToCode);
-
-    byte[] Serialize(string objectName);
-
-    void Unserialize(byte[] raw, string objectName);
-
-    byte[] SaveObjectToBinary(string objectName);
-
-    void LoadFromBinary(byte[] raw);
-
-    void CreateVector(double[] source, string objectName);
-
-    void CreateMatrix(double[][] source, string objectName);
+    Task ClearAsync(CancellationToken cancellationToken = default);
+    Task CreateMatrixAsync(double[][] source, string objectName, CancellationToken cancellationToken = default);
+    Task CreateVectorAsync(double[] source, string objectName, CancellationToken cancellationToken = default);
+    Task<Dictionary<string, double[]>> EvaluateDoublesAsync(string code, CancellationToken cancellationToken = default);
+    Task EvaluateNonQueryAsync(string code, CancellationToken cancellationToken = default);
+    Task<NumDataColumn[]> EvaluateNumDataAsync(string code, CancellationToken cancellationToken = default);
+    Task<Dictionary<string, string[]>> EvaluateStringsAsync(string code, CancellationToken cancellationToken = default);
+    Task GarbageCollectAsync(CancellationToken cancellationToken = default);
+    Task<(string Package, string Version)[]> GetInstalledPackagesAsync(CancellationToken cancellationToken = default);
+    Task<(string Name, string Value)[]> GetRversionAsync(CancellationToken cancellationToken = default);
+    Task<ISymbolInfo[]> InspectSymbolsAsync(string pathToCode, CancellationToken cancellationToken = default);
+    Task LoadFromBinaryAsync(byte[] raw, CancellationToken cancellationToken = default);
+    Task RunExecAsync(string pathToCode, SimConfig config, CancellationToken cancellationToken = default);
+    Task<byte[]> SaveObjectToBinaryAsync(string objectName, CancellationToken cancellationToken = default);
+    Task<byte[]> SerializeAsync(string objectName, CancellationToken cancellationToken = default);
+    Task SourceFileAsync(string pathToCode, CancellationToken cancellationToken = default);
+    Task StopServerAsync(CancellationToken cancellationToken = default);
+    Task<NumDataTable> TabulateExecOutputAsync(SimConfig config, CancellationToken cancellationToken = default);
+    Task<NumDataTable> TabulateTmplOutputAsync(SimConfig config, CancellationToken cancellationToken = default);
+    Task UnserializeAsync(byte[] raw, string objectName, CancellationToken cancellationToken = default);
   }
 
   public interface IRVisServiceCallback
@@ -79,77 +60,53 @@ namespace RVis.Model
     //[OperationContract(IsOneWay = true)]
     //void NotifyResult(ResultType resultType);
 
-    [OperationContract]
     void NotifyGeneratedOutput(NumDataTable[] generatedOutput);
 
-    [OperationContract]
     void NotifyFault(string message, string innerMessage);
   }
 
-  [ServiceContract(CallbackContract = typeof(IRVisServiceCallback))]
   public interface IRVisService
   {
-    [OperationContract]
     NameValueArraySvcRes GetRversion();
 
-    [OperationContract]
     NameValueArraySvcRes GetInstalledPackages();
 
-    [OperationContract]
     BoolSvcRes IsBusy();
 
-    [OperationContract]
     UnitSvcRes Clear();
 
-    [OperationContract]
     UnitSvcRes GarbageCollect();
 
-    [OperationContract]
     UnitSvcRes Shutdown();
 
-    [OperationContract]
     NameStringsMapSvcRes EvaluateStrings(string code);
 
-    [OperationContract]
     NameDoublesMapSvcRes EvaluateDoubles(string code);
 
-    [OperationContract]
     NumDataColumnArraySvcRes EvaluateNumData(string code);
 
-    [OperationContract]
     UnitSvcRes EvaluateNonQuery(string code);
 
-    [OperationContract]
     UnitSvcRes RunExec(string pathToCode, SimConfig config);
 
-    [OperationContract]
     UnitSvcRes SourceFile(string pathToCode);
 
-    [OperationContract]
     NumDataTableSvcRes TabulateExecOutput(SimConfig config);
 
-    [OperationContract]
     NumDataTableSvcRes TabulateTmplOutput(SimConfig config);
 
-    [OperationContract]
     SymbolInfoArraySvcRes InspectSymbols(string pathToCode);
 
-    [OperationContract]
     ByteArraySvcRes Serialize(string objectName);
 
-    [OperationContract]
     UnitSvcRes Unserialize(byte[] raw, string objectName);
 
-    [OperationContract]
     ByteArraySvcRes SaveObjectToBinary(string objectName);
 
-    [OperationContract]
     UnitSvcRes LoadFromBinary(byte[] raw);
 
-    [OperationContract]
     UnitSvcRes CreateVector(double[] source, string objectName);
 
-    [OperationContract]
     UnitSvcRes CreateMatrix(double[][] source, string objectName);
   }
 }

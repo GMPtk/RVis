@@ -1,4 +1,6 @@
-﻿namespace Plot.Design
+﻿#nullable disable
+
+namespace Plot.Design
 {
   public class OutputGroupViewModel : IOutputGroupViewModel
   {

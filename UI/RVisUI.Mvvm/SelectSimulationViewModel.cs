@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
+using static RVis.Base.Check;
 
 namespace RVisUI.Mvvm
 {
@@ -38,33 +39,35 @@ namespace RVisUI.Mvvm
 
     public ObservableCollection<ISimulationViewModel> SimulationVMs { get; }
 
-    public ISimulationViewModel SelectedSimulationVM
+    public ISimulationViewModel? SelectedSimulationVM
     {
       get => _selectedSimulationVM;
       set => this.RaiseAndSetIfChanged(ref _selectedSimulationVM, value);
     }
-    private ISimulationViewModel _selectedSimulationVM;
+    private ISimulationViewModel? _selectedSimulationVM;
 
-    public string PathToLibrary
+    public string? PathToLibrary
     {
       get => _pathToLibrary;
       set => this.RaiseAndSetIfChanged(ref _pathToLibrary, value);
     }
-    private string _pathToLibrary;
+    private string? _pathToLibrary;
 
     public ICommand OpenSimulation { get; }
 
     public ICommand DeleteSimulation { get; }
 
-    public string RVersion
+    public string? RVersion
     {
       get => _rVersion;
       set => this.RaiseAndSetIfChanged(ref _rVersion, value);
     }
-    private string _rVersion;
+    private string? _rVersion;
 
-    private void HandleSimLibraryLoaded(object sender, System.EventArgs e)
+    private void HandleSimLibraryLoaded(object? sender, System.EventArgs e)
     {
+      RequireNotNullEmptyWhiteSpace(_simLibrary.Location);
+
       while (SimulationVMs.Count > 0)
       {
         SimulationVMs.RemoveAt(SimulationVMs.Count - 1);
@@ -78,7 +81,7 @@ namespace RVisUI.Mvvm
       PathToLibrary = _simLibrary.Location.ContractPath();
     }
 
-    private void HandleSimulationDeleted(object sender, SimulationDeletedEventArgs e)
+    private void HandleSimulationDeleted(object? sender, SimulationDeletedEventArgs e)
     {
       var simulationVM = SimulationVMs.Single(vm => vm.Simulation == e.Simulation);
       if (simulationVM == SelectedSimulationVM) SelectedSimulationVM = default;
@@ -86,7 +89,7 @@ namespace RVisUI.Mvvm
     }
 
     private void HandleOpenSimulation() =>
-      _appState.Target = Some(_selectedSimulationVM.Simulation);
+      _appState.Target = Some(_selectedSimulationVM.AssertNotNull().Simulation);
 
     private void HandleDeleteSimulation()
     {
@@ -95,7 +98,7 @@ namespace RVisUI.Mvvm
       {
         try
         {
-          _simLibrary.Delete(SelectedSimulationVM.Simulation);
+          _simLibrary.Delete(SelectedSimulationVM.AssertNotNull().Simulation);
         }
         catch (Exception ex)
         {

@@ -45,7 +45,7 @@ namespace Evidence
         _appSettings
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(
               ObserveAppSettingsPropertyChange
             )
           ),
@@ -104,18 +104,18 @@ namespace Evidence
         os => SubjectViewModels.Find(vm => vm.Subject == os.Subject),
         NoneOf<ISubjectViewModel>
         );
-      SelectedSubjectViewModel = maybeSelectedSubjectViewModel.IfNoneUnsafe(default(ISubjectViewModel));
+      SelectedSubjectViewModel = maybeSelectedSubjectViewModel.IfNoneUnsafe(default(ISubjectViewModel)!);
 
       PopulateObservations();
       PlotObservations();
     }
 
-    public PlotModel PlotModel
+    public PlotModel? PlotModel
     {
       get => _plotModel;
       set => this.RaiseAndSetIfChanged(ref _plotModel, value, PropertyChanged);
     }
-    private PlotModel _plotModel;
+    private PlotModel? _plotModel;
 
     public Arr<ISubjectViewModel> SubjectViewModels
     {
@@ -124,12 +124,12 @@ namespace Evidence
     }
     private Arr<ISubjectViewModel> _subjectViewModels;
 
-    public ISubjectViewModel SelectedSubjectViewModel
+    public ISubjectViewModel? SelectedSubjectViewModel
     {
       get => _selectedSubjectViewModel;
       set => this.RaiseAndSetIfChanged(ref _selectedSubjectViewModel, value, PropertyChanged);
     }
-    private ISubjectViewModel _selectedSubjectViewModel;
+    private ISubjectViewModel? _selectedSubjectViewModel;
 
     public Arr<IObservationsViewModel> ObservationsViewModels
     {
@@ -138,7 +138,7 @@ namespace Evidence
     }
     private Arr<IObservationsViewModel> _observationsViewModels;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -162,7 +162,7 @@ namespace Evidence
         .Filter(vm => vm.NAvailable > 0)
         .OrderBy(vm => vm.Subject.ToUpperInvariant())
         .ToArr<ISubjectViewModel>();
-      if (!subjectViewModelsWithDataAvailable.Contains(SelectedSubjectViewModel))
+      if (SelectedSubjectViewModel is null || !subjectViewModelsWithDataAvailable.Contains(SelectedSubjectViewModel))
       {
         SelectedSubjectViewModel = default;
       }
@@ -208,7 +208,7 @@ namespace Evidence
       ObservationsViewModels = observationsViewModels;
     }
 
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (!propertyName.IsThemeProperty()) return;
 
@@ -289,7 +289,9 @@ namespace Evidence
 
     private void ObserveObservationsViewModelIsSelected(IObservedChange<IObservationsViewModel, bool> change)
     {
-      var observationsViewModel = change.Sender as IObservationsViewModel;
+      RequireNotNull(SelectedSubjectViewModel);
+
+      var observationsViewModel = change.Sender;
       var observationsSet = _appState.SimEvidence.GetObservationSet(SelectedSubjectViewModel.Subject);
       var observations = observationsSet.Observations.Find(o => o.ID == observationsViewModel.ID).AssertSome();
       if (observationsViewModel.IsSelected)
@@ -319,7 +321,7 @@ namespace Evidence
 
       RequireNotNull(SelectedSubjectViewModel);
 
-      var verticalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Left);
+      var verticalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Left).AssertNotNull();
       if (!SelectedSubjectViewModel.Subject.Equals(verticalAxis.Tag))
       {
         var simulation = _appState.Target.AssertSome();
@@ -352,7 +354,7 @@ namespace Evidence
         : NaN;
 
       verticalAxis.Minimum = verticalAxisMin;
-      var horizontalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Bottom);
+      var horizontalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Bottom).AssertNotNull();
       horizontalAxis.Minimum = horizontalAxisMin;
 
       _observationsScatterPlot.Series.Clear();
@@ -382,7 +384,7 @@ namespace Evidence
     private readonly Arr<SubjectViewModel> _allSubjectViewModels;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private IDisposable _observationsViewModelIsSelectedSubscriptions;
+    private IDisposable? _observationsViewModelIsSelectedSubscriptions;
     private bool _disposed = false;
   }
 }

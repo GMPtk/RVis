@@ -2,8 +2,8 @@
 {
   public class TSimValue
   {
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
 
-    public TSimElement[] Elements { get; set; }
+    public TSimElement[] Elements { get; set; } = null!;
   }
 }

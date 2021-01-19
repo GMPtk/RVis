@@ -30,20 +30,18 @@ namespace RVis.Model
     public bool HasOutput(SimInput serieInput, Simulation simulation) =>
       HasOutput(serieInput.Hash, simulation);
 
-    public Option<NumDataTable> GetOutput(string serieInputHash, Simulation simulation)
-    {
-      var got = _outputs.TryGetValue((serieInputHash, simulation), out SimDataOutput output);
-      return got ? Some(output.Serie) : None;
-    }
+    public Option<NumDataTable> GetOutput(string serieInputHash, Simulation simulation) =>
+      _outputs.TryGetValue((serieInputHash, simulation), out SimDataOutput? output)
+        ? Some(output.Serie)
+        : None;
 
     public Option<NumDataTable> GetOutput(SimInput serieInput, Simulation simulation) =>
       GetOutput(serieInput.Hash, simulation);
 
-    public Option<(SimInput SerieInput, OutputOrigin OutputOrigin, bool Persist, DateTime PersistedOn)> GetOutputInfo(string serieInputHash, Simulation simulation)
-    {
-      var got = _outputs.TryGetValue((serieInputHash, simulation), out SimDataOutput output);
-      return got ? Some((output.SerieInput, output.OutputOrigin, output.Persist, output.PersistedOn)) : None;
-    }
+    public Option<(SimInput SerieInput, OutputOrigin OutputOrigin, bool Persist, DateTime PersistedOn)> GetOutputInfo(string serieInputHash, Simulation simulation) =>
+      _outputs.TryGetValue((serieInputHash, simulation), out SimDataOutput? output)
+        ? Some((output.SerieInput, output.OutputOrigin, output.Persist, output.PersistedOn))
+        : None;
 
     public Option<(SimInput SerieInput, OutputOrigin OutputOrigin, bool Persist, DateTime PersistedOn)> GetOutputInfo(SimInput serieInput, Simulation simulation) =>
       GetOutputInfo(serieInput.Hash, simulation);
@@ -85,7 +83,7 @@ namespace RVis.Model
 
       foreach (var key in keys)
       {
-        if (!_outputs.TryGetValue(key, out SimDataOutput simDataOutput)) continue;
+        if (!_outputs.TryGetValue(key, out SimDataOutput? simDataOutput)) continue;
 
         if (simDataOutput.AcquiredOn < utcCutOff)
         {
@@ -156,7 +154,7 @@ namespace RVis.Model
 
     private bool IsDataServiceRunning => _serviceThread?.IsAlive == true;
 
-    private void ServeData(object stateInfo)
+    private void ServeData(object? stateInfo)
     {
       Log.Debug($"{nameof(SimData)} entering service loop on MTID={Thread.CurrentThread.ManagedThreadId}");
 
@@ -185,8 +183,8 @@ namespace RVis.Model
     private readonly ConcurrentDictionary<(string InputHash, Simulation Simulation), SimDataOutput> _outputs =
       new ConcurrentDictionary<(string InputHash, Simulation Simulation), SimDataOutput>();
 
-    private Thread _serviceThread;
-    private CancellationTokenSource _ctsDataService;
+    private Thread? _serviceThread;
+    private CancellationTokenSource? _ctsDataService;
     private readonly ManualResetEventSlim _mreDataService = new ManualResetEventSlim(false);
 
     private readonly IDictionary<Simulation, SimExecutionInterval> _executionIntervals = new Dictionary<Simulation, SimExecutionInterval>();

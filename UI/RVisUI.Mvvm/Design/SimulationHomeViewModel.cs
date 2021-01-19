@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
+#nullable disable
+
 namespace RVisUI.Mvvm.Design
 {
   public class SimulationHomeViewModel : ISimulationHomeViewModel

@@ -1,8 +1,3 @@
-# .NET Desktop
-# Build and run tests for .NET Desktop or Windows classic desktop solutions.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
-
 trigger:
 - master
 
@@ -10,61 +5,101 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: '**/*.sln'
   buildConfiguration: 'Release'
+  rid32: 'win-x86'
+  rid64: 'win-x64'
 
 steps:
-- task: NuGetToolInstaller@1
-
-- task: NuGetCommand@2
+- task: UseDotNet@2
+  displayName: 'Install .NET Core SDK'
   inputs:
-    restoreSolution: '$(solution)'
+    version: 5.0.x
+    performMultiLevelLookup: true
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
+  displayName: 'Build 32-bit'
   inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DefineConstants="IS_PIPELINES_BUILD"'
-    platform: 'Any CPU'
-    configuration: '$(buildConfiguration)'
+    command: build
+    projects: '**/*.csproj'
+    arguments: '--configuration $(buildConfiguration) /p:DefineConstants=IS_PIPELINES_BUILD -r $(rid32)'
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
+  displayName: 'Build 64-bit'
   inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DefineConstants="IS_PIPELINES_BUILD"'
-    platform: 'x64'
-    configuration: '$(buildConfiguration)'
+    command: build
+    projects: '**/*.csproj'
+    arguments: '--configuration $(buildConfiguration) /p:DefineConstants=IS_PIPELINES_BUILD -r $(rid64)'
 
-- task: VSTest@2
+- task: DotNetCoreCLI@2
+  displayName: 'Test'
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    command: test
+    projects: 'Test/**/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --runtime $(rid32) --no-build'
 
 - task: PowerShell@2
+  displayName: 'Set app version variables'
   inputs:
     filePath: 'SetAppVerVariables.ps1'
 
+- task: DotNetCoreCLI@2
+  displayName: 'Publish RVisUI 32-bit'
+  inputs:
+    command: publish
+    publishWebProjects: False
+    arguments: 'UI\RVisUI\RVisUI.csproj --configuration $(BuildConfiguration) /p:SelfContained=true -r $(rid32) --output $(Build.ArtifactStagingDirectory)/$(rid32)/RVis_v$(AppVer)'
+    zipAfterPublish: False
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish RVis server 32-bit'
+  inputs:
+    command: publish
+    publishWebProjects: False
+    arguments: 'R\RVis.Server\RVis.Server.csproj --configuration $(BuildConfiguration) /p:SelfContained=true -r $(rid32) --output $(Build.ArtifactStagingDirectory)/$(rid32)/RVis_v$(AppVer)/R'
+    zipAfterPublish: False
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish RVisUI 64-bit'
+  inputs:
+    command: publish
+    publishWebProjects: False
+    arguments: 'UI\RVisUI\RVisUI.csproj --configuration $(BuildConfiguration) /p:SelfContained=true -r $(rid64) --output $(Build.ArtifactStagingDirectory)/$(rid64)/RVis_v$(AppVer)'
+    zipAfterPublish: False
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish RVis server 64-bit'
+  inputs:
+    command: publish
+    publishWebProjects: False
+    arguments: 'R\RVis.Server\RVis.Server.csproj --configuration $(BuildConfiguration) /p:SelfContained=true -r $(rid64) --output $(Build.ArtifactStagingDirectory)/$(rid64)/RVis_v$(AppVer)/R'
+    zipAfterPublish: False
+
 - task: BatchScript@1
+  displayName: 'Publish modules'
   inputs:
     filename: 'prepare_release.bat'
-    arguments: '$(AppVer)'
+    arguments: '$(AppVer) $(Build.ArtifactStagingDirectory)'
 
 - task: ArchiveFiles@2
+  displayName: 'Zip 32-bit'
   inputs:
-    rootFolderOrFile: 'RVis_v$(AppVer)'
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/$(rid32)/RVis_v$(AppVer)'
     includeRootFolder: true
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/RVis_v$(AppVer).zip'
     replaceExistingArchive: true
 
 - task: ArchiveFiles@2
+  displayName: 'Zip 64-bit'
   inputs:
-    rootFolderOrFile: 'RVis_v$(AppVer)_x64'
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/$(rid64)/RVis_v$(AppVer)'
     includeRootFolder: true
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/RVis_v$(AppVer)_x64.zip'
     replaceExistingArchive: true
 
 - task: GitHubRelease@1
+  displayName: 'Release zips on GitHub'
   inputs:
     gitHubConnection: 'GH-GMPtk-RVis'
     repositoryName: '$(Build.Repository.Name)'

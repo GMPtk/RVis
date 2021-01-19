@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Input;
 
+#nullable disable
+
 namespace RVisUI.Mvvm.Design
 {
   public sealed class ImportMCSimViewModel : IImportMCSimViewModel

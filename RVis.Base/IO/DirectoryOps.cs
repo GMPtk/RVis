@@ -4,6 +4,7 @@ using static RVis.Base.Meta;
 using static System.Environment;
 using static System.IO.Directory;
 using static System.IO.Path;
+using static RVis.Base.Check;
 
 namespace RVis.Base
 {
@@ -13,9 +14,11 @@ namespace RVis.Base
 
     public static DirectoryInfo DocumentsDirectory => GetDocumentsDirectory(null);
 
-    private static DirectoryInfo GetApplicationDataDirectory(string subDirectory)
+    private static DirectoryInfo GetApplicationDataDirectory(string? subDirectory)
     {
       if (_applicationDataDirectory.IsntAString()) EnsureApplicationDataDirectory();
+
+      RequireNotNullEmptyWhiteSpace(_applicationDataDirectory);
 
       if (subDirectory.IsntAString()) return new DirectoryInfo(_applicationDataDirectory);
 
@@ -26,12 +29,14 @@ namespace RVis.Base
       return new DirectoryInfo(path);
     }
 
-    private static DirectoryInfo GetDocumentsDirectory(string subDirectory)
+    private static DirectoryInfo GetDocumentsDirectory(string? subDirectory)
     {
       if (_documentsDirectory.IsntAString())
       {
         EnsureDocumentsDirectory();
       }
+
+      RequireNotNullEmptyWhiteSpace(_documentsDirectory);
 
       if (subDirectory.IsntAString())
       {
@@ -70,7 +75,7 @@ namespace RVis.Base
       _documentsDirectory = path;
     }
 
-    private static string _applicationDataDirectory;
-    private static string _documentsDirectory;
+    private static string? _applicationDataDirectory;
+    private static string? _documentsDirectory;
   }
 }

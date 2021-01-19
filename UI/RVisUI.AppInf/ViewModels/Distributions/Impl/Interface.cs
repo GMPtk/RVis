@@ -9,9 +9,9 @@ namespace RVisUI.AppInf
   {
     DistributionType DistributionType { get; }
     bool AllowTruncation { get; set; }
-    IDistribution DistributionUnsafe { get; set; }
-    string Variable { get; set; }
-    string Unit { get; set; }
+    IDistribution? DistributionUnsafe { get; set; }
+    string? Variable { get; set; }
+    string? Unit { get; set; }
     PlotModel PlotModel { get; }
   }
 

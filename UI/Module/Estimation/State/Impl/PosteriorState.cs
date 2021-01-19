@@ -16,7 +16,7 @@ namespace Estimation
       SavePosteriorState(posteriorState, pathToPosteriorState);
     }
 
-    internal static PosteriorState Load(string pathToEstimationDesign)
+    internal static PosteriorState? Load(string pathToEstimationDesign)
     {
       RequireDirectory(pathToEstimationDesign);
 

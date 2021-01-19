@@ -26,7 +26,7 @@ namespace RVis.Base
 
   public sealed class CliOptSpec : Record<CliOptSpec>
   {
-    public CliOptSpec(string option, OptArgType optArgType, OptArgUsage optArgUsage)
+    public CliOptSpec(string? option, OptArgType optArgType, OptArgUsage optArgUsage)
     {
       RequireTrue(optArgType == OptArgType.ArgOnly || option.IsAString());
 
@@ -37,14 +37,14 @@ namespace RVis.Base
 
     public static readonly CliOptSpec ArgOnly = new CliOptSpec(null, OptArgType.ArgOnly, OptArgUsage.Required);
 
-    public readonly string Option;
+    public readonly string? Option;
     public readonly OptArgType OptArgType;
     public readonly OptArgUsage OptArgUsage;
   }
 
   public sealed class CliOpt : Record<CliOpt>
   {
-    public CliOpt(CliOptSpec cliOptSpec, string argument)
+    public CliOpt(CliOptSpec cliOptSpec, string? argument)
     {
       RequireTrue(
         cliOptSpec.OptArgUsage != OptArgUsage.Required || argument.IsAString(),
@@ -52,7 +52,7 @@ namespace RVis.Base
         );
 
       CliOptSpec = cliOptSpec;
-      Argument = argument;
+      Argument = null == argument ? None : Some(argument);
     }
 
     public CliOpt(CliOptSpec cliOptSpec) : this(cliOptSpec, null) { }
@@ -65,7 +65,7 @@ namespace RVis.Base
   {
     public static Seq<CliOptSpec> ToCliOptSpecs(this Seq<string> optSpecs)
     {
-      CliOptSpec StringToCliOptSpec(string optSpec)
+      static CliOptSpec StringToCliOptSpec(string optSpec)
       {
         var optArgType = 1 < optSpec.Length ? OptArgType.LongOpt : OptArgType.ShortOpt;
 
@@ -97,7 +97,7 @@ namespace RVis.Base
         arg = arg.TrimStart('-');
 
         string option;
-        string argument;
+        string? argument;
 
         if (optArgType == OptArgType.LongOpt)
         {
@@ -110,13 +110,13 @@ namespace RVis.Base
           else
           {
             option = arg.Substring(0, index);
-            argument = arg.Substring(index + 1);
+            argument = arg[(index + 1)..];
           }
         }
         else
         {
           option = arg.Substring(0, 1);
-          argument = arg.Length > 1 ? arg.Substring(1) : null;
+          argument = arg.Length > 1 ? arg[1..] : null;
         }
 
         if (argument.IsntAString()) argument = null;
@@ -136,7 +136,7 @@ namespace RVis.Base
 
     public static Option<CliOpt> GetOpt<T>(this Seq<CliOpt> cliOpts, params T[] ts)
     {
-      var options = ts.Map(t => Convert.ToString(t,InvariantCulture).PascalToHyphenated().ToLowerInvariant()).ToSeq();
+      var options = ts.Map(t => Convert.ToString(t,InvariantCulture)!.PascalToHyphenated().ToLowerInvariant()).ToSeq();
       return GetOptImpl(cliOpts, options);
     }
 
@@ -144,7 +144,7 @@ namespace RVis.Base
       GetOptImpl(cliOpts, options.Map(s => s.PascalToHyphenated().ToLowerInvariant()).ToSeq());
 
     public static Either<string, Option<U>> GetOpt<T, U>(this Seq<CliOpt> cliOpts, params T[] ts) =>
-      GetOptImpl<U>(cliOpts, ts.Map(t => Convert.ToString(t, InvariantCulture).PascalToHyphenated().ToLowerInvariant()).ToSeq());
+      GetOptImpl<U>(cliOpts, ts.Map(t => Convert.ToString(t, InvariantCulture)!.PascalToHyphenated().ToLowerInvariant()).ToSeq());
 
     public static Either<string, Option<T>> GetOpt<T>(this Seq<CliOpt> cliOpts, params string[] options) =>
       GetOptImpl<T>(cliOpts, options.ToSeq());

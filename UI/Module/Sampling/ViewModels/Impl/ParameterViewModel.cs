@@ -6,7 +6,7 @@ namespace Sampling
 {
   internal sealed class ParameterViewModel : IParameterViewModel, INotifyPropertyChanged
   {
-    internal ParameterViewModel(string name, ICommand toggleSelect)
+    internal ParameterViewModel(string name, ICommand? toggleSelect)
     {
       Name = name;
       ToggleSelect = toggleSelect;
@@ -15,12 +15,12 @@ namespace Sampling
 
     public string Name { get; }
 
-    public string Distribution
+    public string? Distribution
     {
       get => _distribution;
       set => this.RaiseAndSetIfChanged(ref _distribution, value, PropertyChanged);
     }
-    private string _distribution;
+    private string? _distribution;
 
     public bool IsSelected
     {
@@ -29,10 +29,10 @@ namespace Sampling
     }
     private bool _isSelected;
 
-    public ICommand ToggleSelect { get; }
+    public ICommand? ToggleSelect { get; }
 
     public string SortKey { get; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

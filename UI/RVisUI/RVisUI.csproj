@@ -1,426 +1,77 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D4C8E902-3493-4D47-B2AE-26A6911F9517}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>RVisUI</RootNamespace>
-    <AssemblyName>RVisUI</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x64</Platforms>
     <ApplicationIcon>Resources\app.ico</ApplicationIcon>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>latest</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>latest</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Transactions" />
-    <Reference Include="System.Windows" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
+    <None Remove="appsettings.json" />
+    <None Remove="Resources\app.ico" />
   </ItemGroup>
+
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </ApplicationDefinition>
-    <Compile Include="Controls\AppSettingsFlyout.xaml.cs">
-      <DependentUpon>AppSettingsFlyout.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\BusyOverlay.xaml.cs">
-      <DependentUpon>BusyOverlay.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Dialogs\AskYesNoDialog.xaml.cs">
-      <DependentUpon>AskYesNoDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Dialogs\ChangeDescriptionUnitDialog.xaml.cs">
-      <DependentUpon>ChangeDescriptionUnitDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Dialogs\CommonConfigurationDialog.xaml.cs">
-      <DependentUpon>CommonConfigurationDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Dialogs\ConfigureModulesDialog.xaml.cs">
-      <DependentUpon>ConfigureModulesDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Dialogs\DataExportConfigurationDialog.xaml.cs">
-      <DependentUpon>DataExportConfigurationDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Dialogs\ImportExecDialog.xaml.cs">
-      <DependentUpon>ImportExecDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Dialogs\ImportTmplDialog.xaml.cs">
-      <DependentUpon>ImportTmplDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Dialogs\NotifyDialog.xaml.cs">
-      <DependentUpon>NotifyDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Dialogs\SelectExecDialog.xaml.cs">
-      <DependentUpon>SelectExecDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\FailedStartUpView.xaml.cs">
-      <DependentUpon>FailedStartUpView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\HomeView.xaml.cs">
-      <DependentUpon>HomeView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\Impl\PaletteSelector.xaml.cs">
-      <DependentUpon>PaletteSelector.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\Impl\SharedStateView.xaml.cs">
-      <DependentUpon>SharedStateView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\Impl\ZoomView.xaml.cs">
-      <DependentUpon>ZoomView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\ImportMCSimView.xaml.cs">
-      <DependentUpon>ImportMCSimView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\ImportSimulationView.xaml.cs">
-      <DependentUpon>ImportSimulationView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\LibraryView.xaml.cs">
-      <DependentUpon>LibraryView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\ModuleNotSupportedView.xaml.cs">
-      <DependentUpon>ModuleNotSupportedView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\SelectSimulationView.xaml.cs">
-      <DependentUpon>SelectSimulationView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\SimulationHomeView.xaml.cs">
-      <DependentUpon>SimulationHomeView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\ActiveViewTemplateSelector.cs" />
-    <Compile Include="DepProps\Content\Content.cs" />
-    <Page Include="Controls\AppSettingsFlyout.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\BusyOverlay.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Dialogs\AskYesNoDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Dialogs\ChangeDescriptionUnitDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Dialogs\CommonConfigurationDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Dialogs\ConfigureModulesDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Dialogs\DataExportConfigurationDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Dialogs\ImportExecDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Dialogs\ImportTmplDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Dialogs\NotifyDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Dialogs\SelectExecDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\FailedStartUpView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\HomeView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\Impl\PaletteSelector.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\Impl\SharedStateView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\Impl\ZoomView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\ImportMCSimView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\ImportSimulationView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\LibraryView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\ModuleNotSupportedView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\SelectSimulationView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\SimulationHomeView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="..\..\Version\VersionInfo.cs">
-      <Link>VersionInfo.cs</Link>
-    </Compile>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="AppImpl\App.Diagnostics.cs" />
-    <Compile Include="AppImpl\App.Startup.cs" />
-    <Compile Include="AppImpl\App.Window.cs" />
-    <Compile Include="DepProps\Layout\Layout.cs" />
-    <Compile Include="Extensions\ThemeExt.cs" />
-    <Compile Include="Extensions\SettingsExt.cs" />
-    <Compile Include="Interop\SafeNativeMethods.cs" />
-    <Compile Include="Ioc\AppModule.cs" />
-    <Compile Include="Ioc\AppService.cs" />
-    <Compile Include="Ioc\AppSettings.cs" />
-    <Compile Include="Ioc\AppState.cs" />
-    <Compile Include="Ioc\Impl\AppState.Sim.cs" />
-    <Compile Include="Ioc\Impl\AppState.UI.cs" />
-    <Compile Include="Ioc\Impl\AppState.Module.cs" />
-    <Compile Include="Ioc\Impl\AppState.LifeCycle.cs" />
-    <Compile Include="Ioc\Mvvm\AppSettingsViewModel.cs" />
-    <Compile Include="Ioc\Mvvm\Enum.cs" />
-    <Compile Include="Ioc\Mvvm\Impl\SwatchViewModel.cs" />
-    <Compile Include="Ioc\Mvvm\Impl\HueViewModel.cs" />
-    <Compile Include="Ioc\Mvvm\Interface.cs" />
-    <Compile Include="Ioc\Mvvm\ModuleConfigViewModel.cs" />
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
+    <PackageReference Include="MahApps.Metro" Version="2.4.3" />
+    <PackageReference Include="MahApps.Metro.IconPacks" Version="4.8.0" />
+    <PackageReference Include="MaterialDesignColors" Version="1.2.7" />
+    <PackageReference Include="MaterialDesignThemes" Version="3.2.0" />
+    <PackageReference Include="MaterialDesignThemes.MahApps" Version="0.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.19" />
+    <PackageReference Include="ninject.extensions.conventions" Version="3.3.0" />
+    <PackageReference Include="ReactiveUI.WPF" Version="13.0.27" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\R\RVis.Client\RVis.Client.csproj" />
+    <ProjectReference Include="..\RVisUI.AppInf\RVisUI.AppInf.csproj" />
+    <ProjectReference Include="..\RVisUI.Ioc\RVisUI.Ioc.csproj" />
+    <ProjectReference Include="..\RVisUI.WPF\RVisUI.Wpf.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\app.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="Properties\Settings.settings">
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\RVis.Base\RVis.Base.csproj">
-      <Project>{75df8b2f-d179-436d-8107-be640f3c3531}</Project>
-      <Name>RVis.Base</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\RVis.Data\RVis.Data.csproj">
-      <Project>{4dee84dc-ab9e-4ae7-9021-2c0fab41964d}</Project>
-      <Name>RVis.Data</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\RVis.Model\RVis.Model.csproj">
-      <Project>{3edaa788-c299-4133-b59a-d9f3f13fa978}</Project>
-      <Name>RVis.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\WinR\RVis.Client\RVis.Client.csproj">
-      <Project>{c538987a-1dad-48ca-a3dd-cdd00f75aede}</Project>
-      <Name>RVis.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RVisUI.AppInf\RVisUI.AppInf.csproj">
-      <Project>{11039298-b9bf-4b94-86bb-c6aa6ac8469f}</Project>
-      <Name>RVisUI.AppInf</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RVisUI.Ioc\RVisUI.Ioc.csproj">
-      <Project>{e10a54a2-08d1-435a-9b2e-f828a6a55662}</Project>
-      <Name>RVisUI.Ioc</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RVisUI.Model\RVisUI.Model.csproj">
-      <Project>{3b88f57e-4c6d-49e4-8d8e-71bc81ea95da}</Project>
-      <Name>RVisUI.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RVisUI.Mvvm\RVisUI.Mvvm.csproj">
-      <Project>{238e1dcb-2aa1-4233-8b90-53e43f6b6c27}</Project>
-      <Name>RVisUI.Mvvm</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RVisUI.WPF\RVisUI.Wpf.csproj">
-      <Project>{306c45cd-7a5f-4ebd-be4b-8be5deddaea5}</Project>
-      <Name>RVisUI.Wpf</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\app.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Castle.Core">
-      <Version>4.4.0</Version>
-    </PackageReference>
-    <PackageReference Include="LanguageExt.Core">
-      <Version>3.3.46</Version>
-    </PackageReference>
-    <PackageReference Include="MahApps.Metro">
-      <Version>1.6.5</Version>
-    </PackageReference>
-    <PackageReference Include="MahApps.Metro.IconPacks">
-      <Version>3.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="MaterialDesignColors">
-      <Version>1.2.1</Version>
-    </PackageReference>
-    <PackageReference Include="MaterialDesignThemes">
-      <Version>2.6.0</Version>
-    </PackageReference>
-    <PackageReference Include="MaterialDesignThemes.MahApps">
-      <Version>0.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.WindowsAPICodePack-Shell">
-      <Version>1.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf">
-      <Version>1.1.3</Version>
-    </PackageReference>
-    <PackageReference Include="Ninject">
-      <Version>3.3.4</Version>
-    </PackageReference>
-    <PackageReference Include="Ninject.Extensions.Conventions">
-      <Version>3.3.0</Version>
-    </PackageReference>
-    <PackageReference Include="NLog">
-      <Version>4.6.8</Version>
-    </PackageReference>
-    <PackageReference Include="ReactiveUI">
-      <Version>11.0.6</Version>
-    </PackageReference>
-    <PackageReference Include="ReactiveUI.WPF">
-      <Version>11.0.6</Version>
-    </PackageReference>
-    <PackageReference Include="System.Reactive.Core">
-      <Version>4.3.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.Reactive.Interfaces">
-      <Version>4.3.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.Reactive.Linq">
-      <Version>4.3.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.Reactive.PlatformServices">
-      <Version>4.3.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.Reactive.Windows.Threading">
-      <Version>4.3.2</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.7.1">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.7.1 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

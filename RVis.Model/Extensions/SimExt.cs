@@ -7,16 +7,17 @@ using System.IO;
 using static LanguageExt.Prelude;
 using static RVis.Model.Constant;
 using static RVis.Model.Sim;
+using static RVis.Base.Check;
 
 namespace RVis.Model.Extensions
 {
   public static partial class SimExt
   {
     internal static bool IsRSimulation(this Simulation simulation) =>
-      simulation.SimConfig.SimCode.File.EndsWith(".R", StringComparison.InvariantCultureIgnoreCase);
+      simulation.SimConfig.SimCode.File?.EndsWith(".R", StringComparison.InvariantCultureIgnoreCase) == true;
 
     internal static bool IsMCSimSimulation(this Simulation simulation) =>
-      simulation.SimConfig.SimCode.File.EndsWith(".exe", StringComparison.InvariantCultureIgnoreCase);
+      simulation.SimConfig.SimCode.File?.EndsWith(".exe", StringComparison.InvariantCultureIgnoreCase) == true;
 
     internal static Option<SimConfig> LoadConfig(this Simulation simulation, string inputHash)
     {
@@ -24,6 +25,7 @@ namespace RVis.Model.Extensions
 
       var pathToData = GetPathToData(simulation, inputHash);
       var pathToDataDirectory = Path.GetDirectoryName(pathToData);
+      RequireNotNullEmptyWhiteSpace(pathToDataDirectory);
       if (!Directory.Exists(pathToDataDirectory)) return None;
 
       var pathToEditsFile = Path.Combine(pathToDataDirectory, EditsFileName);
@@ -54,7 +56,7 @@ namespace RVis.Model.Extensions
       Toml.WriteFile(toToml, pathToConfig);
     }
 
-    internal static readonly string SessionLogFileName = $"{Process.GetCurrentProcess().Id}.{LogFileExtension}";
+    internal static readonly string SessionLogFileName = $"{Environment.ProcessId}.{LogFileExtension}";
     internal const string FmtLogFilesDirectory = "yyyy-MM-dd";
     internal const string LogFileExtension = "log";
     internal const string EditsFileName = "parameters.toml";

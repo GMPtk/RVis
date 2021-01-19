@@ -18,9 +18,9 @@ namespace Evidence
   {
     private class _ModuleStateDTO
     {
-      public string[] SelectedObservationsReferences { get; set; }
-      public string SelectedSubject { get; set; }
-      public string SelectedEvidenceSourceReference { get; set; }
+      public string[]? SelectedObservationsReferences { get; set; }
+      public string? SelectedSubject { get; set; }
+      public string? SelectedEvidenceSourceReference { get; set; }
       public bool? AutoApplyParameterSharedState { get; set; }
       public bool? AutoShareParameterSharedState { get; set; }
       public bool? AutoApplyElementSharedState { get; set; }
@@ -38,9 +38,9 @@ namespace Evidence
             .Map(o => evidence.GetReference(o))
             .ToArray(),
           SelectedSubject = instance.SelectedObservationsSet
-            .MatchUnsafe(os => os.Subject, () => default),
+            .MatchUnsafe<string?>(os => os.Subject, () => default),
           SelectedEvidenceSourceReference = instance.SelectedEvidenceSource
-            .MatchUnsafe(es => es.GetReference(), () => default),
+            .MatchUnsafe<string?>(es => es.GetReference(), () => default),
           AutoApplyParameterSharedState = instance.AutoApplyParameterSharedState,
           AutoShareParameterSharedState = instance.AutoShareParameterSharedState,
           AutoApplyElementSharedState = instance.AutoApplyElementSharedState,
@@ -209,7 +209,7 @@ namespace Evidence
     }
     private bool? _autoShareObservationsSharedState;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -260,7 +260,7 @@ namespace Evidence
       }
     }
 
-    private IDisposable _subscriptions;
+    private IDisposable? _subscriptions;
     private bool _disposed = false;
   }
 }

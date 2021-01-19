@@ -2,6 +2,6 @@
 {
   public class TSimOutput
   {
-    public TSimValue[] Values { get; set; }
+    public TSimValue[]? Values { get; set; }
   }
 }

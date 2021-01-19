@@ -22,7 +22,7 @@ namespace RVisUI.AppInf
         _appSettings
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(ObserveAppSettingsPropertyChange)
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(ObserveAppSettingsPropertyChange)
             )
 
         );
@@ -67,7 +67,7 @@ namespace RVisUI.AppInf
       }
     }
 
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (propertyName.IsThemeProperty()) ObserveThemeChange();
     }

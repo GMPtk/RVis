@@ -16,10 +16,11 @@ namespace RVisUI.Model
     internal ModuleInfo(
       string id,
       string displayName,
-      string displayIcon,
+      string? displayIcon,
       string description,
       Arr<string> requiredRPackageNames,
       ModulePurpose modulePurpose,
+      Arr<string> supportedTaskNames,
       IRVisExtensibility service,
       string assemblyVersion,
       string key
@@ -31,6 +32,7 @@ namespace RVisUI.Model
       Description = description;
       RequiredRPackageNames = requiredRPackageNames;
       ModulePurpose = modulePurpose;
+      SupportedTaskNames = supportedTaskNames;
       Service = service;
       AssemblyVersion = assemblyVersion;
       Key = key;
@@ -38,10 +40,11 @@ namespace RVisUI.Model
 
     public string ID { get; }
     public string DisplayName { get; }
-    public string DisplayIcon { get; }
+    public string? DisplayIcon { get; }
     public string Description { get; }
     public Arr<string> RequiredRPackageNames { get; }
     public ModulePurpose ModulePurpose { get; }
+    public Arr<string> SupportedTaskNames { get; }
     public bool IsEnabled { get; set; }
     public IRVisExtensibility Service { get; }
     public string AssemblyVersion { get; }
@@ -60,7 +63,8 @@ namespace RVisUI.Model
         var description = type.GetCustomAttribute<DescriptionAttribute>()?.Description ?? type.Name;
         var modulePurpose = type.GetCustomAttribute<PurposeAttribute>()?.ModulePurpose ?? ModulePurpose.None;
         var requiredRPackageNames = type.GetCustomAttribute<RequiredRPackagesAttribute>()?.PackageNames ?? default;
-        var assemblyVersion = type.Assembly.GetName().Version.AsMmbrString();
+        var supportedTaskNames = type.GetCustomAttribute<SupportedTasksAttribute>()?.TaskNames ?? default;
+        var assemblyVersion = type.Assembly.GetName().Version.AssertNotNull().AsMmbrString();
 
         var moduleInfo = new ModuleInfo(
           id,
@@ -69,6 +73,7 @@ namespace RVisUI.Model
           description,
           requiredRPackageNames,
           modulePurpose,
+          supportedTaskNames,
           service,
           assemblyVersion,
           displayName.ToKey()
@@ -81,6 +86,12 @@ namespace RVisUI.Model
 
         if (!dropModuleInfo) list.Add(moduleInfo);
       }
+
+      RequireUniqueElements(list, mi => mi.ID, "Found modules with duplicate IDs");
+      RequireUniqueElements(list, mi => mi.Key, "Found modules with duplicate keys");
+
+      var allTaskNames = list.SelectMany(l => l.SupportedTaskNames);
+      RequireUniqueElements(allTaskNames, tn => tn, "Found duplicate task names among modules");
 
       return list.ToArr();
     }

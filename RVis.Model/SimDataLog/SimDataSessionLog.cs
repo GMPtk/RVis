@@ -68,9 +68,9 @@ namespace RVis.Model
       _outputRequestSubscription?.Dispose();
       _outputRequestSubscription = default;
 
-      if (HaveOngoingWriteLogEntriesTask) _writeLogEntriesTask.Wait();
+      if (HaveOngoingWriteLogEntriesTask) _writeLogEntriesTask!.Wait();
       _writeLogEntriesTask = default;
-      if (_pendingToFile.Count > 0) WritePendingToFile();
+      if (!_pendingToFile.IsEmpty) WritePendingToFile();
 
       lock (_logEntriesSyncLock)
       {
@@ -91,9 +91,9 @@ namespace RVis.Model
           _secondIntervalSubscription?.Dispose();
           _outputRequestSubscription?.Dispose();
 
-          if (HaveOngoingWriteLogEntriesTask) _writeLogEntriesTask.Wait();
+          if (HaveOngoingWriteLogEntriesTask) _writeLogEntriesTask!.Wait();
 
-          if (_pendingToFile.Count > 0) WritePendingToFile();
+          if (!_pendingToFile.IsEmpty) WritePendingToFile();
         }
 
         _disposed = true;
@@ -170,7 +170,7 @@ namespace RVis.Model
 
       _writeLogEntriesTask = null;
 
-      if (_pendingToFile.Count == 0) return;
+      if (_pendingToFile.IsEmpty) return;
 
       _writeLogEntriesTask = Task.Run(WritePendingToFile);
     }
@@ -189,17 +189,18 @@ namespace RVis.Model
         var simulation = pending.Simulation;
         var pathToSessionLog = simulation.GetPathToSessionLog();
         var pathToSessionLogDirectory = Path.GetDirectoryName(pathToSessionLog);
+        RequireNotNull(pathToSessionLogDirectory);
         if (!Directory.Exists(pathToSessionLogDirectory)) Directory.CreateDirectory(pathToSessionLogDirectory);
 
-        using (var file = new StreamWriter(pathToSessionLog, true))
+        using var file = new StreamWriter(pathToSessionLog, true);
+        
+        while (_pendingToFile.TryDequeue(out pending))
         {
-          while (_pendingToFile.TryDequeue(out pending))
-          {
-            RequireTrue(simulation == pending.Simulation);
-            logEntries.Add(pending.LogEntry);
-          }
-          foreach (var logEntry in logEntries) file.WriteLine(logEntry.ToString());
+          RequireTrue(simulation == pending.Simulation);
+          logEntries.Add(pending.LogEntry);
         }
+        
+        foreach (var logEntry in logEntries) file.WriteLine(logEntry.ToString());
       }
       catch (Exception ex)
       {
@@ -215,15 +216,15 @@ namespace RVis.Model
     private readonly SimData _simData;
     private readonly IObservable<long> _secondInterval;
 
-    private IDisposable _secondIntervalSubscription;
-    private IDisposable _outputRequestSubscription;
+    private IDisposable? _secondIntervalSubscription;
+    private IDisposable? _outputRequestSubscription;
 
     private int _logIndex;
     private readonly List<SimDataLogEntry> _logEntries = new List<SimDataLogEntry>();
     private readonly object _logEntriesSyncLock = new object();
     private readonly ConcurrentQueue<(Simulation Simulation, SimDataLogEntry LogEntry)> _pendingToFile =
       new ConcurrentQueue<(Simulation Simulation, SimDataLogEntry LogEntry)>();
-    private Task _writeLogEntriesTask;
+    private Task? _writeLogEntriesTask;
 
     private bool _disposed = false;
   }

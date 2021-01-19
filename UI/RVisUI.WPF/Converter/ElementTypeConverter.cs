@@ -2,6 +2,8 @@
 using System.Globalization;
 using System.Windows.Data;
 
+#nullable disable
+
 namespace RVisUI.Wpf
 {
   public class ElementTypeConverter : IValueConverter
@@ -12,7 +14,7 @@ namespace RVisUI.Wpf
     {
       if (!targetType.IsArray) throw new ArgumentException("expecting array", nameof(targetType));
       if (value == default) return default;
-      if (!(value is Array array)) throw new ArgumentException("expecting array", nameof(value));
+      if (value is not Array array) throw new ArgumentException("expecting array", nameof(value));
       return CreateArray(array, targetType.GetElementType());
     }
 
@@ -20,7 +22,7 @@ namespace RVisUI.Wpf
     {
       if (!targetType.IsArray) throw new ArgumentException("expecting array", nameof(targetType));
       if (value == default) return default;
-      if (!(value is Array array)) throw new ArgumentException("expecting array", nameof(value));
+      if (value is not Array array) throw new ArgumentException("expecting array", nameof(value));
       return CreateArray(array, targetType.GetElementType());
     }
 

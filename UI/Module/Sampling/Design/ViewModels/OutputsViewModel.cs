@@ -18,21 +18,19 @@ namespace Sampling.Design
 
     public PlotModel Outputs => CreatePlotModel();
 
+    public PlotController PlotController => new PlotController();
+
     public ICommand ToggleSeriesType => throw new NotImplementedException();
 
     public bool IsSeriesTypeLine => true;
 
     public ICommand ResetAxes => throw new NotImplementedException();
 
-    public int SelectedSample => throw new NotImplementedException();
+    public IOutputsSelectedSampleViewModel OutputsSelectedSampleViewModel { get; } = new OutputsSelectedSampleViewModel();
 
-    public string SampleIdentifier => "Sample #12345678";
+    public IOutputsFilteredSamplesViewModel OutputsFilteredSamplesViewModel { get; } = new OutputsFilteredSamplesViewModel();
 
-    public Arr<string> ParameterValues => Range(1, 40)
-      .Map(i => $"param{i:0000} = {i * 2d} [u]")
-      .ToArr();
-
-    public ICommand ShareParameterValues => throw new NotImplementedException();
+    public IOutputsEvidenceViewModel OutputsEvidenceViewModel { get; } = new OutputsEvidenceViewModel();
 
     private static PlotModel CreatePlotModel()
     {

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "RVis.Server": {
+      "commandName": "Project",
+      "commandLineArgs": "1"
+    }
+  }
+}

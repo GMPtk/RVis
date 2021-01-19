@@ -3,6 +3,8 @@ using RVisUI.AppInf;
 using System.Collections.ObjectModel;
 using static LanguageExt.Prelude;
 
+#nullable disable
+
 namespace Sensitivity.Design
 {
   internal sealed class ParametersViewModel : IParametersViewModel

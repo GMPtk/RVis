@@ -15,7 +15,7 @@ namespace Estimation.Test
       var sourceX = new[] { 1d, 3d, 5d };
       var sourceY = new[] { 7d, 8d, 9d };
 
-      var targetX1 = new double[0];
+      var targetX1 = Array.Empty<double>();
       var expectedY1 = Enumerable.Empty<double>();
 
       var targetX2 = new[] { 1d, 3d, 5d };

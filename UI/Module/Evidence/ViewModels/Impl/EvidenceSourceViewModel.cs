@@ -2,7 +2,7 @@
 {
   internal class EvidenceSourceViewModel : IEvidenceSourceViewModel
   {
-    internal EvidenceSourceViewModel(int id, string name, string description)
+    internal EvidenceSourceViewModel(int id, string name, string? description)
     {
       ID = id;
       Name = name;
@@ -13,6 +13,6 @@
 
     public string Name { get; }
 
-    public string Description { get; }
+    public string? Description { get; }
   }
 }

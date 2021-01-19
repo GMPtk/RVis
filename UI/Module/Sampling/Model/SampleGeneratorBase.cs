@@ -35,7 +35,7 @@ namespace Sampling
 
     public abstract Task<DataTable> GetSamplesAsync();
 
-    protected Arr<(ParameterState ParameterState, double[] Samples)> DoRankCorrelation(
+    protected async Task<Arr<(ParameterState ParameterState, double[] Samples)>> DoRankCorrelationAsync(
       Arr<(ParameterState ParameterState, double[] Samples)> parameterSamples,
       IRVisClient rvisClient
       )
@@ -44,7 +44,6 @@ namespace Sampling
       RequireTrue(parameterSamples.ForAll(ps => ps.ParameterState.IsSelected));
       RequireTrue(parameterSamples.ForAll(ps => ps.ParameterState.DistributionType != DistributionType.Invariant));
       RequireTrue(parameterSamples.Count > 1);
-      RequireTrue(parameterSamples.ForAll(ps => _rankCorrelationDesign.Correlations.Exists(c => c.Parameter == ps.ParameterState.Name)));
 
       var parameters = parameterSamples.Map(ps => ps.ParameterState.Name);
       RequireTrue(parameters.ForAll(
@@ -57,21 +56,21 @@ namespace Sampling
         .Transpose();
 
       var objectNameSamples = "dvm_rc_ds";
-      rvisClient.CreateMatrix(samples, objectNameSamples);
+      await rvisClient.CreateMatrixAsync(samples, objectNameSamples);
 
       var correlations = _rankCorrelationDesign.Correlations
         .CorrelationsFor(parameters)
         .CorrelationsToMatrix();
 
       var objectNameCorrelations = "dvm_rc_corr";
-      rvisClient.CreateMatrix(correlations.ToJagged(), objectNameCorrelations);
+      await rvisClient.CreateMatrixAsync(correlations.ToJagged(), objectNameCorrelations);
 
       var objectNameCorrelated = "dvm_rc_dsc";
       var code = $"{objectNameCorrelated} <- mc2d::cornode({objectNameSamples}, target={objectNameCorrelations})";
 
-      rvisClient.EvaluateNonQuery(code);
+      await rvisClient.EvaluateNonQueryAsync(code);
 
-      var correlated = rvisClient.EvaluateNumData(objectNameCorrelated);
+      var correlated = await rvisClient.EvaluateNumDataAsync(objectNameCorrelated);
 
       parameterSamples = parameterSamples
         .Map((i, ps) => (ps.ParameterState, correlated[i].Data.ToArray()))

@@ -23,7 +23,7 @@ namespace RVisUI.Controls.Dialogs
   {
     public AskYesNoDialog(
       string question,
-      string prompt = default,
+      string? prompt = default,
       string about = "Confirm"
       )
     {

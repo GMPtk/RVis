@@ -36,19 +36,19 @@ namespace Sensitivity
     }
     private Arr<ParameterState> _parameterStates;
 
-    internal SensitivityDesign SensitivityDesign
+    internal SensitivityDesign? SensitivityDesign
     {
       get => _sensitivityDesign;
       set => this.RaiseAndSetIfChanged(ref _sensitivityDesign, value, PropertyChanged);
     }
-    private SensitivityDesign _sensitivityDesign;
+    private SensitivityDesign? _sensitivityDesign;
 
-    public NumDataTable Trace
+    public NumDataTable? Trace
     {
       get => _trace;
       set => this.RaiseAndSetIfChanged(ref _trace, value, PropertyChanged);
     }
-    private NumDataTable _trace;
+    private NumDataTable? _trace;
 
     public Ranking Ranking
     {
@@ -62,12 +62,12 @@ namespace Sensitivity
     private readonly ISubject<(Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier)> _parameterStateChangesSubject =
       new Subject<(Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier)>();
 
-    internal string RootExportDirectory
+    internal string? RootExportDirectory
     {
       get => _rootExportDirectory;
       set => this.RaiseAndSetIfChanged(ref _rootExportDirectory, value, PropertyChanged);
     }
-    private string _rootExportDirectory;
+    private string? _rootExportDirectory;
 
     internal bool OpenAfterExport
     {
@@ -118,7 +118,7 @@ namespace Sensitivity
     }
     private bool? _autoShareObservationsSharedState;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 

@@ -14,26 +14,26 @@ namespace Sensitivity
     }
     private double? _viewHeight;
 
-    public string ChartTitle
+    public string? ChartTitle
     {
       get => _chartTitle;
       set => this.RaiseAndSetIfChanged(ref _chartTitle, value, PropertyChanged);
     }
-    private string _chartTitle;
+    private string? _chartTitle;
 
-    public string YAxisTitle
+    public string? YAxisTitle
     {
       get => _yAxisTitle;
       set => this.RaiseAndSetIfChanged(ref _yAxisTitle, value, PropertyChanged);
     }
-    private string _yAxisTitle;
+    private string? _yAxisTitle;
 
-    public string XAxisTitle
+    public string? XAxisTitle
     {
       get => _xAxisTitle;
       set => this.RaiseAndSetIfChanged(ref _xAxisTitle, value, PropertyChanged);
     }
-    private string _xAxisTitle;
+    private string? _xAxisTitle;
 
     internal OxyColor? MarkerFill
     {
@@ -105,6 +105,6 @@ namespace Sensitivity
     }
     private double _verticalAxisAbsoluteMaximum = MaxValue;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

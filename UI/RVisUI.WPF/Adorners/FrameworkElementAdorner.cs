@@ -15,19 +15,19 @@ namespace RVisUI.Wpf
     //
     // The framework element that is the adorner. 
     //
-    private FrameworkElement child;
+    private readonly FrameworkElement child;
 
     //
     // Placement of the child.
     //
-    private AdornerPlacement horizontalAdornerPlacement = AdornerPlacement.Inside;
-    private AdornerPlacement verticalAdornerPlacement = AdornerPlacement.Inside;
+    private readonly AdornerPlacement horizontalAdornerPlacement = AdornerPlacement.Inside;
+    private readonly AdornerPlacement verticalAdornerPlacement = AdornerPlacement.Inside;
 
     //
     // Offset of the child.
     //
-    private double offsetX = 0.0;
-    private double offsetY = 0.0;
+    private readonly double offsetX = 0.0;
+    private readonly double offsetY = 0.0;
 
     //
     // Position of the child (when not set to NaN).
@@ -40,8 +40,8 @@ namespace RVisUI.Wpf
     {
       this.child = adornerChildElement;
 
-      base.AddLogicalChild(adornerChildElement);
-      base.AddVisualChild(adornerChildElement);
+      AddLogicalChild(adornerChildElement);
+      AddVisualChild(adornerChildElement);
     }
 
     public FrameworkElementAdorner(FrameworkElement adornerChildElement, FrameworkElement adornedElement,
@@ -57,8 +57,8 @@ namespace RVisUI.Wpf
 
       adornedElement.SizeChanged += new SizeChangedEventHandler(adornedElement_SizeChanged);
 
-      base.AddLogicalChild(adornerChildElement);
-      base.AddVisualChild(adornerChildElement);
+      AddLogicalChild(adornerChildElement);
+      AddVisualChild(adornerChildElement);
     }
 
     /// <summary>
@@ -298,8 +298,10 @@ namespace RVisUI.Wpf
     {
       get
       {
-        ArrayList list = new ArrayList();
-        list.Add(this.child);
+        ArrayList list = new ArrayList
+        {
+          this.child
+        };
         return (IEnumerator)list.GetEnumerator();
       }
     }
@@ -309,8 +311,8 @@ namespace RVisUI.Wpf
     /// </summary>
     public void DisconnectChild()
     {
-      base.RemoveLogicalChild(child);
-      base.RemoveVisualChild(child);
+      RemoveLogicalChild(child);
+      RemoveVisualChild(child);
     }
 
     /// <summary>

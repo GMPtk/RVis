@@ -38,6 +38,6 @@ namespace RVis.Model
         .ToArr();
     }
 
-    public EvidenceSourceDTO[] EvidenceSources { get; set; }
+    public EvidenceSourceDTO[] EvidenceSources { get; set; } = null!;
   }
 }

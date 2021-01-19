@@ -3,6 +3,8 @@ using RVisUI.AppInf;
 using System.Collections.ObjectModel;
 using static LanguageExt.Prelude;
 
+#nullable disable
+
 namespace Estimation.Design
 {
   internal sealed class PriorsViewModel : IPriorsViewModel

@@ -35,6 +35,7 @@ namespace RVis.Model.Extensions
       }
 
       var pathToDataDirectory = Path.GetDirectoryName(pathToData);
+      RequireNotNullEmptyWhiteSpace(pathToDataDirectory);
       if (!Directory.Exists(pathToDataDirectory)) Directory.CreateDirectory(pathToDataDirectory);
 
       NumDataTable.SaveToBinaryFile(data, pathToData);

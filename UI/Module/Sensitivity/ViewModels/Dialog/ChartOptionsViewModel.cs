@@ -3,20 +3,21 @@ using ReactiveUI;
 using RVis.Base.Extensions;
 using RVisUI.Model;
 using RVisUI.Model.Extensions;
-using Splat;
 using System;
 using System.ComponentModel;
 using System.Windows.Input;
 using static RVis.Base.Check;
 using static RVis.Base.Extensions.NumExt;
+using static RVisUI.Wpf.WpfTools;
 
 namespace Sensitivity
 {
   internal sealed class ChartOptionsViewModel : INotifyPropertyChanged
   {
     public ChartOptionsViewModel()
+      : this(new RVisUI.AppInf.Design.AppService())
     {
-      RequireTrue(PlatformModeDetector.InDesignMode());
+      RequireTrue(IsInDesignMode);
 
       _windowTitle = "Options Dialog";
 
@@ -84,26 +85,26 @@ namespace Sensitivity
     }
     private bool _showAxesTab;
 
-    public string ChartTitle
+    public string? ChartTitle
     {
       get => _chartTitle;
       set => this.RaiseAndSetIfChanged(ref _chartTitle, value, PropertyChanged);
     }
-    private string _chartTitle;
+    private string? _chartTitle;
 
-    public string YAxisTitle
+    public string? YAxisTitle
     {
       get => _yAxisTitle;
       set => this.RaiseAndSetIfChanged(ref _yAxisTitle, value, PropertyChanged);
     }
-    private string _yAxisTitle;
+    private string? _yAxisTitle;
 
-    public string XAxisTitle
+    public string? XAxisTitle
     {
       get => _xAxisTitle;
       set => this.RaiseAndSetIfChanged(ref _xAxisTitle, value, PropertyChanged);
     }
-    private string _xAxisTitle;
+    private string? _xAxisTitle;
 
     public ICommand OK { get; }
 
@@ -145,12 +146,12 @@ namespace Sensitivity
     }
     private Arr<string> _elementNames;
 
-    public int[] ElementColorIndices
+    public int[]? ElementColorIndices
     {
       get => _elementColorIndices;
       set => this.RaiseAndSetIfChanged(ref _elementColorIndices, value, PropertyChanged);
     }
-    private int[] _elementColorIndices;
+    private int[]? _elementColorIndices;
 
     public bool SelectedOxyColorView
     {
@@ -271,16 +272,16 @@ namespace Sensitivity
     }
     private double _verticalAxisAbsoluteMaximum;
 
-    public string WindowTitle
+    public string? WindowTitle
     {
       get => _windowTitle;
       set => this.RaiseAndSetIfChanged(ref _windowTitle, value, PropertyChanged);
     }
-    private string _windowTitle;
+    private string? _windowTitle;
 
     public ICommand Loaded { get; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void ObservePage(object _)
     {
@@ -322,6 +323,8 @@ namespace Sensitivity
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
+        RequireNotNull(_elementColorIndices);
+
         SelectedOxyColor = _elementColorIndices[SelectedElement];
         SelectedOxyColorView = !SelectedOxyColorView;
       }

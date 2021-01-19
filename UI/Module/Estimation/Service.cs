@@ -1,4 +1,6 @@
-﻿using RVisUI.Model;
+﻿using Nett;
+using RVisUI.Model;
+using System;
 using System.ComponentModel;
 
 namespace Estimation
@@ -21,6 +23,9 @@ namespace Estimation
 
     public object GetViewModel() =>
       new ViewModel(_appState, _appService, _appSettings);
+
+    public IRunControlTask GetRunControlTask(string type, TomlTable taskSpec) => 
+      throw new InvalidOperationException($"{nameof(Estimation)} does not support task: {type}");
 
     private readonly IAppState _appState;
     private readonly IAppService _appService;

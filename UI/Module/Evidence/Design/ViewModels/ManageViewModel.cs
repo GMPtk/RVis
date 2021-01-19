@@ -4,6 +4,8 @@ using System.Linq;
 using System.Windows.Input;
 using static System.Linq.Enumerable;
 
+#nullable disable
+
 namespace Evidence.Design
 {
   internal class ManageViewModel : IManageViewModel

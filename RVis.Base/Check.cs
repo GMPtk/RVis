@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using static RVis.Base.Constant;
@@ -24,7 +25,7 @@ namespace RVis.Base
     /// </summary>
     /// <param name="condition">Something that should be true.</param>
     [DebuggerStepThrough]
-    public static void RequireTrue(bool condition) =>
+    public static void RequireTrue([DoesNotReturnIf(false)] bool condition) =>
       RequireTrue(condition, ERR_NOT_TRUE);
 
     /// <summary>
@@ -33,7 +34,7 @@ namespace RVis.Base
     /// <param name="condition">Something that should be true.</param>
     /// <param name="message">Message for the exception if the condition is not true.</param>
     [DebuggerStepThrough]
-    public static void RequireTrue(bool condition, [Localizable(false)] string message)
+    public static void RequireTrue([DoesNotReturnIf(false)] bool condition, [Localizable(false)] string message)
     {
       if (!condition)
       {
@@ -46,7 +47,7 @@ namespace RVis.Base
     /// </summary>
     /// <param name="condition">Something that should be false.</param>
     [DebuggerStepThrough]
-    public static void RequireFalse(bool condition) =>
+    public static void RequireFalse([DoesNotReturnIf(true)] bool condition) =>
       RequireFalse(condition, ERR_NOT_FALSE);
 
     /// <summary>
@@ -55,7 +56,7 @@ namespace RVis.Base
     /// <param name="condition">Something that should be false.</param>
     /// <param name="message">Message for the exception if the condition is not false.</param>
     [DebuggerStepThrough]
-    public static void RequireFalse(bool condition, [Localizable(false)] string message) =>
+    public static void RequireFalse([DoesNotReturnIf(true)] bool condition, [Localizable(false)] string message) =>
       RequireTrue(!condition, message);
 
     #endregion
@@ -67,7 +68,7 @@ namespace RVis.Base
     /// </summary>
     /// <param name="o">Something that should be null.</param>
     [DebuggerStepThrough]
-    public static void RequireNull(object o) =>
+    public static void RequireNull(object? o) =>
       RequireNull(o, ERR_NOT_NULL);
 
     /// <summary>
@@ -76,7 +77,7 @@ namespace RVis.Base
     /// <param name="o">Something that should be null.</param>
     /// <param name="message">Message for the exception if the object is not null.</param>
     [DebuggerStepThrough]
-    public static void RequireNull(object o, [Localizable(false)] string message)
+    public static void RequireNull(object? o, [Localizable(false)] string message)
     {
       if (o != null)
       {
@@ -89,7 +90,7 @@ namespace RVis.Base
     /// </summary>
     /// <param name="argument">A string should that not be null or empty.</param>
     [DebuggerStepThrough]
-    public static void RequireNullEmptyWhiteSpace(string s) =>
+    public static void RequireNullEmptyWhiteSpace(string? s) =>
       RequireNullEmptyWhiteSpace(s, ERR_STRING_NOT_NULL_OR_EMPTY);
 
     /// <summary>
@@ -98,7 +99,7 @@ namespace RVis.Base
     /// <param name="argument">A string should that not be null or empty.</param>
     /// <param name="message">Message for the exception if the string is null or empty.</param>
     [DebuggerStepThrough]
-    public static void RequireNullEmptyWhiteSpace(string s, [Localizable(false)] string message)
+    public static void RequireNullEmptyWhiteSpace(string? s, [Localizable(false)] string message)
     {
       if (!IsNullOrWhiteSpace(s))
       {
@@ -115,7 +116,7 @@ namespace RVis.Base
     /// </summary>
     /// <param name="o">Something that should not be null.</param>
     [DebuggerStepThrough]
-    public static void RequireNotNull(object o) =>
+    public static void RequireNotNull([NotNull] object? o) =>
       RequireNotNull(o, ERR_NULL);
 
     /// <summary>
@@ -124,7 +125,7 @@ namespace RVis.Base
     /// <param name="o">Something that should not be null.</param>
     /// <param name="message">Message for the exception if the object is null.</param>
     [DebuggerStepThrough]
-    public static void RequireNotNull(object o, [Localizable(false)] string message)
+    public static void RequireNotNull([NotNull] object? o, [Localizable(false)] string message)
     {
       if (o == null)
       {
@@ -137,7 +138,7 @@ namespace RVis.Base
     /// </summary>
     /// <param name="argument">A string should that not be null or empty.</param>
     [DebuggerStepThrough]
-    public static void RequireNotNullEmptyWhiteSpace(string s) =>
+    public static void RequireNotNullEmptyWhiteSpace([NotNull] string? s) =>
       RequireNotNullEmptyWhiteSpace(s, ERR_STRING_NULL_OR_EMPTY);
 
     /// <summary>
@@ -146,7 +147,7 @@ namespace RVis.Base
     /// <param name="argument">A string should that not be null or empty.</param>
     /// <param name="message">Message for the exception if the string is null or empty.</param>
     [DebuggerStepThrough]
-    public static void RequireNotNullEmptyWhiteSpace(string s, [Localizable(false)] string message)
+    public static void RequireNotNullEmptyWhiteSpace([NotNull] string? s, [Localizable(false)] string message)
     {
       if (IsNullOrWhiteSpace(s))
       {
@@ -164,7 +165,7 @@ namespace RVis.Base
     /// <param name="o1">An object.</param>
     /// <param name="o2">Another object that should be equal to the first.</param>
     [DebuggerStepThrough]
-    public static void RequireEqual(object o1, object o2) =>
+    public static void RequireEqual(object o1, object? o2) =>
       RequireEqual(o1, o2, ERR_NOT_EQUAL);
 
     /// <summary>
@@ -174,7 +175,7 @@ namespace RVis.Base
     /// <param name="o2">Another object that should be equal to the first.</param>
     /// <param name="message">Message for the exception if the objects are not equal.</param>
     [DebuggerStepThrough]
-    public static void RequireEqual(object o1, object o2, [Localizable(false)] string message)
+    public static void RequireEqual(object o1, object? o2, [Localizable(false)] string message)
     {
       if (!o1.Equals(o2))
       {
@@ -188,7 +189,7 @@ namespace RVis.Base
     /// <param name="o1">An object.</param>
     /// <param name="o2">Another object that shouldn't be equal to the first.</param>
     [DebuggerStepThrough]
-    public static void RequireNotEqual(object o1, object o2) =>
+    public static void RequireNotEqual(object o1, object? o2) =>
       RequireNotEqual(o1, o2, ERR_EQUAL);
 
     /// <summary>
@@ -198,7 +199,7 @@ namespace RVis.Base
     /// <param name="o2">Another object that shouldn't be equal to the first.</param>
     /// <param name="message">Message for the exception if the objects are equal.</param>
     [DebuggerStepThrough]
-    public static void RequireNotEqual(object o1, object o2, [Localizable(false)] string message)
+    public static void RequireNotEqual(object o1, object? o2, [Localizable(false)] string message)
     {
       if (o1.Equals(o2))
       {
@@ -530,8 +531,10 @@ namespace RVis.Base
     /// <param name="path">A directory that must exist</param>
     /// <param name="message">Context for the error</param>
     [DebuggerStepThrough]
-    public static void RequireDirectory(string path, string message = default)
+    public static void RequireDirectory([NotNull] string? path, string? message = default)
     {
+      RequireNotNull(path);
+
       if (!Directory.Exists(path))
       {
         throw new DirectoryNotFoundException(message ?? $"Does not exist: {path}");
@@ -544,8 +547,10 @@ namespace RVis.Base
     /// <param name="path">A file that must exist</param>
     /// <param name="message">Context for the error</param>
     [DebuggerStepThrough]
-    public static void RequireFile(string path, string message = default)
+    public static void RequireFile([NotNull] string? path, string? message = default)
     {
+      RequireNotNull(path);
+
       if (!File.Exists(path))
       {
         throw new FileNotFoundException(message ?? $"Does not exist: {path}");
@@ -557,11 +562,11 @@ namespace RVis.Base
     #region Type
 
     [DebuggerStepThrough]
-    public static T RequireInstanceOf<T>(object implementation) =>
+    public static T RequireInstanceOf<T>([NotNull] object? implementation) =>
       RequireInstanceOf<T>(implementation, $"Expecting implementation of type {typeof(T).Name}. Received instance of {implementation?.GetType().Name}");
 
     [DebuggerStepThrough]
-    public static T RequireInstanceOf<T>(object implementation, [Localizable(false)] string message)
+    public static T RequireInstanceOf<T>([NotNull] object? implementation, [Localizable(false)] string message)
     {
       if (implementation is T t) return t;
 

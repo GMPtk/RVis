@@ -1,9 +1,13 @@
 ﻿using LanguageExt;
+using MaterialDesignThemes.Wpf;
 using OxyPlot;
+using OxyPlot.Annotations;
 using OxyPlot.Axes;
+using OxyPlot.Legends;
 using OxyPlot.Series;
 using ReactiveUI;
 using RVis.Base.Extensions;
+using RVis.Data;
 using RVis.Model;
 using RVis.Model.Extensions;
 using RVisUI.AppInf.Extensions;
@@ -11,23 +15,33 @@ using RVisUI.Model;
 using RVisUI.Model.Extensions;
 using System;
 using System.ComponentModel;
-using System.Data;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Windows.Input;
 using static RVis.Base.Check;
-using static RVis.Base.Extensions.NumExt;
 using static RVis.Base.Extensions.LangExt;
+using static RVis.Base.Extensions.NumExt;
 
 namespace Sampling
 {
   internal sealed class OutputsViewModel : IOutputsViewModel, INotifyPropertyChanged, IDisposable
   {
-    internal OutputsViewModel(IAppState appState, IAppService appService, IAppSettings appSettings, ModuleState moduleState)
+    internal OutputsViewModel(
+      IAppState appState,
+      IAppService appService,
+      IAppSettings appSettings,
+      ModuleState moduleState,
+      SamplingDesigns samplingDesigns
+      )
     {
       _appState = appState;
+      _appSettings = appSettings;
       _moduleState = moduleState;
       _simulation = appState.Target.AssertSome();
+
+      _outputsSelectedSampleViewModel = new OutputsSelectedSampleViewModel(appState, appService, moduleState);
+      _outputsFilteredSamplesViewModel = new OutputsFilteredSamplesViewModel(appState, appService, moduleState, samplingDesigns);
+      _outputsEvidenceViewModel = new OutputsEvidenceViewModel(appState, appService, moduleState);
 
       var output = _simulation.SimConfig.SimOutput;
 
@@ -36,28 +50,46 @@ namespace Sampling
         .OrderBy(n => n.ToUpperInvariant())
         .ToArr();
 
+      _moduleState.OutputsState.SelectedOutputName ??= _outputNames.Head();
+
       _selectedOutputName = _outputNames.IndexOf(
-        _moduleState.OutputsState.SelectedOutputName ?? _outputNames.Head()
+        _moduleState.OutputsState.SelectedOutputName
         );
 
-      Outputs = CreatePlotModel(output.IndependentVariable);
-      Outputs.MouseDown += HandleOutputsMouseDown;
-      Outputs.DefaultColors = OxyPalettes.Gray(_moduleState.Samples?.Rows.Count ?? 1).Colors;
+      PlotController = new();
+      PlotController.Bind(
+        new OxyMouseDownGesture(OxyMouseButton.Left),
+        new DelegatePlotCommand<OxyMouseDownEventArgs>(HandleOutputsMouseDown)
+        );
+      PlotController.Bind(
+        new OxyMouseDownGesture(OxyMouseButton.Left, OxyModifierKeys.Control),
+        new DelegatePlotCommand<OxyMouseDownEventArgs>(HandleOutputsMouseDown)
+        );
+
+      Outputs = new();
+
+      Outputs.Legends.Add(new Legend());
+
+      var horizontalAxis = new LinearAxis
+      {
+        Position = AxisPosition.Bottom,
+        Title = output.IndependentVariable.Name,
+        Unit = output.IndependentVariable.Unit
+      };
+      Outputs.Axes.Add(horizontalAxis);
+
+      var verticalAxis = new LinearAxis
+      {
+        Position = AxisPosition.Left
+      };
+      Outputs.Axes.Add(verticalAxis);
+
       Outputs.ApplyThemeToPlotModelAndAxes();
 
-      PopulateVerticalAxis();
-      PopulateOutputs();
+      PopulateAll();
 
       ToggleSeriesType = ReactiveCommand.Create(HandleToggleSeriesType);
       ResetAxes = ReactiveCommand.Create(HandleResetAxes);
-
-      ShareParameterValues = ReactiveCommand.Create(
-        HandleShareParameterValues,
-        this.ObservableForProperty(
-          vm => vm.SelectedSample,
-          _ => SelectedSample != NOT_FOUND
-          )
-        );
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
@@ -66,7 +98,7 @@ namespace Sampling
         appSettings
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(
               ObserveAppSettingsPropertyChange
               )
             ),
@@ -79,11 +111,19 @@ namespace Sampling
               )
             ),
 
-        moduleState
-          .ObservableForProperty(ms => ms.Samples)
+        moduleState.OutputsState
+          .ObservableForProperty(os => os.ObservationsReferences)
           .Subscribe(
             _reactiveSafeInvoke.SuspendAndInvoke<object>(
-              ObserveModuleStateSamples
+              ObserveOutputsStateObservationsReferences
+              )
+            ),
+
+        moduleState
+          .ObservableForProperty(ms => ms.FilterConfig)
+          .Subscribe(
+            _reactiveSafeInvoke.SuspendAndInvoke<object>(
+              ObserveModuleStateFilterConfig
               )
             ),
 
@@ -95,19 +135,19 @@ namespace Sampling
               )
             ),
 
+        moduleState
+          .ObservableForProperty(ms => ms.OutputFilters)
+          .Subscribe(
+            _reactiveSafeInvoke.SuspendAndInvoke<object>(
+              ObserveModuleStateOutputFilters
+              )
+            ),
+
         this
           .ObservableForProperty(vm => vm.SelectedOutputName)
           .Subscribe(
             _reactiveSafeInvoke.SuspendAndInvoke<object>(
               ObserveSelectedOutputName
-              )
-            ),
-
-        this
-          .ObservableForProperty(vm => vm.SelectedSample)
-          .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<object>(
-              ObserveSelectedSample
               )
             )
 
@@ -137,6 +177,8 @@ namespace Sampling
 
     public PlotModel Outputs { get; }
 
+    public PlotController PlotController { get; }
+
     public ICommand ToggleSeriesType { get; }
 
     public bool IsSeriesTypeLine
@@ -148,30 +190,13 @@ namespace Sampling
 
     public ICommand ResetAxes { get; }
 
-    public int SelectedSample
-    {
-      get => _selectedSample;
-      set => this.RaiseAndSetIfChanged(ref _selectedSample, value, PropertyChanged);
-    }
-    private int _selectedSample = NOT_FOUND;
+    public IOutputsSelectedSampleViewModel OutputsSelectedSampleViewModel => _outputsSelectedSampleViewModel;
 
-    public string SampleIdentifier
-    {
-      get => _sampleIdentifier;
-      set => this.RaiseAndSetIfChanged(ref _sampleIdentifier, value, PropertyChanged);
-    }
-    private string _sampleIdentifier;
+    public IOutputsFilteredSamplesViewModel OutputsFilteredSamplesViewModel => _outputsFilteredSamplesViewModel;
 
-    public Arr<string> ParameterValues
-    {
-      get => _parameterValues;
-      set => this.RaiseAndSetIfChanged(ref _parameterValues, value, PropertyChanged);
-    }
-    private Arr<string> _parameterValues;
+    public IOutputsEvidenceViewModel OutputsEvidenceViewModel => _outputsEvidenceViewModel;
 
-    public ICommand ShareParameterValues { get; }
-
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() =>
       Dispose(true);
@@ -181,8 +206,12 @@ namespace Sampling
       _moduleState.OutputsState.IsSeriesTypeLine = !IsSeriesTypeLine;
       IsSeriesTypeLine = _moduleState.OutputsState.IsSeriesTypeLine;
 
-      Outputs.Series.Clear();
-      PopulateOutputs();
+      PopulateSeries(repopulate: true);
+      UpdateSelectedSeries(NOT_FOUND, _outputsSelectedSampleViewModel.SelectedSample);
+
+      Outputs.Annotations.Clear();
+      ApplyOutputFilters();
+
       Outputs.InvalidatePlot(updateData: true);
     }
 
@@ -192,85 +221,154 @@ namespace Sampling
       Outputs.InvalidatePlot(updateData: false);
     }
 
-    private void HandleOutputsMouseDown(object sender, OxyMouseDownEventArgs e)
+    private void HandleOutputsMouseDown(IPlotView plotView, IController controller, OxyMouseDownEventArgs e)
     {
+      var indexToUnselect = _outputsSelectedSampleViewModel.SelectedSample;
+
       var series = Outputs.GetSeriesFromPoint(e.Position);
-      SelectedSample = series == default
-        ? NOT_FOUND
-        : RequireInstanceOf<int>(series.Tag);
-    }
 
-    private void HandleShareParameterValues()
-    {
-      var defaultInput = _simulation.SimConfig.SimInput;
+      var (indexToSelect, serieType) = series is null
+        ? (NOT_FOUND, SerieType.None)
+        : RequireInstanceOf<(int, SerieType)>(series.Tag);
 
-      var row = _moduleState.SamplingDesign.Samples.Rows[SelectedSample];
+      if (serieType != SerieType.DepVar) return;
 
-      var parameterStates = _moduleState.SamplingDesign.DesignParameters.Map(dp =>
+      _outputsSelectedSampleViewModel.SelectedSample = indexToSelect;
+
+      var didUpdate = UpdateSelectedSeries(indexToUnselect, indexToSelect);
+      if (didUpdate) Outputs.InvalidatePlot(updateData: false);
+
+      if (series is null) return;
+
+      var xyAxisSeries = RequireInstanceOf<XYAxisSeries>(series);
+
+      var dataPoint = xyAxisSeries.InverseTransform(e.Position);
+
+      if (e.IsControlDown)
       {
-        var (_, minimum, maximum) = _appState.SimSharedState.ParameterSharedStates.GetParameterValueStateOrDefaults(
-          dp.Name,
-          defaultInput.SimParameters
+        _outputsFilteredSamplesViewModel.SetTo(dataPoint.Y);
+      }
+      else
+      {
+        var trackerHitResult = xyAxisSeries.GetNearestPoint(e.Position, interpolate: false);
+        var independentVariableValue = trackerHitResult.DataPoint.X;
+
+        var independentVariableName = _simulation.SimConfig.SimOutput.IndependentVariable.Name;
+        var (_, output) = _moduleState.Outputs.First();
+        var independentData = output[independentVariableName];
+
+        var independentVariableIndex = independentData.Data.FindIndex(d => d == independentVariableValue);
+
+        if (independentVariableIndex.IsntFound()) return;
+
+        _outputsFilteredSamplesViewModel.SetFrom(
+          independentVariableIndex,
+          independentVariableValue,
+          dataPoint.Y
           );
-
-        var value = row.Field<double>(dp.Name);
-        if (value < minimum) minimum = value.GetPreviousOrderOfMagnitude();
-        if (value > maximum) maximum = value.GetNextOrderOfMagnitude();
-
-        return (dp.Name, value, minimum, maximum, NoneOf<IDistribution>());
-      });
-
-      _appState.SimSharedState.ShareParameterState(parameterStates);
+      }
     }
 
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (!propertyName.IsThemeProperty()) return;
 
       Outputs.ApplyThemeToPlotModelAndAxes();
-      Outputs.InvalidatePlot(updateData: false);
-    }
 
-    internal void ObserveOutputsStateSelectedOutputName(object _)
-    {
-      SelectedOutputName = _outputNames.IndexOf(_moduleState.OutputsState.SelectedOutputName);
-
-      PopulateVerticalAxis();
-
-      Outputs.Series.Clear();
-      PopulateOutputs();
-      Outputs.ResetAllAxes();
-      Outputs.InvalidatePlot(updateData: true);
-    }
-
-    internal void ObserveModuleStateSamples(object _)
-    {
-      Outputs.DefaultColors = OxyPalettes.Gray(_moduleState.Samples?.Rows.Count ?? 1).Colors;
-    }
-
-    internal void ObserveModuleStateOutputs(object _)
-    {
-      PopulateVerticalAxis();
-
-      if (_moduleState.Outputs.IsEmpty)
+      if (!_moduleState.Outputs.IsEmpty)
       {
-        Outputs.Series.Clear();
+        Outputs.DefaultColors = _appSettings.IsBaseDark
+          ? OxyPalettes.Hot(_moduleState.Outputs.Count).Colors
+          : OxyPalettes.Cool(_moduleState.Outputs.Count).Colors;
       }
 
-      PopulateOutputs();
+      PopulateSeries(repopulate: true);
+
+      PopulateEvidence();
+
+      Outputs.Annotations.Clear();
+      ApplyOutputFilters();
+
+      Outputs.InvalidatePlot(updateData: true);
+    }
+
+    private void ObserveOutputsStateSelectedOutputName(object _)
+    {
+      SelectedOutputName = _moduleState.OutputsState.SelectedOutputName.IsAString()
+        ? _outputNames.IndexOf(_moduleState.OutputsState.SelectedOutputName)
+        : NOT_FOUND;
+
+      PopulateVerticalAxis();
+
+      PopulateSeries(repopulate: true);
+      UpdateSelectedSeries(NOT_FOUND, _outputsSelectedSampleViewModel.SelectedSample);
+
+      PopulateEvidence();
+
+      Outputs.Annotations.Clear();
+      ApplyOutputFilters();
+
       Outputs.ResetAllAxes();
       Outputs.InvalidatePlot(updateData: true);
-      
-      SelectedSample = NOT_FOUND;
-      PopulateSelectedSample();
+    }
+
+    private void ObserveOutputsStateObservationsReferences(object _)
+    {
+      PopulateEvidence();
+      Outputs.ResetAllAxes();
+      Outputs.InvalidatePlot(updateData: true);
+    }
+
+    private void ObserveModuleStateFilterConfig(object _)
+    {
+      Outputs.Annotations.Clear();
+      ApplyOutputFilters();
+      Outputs.InvalidatePlot(updateData: true);
+    }
+
+    private void ObserveModuleStateOutputs(object _)
+    {
+      if (Outputs.Series.Count == 0)
+      {
+        PopulateVerticalAxis();
+
+        PopulateSeries(repopulate: true);
+
+        PopulateEvidence();
+
+        Outputs.Annotations.Clear();
+        ApplyOutputFilters();
+
+        Outputs.ResetAllAxes();
+        Outputs.InvalidatePlot(updateData: true);
+
+        _outputsSelectedSampleViewModel.SelectedSample = NOT_FOUND;
+      }
+      else
+      {
+        PopulateSeries(repopulate: false);
+      }
+    }
+
+    private void ObserveModuleStateOutputFilters(object _)
+    {
+      Outputs.Annotations.Clear();
+      ApplyOutputFilters();
+      Outputs.InvalidatePlot(updateData: true);
     }
 
     private void ObserveSelectedOutputName(object _)
     {
       PopulateVerticalAxis();
 
-      Outputs.Series.Clear();
-      PopulateOutputs();
+      PopulateSeries(repopulate: true);
+      UpdateSelectedSeries(NOT_FOUND, _outputsSelectedSampleViewModel.SelectedSample);
+
+      PopulateEvidence();
+
+      Outputs.Annotations.Clear();
+      ApplyOutputFilters();
+
       Outputs.ResetAllAxes();
       Outputs.InvalidatePlot(updateData: true);
 
@@ -278,9 +376,6 @@ namespace Sampling
         ? _outputNames[_selectedOutputName]
         : default;
     }
-
-    private void ObserveSelectedSample(object _) => 
-      PopulateSelectedSample();
 
     private void PopulateVerticalAxis()
     {
@@ -292,13 +387,31 @@ namespace Sampling
         ? _simulation.SimConfig.SimOutput.FindElement(outputName).AssertSome()
         : default;
 
-      var verticalAxis = Outputs.GetAxis(AxisPosition.Left);
+      var verticalAxis = Outputs.GetAxis(AxisPosition.Left).AssertNotNull();
       verticalAxis.Title = simValue.Name;
       verticalAxis.Unit = simValue.Unit;
     }
 
-    private void PopulateOutputs()
+    private enum SerieType
     {
+      None,
+      DepVar,
+      Observations
+    }
+
+    private void PopulateSeries(bool repopulate)
+    {
+      var plottedOutputs = Outputs.Series
+        .Select(s => (Series: s, Meta: RequireInstanceOf<(int Index, SerieType SerieType)>(s.Tag)))
+        .Where(t => t.Meta.SerieType == SerieType.DepVar)
+        .ToArr();
+
+      if (repopulate)
+      {
+        plottedOutputs.Iter(po => Outputs.Series.Remove(po.Series));
+        plottedOutputs = default;
+      }
+
       var outputName = _selectedOutputName.IsFound()
         ? _outputNames[_selectedOutputName]
         : default;
@@ -307,16 +420,23 @@ namespace Sampling
       {
         var independentVariableName = _simulation.SimConfig.SimOutput.IndependentVariable.Name;
 
-        _moduleState.Outputs.Iter(t =>
+        void PlotOutput((int, NumDataTable) t)
         {
-          var isPlotted = Outputs.Series.Any(s => RequireInstanceOf<int>(s.Tag) == t.Index);
-          if (isPlotted) return;
+          var (index, output) = t;
 
-          var independentData = t.Output[independentVariableName];
-          var dependentData = t.Output[outputName];
+          if (output is null) return;
+
+          if (!repopulate)
+          {
+            var isPlotted = plottedOutputs.Exists(po => po.Meta.Index == index);
+            if (isPlotted) return;
+          }
+
+          var independentData = output[independentVariableName];
+          var dependentData = output[outputName];
+          var seriesTitle = $"#{index + 1}";
 
           Series series;
-          var seriesTitle = $"#{t.Index + 1}";
 
           if (IsSeriesTypeLine)
           {
@@ -324,9 +444,10 @@ namespace Sampling
             {
               Title = seriesTitle,
               StrokeThickness = 1,
-              LineStyle = LineStyle.Solid, 
+              LineStyle = LineStyle.Solid,
               Color = Outputs.DefaultColors[Outputs.Series.Count % Outputs.DefaultColors.Count],
-              Tag = t.Index
+              RenderInLegend = false,
+              Tag = (index, SerieType.DepVar)
             };
 
             for (var row = 0; row < independentData.Length; ++row)
@@ -347,7 +468,8 @@ namespace Sampling
               MarkerType = MarkerType.Plus,
               MarkerStroke = Outputs.DefaultColors[Outputs.Series.Count % Outputs.DefaultColors.Count],
               MarkerSize = 1,
-              Tag = t.Index
+              RenderInLegend = false,
+              Tag = (index, SerieType.DepVar)
             };
 
             for (var row = 0; row < independentData.Length; ++row)
@@ -362,26 +484,208 @@ namespace Sampling
           }
 
           Outputs.Series.Add(series);
-        });
+        }
+
+        _moduleState.Outputs.Iter(PlotOutput);
       }
     }
 
-    private void PopulateSelectedSample()
+    private void PopulateEvidence()
     {
-      if (SelectedSample == NOT_FOUND)
+      var plottedObservations = Outputs.Series
+        .Select(s => (Series: s, Meta: RequireInstanceOf<(int Index, SerieType SerieType)>(s.Tag)))
+        .Where(t => t.Meta.SerieType == SerieType.Observations)
+        .ToArr();
+
+      plottedObservations.Iter(po => Outputs.Series.Remove(po.Series));
+
+      var verticalAxis = Outputs.Axes
+        .Find(a => a.Position == AxisPosition.Left)
+        .AssertSome("Missing vertical axis");
+
+      var outputName = _selectedOutputName.IsFound()
+        ? _outputNames[_selectedOutputName]
+        : default;
+
+      void PlotObservations(int index, string reference)
       {
-        SampleIdentifier = default;
-        ParameterValues = default;
+        var maybeObservations = _appState.SimEvidence.GetObservations(reference);
+
+        maybeObservations.IfSome(o =>
+        {
+          if (o.Subject != outputName) return;
+
+          Outputs.AddScatterSeries(
+            index,
+            o.RefName,
+            o.X,
+            o.Y,
+            Outputs.DefaultColors,
+            verticalAxis.Key,
+            (NOT_FOUND, SerieType.Observations)
+            );
+        });
+      }
+
+      _moduleState.OutputsState.ObservationsReferences.Iter(PlotObservations);
+    }
+
+    private void ApplyOutputFilters()
+    {
+      if (!_moduleState.FilterConfig.IsEnabled)
+      {
+        foreach (var series in Outputs.Series)
+        {
+          series.IsVisible = true;
+        }
+
         return;
       }
 
-      SampleIdentifier = $"Sample #{SelectedSample + 1}";
+      if (_moduleState.Outputs.IsEmpty) return;
+      if (_moduleState.OutputFilters.IsEmpty) return;
 
-      var row = _moduleState.SamplingDesign.Samples.Rows[SelectedSample];
-      ParameterValues = _moduleState.SamplingDesign.DesignParameters
-        .Map(dp => _simulation.SimConfig.SimInput.SimParameters.GetParameter(dp.Name))
-        .Map(p => $"{p.Name} = {row.Field<double>(p.Name)} {p.Unit}")
+      foreach (var series in Outputs.Series)
+      {
+        var (index, serieType) = RequireInstanceOf<(int, SerieType)>(series.Tag);
+        if (serieType != SerieType.DepVar) continue;
+        var filter = _moduleState.OutputFilters.Find(f => f.Index == index).AssertSome();
+        series.IsVisible = filter.IsInFilteredSet;
+      }
+
+      if (_selectedOutputName.IsntFound()) return;
+
+      var outputName = _outputNames[_selectedOutputName];
+
+      var independentVariableName = _simulation.SimConfig.SimOutput.IndependentVariable.Name;
+      var (_, output) = _moduleState.Outputs.First();
+      var independentData = output[independentVariableName];
+
+      var theme = new PaletteHelper().GetTheme();
+      var color = OxyColor.FromArgb(
+        theme.SecondaryLight.Color.A,
+        theme.SecondaryLight.Color.R,
+        theme.SecondaryLight.Color.G,
+        theme.SecondaryLight.Color.B
+        );
+
+      foreach (var filter in _moduleState.FilterConfig.Filters)
+      {
+        if (!filter.IsEnabled) continue;
+        if (filter.OutputName != outputName) continue;
+
+        var lineAnnotation = new LineAnnotation
+        {
+          Type = LineAnnotationType.Vertical,
+          X = independentData[filter.At],
+          MinimumY = filter.From,
+          MaximumY = filter.To,
+          Color = color,
+          LineStyle = LineStyle.Solid,
+          StrokeThickness = 3
+        };
+
+        Outputs.Annotations.Add(lineAnnotation);
+      }
+    }
+
+    private bool UpdateSelectedSeries(int indexUnselect, int indexSelect)
+    {
+      var didUpdate = false;
+
+      var series = Outputs.Series
+        .Select(s => (Series: s, Meta: RequireInstanceOf<(int Index, SerieType SerieType)>(s.Tag)))
+        .Where(t => t.Meta.SerieType == SerieType.DepVar)
         .ToArr();
+
+      var seriesToUnselect = series
+        .Where(t => t.Meta.Index == indexUnselect)
+        .SingleOrDefault().Series;
+
+      var seriesToSelect = series
+        .Where(t => t.Meta.Index == indexSelect)
+        .SingleOrDefault().Series;
+
+      if (seriesToUnselect == seriesToSelect) return didUpdate;
+
+      if (seriesToUnselect is not null)
+      {
+        if (seriesToUnselect is LineSeries lineSeries)
+        {
+          lineSeries.MarkerFill = OxyColors.Automatic;
+          lineSeries.Color = Outputs.DefaultColors[indexUnselect % Outputs.DefaultColors.Count];
+          lineSeries.StrokeThickness = 1;
+        }
+        else if (seriesToUnselect is ScatterSeries scatterSeries)
+        {
+          scatterSeries.MarkerFill = Outputs.DefaultColors[indexUnselect % Outputs.DefaultColors.Count];
+          scatterSeries.MarkerSize = 1;
+        }
+        else
+        {
+          throw new InvalidOperationException(seriesToUnselect.GetType().Name);
+        }
+
+        didUpdate = true;
+      }
+
+      if (seriesToSelect is not null)
+      {
+        var theme = new PaletteHelper().GetTheme();
+        var color = OxyColor.FromArgb(
+          theme.PrimaryMid.Color.A,
+          theme.PrimaryMid.Color.R,
+          theme.PrimaryMid.Color.G,
+          theme.PrimaryMid.Color.B
+          );
+
+        if (seriesToSelect is LineSeries lineSeries)
+        {
+          lineSeries.MarkerFill = color;
+          lineSeries.Color = color;
+          lineSeries.StrokeThickness = 4;
+        }
+        else if (seriesToSelect is ScatterSeries scatterSeries)
+        {
+          scatterSeries.MarkerFill = color;
+          scatterSeries.MarkerSize = 4;
+        }
+        else
+        {
+          throw new InvalidOperationException(seriesToSelect.GetType().Name);
+        }
+
+        didUpdate = true;
+      }
+
+      return didUpdate;
+    }
+
+    private void PopulateAll()
+    {
+      PopulateVerticalAxis();
+
+      if (_moduleState.Outputs.IsEmpty)
+      {
+        Outputs.Series.Clear();
+        Outputs.Annotations.Clear();
+      }
+      else
+      {
+        Outputs.DefaultColors = _appSettings.IsBaseDark
+          ? OxyPalettes.Hot(_moduleState.Outputs.Count).Colors
+          : OxyPalettes.Cool(_moduleState.Outputs.Count).Colors;
+      }
+
+      PopulateSeries(repopulate: true);
+      ApplyOutputFilters();
+
+      PopulateEvidence();
+
+      Outputs.ResetAllAxes();
+      Outputs.InvalidatePlot(updateData: true);
+
+      _outputsSelectedSampleViewModel.SelectedSample = NOT_FOUND;
     }
 
     private void Dispose(bool disposing)
@@ -391,39 +695,21 @@ namespace Sampling
         if (disposing)
         {
           _subscriptions.Dispose();
+          _outputsFilteredSamplesViewModel.Dispose();
+          _outputsSelectedSampleViewModel.Dispose();
         }
 
         _disposed = true;
       }
     }
 
-    private static PlotModel CreatePlotModel(SimElement independentVariable)
-    {
-      var outputs = new PlotModel
-      {
-        IsLegendVisible = false
-      };
-
-      var horizontalAxis = new LinearAxis
-      {
-        Position = AxisPosition.Bottom,
-        Title = independentVariable.Name,
-        Unit = independentVariable.Unit
-      };
-      outputs.Axes.Add(horizontalAxis);
-
-      var verticalAxis = new LinearAxis
-      {
-        Position = AxisPosition.Left
-      };
-      outputs.Axes.Add(verticalAxis);
-
-      return outputs;
-    }
-
     private readonly IAppState _appState;
+    private readonly IAppSettings _appSettings;
     private readonly ModuleState _moduleState;
     private readonly Simulation _simulation;
+    private readonly OutputsSelectedSampleViewModel _outputsSelectedSampleViewModel;
+    private readonly OutputsFilteredSamplesViewModel _outputsFilteredSamplesViewModel;
+    private readonly OutputsEvidenceViewModel _outputsEvidenceViewModel;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
     private bool _disposed = false;

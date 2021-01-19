@@ -1,6 +1,5 @@
 ﻿using LanguageExt;
 using System;
-using System.Windows.Input;
 using static LanguageExt.Prelude;
 
 namespace RVisUI.AppInf.Design
@@ -9,7 +8,7 @@ namespace RVisUI.AppInf.Design
   {
     public Arr<string> DistributionNames => Array("Normal", "Log normal");
     public int SelectedDistributionName { get => 1; set => throw new NotImplementedException(); }
-    public IDistributionViewModel DistributionViewModel
+    public IDistributionViewModel? DistributionViewModel
     {
       get => new LogNormalDistributionViewModel()
       {

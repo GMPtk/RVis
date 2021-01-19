@@ -21,6 +21,7 @@ namespace Plot
               {
                 SelectedElementName = tdps.DepVarConfigState.SelectedElementName,
                 MRUElementNames = tdps.DepVarConfigState.MRUElementNames.ToArray(),
+                SelectedInsetElementName = tdps.DepVarConfigState.SelectedInsetElementName,
                 SupplementaryElementNames = tdps.DepVarConfigState.SupplementaryElementNames.ToArray(),
                 InactiveSupplementaryElementNames = tdps.DepVarConfigState.InactiveSupplementaryElementNames
                   .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray()),
@@ -91,6 +92,9 @@ namespace Plot
           tdpsDTO.DepVarConfigState.MRUElementNames.IsNullOrEmpty()
             ? default
             : tdpsDTO.DepVarConfigState.MRUElementNames.ToArr();
+
+        traceDataPlotState.DepVarConfigState.SelectedInsetElementName =
+          tdpsDTO.DepVarConfigState.SelectedInsetElementName;
 
         traceDataPlotState.DepVarConfigState.SupplementaryElementNames =
           tdpsDTO.DepVarConfigState.SupplementaryElementNames.IsNullOrEmpty()

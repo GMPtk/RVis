@@ -7,6 +7,7 @@ using RVisUI.Model;
 using System;
 using System.Windows.Input;
 using static System.Linq.Enumerable;
+using static RVis.Base.Check;
 
 namespace RVisUI.Mvvm
 {
@@ -73,34 +74,34 @@ namespace RVisUI.Mvvm
     }
     private bool _isViewOpen;
 
-    public object[][] SharedParameters
+    public object?[][]? SharedParameters
     {
       get => _sharedParameters;
       set => this.RaiseAndSetIfChanged(ref _sharedParameters, value);
     }
-    private object[][] _sharedParameters;
+    private object?[][]? _sharedParameters;
 
     public ICommand ApplyParametersState { get; }
 
     public ICommand ShareParametersState { get; }
 
-    public object[][] SharedOutputs
+    public object[][]? SharedOutputs
     {
       get => _sharedOutputs;
       set => this.RaiseAndSetIfChanged(ref _sharedOutputs, value);
     }
-    private object[][] _sharedOutputs;
+    private object[][]? _sharedOutputs;
 
     public ICommand ApplyOutputsState { get; }
 
     public ICommand ShareOutputsState { get; }
 
-    public object[][] SharedObservations
+    public object[][]? SharedObservations
     {
       get => _sharedObservations;
       set => this.RaiseAndSetIfChanged(ref _sharedObservations, value);
     }
-    private object[][] _sharedObservations;
+    private object[][]? _sharedObservations;
 
     public ICommand ApplyObservationsState { get; }
 
@@ -110,12 +111,12 @@ namespace RVisUI.Mvvm
 
     public ICommand ShareState { get; }
 
-    public ISharedStateProvider ActiveSharedStateProvider
+    public ISharedStateProvider? ActiveSharedStateProvider
     {
       get => _activeSharedStateProvider;
       set => this.RaiseAndSetIfChanged(ref _activeSharedStateProvider, value);
     }
-    private ISharedStateProvider _activeSharedStateProvider;
+    private ISharedStateProvider? _activeSharedStateProvider;
 
     private void HandleOpenView()
     {
@@ -124,6 +125,8 @@ namespace RVisUI.Mvvm
 
     private void HandleApplyParametersState()
     {
+      RequireNotNull(ActiveSharedStateProvider);
+
       var simulation = _appState.Target.AssertSome();
       var input = simulation.SimConfig.SimInput;
       var parameterState = _appState.SimSharedState.ParameterSharedStates.Map(
@@ -147,6 +150,8 @@ namespace RVisUI.Mvvm
 
     private void HandleApplyOutputsState()
     {
+      RequireNotNull(ActiveSharedStateProvider);
+
       var simulation = _appState.Target.AssertSome();
       var elements = simulation.SimConfig.SimOutput.SimValues.Bind(v => v.SimElements);
       var outputState = _appState.SimSharedState.ElementSharedStates.Map(
@@ -165,6 +170,8 @@ namespace RVisUI.Mvvm
 
     private void HandleApplyObservationsState()
     {
+      RequireNotNull(ActiveSharedStateProvider);
+
       var observationsState = _appState.SimSharedState.ObservationsSharedStates
         .Map(oss => _appState.SimEvidence.GetObservations(oss.Reference))
         .Somes()
@@ -182,6 +189,8 @@ namespace RVisUI.Mvvm
 
     private void HandleApplyState()
     {
+      RequireNotNull(ActiveSharedStateProvider);
+
       var simulation = _appState.Target.AssertSome();
 
       var input = simulation.SimConfig.SimInput;
@@ -216,19 +225,21 @@ namespace RVisUI.Mvvm
 
     private void HandleShareState(SimSharedStateBuild buildType)
     {
-      using (var builder = new SimSharedStateBuilder(
+      RequireNotNull(ActiveSharedStateProvider);
+
+      using var builder = new SimSharedStateBuilder(
         _appState.SimSharedState,
         _appState.Target.AssertSome(),
         _appState.SimEvidence,
-        buildType)
-        )
-      {
-        ActiveSharedStateProvider.ShareState(builder);
-      }
+        buildType
+        );
+      ActiveSharedStateProvider.ShareState(builder);
     }
 
     private void HandleApplySingleParameterState(SimParameterSharedState parameterSharedState)
     {
+      RequireNotNull(ActiveSharedStateProvider);
+
       var simulation = _appState.Target.AssertSome();
       var input = simulation.SimConfig.SimInput;
       var parameter = input.SimParameters
@@ -251,6 +262,8 @@ namespace RVisUI.Mvvm
 
     private void HandleApplySingleOutputState(SimElementSharedState elementSharedState)
     {
+      RequireNotNull(ActiveSharedStateProvider);
+
       var simulation = _appState.Target.AssertSome();
       var elements = simulation.SimConfig.SimOutput.SimValues.Bind(v => v.SimElements);
       var outputState = elements.Find(e => e.Name == elementSharedState.Name).AssertSome();
@@ -265,6 +278,8 @@ namespace RVisUI.Mvvm
 
     private void HandleApplySingleObservationsState(SimObservations observations)
     {
+      RequireNotNull(ActiveSharedStateProvider);
+
       ActiveSharedStateProvider.ApplyState(
         SimSharedStateApply.Observations | SimSharedStateApply.Single,
         default,
@@ -307,11 +322,11 @@ namespace RVisUI.Mvvm
 
     private void UpdateSharedParameters()
     {
-      object[][] SomeSimulation(Simulation simulation)
+      object?[][] SomeSimulation(Simulation simulation)
       {
         var parameters = simulation.SimConfig.SimInput.SimParameters;
         return _appState.SimSharedState.ParameterSharedStates
-          .Map(pss => new object[]
+          .Map(pss => new object?[]
           {
             _applySingleParameterState,
             pss,
@@ -323,7 +338,7 @@ namespace RVisUI.Mvvm
           .ToArray();
       }
 
-      object[][] NoSimulation() => System.Array.Empty<object[]>();
+      object[][] NoSimulation() => Array.Empty<object[]>();
 
       SharedParameters = _appState.Target.Match(SomeSimulation, NoSimulation);
     }

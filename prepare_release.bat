@@ -7,97 +7,60 @@
   @exit /b 1
 )
 
-@set dirName="RVis_v%version%"
+@set artifactStagingDirectory=%2
 
-@if exist %dirName% (
-  @rmdir /Q /S %dirName%
+@if not exist %artifactStagingDirectory% (
+  @echo Staging directory needed^^!
+  @exit /b 1
 )
 
-@mkdir %dirName%
-@mkdir %dirName%\bin
-
-@set release="UI\RVisUI\bin\Release"
-
-@copy %release%\RVisUI.exe %dirName%\ >nul
-@copy %release%\RVisUI.exe.config %dirName%\ >nul
-@copy %release%\*.dll %dirName%\bin\ >nul
-
-@set release="WinR\RVis.Server\bin\Release"
-
-@copy %release%\RVis.Server.exe %dirName%\bin\ >nul
-@copy %release%\RVis.Server.exe.config %dirName%\bin\ >nul
-@copy /Y %release%\*.dll %dirName%\bin\ >nul
-
-@mkdir %dirName%\module
-
-@mkdir %dirName%\module\estimation
-@copy UI\module\Estimation\bin\Release\Estimation.dll %dirName%\module\estimation\ >nul
-
-@mkdir %dirName%\module\evidence
-@copy UI\module\Evidence\bin\Release\Evidence.dll %dirName%\module\evidence\ >nul
-
-@mkdir %dirName%\module\plot
-@copy UI\module\Plot\bin\Release\Plot.dll %dirName%\module\plot\ >nul
-
-@mkdir %dirName%\module\sampling
-@copy UI\module\Sampling\bin\Release\Sampling.dll %dirName%\module\sampling\ >nul
-
-@mkdir %dirName%\module\sensitivity
-@copy UI\module\Sensitivity\bin\Release\Sensitivity.dll %dirName%\module\sensitivity\ >nul
-
-@echo.
-@echo Prepared portable %dirName%
-@echo.
-
-@dir %dirName% /B /S
-
-@echo.
-
-@set dirNamex64="RVis_v%version%_x64"
-
-@if exist %dirNamex64% (
-  @rmdir /Q /S %dirNamex64%
+@if not exist %artifactStagingDirectory%\win-x86\RVis_v%version% (
+  @echo Expecting published x86^^!
+  @exit /b 1
 )
 
-@mkdir %dirNamex64%
-@mkdir %dirNamex64%\bin
+@if not exist %artifactStagingDirectory%\win-x64\RVis_v%version% (
+  @echo Expecting published x64^^!
+  @exit /b 1
+)
 
-@set release="UI\RVisUI\bin\x64\Release"
+@mkdir %artifactStagingDirectory%\win-x86\RVis_v%version%\module
 
-@copy %release%\RVisUI.exe %dirNamex64%\ >nul
-@copy %release%\RVisUI.exe.config %dirNamex64%\ >nul
-@copy %release%\*.dll %dirNamex64%\bin\ >nul
+set moduleDirectory="%artifactStagingDirectory%\win-x86\RVis_v%version%\module"
 
-@set release="WinR\RVis.Server\bin\x64\Release"
+@mkdir %moduleDirectory%\estimation
+@copy UI\module\Estimation\bin\Release\net5.0-windows\win-x86\Estimation.dll %moduleDirectory%\estimation\ >nul
 
-@copy %release%\RVis.Server.exe %dirNamex64%\bin\ >nul
-@copy %release%\RVis.Server.exe.config %dirNamex64%\bin\ >nul
-@copy /Y %release%\*.dll %dirNamex64%\bin\ >nul
+@mkdir %moduleDirectory%\evidence
+@copy UI\module\Evidence\bin\Release\net5.0-windows\win-x86\Evidence.dll %moduleDirectory%\evidence\ >nul
 
-@mkdir %dirNamex64%\module
+@mkdir %moduleDirectory%\plot
+@copy UI\module\Plot\bin\Release\net5.0-windows\win-x86\Plot.dll %moduleDirectory%\plot\ >nul
 
-@mkdir %dirNamex64%\module\estimation
-@copy UI\module\Estimation\bin\x64\Release\Estimation.dll %dirNamex64%\module\estimation\ >nul
+@mkdir %moduleDirectory%\sampling
+@copy UI\module\Sampling\bin\Release\net5.0-windows\win-x86\Sampling.dll %moduleDirectory%\sampling\ >nul
 
-@mkdir %dirNamex64%\module\evidence
-@copy UI\module\Evidence\bin\x64\Release\Evidence.dll %dirNamex64%\module\evidence\ >nul
+@mkdir %moduleDirectory%\sensitivity
+@copy UI\module\Sensitivity\bin\Release\net5.0-windows\win-x86\Sensitivity.dll %moduleDirectory%\sensitivity\ >nul
 
-@mkdir %dirNamex64%\module\plot
-@copy UI\module\Plot\bin\x64\Release\Plot.dll %dirNamex64%\module\plot\ >nul
+@mkdir %artifactStagingDirectory%\win-x64\RVis_v%version%\module
 
-@mkdir %dirNamex64%\module\sampling
-@copy UI\module\Sampling\bin\x64\Release\Sampling.dll %dirNamex64%\module\sampling\ >nul
+set moduleDirectory="%artifactStagingDirectory%\win-x64\RVis_v%version%\module"
 
-@mkdir %dirNamex64%\module\sensitivity
-@copy UI\module\Sensitivity\bin\x64\Release\Sensitivity.dll %dirNamex64%\module\sensitivity\ >nul
+@mkdir %moduleDirectory%\estimation
+@copy UI\module\Estimation\bin\Release\net5.0-windows\win-x64\Estimation.dll %moduleDirectory%\estimation\ >nul
 
-@echo.
-@echo Prepared portable %dirNamex64%
-@echo.
+@mkdir %moduleDirectory%\evidence
+@copy UI\module\Evidence\bin\Release\net5.0-windows\win-x64\Evidence.dll %moduleDirectory%\evidence\ >nul
 
-@dir %dirNamex64% /B /S
+@mkdir %moduleDirectory%\plot
+@copy UI\module\Plot\bin\Release\net5.0-windows\win-x64\Plot.dll %moduleDirectory%\plot\ >nul
 
-@echo.
+@mkdir %moduleDirectory%\sampling
+@copy UI\module\Sampling\bin\Release\net5.0-windows\win-x64\Sampling.dll %moduleDirectory%\sampling\ >nul
+
+@mkdir %moduleDirectory%\sensitivity
+@copy UI\module\Sensitivity\bin\Release\net5.0-windows\win-x64\Sensitivity.dll %moduleDirectory%\sensitivity\ >nul
 
 @endlocal
 

@@ -2,6 +2,8 @@
 using System.Windows.Input;
 using static Plot.Design.Data;
 
+#nullable disable
+
 namespace Plot.Design
 {
   internal class ParameterViewModel : IParameterViewModel

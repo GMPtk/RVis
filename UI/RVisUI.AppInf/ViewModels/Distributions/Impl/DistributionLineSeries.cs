@@ -78,16 +78,16 @@ namespace RVisUI.AppInf
       double upper,
       IList<OxyColor> defaultColors,
       Func<double, double> inverseCumulativeDistribution,
-      IInterpolationAlgorithm interpolationAlgorithm
+      IInterpolationAlgorithm? interpolationAlgorithm
       ) where T : IContinuousDistribution
     {
       var hasLowerBound = lower > NegativeInfinity;
       var hasUpperBound = upper < PositiveInfinity;
 
-      if(!hasLowerBound) lower = inverseCumulativeDistribution(0.0005);
-      if(!hasUpperBound) upper = inverseCumulativeDistribution(0.9995);
+      if (!hasLowerBound) lower = inverseCumulativeDistribution(0.0005);
+      if (!hasUpperBound) upper = inverseCumulativeDistribution(0.9995);
 
-      if(hasLowerBound || hasUpperBound)
+      if (hasLowerBound || hasUpperBound)
       {
         var padding = (upper - lower) / 10d;
         if (hasLowerBound) lower -= padding;
@@ -120,7 +120,7 @@ namespace RVisUI.AppInf
       Arr<double> y,
       IList<OxyColor> colors,
       LineStyle lineStyle,
-      IInterpolationAlgorithm interpolationAlgorithm
+      IInterpolationAlgorithm? interpolationAlgorithm
     )
     {
       var lineSeries = new LineSeries

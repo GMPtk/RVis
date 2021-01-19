@@ -10,7 +10,7 @@ namespace RVisUI.Mvvm
 {
   public class ChangeDescriptionUnitViewModel : ReactiveObject, IChangeDescriptionUnitViewModel
   {
-    public ChangeDescriptionUnitViewModel(string name, string description, string unit, Arr<ISymbolInfo> symbolInfos)
+    public ChangeDescriptionUnitViewModel(string name, string? description, string? unit, Arr<ISymbolInfo> symbolInfos)
     {
       _targetSymbol = name;
       _description = description;
@@ -21,7 +21,7 @@ namespace RVisUI.Mvvm
         .OrderBy(si => si.Symbol);
 
       LineSymDescUnit = choices
-        .Select(si => new object[]
+        .Select(si => new object?[]
         {
           0 == si.LineNo ? string.Empty : si.LineNo.ToString(InvariantCulture),
           si.Symbol,
@@ -41,21 +41,21 @@ namespace RVisUI.Mvvm
     }
     private string _targetSymbol;
 
-    public string Description
+    public string? Description
     {
       get => _description;
       set => this.RaiseAndSetIfChanged(ref _description, value);
     }
-    private string _description;
+    private string? _description;
 
-    public string Unit
+    public string? Unit
     {
       get => _unit;
       set => this.RaiseAndSetIfChanged(ref _unit, value);
     }
-    private string _unit;
+    private string? _unit;
 
-    public object[][] LineSymDescUnit { get; }
+    public object?[][] LineSymDescUnit { get; }
 
     public ICommand OK { get; }
 

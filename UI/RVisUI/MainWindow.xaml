@@ -32,17 +32,6 @@
 
   <mmc:MetroWindow.Resources>
     <ResourceDictionary>
-      <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
-      </ResourceDictionary.MergedDictionaries>
-      
       <ctrls:ActiveViewTemplateSelector x:Key="activeViewTemplateSelector"/>
     </ResourceDictionary>
   </mmc:MetroWindow.Resources>
@@ -133,7 +122,7 @@
           <Setter Property="Height" Value="18"/>
           <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>
-        <Style TargetType="Separator" BasedOn="{StaticResource MetroStatusBarSeparator}">
+        <Style TargetType="Separator" BasedOn="{StaticResource MahApps.Styles.Separator.StatusBar}">
 
         </Style>
       </StatusBar.Resources>

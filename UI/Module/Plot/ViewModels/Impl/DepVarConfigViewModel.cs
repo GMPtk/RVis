@@ -4,6 +4,7 @@ using RVis.Base;
 using RVis.Base.Extensions;
 using RVis.Model;
 using RVis.Model.Extensions;
+using RVisUI.AppInf;
 using RVisUI.Model;
 using System;
 using System.Collections.ObjectModel;
@@ -61,9 +62,7 @@ namespace Plot
 
       _elementViewModels = elementViewModels.ToArr();
 
-      depVarConfigState.SelectedElementName =
-        depVarConfigState.SelectedElementName ??
-        elementViewModels.First().Item.Name;
+      depVarConfigState.SelectedElementName ??= elementViewModels.First().Item.Name;
 
       _selectedElement = elementViewModels.Single(e => e.Item.Name == depVarConfigState.SelectedElementName);
 
@@ -78,6 +77,11 @@ namespace Plot
       LRUElements = new ObservableCollection<ISelectableItemViewModel>(partitioned.Choose(t => t.LRU));
 
       _isScaleLogarithmic = depVarConfigState.IsScaleLogarithmic;
+
+      InsetOptions = Array("(none)") + _elementViewModels.Map(vm => vm.Item.Name);
+      SelectedInsetOption = depVarConfigState.SelectedInsetElementName.IsAString() 
+        ? InsetOptions.FindIndex(io => io == depVarConfigState.SelectedElementName) + 1 
+        : 0;
 
       PopulateSupplementaryElements();
       PopulateObservations();
@@ -108,7 +112,14 @@ namespace Plot
           .ObservableForProperty(vm => vm.IsScaleLogarithmic)
           .Subscribe(
             _reactiveSafeInvoke.SuspendAndInvoke<object>(ObserveIsScaleLogarithmic)
+            ),
+
+        this
+          .ObservableForProperty(vm => vm.SelectedInsetOption)
+          .Subscribe(
+            _reactiveSafeInvoke.SuspendAndInvoke<object>(ObserveSelectedInsetOption)
             )
+          
         );
     }
 
@@ -131,6 +142,20 @@ namespace Plot
     public ObservableCollection<ISelectableItemViewModel> MRUElements { get; }
 
     public ObservableCollection<ISelectableItemViewModel> LRUElements { get; }
+
+    public Arr<string> InsetOptions
+    {
+      get => _insetOptions;
+      set => this.RaiseAndSetIfChanged(ref _insetOptions, value);
+    }
+    private Arr<string> _insetOptions;
+
+    public int SelectedInsetOption 
+    { 
+      get => _selectedInsetOption; 
+      set => this.RaiseAndSetIfChanged(ref _selectedInsetOption, value); 
+    }
+    private int _selectedInsetOption;
 
     public Arr<ISelectableItemViewModel> SupplementaryElements
     {
@@ -172,7 +197,7 @@ namespace Plot
 
       while (MRUElements.Count > MAX_MRU_COUNT)
       {
-        var lruViewModel = MRUElements[MRUElements.Count - 1];
+        var lruViewModel = MRUElements[^1];
         MRUElements.RemoveAt(MRUElements.Count - 1);
         LRUElements.InsertInOrdered(lruViewModel, vm => vm.SortKey);
       }
@@ -199,9 +224,9 @@ namespace Plot
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
-        var element = (viewModel as SelectableItemViewModel<SimElement>).Item;
+        var element = ((SelectableItemViewModel<SimElement>)viewModel).Item;
 
-        if (viewModel.Use)
+        if (viewModel.IsSelected)
         {
           RequireFalse(_depVarConfigState.SupplementaryElementNames.Contains(element.Name));
           _depVarConfigState.SupplementaryElementNames = _depVarConfigState.SupplementaryElementNames.Add(element.Name);
@@ -218,10 +243,10 @@ namespace Plot
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
-        var observations = (viewModel as SelectableItemViewModel<SimObservations>).Item;
+        var observations = ((SelectableItemViewModel<SimObservations>)viewModel).Item;
         var reference = _evidence.GetReference(observations);
 
-        if (viewModel.Use)
+        if (viewModel.IsSelected)
         {
           RequireFalse(_depVarConfigState.ObservationsReferences.Contains(reference));
           _depVarConfigState.ObservationsReferences = _depVarConfigState.ObservationsReferences.Add(reference);
@@ -272,6 +297,13 @@ namespace Plot
     private void ObserveIsScaleLogarithmic(object _)
     {
       _depVarConfigState.IsScaleLogarithmic = IsScaleLogarithmic;
+    }
+
+    private void ObserveSelectedInsetOption(object _)
+    {
+      _depVarConfigState.SelectedInsetElementName = SelectedInsetOption > 0 
+        ? InsetOptions[SelectedInsetOption]
+        : null;
     }
 
     private void PopulateSupplementaryElements()
@@ -327,7 +359,7 @@ namespace Plot
     }
 
     private SelectableItemViewModel<SimElement> _SelectedElement =>
-      SelectedElement as SelectableItemViewModel<SimElement>;
+      (SelectableItemViewModel<SimElement>)SelectedElement.AssertNotNull();
 
     private void Dispose(bool disposing)
     {

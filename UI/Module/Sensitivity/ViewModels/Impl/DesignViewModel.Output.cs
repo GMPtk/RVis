@@ -71,6 +71,8 @@ namespace Sensitivity
 
     private void Measure(Arr<Arr<double>> designOutputs)
     {
+      RequireNotNull(_moduleState.SensitivityDesign);
+
       var outputName = _moduleState.MeasuresState.SelectedOutputName;
       RequireTrue(outputName.IsAString());
 

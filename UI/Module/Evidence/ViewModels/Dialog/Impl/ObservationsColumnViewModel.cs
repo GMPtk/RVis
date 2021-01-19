@@ -44,17 +44,17 @@ namespace Evidence
     }
     private string _subject;
 
-    public string RefName
+    public string? RefName
     {
       get => _refName;
       set => this.RaiseAndSetIfChanged(ref _refName, value, PropertyChanged);
     }
-    private string _refName;
+    private string? _refName;
 
     public Arr<double> Observations { get; }
 
     public string Content { get; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

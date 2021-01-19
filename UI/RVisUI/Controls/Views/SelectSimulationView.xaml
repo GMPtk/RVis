@@ -7,7 +7,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:base="clr-namespace:RVis.Base;assembly=RVis.Base"
              xmlns:mvvmd="clr-namespace:RVisUI.Mvvm.Design;assembly=RVisUI.Mvvm"
-             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
              mc:Ignorable="d" 
              d:DesignHeight="768" 
              d:DesignWidth="1200"
@@ -16,17 +15,6 @@
 
   <UserControl.Resources>
     <ResourceDictionary>
-
-      <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
-      </ResourceDictionary.MergedDictionaries>
 
       <ControlTemplate x:Key="NoSimulationData">
         <Grid VerticalAlignment="Center">
@@ -198,11 +186,11 @@
                 Margin="100 20 20 20"
                 >
       <TextBlock TextAlignment="Right" 
-                  Style="{StaticResource MaterialDesignHeadlineTextBlock}"
+                  Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                   Text="{Binding Source={x:Static base:Meta.Product}}" 
                   />
       <TextBlock TextAlignment="Right"
-                  Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                  Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
                   Text="{Binding Source={x:Static base:Meta.VersionMajorDotMinor}, StringFormat={}v{0}}"
                   />
       <TextBlock TextAlignment="Right"

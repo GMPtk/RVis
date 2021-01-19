@@ -7,9 +7,9 @@ using RVisUI.Model;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using static RVis.Base.Check;
 
 namespace RVisUI.Mvvm
 {
@@ -56,21 +56,21 @@ namespace RVisUI.Mvvm
 
     public ICommand BrowseForRFile { get; }
 
-    public string PathToRFile
+    public string? PathToRFile
     {
       get => _pathToRFile;
       set => this.RaiseAndSetIfChanged(ref _pathToRFile, value);
     }
-    private string _pathToRFile;
+    private string? _pathToRFile;
 
     public ICommand InspectRFile { get; }
 
-    public ManagedImport ManagedImport
+    public ManagedImport? ManagedImport
     {
       get => _managedImport;
       set => this.RaiseAndSetIfChanged(ref _managedImport, value);
     }
-    private ManagedImport _managedImport;
+    private ManagedImport? _managedImport;
 
     public Arr<ISymbolInfo> UnaryFuncs
     {
@@ -100,26 +100,26 @@ namespace RVisUI.Mvvm
     }
     private Arr<ISymbolInfo> _dataSets;
 
-    public ISymbolInfo ExecutiveFunction
+    public ISymbolInfo? ExecutiveFunction
     {
       get => _executiveFunction;
       set => this.RaiseAndSetIfChanged(ref _executiveFunction, value);
     }
-    private ISymbolInfo _executiveFunction;
+    private ISymbolInfo? _executiveFunction;
 
-    public ISymbolInfo ExecutiveFormal
+    public ISymbolInfo? ExecutiveFormal
     {
       get => _executiveFormal;
       set => this.RaiseAndSetIfChanged(ref _executiveFormal, value);
     }
-    private ISymbolInfo _executiveFormal;
+    private ISymbolInfo? _executiveFormal;
 
-    public NumDataTable ExecutiveOutput
+    public NumDataTable? ExecutiveOutput
     {
       get => _executiveOutput;
       set => this.RaiseAndSetIfChanged(ref _executiveOutput, value);
     }
-    private NumDataTable _executiveOutput;
+    private NumDataTable? _executiveOutput;
 
     public ICommand SelectExecutive { get; }
 
@@ -134,14 +134,14 @@ namespace RVisUI.Mvvm
     }
     private bool _isBusy;
 
-    public string BusyWith
+    public string? BusyWith
     {
       get => _busyWith;
       set => this.RaiseAndSetIfChanged(ref _busyWith, value);
     }
-    private string _busyWith;
+    private string? _busyWith;
 
-    public ObservableCollection<string> BusyMessages => default;
+    public ObservableCollection<string>? BusyMessages => default;
 
     public bool EnableBusyCancel
     {
@@ -154,15 +154,15 @@ namespace RVisUI.Mvvm
 
     private void HandleBrowseForRFile()
     {
-      var lastDirectoryBrowsed = PathToRFile.IsAString() 
-        ? Path.GetDirectoryName(PathToRFile) 
+      var lastDirectoryBrowsed = PathToRFile.IsAString()
+        ? Path.GetDirectoryName(PathToRFile)
         : default;
 
       var didOpen = _appService.OpenFile(
-        "Import Simulation", 
-        lastDirectoryBrowsed, 
-        "R Files|*.R", 
-        out string path
+        "Import Simulation",
+        lastDirectoryBrowsed,
+        "R Files|*.R",
+        out string? path
         );
 
       if (!didOpen) return;
@@ -194,7 +194,9 @@ namespace RVisUI.Mvvm
 
     private async Task RunInspectionAsync(ServerLicense serverLicense)
     {
-      _busyCancelHandler = () => serverLicense.GetRClient().StopServer();
+      RequireFile(PathToRFile);
+
+      _busyCancelHandler = async () => await (await serverLicense.GetRClientAsync()).StopServerAsync();
 
       BusyWith = "RUN AND INSPECT";
       EnableBusyCancel = true;
@@ -202,20 +204,16 @@ namespace RVisUI.Mvvm
 
       var managedImport = new ManagedImport(PathToRFile, _simLibrary);
 
-      string error = default;
+      string? error = default;
 
       try
       {
-        await managedImport.InspectAsync(serverLicense.GetRClient());
+        await managedImport.InspectAsync(await serverLicense.GetRClientAsync());
         UnaryFuncs = managedImport.UnaryFunctions;
         Scalars = managedImport.Scalars;
         ScalarSets = managedImport.ScalarSets;
         DataSets = managedImport.DataSets;
         ManagedImport = managedImport;
-      }
-      catch (CommunicationException)
-      {
-        error = "R channel lost";
       }
       catch (Exception ex)
       {
@@ -242,15 +240,17 @@ namespace RVisUI.Mvvm
 
     private void HandleSelectExec()
     {
+      RequireNotNull(ManagedImport);
+
       var unaryFunctionSelectedIndex = ManagedImport.UnaryFunctions
         .FindIndex(uf => uf == ManagedImport.ExecutorFunction);
       var scalarSetSelectedIndex = ManagedImport.ScalarSets
         .FindIndex(sv => sv == ManagedImport.ExecutorFormal);
 
       var selectExecViewModel = new SelectExecViewModel(
-        ManagedImport.UnaryFunctions.Map(uf => uf.Symbol),
+        ManagedImport.UnaryFunctions.Map(uf => uf.Symbol.AssertNotNull()),
         unaryFunctionSelectedIndex,
-        ManagedImport.ScalarSets.Map(sv => sv.Symbol),
+        ManagedImport.ScalarSets.Map(sv => sv.Symbol.AssertNotNull()),
         scalarSetSelectedIndex
         );
 
@@ -285,24 +285,22 @@ namespace RVisUI.Mvvm
 
     private async Task SetExecAsync(ISymbolInfo function, ISymbolInfo formal, ServerLicense serverLicense)
     {
-      _busyCancelHandler = () => serverLicense.GetRClient().StopServer();
+      RequireNotNull(ManagedImport);
+
+      _busyCancelHandler = async () => await (await serverLicense.GetRClientAsync()).StopServerAsync();
 
       BusyWith = "RUN EXECUTIVE FUNCTION";
       EnableBusyCancel = true;
       IsBusy = true;
 
-      string error = default;
+      string? error = default;
 
       try
       {
-        await ManagedImport.SetExecutorAsync(function, formal, serverLicense.GetRClient());
+        await ManagedImport.SetExecutorAsync(function, formal, await serverLicense.GetRClientAsync());
         ExecutiveFunction = ManagedImport.ExecutorFunction;
         ExecutiveFormal = ManagedImport.ExecutorFormal;
         ExecutiveOutput = ManagedImport.ExecutorOutput;
-      }
-      catch (CommunicationException)
-      {
-        error = "R channel lost";
       }
       catch (Exception ex)
       {
@@ -329,19 +327,21 @@ namespace RVisUI.Mvvm
 
     private async Task DoImportUsingExecAsync(ServerLicense serverLicense)
     {
-      _busyCancelHandler = () => serverLicense.GetRClient().StopServer();
+      RequireNotNull(ManagedImport);
+
+      _busyCancelHandler = async () => await (await serverLicense.GetRClientAsync()).StopServerAsync();
 
       BusyWith = "IMPORT EXEC";
       EnableBusyCancel = true;
       IsBusy = true;
 
-      string error = default;
+      string? error = default;
 
       try
       {
-        var destinationDirectoryName = 
-          await _managedImport.ImportExecToLibraryAsync(
-            serverLicense.GetRClient()
+        var destinationDirectoryName =
+          await ManagedImport.ImportExecToLibraryAsync(
+            await serverLicense.GetRClientAsync()
             );
 
         _simLibrary.Refresh();
@@ -350,10 +350,6 @@ namespace RVisUI.Mvvm
 
         var fileName = Path.GetFileName(PathToRFile);
         _appState.Status = $"Imported {fileName} into {destinationDirectoryName}";
-      }
-      catch (CommunicationException)
-      {
-        error = "R channel lost";
       }
       catch (Exception ex)
       {
@@ -380,6 +376,9 @@ namespace RVisUI.Mvvm
 
     private void HandleImportUsingExec()
     {
+      RequireNotNull(ManagedImport);
+      RequireNotNull(ManagedImport.ExecutorIndependentVariable);
+
       var importExecViewModel = new ImportExecViewModel(ManagedImport, _appService);
       var didOK = _appService.ShowDialog(importExecViewModel, default);
 
@@ -387,7 +386,7 @@ namespace RVisUI.Mvvm
       {
         foreach (var vm in importExecViewModel.ParameterCandidates)
         {
-          var candidate = _managedImport.ExecutorParameterCandidates
+          var candidate = ManagedImport.ExecutorParameterCandidates
             .Find(pc => pc.Name == vm.Name)
             .AssertSome();
           candidate.IsUsed = vm.IsUsed;
@@ -395,13 +394,13 @@ namespace RVisUI.Mvvm
           candidate.Description = vm.Description;
         }
 
-        var ivCandidate = _managedImport.ExecutorIndependentVariable.ElementCandidates[0];
+        var ivCandidate = ManagedImport.ExecutorIndependentVariable.ElementCandidates[0];
         ivCandidate.Unit = importExecViewModel.IndependentVariable.Unit;
         ivCandidate.Description = importExecViewModel.IndependentVariable.Description;
 
         foreach (var vm in importExecViewModel.ElementCandidates)
         {
-          var valueCandidate = _managedImport.ExecutorValueCandidates
+          var valueCandidate = ManagedImport.ExecutorValueCandidates
             .Find(pc => pc.Name == vm.Name)
             .AssertSome();
           var candidate = valueCandidate.ElementCandidates[0];
@@ -410,8 +409,8 @@ namespace RVisUI.Mvvm
           candidate.Description = vm.Description;
         }
 
-        _managedImport.SimulationName = importExecViewModel.SimulationName;
-        _managedImport.SimulationDescription = importExecViewModel.SimulationDescription;
+        ManagedImport.SimulationName = importExecViewModel.SimulationName;
+        ManagedImport.SimulationDescription = importExecViewModel.SimulationDescription;
 
         void Some(ServerLicense serverLicense)
         {
@@ -435,19 +434,21 @@ namespace RVisUI.Mvvm
 
     private async Task DoImportUsingTmplAsync(ServerLicense serverLicense)
     {
-      _busyCancelHandler = () => serverLicense.GetRClient().StopServer();
+      RequireNotNull(ManagedImport);
+
+      _busyCancelHandler = async () => await (await serverLicense.GetRClientAsync()).StopServerAsync();
 
       BusyWith = "IMPORT TMPL";
       EnableBusyCancel = true;
       IsBusy = true;
 
-      string error = default;
+      string? error = default;
 
       try
       {
-        var destinationDirectoryName = 
-          await _managedImport.ImportTmplToLibraryAsync(
-            serverLicense.GetRClient()
+        var destinationDirectoryName =
+          await ManagedImport.ImportTmplToLibraryAsync(
+            await serverLicense.GetRClientAsync()
             );
 
         _simLibrary.Refresh();
@@ -456,10 +457,6 @@ namespace RVisUI.Mvvm
 
         var fileName = Path.GetFileName(PathToRFile);
         _appState.Status = $"Imported {fileName} into {destinationDirectoryName}";
-      }
-      catch (CommunicationException)
-      {
-        error = "R channel lost";
       }
       catch (Exception ex)
       {
@@ -486,15 +483,20 @@ namespace RVisUI.Mvvm
 
     private void HandleImportUsingTmpl()
     {
+      RequireNotNull(ManagedImport);
+      RequireFile(PathToRFile);
+
       var fileName = Path.GetFileName(PathToRFile);
       var importTmplViewModel = new ImportTmplViewModel(ManagedImport, fileName, _appService);
       var didOK = _appService.ShowDialog(importTmplViewModel, default);
 
       if (didOK)
       {
+        RequireNotNull(importTmplViewModel.IndependentVariable);
+
         foreach (var vm in importTmplViewModel.ParameterCandidates)
         {
-          var candidate = _managedImport.ParameterCandidates
+          var candidate = ManagedImport.ParameterCandidates
             .Find(pc => pc.Name == vm.Name)
             .AssertSome();
           candidate.IsUsed = vm.IsUsed;
@@ -502,7 +504,7 @@ namespace RVisUI.Mvvm
           candidate.Description = vm.Description;
         }
 
-        foreach (var valueCandidate in _managedImport.ValueCandidates)
+        foreach (var valueCandidate in ManagedImport.ValueCandidates)
         {
           foreach (var elementCandidate in valueCandidate.ElementCandidates)
           {
@@ -511,7 +513,7 @@ namespace RVisUI.Mvvm
           }
         }
 
-        var ivValueCandidate = _managedImport.ValueCandidates
+        var ivValueCandidate = ManagedImport.ValueCandidates
           .Find(vc => vc.Name == importTmplViewModel.IndependentVariable.ValueName)
           .AssertSome();
         var ivElementCandidate = ivValueCandidate.ElementCandidates
@@ -524,7 +526,7 @@ namespace RVisUI.Mvvm
 
         foreach (var vm in importTmplViewModel.ElementCandidates)
         {
-          var valueCandidate = _managedImport.ValueCandidates
+          var valueCandidate = ManagedImport.ValueCandidates
             .Find(vc => vc.Name == vm.ValueName)
             .AssertSome();
           var elementCandidate = valueCandidate.ElementCandidates
@@ -535,8 +537,8 @@ namespace RVisUI.Mvvm
           elementCandidate.Description = vm.Description;
         }
 
-        _managedImport.SimulationName = importTmplViewModel.SimulationName;
-        _managedImport.SimulationDescription = importTmplViewModel.SimulationDescription;
+        ManagedImport.SimulationName = importTmplViewModel.SimulationName;
+        ManagedImport.SimulationDescription = importTmplViewModel.SimulationDescription;
 
         void Some(ServerLicense serverLicense)
         {
@@ -576,6 +578,6 @@ namespace RVisUI.Mvvm
     private readonly SimLibrary _simLibrary;
     private readonly IAppState _appState;
     private readonly IAppService _appService;
-    private Action _busyCancelHandler;
+    private Action? _busyCancelHandler;
   }
 }

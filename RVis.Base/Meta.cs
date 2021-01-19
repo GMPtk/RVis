@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using static RVis.Base.Check;
 
 namespace RVis.Base
 {
@@ -22,6 +23,7 @@ namespace RVis.Base
       {
         var assembly = Assembly.GetExecutingAssembly();
         var version = assembly.GetName().Version;
+        RequireNotNull(version);
         return version.AsMmbrString();
       }
     }
@@ -32,6 +34,7 @@ namespace RVis.Base
       {
         var assembly = Assembly.GetExecutingAssembly();
         var version = assembly.GetName().Version;
+        RequireNotNull(version);
         return $"{version.Major}.{version.Minor}";
       }
     }
@@ -40,14 +43,14 @@ namespace RVis.Base
       ((AssemblyProductAttribute)Attribute.GetCustomAttribute(
         Assembly.GetExecutingAssembly(),
         typeof(AssemblyProductAttribute)
-        )
+        )!
       ).Product;
 
     public static string Company =>
       ((AssemblyCompanyAttribute)Attribute.GetCustomAttribute(
         Assembly.GetExecutingAssembly(),
         typeof(AssemblyCompanyAttribute)
-        )
+        )!
       ).Company;
   }
 }

@@ -1,6 +1,5 @@
 ﻿using ProtoBuf;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using static System.Double;
 using static System.Globalization.CultureInfo;
@@ -10,7 +9,7 @@ namespace RVis.Model
   [ProtoContract]
   public struct SimParameter : IEquatable<SimParameter>
   {
-    public SimParameter(string name, string value, string unit, string description)
+    public SimParameter(string name, string value, string? unit, string? description)
     {
       _name = name;
       _value = value;
@@ -32,12 +31,12 @@ namespace RVis.Model
     public double Scalar => _scalar;
 
     [ProtoIgnore]
-    public string Unit => _unit;
+    public string? Unit => _unit;
 
     [ProtoIgnore]
-    public string Description => _description;
+    public string? Description => _description;
 
-    public SimParameter With(string Value = null) =>
+    public SimParameter With(string? Value = null) =>
       new SimParameter(this, Value ?? this.Value);
 
     public SimParameter With(double value) =>
@@ -50,22 +49,14 @@ namespace RVis.Model
       _unit == rhs._unit &&
       _description == rhs._description;
 
-    public override bool Equals(object obj) =>
-      obj is SimParameter parameter ? Equals(parameter) : false;
+    public override bool Equals(object? obj) =>
+      obj is SimParameter parameter && Equals(parameter);
 
     public override string ToString() =>
       $"{Name} = {Value:G4}{Unit}";
 
-    public override int GetHashCode()
-    {
-      var hashCode = -1648669195;
-      hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
-      hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Value);
-      hashCode = hashCode * -1521134295 + Scalar.GetHashCode();
-      hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Unit);
-      hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Description);
-      return hashCode;
-    }
+    public override int GetHashCode() =>
+      HashCode.Combine(Name, Value, Scalar, Unit, Description);
 
     private SimParameter(SimParameter toCopy, string value)
       : this(toCopy.Name, value, toCopy.Unit, toCopy.Description)
@@ -73,7 +64,7 @@ namespace RVis.Model
     }
 
     private SimParameter(SimParameter toCopy, double value)
-      : this(toCopy.Name, default, toCopy.Unit, toCopy.Description)
+      : this(toCopy.Name, default!, toCopy.Unit, toCopy.Description)
     {
       _value = value.ToString(InvariantCulture);
       _scalar = value;
@@ -95,9 +86,9 @@ namespace RVis.Model
     private readonly double _scalar;
 
     [ProtoMember(4)]
-    private readonly string _unit;
+    private readonly string? _unit;
 
     [ProtoMember(5)]
-    private readonly string _description;
+    private readonly string? _description;
   }
 }

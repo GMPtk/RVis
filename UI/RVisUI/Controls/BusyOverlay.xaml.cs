@@ -76,29 +76,32 @@ namespace RVisUI.Controls
 
     private static void HandleMessagesPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      if (!d.Resolve(out BusyOverlay busyOverlay)) return;
+      if (!d.Resolve(out BusyOverlay? busyOverlay)) return;
 
       if (e.OldValue is ObservableCollection<string> existing)
       {
         existing.CollectionChanged -= busyOverlay.HandleMessagesCollectionChanged;
       }
 
-      if (!e.NewValue.Resolve(out ObservableCollection<string> messages)) return;
+      if (!e.NewValue.Resolve(out ObservableCollection<string>? messages)) return;
 
       messages.CollectionChanged += busyOverlay.HandleMessagesCollectionChanged;
     }
 
-    private void HandleMessagesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void HandleMessagesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
       if (e.Action == NotifyCollectionChangedAction.Add)
       {
-        foreach (string message in e.NewItems)
+        if (e.NewItems is not null)
         {
-          var run = new Run(message);
-          _tbMessages.Inlines.Add(run);
-          _tbMessages.Inlines.Add(new LineBreak());
+          foreach (string message in e.NewItems)
+          {
+            var run = new Run(message);
+            _tbMessages.Inlines.Add(run);
+            _tbMessages.Inlines.Add(new LineBreak());
+          }
+          _svMessages.ScrollToBottom();
         }
-        _svMessages.ScrollToBottom();
       }
       else if(e.Action == NotifyCollectionChangedAction.Reset)
       {

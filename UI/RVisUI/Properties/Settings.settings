@@ -50,5 +50,8 @@
     <Setting Name="Zoom" Type="System.Double" Scope="User">
       <Value Profile="(Default)">1</Value>
     </Setting>
+    <Setting Name="PathToRunControlDrop" Type="System.String" Scope="User">
+      <Value Profile="(Default)">~/RVisDrop</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

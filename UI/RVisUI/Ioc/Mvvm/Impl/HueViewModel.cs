@@ -31,6 +31,6 @@ namespace RVisUI.Ioc.Mvvm
     }
     private bool _isSelected;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

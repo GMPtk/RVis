@@ -14,6 +14,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
@@ -250,12 +251,12 @@ namespace Sensitivity
     }
     private bool _canCancelAcquireOutputs;
 
-    public DataView Inputs
+    public DataView? Inputs
     {
       get => _inputs;
       set => this.RaiseAndSetIfChanged(ref _inputs, value);
     }
-    private DataView _inputs;
+    private DataView? _inputs;
 
     public int SelectedInputIndex
     {
@@ -334,7 +335,7 @@ namespace Sensitivity
       base.Dispose(disposing);
     }
 
-    private void HandleCreateDesign()
+    private async Task HandleCreateDesign()
     {
       var parameterDistributions = _moduleState.ParameterStates
         .Filter(ps => ps.IsSelected)
@@ -352,7 +353,7 @@ namespace Sensitivity
         "One or more parameter distribitions not correctly configured"
         );
 
-      void SomeServer(ServerLicense serverLicense)
+      async Task SomeServer(ServerLicense serverLicense)
       {
         using (serverLicense)
         {
@@ -362,16 +363,16 @@ namespace Sensitivity
             {
               if (SensitivityMethod == SensitivityMethod.Morris)
               {
-                CreateMorrisDesign(
+                await CreateMorrisDesignAsync(
                   parameterDistributions,
-                  serverLicense.GetRClient()
+                  await serverLicense.GetRClientAsync()
                   );
               }
               else
               {
-                CreateFast99Design(
+                await CreateFast99DesignAsync(
                   parameterDistributions,
-                  serverLicense.GetRClient()
+                  await serverLicense.GetRClientAsync()
                   );
               }
             }
@@ -390,7 +391,7 @@ namespace Sensitivity
         }
       }
 
-      void NoServer()
+      Task NoServer()
       {
         _appService.Notify(
           NotificationType.Information,
@@ -398,9 +399,11 @@ namespace Sensitivity
           nameof(HandleCreateDesign),
           "No R server available."
           );
+
+        return Task.CompletedTask;
       }
 
-      _appService.RVisServerPool
+      await _appService.RVisServerPool
         .RequestServer()
         .Match(SomeServer, NoServer);
     }
@@ -475,8 +478,11 @@ namespace Sensitivity
       {
         if (!_runOutputRequestJob) return;
 
+        RequireNotNull(_outputRequestJob);
+        RequireNotNull(Inputs?.Table);
+
         _runOutputRequestJob = false;
-        _jobSubscriptions.Dispose();
+        _jobSubscriptions?.Dispose();
         _jobSubscriptions = default;
 
         for (var i = 0; i < _outputRequestJob.Length; ++i)
@@ -496,7 +502,7 @@ namespace Sensitivity
 
     private void HandleShareParameters()
     {
-      RequireNotNull(Inputs);
+      RequireNotNull(Inputs?.Table);
       RequireNotNull(_moduleState.SensitivityDesign);
       RequireFalse(SelectedInputIndex == NOT_FOUND);
 
@@ -546,6 +552,8 @@ namespace Sensitivity
 
     private void HandleViewError()
     {
+      RequireNotNull(Inputs?.Table);
+
       var dataRowView = Inputs[SelectedInputIndex];
       var index = Inputs.Table.Rows.IndexOf(dataRowView.Row);
       RequireTrue(_outputRequestErrors.ContainsKey(index));
@@ -564,6 +572,8 @@ namespace Sensitivity
       lock (_jobSyncLock)
       {
         if (!_runOutputRequestJob) return;
+
+        RequireNotNull(_outputRequestJob);
 
         RequireTrue(outputRequest.RequestToken.Resolve(out int thisIndex));
         if (thisIndex >= _outputRequestJob.Length) return;
@@ -591,6 +601,8 @@ namespace Sensitivity
 
             if (unique && ascending)
             {
+              RequireNotNull(_moduleState.SensitivityDesign);
+
               _moduleState.Trace = numDataTable;
 
               _sensitivityDesigns.SaveTrace(
@@ -681,6 +693,8 @@ namespace Sensitivity
       lock (_jobSyncLock)
       {
         RequireTrue(_runOutputRequestJob);
+        RequireNotNull(_outputRequestJob);
+        RequireNotNull(Inputs?.Table);
 
         NOutputsAcquired = _outputRequestJob.Count(t => t.Input == default || t.Output != default);
         AcquireOutputsProgress = 100.0 * NOutputsAcquired / _outputRequestJob.Length;
@@ -691,7 +705,7 @@ namespace Sensitivity
         if (!isComplete && !hasProducedErrors) return;
 
         _runOutputRequestJob = false;
-        _jobSubscriptions.Dispose();
+        _jobSubscriptions?.Dispose();
         _jobSubscriptions = default;
         var outputRequestJob = _outputRequestJob;
         _outputRequestJob = default;
@@ -713,8 +727,7 @@ namespace Sensitivity
 
             _outputRequestErrors.Add(
               i,
-              new ArgumentOutOfRangeException(
-                nameof(actualOutputLength),
+              new InvalidOperationException(
                 $"Unexpected output length: {actualOutputLength} (expected {expectedOutputLength})"
                 )
               );
@@ -779,6 +792,8 @@ namespace Sensitivity
     private void ObserveMeasuresStateSelectedOutputName(object _)
     {
       if (_moduleState.MeasuresState.SelectedOutputName.IsntAString()) return;
+
+      RequireNotNull(_moduleState.SensitivityDesign);
 
       if (_moduleState.SensitivityDesign.SensitivityMethod == SensitivityMethod.Morris)
       {
@@ -870,6 +885,8 @@ namespace Sensitivity
     {
       SelectedInputIndex = NOT_FOUND;
 
+      RequireNotNull(Inputs?.Table);
+
       var inputs = Inputs.Table;
       Inputs = default;
       var dataView = inputs.DefaultView;
@@ -879,8 +896,8 @@ namespace Sensitivity
       UpdateSamplesEnable();
     }
 
-    private string InputsRowFilter => ShowIssues
-      ? $"[{ACQUIRED_DATACOLUMN_NAME}] = '{AcquiredType.Error.ToString()}' OR [{ACQUIRED_DATACOLUMN_NAME}] = '{AcquiredType.Suspect.ToString()}'"
+    private string? InputsRowFilter => ShowIssues
+      ? $"[{ACQUIRED_DATACOLUMN_NAME}] = '{AcquiredType.Error}' OR [{ACQUIRED_DATACOLUMN_NAME}] = '{AcquiredType.Suspect}'"
       : default;
 
     private void PopulateFactors(Arr<ParameterState> parameterStates) =>
@@ -1084,6 +1101,8 @@ namespace Sensitivity
 
       if (haveInputSelection)
       {
+        RequireNotNull(Inputs);
+
         var dataRowView = Inputs[SelectedInputIndex];
         var acquired = dataRowView.Row.Field<string>(ACQUIRED_DATACOLUMN_NAME);
         CanViewError = acquired == AcquiredType.Error.ToString();
@@ -1103,12 +1122,12 @@ namespace Sensitivity
     private readonly Simulation _simulation;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private CancellationTokenSource _cancellationTokenSource;
+    private CancellationTokenSource? _cancellationTokenSource;
     private Arr<SimInput> _sampleInputs;
-    private (SimInput Input, bool OutputRequested, Arr<double> Output)[] _outputRequestJob;
+    private (SimInput Input, bool OutputRequested, Arr<double> Output)[]? _outputRequestJob;
     private bool _runOutputRequestJob;
     private readonly IDictionary<int, Exception> _outputRequestErrors = new SortedDictionary<int, Exception>();
-    private IDisposable _jobSubscriptions;
+    private IDisposable? _jobSubscriptions;
     private readonly object _jobSyncLock = new object();
     private bool _disposed = false;
   }

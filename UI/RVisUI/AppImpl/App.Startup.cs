@@ -1,11 +1,16 @@
-﻿using Ninject;
+﻿using Microsoft.Extensions.Configuration;
+using Ninject;
+using NLog;
+using RVis.Base.Extensions;
 using RVisUI.Extensions;
 using RVisUI.Ioc;
 using RVisUI.Properties;
 using System;
-using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
+using static RVisUI.Wpf.Behaviour;
+using static System.IO.Path;
 
 namespace RVisUI
 {
@@ -13,12 +18,28 @@ namespace RVisUI
   {
     private void DoStartup(StartupEventArgs e)
     {
-      var logLevelSuffix = ".Log.Level";
-      var logNames = ConfigurationManager.AppSettings.AllKeys
-        .Where(k => k.EndsWith(logLevelSuffix, StringComparison.InvariantCulture))
-        .Select(k => k.Substring(0, k.Length - logLevelSuffix.Length))
-        .ToArray();
-      RVis.Base.Logging.Configure(logNames);
+      var builder = new ConfigurationBuilder()
+        .SetBasePath(GetBasePath())
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+
+      var configuration = builder.Build();
+
+      var logLevel = configuration.GetSection(nameof(LogLevel));
+      var logLevels = logLevel
+        .GetChildren()
+        .ToDictionary(cs => cs.Key, cs => LogLevel.FromString(cs.Value));
+      RVis.Base.Logging.Configure(logLevels);
+
+      var rvisUI = configuration.GetSection(nameof(RVisUI));
+      RVisUI.MainWindow.ShowFrameRate = rvisUI.GetValue<bool>(
+        nameof(RVisUI.MainWindow.ShowFrameRate)
+        );
+      RVisUI.MainWindow.MaximumMemoryPressure = rvisUI.GetValue<double>(
+        nameof(RVisUI.MainWindow.MaximumMemoryPressure)
+        );
+      DocRoot = rvisUI.GetValue<string>(
+        nameof(DocRoot)
+        );
 
       var doSaveSettings = false;
 
@@ -59,8 +80,14 @@ namespace RVisUI
 
     private void HandleExit(object sender, ExitEventArgs e)
     {
-      (AppState as IDisposable).Dispose();
-      (AppService as IDisposable).Dispose();
+      ((IDisposable)AppState).Dispose();
+      ((IDisposable)AppService).Dispose();
+    }
+
+    private static string GetBasePath()
+    {
+      using var processModule = Process.GetCurrentProcess().MainModule;
+      return GetDirectoryName(processModule?.FileName).AssertNotNull();
     }
   }
 }

@@ -16,12 +16,12 @@ namespace Estimation
   {
     private class _PriorsStateDTO
     {
-      public string SelectedPrior { get; set; }
+      public string? SelectedPrior { get; set; }
     }
 
     private class _LikelihoodStateDTO
     {
-      public string SelectedOutput { get; set; }
+      public string? SelectedOutput { get; set; }
     }
 
     private class _DesignStateDTO
@@ -33,36 +33,36 @@ namespace Estimation
 
     private class _SimulationStateDTO
     {
-      public string SelectedParameter { get; set; }
+      public string? SelectedParameter { get; set; }
     }
 
     private class _PriorStateDTO
     {
-      public string Name { get; set; }
-      public string DistributionType { get; set; }
-      public string[] DistributionStates { get; set; }
+      public string? Name { get; set; }
+      public string? DistributionType { get; set; }
+      public string[]? DistributionStates { get; set; }
       public bool IsSelected { get; set; }
     }
 
     private class _OutputStateDTO
     {
-      public string Name { get; set; }
-      public string ErrorModelType { get; set; }
-      public string[] ErrorModelStates { get; set; }
+      public string? Name { get; set; }
+      public string? ErrorModelType { get; set; }
+      public string[]? ErrorModelStates { get; set; }
       public bool IsSelected { get; set; }
     }
 
     private class _ModuleStateDTO
     {
-      public _PriorsStateDTO PriorsState { get; set; }
-      public _LikelihoodStateDTO LikelihoodState { get; set; }
-      public _DesignStateDTO DesignState { get; set; }
-      public _SimulationStateDTO SimulationState { get; set; }
-      public _PriorStateDTO[] PriorStates { get; set; }
-      public _OutputStateDTO[] OutputStates { get; set; }
-      public string[] SelectedObservationsReferences { get; set; }
-      public string EstimationDesign { get; set; }
-      public string RootExportDirectory { get; set; }
+      public _PriorsStateDTO? PriorsState { get; set; }
+      public _LikelihoodStateDTO? LikelihoodState { get; set; }
+      public _DesignStateDTO? DesignState { get; set; }
+      public _SimulationStateDTO? SimulationState { get; set; }
+      public _PriorStateDTO[]? PriorStates { get; set; }
+      public _OutputStateDTO[]? OutputStates { get; set; }
+      public string[]? SelectedObservationsReferences { get; set; }
+      public string? EstimationDesign { get; set; }
+      public string? RootExportDirectory { get; set; }
       public bool OpenAfterExport { get; set; }
       public bool? AutoApplyParameterSharedState { get; set; } = false;
       public bool? AutoShareParameterSharedState { get; set; } = false;
@@ -184,9 +184,9 @@ namespace Estimation
         _priorStates = dto.PriorStates
           .Select(ps =>
           {
-            var name = ps.Name;
+            var name = ps.Name.AssertNotNull();
             var distributionType = Enum.TryParse(ps.DistributionType, out DistributionType dt) ? dt : DistributionType.None;
-            var distributionStates = Distribution.DeserializeDistributions(ps.DistributionStates);
+            var distributionStates = Distribution.DeserializeDistributions(ps.DistributionStates.AssertNotNull());
             var isSelected = ps.IsSelected;
             return new ParameterState(name, distributionType, distributionStates, isSelected);
           })
@@ -198,9 +198,9 @@ namespace Estimation
         _outputStates = dto.OutputStates
           .Select(os =>
           {
-            var name = os.Name;
+            var name = os.Name.AssertNotNull();
             var errorModelType = Enum.TryParse(os.ErrorModelType, out ErrorModelType emt) ? emt : ErrorModelType.None;
-            var errorModelStates = ErrorModel.DeserializeErrorModels(os.ErrorModelStates);
+            var errorModelStates = ErrorModel.DeserializeErrorModels(os.ErrorModelStates.AssertNotNull());
             var isSelected = os.IsSelected;
             return new OutputState(name, errorModelType, errorModelStates, isSelected);
           })

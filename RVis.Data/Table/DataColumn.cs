@@ -18,8 +18,8 @@ namespace RVis.Data
 
     public override IReadOnlyList<T> Data => _data;
 
-    internal string _name;
-    internal T[] _data;
+    internal string _name = null!;
+    internal T[] _data = null!;
 
     protected DataColumn() { }
   }

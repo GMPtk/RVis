@@ -31,10 +31,7 @@ namespace Sampling
       _latinHypercubeDesign = latinHypercubeDesign;
     }
 
-    public override async Task<DataTable> GetSamplesAsync() =>
-      await Task.Run(GetSamples);
-
-    private DataTable GetSamples()
+    public override async Task<DataTable> GetSamplesAsync()
     {
       using var serverLicense = _serverPool.RequestServer().Case switch
       {
@@ -84,7 +81,9 @@ namespace Sampling
         seedValue
         );
 
-      serverLicense.GetRClient().EvaluateNonQuery(code);
+      var rClient = await serverLicense.GetRClientAsync();
+
+      await rClient.EvaluateNonQueryAsync(code);
 
       var useSimulatedAnnealing = !IsNaN(_latinHypercubeDesign.T0);
 
@@ -116,29 +115,23 @@ namespace Sampling
           imax
           );
 
-        serverLicense.GetRClient().EvaluateNonQuery(code);
-        design = serverLicense.GetRClient().EvaluateNumData("rvis_lhsDesign_out_opt$design");
+        await rClient.EvaluateNonQueryAsync(code);
+        design = await rClient.EvaluateNumDataAsync("rvis_lhsDesign_out_opt$design");
       }
       else
       {
-        design = serverLicense.GetRClient().EvaluateNumData("rvis_lhsDesign_out$design");
+        design = await rClient.EvaluateNumDataAsync("rvis_lhsDesign_out$design");
       }
 
       var parameterSamples = selectedParameters
         .Filter(ps => ps.DistributionType != DistributionType.Invariant)
         .Map((i, ps) =>
         {
+          var (name, lower, upper, icdf) = parameterBounds[i];
+          RequireTrue(name == ps.Name);
+
           var samples = design[i].Data
-            .Select(d =>
-            {
-              var (name, lower, upper, icdf) = parameterBounds[i];
-              RequireTrue(name == ps.Name);
-
-              d = lower + d * (upper - lower);
-              d = icdf(d);
-
-              return d;
-            })
+            .Select(d => icdf(lower + d * (upper - lower)))
             .ToArray();
 
           return (ParameterState: ps, Samples: samples);
@@ -151,7 +144,7 @@ namespace Sampling
 
       if (doRankCorrelation)
       {
-        parameterSamples = DoRankCorrelation(parameterSamples, serverLicense.GetRClient());
+        parameterSamples = await DoRankCorrelationAsync(parameterSamples, rClient);
       }
 
       var samples = MakeSamples(selectedParameters, parameterSamples);

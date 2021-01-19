@@ -1,10 +1,12 @@
-﻿namespace RVis.Base.Extensions
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace RVis.Base.Extensions
 {
   public static class ObjExt
   {
-    public static bool Resolve<T>(this object o, out T t)
+    public static bool Resolve<T>(this object? o, [NotNullWhen(true)][MaybeNull] out T t)
     {
-      if (!(o is T u))
+      if (o is not T u || u is null)
       {
         t = default;
         return false;

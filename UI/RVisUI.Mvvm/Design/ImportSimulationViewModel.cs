@@ -6,6 +6,8 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
 
+#nullable disable
+
 namespace RVisUI.Mvvm.Design
 {
   public class ImportSimulationViewModel : IImportSimulationViewModel
@@ -33,9 +35,9 @@ namespace RVisUI.Mvvm.Design
     {
       get => new NumDataTable("xxx", new NumDataColumn[] 
       {
-        new NumDataColumn("time", new double[]{ }),
-        new NumDataColumn("y", new double[]{ }),
-        new NumDataColumn("z", new double[]{ }),
+        new NumDataColumn("time", System.Array.Empty<double>()),
+        new NumDataColumn("y", System.Array.Empty<double>()),
+        new NumDataColumn("z", System.Array.Empty<double>()),
       });
       set => throw new NotImplementedException();
     }

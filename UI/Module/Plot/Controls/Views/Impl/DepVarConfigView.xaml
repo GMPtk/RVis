@@ -9,7 +9,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="650" 
              d:DesignWidth="850"
-             d:DataContext="{d:DesignInstance Type=design:TraceDataPlotViewModel, IsDesignTimeCreatable=True}"
+             d:DataContext="{d:DesignInstance Type=design:DepVarConfigViewModel, IsDesignTimeCreatable=True}"
              >
   <UserControl.Resources>
     <ResourceDictionary>
@@ -17,12 +17,14 @@
       <ResourceDictionary.MergedDictionaries>
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <Style x:Key="MaterialDesignTextStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignBody1TextBlock}">
@@ -40,7 +42,6 @@
           Padding="5"
           Background="{DynamicResource MaterialDesignPaper}"
           Margin="0,0,15,15"
-          d:DataContext="{Binding DepVarConfigViewModel}"
           >
 
     <Border.Effect>
@@ -59,6 +60,7 @@
       </Grid.ColumnDefinitions>
 
       <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
         <RowDefinition />
         <RowDefinition />
         <RowDefinition />
@@ -66,7 +68,7 @@
         <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
 
-      <Grid>
+      <Grid Grid.RowSpan="2">
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto"/>
           <RowDefinition/>
@@ -122,7 +124,7 @@
 
       </Grid>
 
-      <ScrollViewer Grid.Row="1"
+      <ScrollViewer Grid.Row="2"
                     Grid.RowSpan="3"
                     Margin="0 5 5 0"
                     VerticalScrollBarVisibility="Auto" 
@@ -150,12 +152,27 @@
 
       </ScrollViewer>
 
-      <CheckBox Grid.Row="4" 
+      <CheckBox Grid.Row="5" 
                 IsChecked="{Binding IsScaleLogarithmic}" 
                 Content="Use logarithmic axis"
                 />
 
-      <GroupBox Grid.Column="1" 
+      <StackPanel Grid.Column="1" 
+                  Orientation="Horizontal" 
+                  Margin="5"
+                  >
+        <TextBlock Text="Inset Trace" 
+                   VerticalAlignment="Center"
+                   Margin="0 0 10 0"
+                   />
+        <ComboBox ItemsSource="{Binding InsetOptions}" 
+                  SelectedIndex="{Binding SelectedInsetOption}"
+                  Width="Auto"
+                  />
+      </StackPanel>
+
+      <GroupBox Grid.Column="1"
+                Grid.Row="1"
                 Grid.RowSpan="2" 
                 Margin="5 0 0 5" 
                 Header="Supplementary Traces"
@@ -192,7 +209,10 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition />
                   </Grid.ColumnDefinitions>
-                  <CheckBox IsChecked="{Binding Use}" Margin="3" Content="{Binding Label}"/>
+                  <CheckBox IsChecked="{Binding IsSelected}" 
+                            Margin="3" 
+                            Content="{Binding Label}"
+                            />
                 </Grid>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
@@ -202,7 +222,7 @@
       </GroupBox>
 
       <GroupBox Grid.Column="1" 
-                Grid.Row="2" 
+                Grid.Row="3" 
                 Grid.RowSpan="2" 
                 Margin="5 5 0 10" 
                 Header="Observations"
@@ -238,7 +258,7 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition />
                   </Grid.ColumnDefinitions>
-                  <CheckBox IsChecked="{Binding Use}" Margin="3" Content="{Binding Label}"/>
+                  <CheckBox IsChecked="{Binding IsSelected}" Margin="3" Content="{Binding Label}"/>
                 </Grid>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
@@ -248,7 +268,7 @@
       </GroupBox>
 
       <Button Grid.Column="1"
-              Grid.Row="4"
+              Grid.Row="5"
               HorizontalAlignment="Right"
               Width="Auto" 
               Height="Auto"                               

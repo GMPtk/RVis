@@ -20,7 +20,7 @@ namespace Sampling
 
     public string Name { get; }
 
-    public ICommand SetKeyboardTarget { get; }
+    public ICommand SetKeyboardTarget { get; } = null!;
 
     public double? CorrelationN
     {
@@ -29,13 +29,13 @@ namespace Sampling
     }
     private double? _correlationN;
 
-    public string CorrelationT
+    public string? CorrelationT
     {
       get => throw new InvalidOperationException(nameof(CorrelationT));
       set => throw new InvalidOperationException(nameof(CorrelationT));
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void ObserveMirrorCorrelationN(double? _) =>
       CorrelationN = _toMirror.CorrelationN;

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static RVis.Base.Extensions.EnumExt;
@@ -17,6 +18,42 @@ namespace RVis.Model
   {
     public static Arr<DistributionType> GetDistributionTypes(DistributionType flags) =>
       _distributionTypes.Filter(dt => flags.HasFlag(dt));
+
+    public static (string Variable, IDistribution Distribution) ParseRelation(string representation)
+    {
+      var match = _reRelation.Match(representation);
+      
+      RequireTrue(match.Success, $"Failed to parse relation: {representation}");
+
+      var variable = match.Groups[1].Value;
+      
+      RequireTrue(
+        Enum.TryParse(match.Groups[2].Value, out DistributionType distributionType),
+        $"Unrecognised distribution type: {match.Groups[2].Value}"
+        );
+
+      var parts = match.Groups
+        .Cast<Group>()
+        .Skip(3)
+        .Where(g => g.Success)
+        .Select(g => g.Value)
+        .ToArr();
+
+      var parseMethod = _distributionParserMap[distributionType];
+
+      var maybeDistribution = (Option<IDistribution>)parseMethod.Invoke(
+        null,
+        new object[] { parts }
+        )!;
+
+      var distribution = maybeDistribution.IfNone(
+        () => throw new InvalidOperationException(
+          $"{distributionType} distribution incorrectly specified: {representation}"
+          )
+        );
+
+      return (variable, distribution);
+    }
 
     public static string[] SerializeDistributions(Arr<IDistribution> distributions)
     {
@@ -44,7 +81,7 @@ namespace RVis.Model
         .ToArr();
     }
 
-    public static Option<IDistribution> DeserializeDistribution(string serialized)
+    public static Option<IDistribution> DeserializeDistribution(string? serialized)
     {
       if (serialized.IsntAString()) return None;
 
@@ -62,7 +99,7 @@ namespace RVis.Model
       var maybeDistribution = (Option<IDistribution>)parseMethod.Invoke(
         null,
         new object[] { parts.Skip(1).ToArr() }
-        );
+        )!;
 
       if (maybeDistribution.IsNone)
       {
@@ -73,7 +110,7 @@ namespace RVis.Model
     }
 
     public static string SerializeDistribution(DistributionType distributionType, Arr<object> state) =>
-      $"{distributionType.ToString()}{PROP_SEP}{Join(PROP_SEP, state.Map(o => Convert.ToString(o, InvariantCulture)))}";
+      $"{distributionType}{PROP_SEP}{Join(PROP_SEP, state.Map(o => Convert.ToString(o, InvariantCulture)))}";
 
     public static IDistribution GetDefault(DistributionType distributionType)
     {
@@ -92,7 +129,7 @@ namespace RVis.Model
         dt => dt,
         dt => typeof(Distribution)
           .Assembly
-          .GetType($"{nameof(RVis)}.{nameof(Model)}.{dt}{nameof(Distribution)}")
+          .GetType($"{nameof(RVis)}.{nameof(Model)}.{dt}{nameof(Distribution)}")!
         );
 
       _distributionDefaultMap = _distributionTypeMap
@@ -102,7 +139,7 @@ namespace RVis.Model
           {
             var defaultProperty = kvp.Value.GetField(nameof(NormalDistribution.Default), BindingFlags.Public | BindingFlags.Static);
             RequireNotNull(defaultProperty, $"Default property not found on type {kvp.Value.Name}");
-            return defaultProperty.GetValue(null) as IDistribution;
+            return (IDistribution)defaultProperty.GetValue(null)!;
           });
 
       _distributionParserMap = _distributionTypeMap
@@ -121,5 +158,7 @@ namespace RVis.Model
     private static readonly IDictionary<DistributionType, Type> _distributionTypeMap;
     private static readonly IDictionary<DistributionType, IDistribution> _distributionDefaultMap;
     private static readonly IDictionary<DistributionType, MethodInfo> _distributionParserMap;
+    private static readonly Regex _reRelation = 
+      new(@"(\w+)\s*~\s*(\w+)\s*\(\s*([\d-+.eE]+)(?:\s*,\s*([\d-+.eE]+))*\)(?:\s*\[\s*([\d-+.eE]+)\s*,\s*([\d-+.eE]+)\s*\])?");
   }
 }

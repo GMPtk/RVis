@@ -104,7 +104,7 @@
                       <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <TextBlock Margin="0,0,0,0" 
                                     HorizontalAlignment="Center"
-                                    Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
                                     Text="NO DESCRIPTIONS/UNITS AVAILABLE FROM SOURCE"
                                     />
                       </StackPanel>

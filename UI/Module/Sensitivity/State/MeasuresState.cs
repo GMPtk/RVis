@@ -7,12 +7,12 @@ namespace Sensitivity
 {
   internal sealed class MeasuresState : INotifyPropertyChanged
   {
-    internal string SelectedOutputName
+    internal string? SelectedOutputName
     {
       get => _selectedOutputName;
       set => this.RaiseAndSetIfChanged(ref _selectedOutputName, value, PropertyChanged);
     }
-    private string _selectedOutputName;
+    private string? _selectedOutputName;
 
     internal Map<string, (DataTable Mu, DataTable MuStar, DataTable Sigma)> MorrisOutputMeasures
     {
@@ -28,6 +28,6 @@ namespace Sensitivity
     }
     private Map<string, (DataTable FirstOrder, DataTable TotalOrder, DataTable Variance)> _fast99OutputMeasures;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

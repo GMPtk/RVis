@@ -35,7 +35,7 @@ namespace Estimation
       var errorModelTypes = ErrorModel.GetErrorModelTypes(errorModelsInView);
 
       var errorViewModelTypes = errorModelTypes.Map(
-        dt => typeof(IErrorViewModel).Assembly.GetType($"{nameof(Estimation)}.{dt}ErrorViewModel")
+        dt => typeof(IErrorViewModel).Assembly.GetType($"{nameof(Estimation)}.{dt}ErrorViewModel").AssertNotNull()
         );
 
       _errorViewModels = errorViewModelTypes
@@ -56,10 +56,10 @@ namespace Estimation
           )
         );
 
-      _errorViewModels.Iter(dvm => (dvm as INotifyPropertyChanged)
+      _errorViewModels.Iter(dvm => ((INotifyPropertyChanged)dvm)
         .GetWhenPropertyChanged()
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<string>(
+          _reactiveSafeInvoke.SuspendAndInvoke<string?>(
             pn => ObserveErrorViewModelProperty(dvm, pn)
           )
         )
@@ -81,12 +81,12 @@ namespace Estimation
     }
     private int _selectedErrorModelName = NOT_FOUND;
 
-    public IErrorViewModel ErrorViewModel
+    public IErrorViewModel? ErrorViewModel
     {
       get => _errorViewModel;
       set => this.RaiseAndSetIfChanged(ref _errorViewModel, value, PropertyChanged);
     }
-    private IErrorViewModel _errorViewModel;
+    private IErrorViewModel? _errorViewModel;
 
     public Option<OutputState> OutputState
     {
@@ -95,7 +95,7 @@ namespace Estimation
     }
     private Option<OutputState> _outputState;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -109,15 +109,17 @@ namespace Estimation
 
       OutputState = new OutputState(
         outputState.Name,
-        ErrorViewModel.ErrorModelType,
+        ErrorViewModel!.ErrorModelType,
         outputState.ErrorModels,
         outputState.IsSelected
         );
     }
 
-    private void ObserveErrorViewModelProperty(IErrorViewModel errorViewModel, string propertyName)
+    private void ObserveErrorViewModelProperty(IErrorViewModel errorViewModel, string? propertyName)
     {
       if (propertyName != nameof(IErrorViewModel<NormalErrorModel>.ErrorModel)) return;
+
+      RequireNotNull(errorViewModel.ErrorModelUnsafe);
 
       var outputState = _outputState.AssertSome();
       RequireTrue(outputState.IsSelected);

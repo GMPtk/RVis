@@ -16,14 +16,14 @@ namespace Sensitivity
 {
   internal sealed partial class DesignViewModel
   {
-    private void CreateFast99Design(
+    private async Task CreateFast99DesignAsync(
       Arr<(string Name, IDistribution Distribution)> parameterDistributions,
       IRVisClient client
       )
     {
       RequireTrue(NoOfSamples > 0);
 
-      var (samples, serializedDesign) = GetFast99Samples(
+      var (samples, serializedDesign) = await GetFast99SamplesAsync(
         parameterDistributions,
         NoOfSamples.Value,
         client
@@ -106,6 +106,9 @@ namespace Sensitivity
     {
       using (serverLicense)
       {
+        RequireNotNull(_moduleState.SensitivityDesign);
+        RequireNotNull(_moduleState.Trace);
+
         _cancellationTokenSource = new CancellationTokenSource();
 
         TaskName = "Generate e-FAST Output Measures";
@@ -114,18 +117,15 @@ namespace Sensitivity
 
         try
         {
-          var measures = await Task.Run(
-            () => GenerateFast99OutputMeasures(
-              _moduleState.SensitivityDesign.SerializedDesigns.Single(),
-              _moduleState.SensitivityDesign.Samples.Single(),
-              designOutputs,
-              _simulation.SimConfig.SimOutput.GetIndependentData(_moduleState.Trace),
-              serverLicense.GetRClient(),
-              _cancellationTokenSource.Token,
-              s => _appService.ScheduleLowPriorityAction(() => RaiseTaskMessageEvent(s))
-            ),
+          var measures = await Method.GenerateFast99OutputMeasuresAsync(
+            _moduleState.SensitivityDesign.SerializedDesigns.Single(),
+            _moduleState.SensitivityDesign.Samples.Single(),
+            designOutputs,
+            _simulation.SimConfig.SimOutput.GetIndependentData(_moduleState.Trace),
+            await serverLicense.GetRClientAsync(),
+            s => _appService.ScheduleLowPriorityAction(() => RaiseTaskMessageEvent(s)),
             _cancellationTokenSource.Token
-            );
+          );
 
           _moduleState.MeasuresState.SelectedOutputName = outputName;
           _moduleState.MeasuresState.Fast99OutputMeasures =

@@ -10,7 +10,7 @@ namespace RVisUI.DepProps
 {
   public static class Content
   {
-    public static string GetUIComponents(DependencyObject o)
+    public static string? GetUIComponents(DependencyObject o)
     {
       return o.GetValue(UIComponentsProperty) as string;
     }
@@ -30,7 +30,7 @@ namespace RVisUI.DepProps
 
     private static void HandleUIComponentsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      if (!d.Resolve(out TabControl tabControl)) return;
+      if (!d.Resolve(out TabControl? tabControl)) return;
 
       if (!e.OldValue.Resolve(out Arr<(string ID, string DisplayName, string DisplayIcon, object View, object ViewModel)> oldUIComponents)) return;
 
@@ -44,7 +44,7 @@ namespace RVisUI.DepProps
       var tabItems = newUIComponents.Map(c =>
       {
         object header = c.DisplayName.ToUpperInvariant();
-        string toolTip = default;
+        string? toolTip = default;
 
         if (c.DisplayIcon != default)
         {

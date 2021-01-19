@@ -7,10 +7,11 @@ using RVis.Model.Extensions;
 using System;
 using System.IO;
 using static LanguageExt.Prelude;
+using static RVis.Base.Check;
+using static Sensitivity.Properties.Resources;
 using static System.Globalization.CultureInfo;
 using static System.IO.Path;
 using static System.String;
-using static Sensitivity.Properties.Resources;
 
 namespace Sensitivity
 {
@@ -18,6 +19,8 @@ namespace Sensitivity
   {
     internal void Export(Arr<string> outputNames, string targetDirectory)
     {
+      RequireNotNull(_moduleState.SensitivityDesign);
+
       string measureNames;
       string mainEffect;
 
@@ -47,7 +50,7 @@ namespace Sensitivity
       }
       else
       {
-        throw new ArgumentOutOfRangeException(nameof(SensitivityMethod));
+        throw new InvalidOperationException(nameof(SensitivityMethod));
       }
 
       var r = Format(
@@ -90,7 +93,7 @@ namespace Sensitivity
         var pathToCSV = Combine(targetDirectory, $"{outputName.ToValidFileName()}.csv");
 
         using var streamWriter = new StreamWriter(pathToCSV);
-        using var csvWriter = new CsvWriter(streamWriter);
+        using var csvWriter = new CsvWriter(streamWriter, InvariantCulture);
 
         csvWriter.WriteField(independentData.Name);
 

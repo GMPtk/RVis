@@ -13,11 +13,9 @@ using System.Data;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
-using static RVis.Base.Extensions.NumExt;
 using DataTable = System.Data.DataTable;
 
 namespace Sampling
@@ -166,7 +164,7 @@ namespace Sampling
     }
     private bool _canCancelAcquireOutputs;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(disposing: true);
 
@@ -205,6 +203,8 @@ namespace Sampling
       {
         UnloadCurrentDesign();
         _moduleState.Outputs = default;
+        _moduleState.FilterConfig = FilterConfig.Default;
+        _moduleState.OutputFilters = default;
         _moduleState.Samples = default;
         _moduleState.SamplingDesign = default;
         UpdateEnable();
@@ -266,8 +266,10 @@ namespace Sampling
       {
         if (!_runOutputRequestJob) return;
 
+        RequireNotNull(_outputRequestJob);
+
         _runOutputRequestJob = false;
-        _jobSubscriptions.Dispose();
+        _jobSubscriptions?.Dispose();
         _jobSubscriptions = default;
 
         for (var i = 0; i < _outputRequestJob.Length; ++i)
@@ -290,6 +292,8 @@ namespace Sampling
       lock (_jobSyncLock)
       {
         if (!_runOutputRequestJob) return;
+
+        RequireNotNull(_outputRequestJob);
 
         RequireTrue(outputRequest.RequestToken.Resolve(out int thisIndex));
         if (thisIndex >= _outputRequestJob.Length) return;
@@ -358,6 +362,7 @@ namespace Sampling
       lock (_jobSyncLock)
       {
         RequireTrue(_runOutputRequestJob);
+        RequireNotNull(_outputRequestJob);
 
         NOutputsAcquired = _outputRequestJob.Count(t => t.Input == default || t.Output != default);
         AcquireOutputsProgress = 100.0 * NOutputsAcquired / _outputRequestJob.Length;
@@ -368,15 +373,20 @@ namespace Sampling
         {
           _moduleState.Outputs = _outputRequestJob
             .Select((t, i) => (Index: i, t.Output))
-            .Filter(t => t.Output != default)
-            .ToArr();
+            .Where(t => t.Output != default)
+            .ToArr()!;
+
+          _moduleState.OutputFilters = _moduleState.Outputs
+            .Map(o => (o.Index, _moduleState.FilterConfig.IsInFilteredSet(o.Output)));
         }
 
         if (!isComplete) return;
 
         _runOutputRequestJob = false;
-        _jobSubscriptions.Dispose();
+        _jobSubscriptions?.Dispose();
         _jobSubscriptions = default;
+
+        RequireNotNull(_moduleState.SamplingDesign);
 
         if (_moduleState.SamplingDesign.NoDataIndices.IsEmpty)
         {
@@ -481,19 +491,22 @@ namespace Sampling
     {
       RequireNotNull(_moduleState.SamplingDesign);
 
-      _outputRequestJob = CompileOutputRequestJob(
+      var outputRequestJob = CompileOutputRequestJob(
         _simulation,
         _simData,
         _moduleState.SamplingDesign.Samples,
         _moduleState.SamplingDesign.NoDataIndices
         );
 
-      _moduleState.Outputs = _outputRequestJob
+      _moduleState.Outputs = outputRequestJob
         .Select((t, i) => (Index: i, t.Output))
-        .Filter(t => t.Output != default)
-        .ToArr();
+        .Where(t => t.Output != default)
+        .ToArr()!;
 
-      NOutputsAcquired = _outputRequestJob.Count(t =>
+      _moduleState.OutputFilters = _moduleState.Outputs
+        .Map(o => (o.Index, _moduleState.FilterConfig.IsInFilteredSet(o.Output)));
+
+      NOutputsAcquired = outputRequestJob.Count(t =>
       {
         if (t.Input == default) return true;
         if (t.Output != default) return true;
@@ -501,19 +514,26 @@ namespace Sampling
         return false;
       });
 
-      NOutputsToAcquire = _outputRequestJob.Length;
+      NOutputsToAcquire = outputRequestJob.Length;
 
       AcquireOutputsProgress = 100.0 * NOutputsAcquired / NOutputsToAcquire;
+
+      var isComplete = NOutputsAcquired == NOutputsToAcquire;
+
+      if (!isComplete)
+      {
+        _outputRequestJob = outputRequestJob;
+      }
     }
 
-    private static (SimInput Input, bool OutputRequested, NumDataTable Output)[] CompileOutputRequestJob(
+    private static (SimInput Input, bool OutputRequested, NumDataTable? Output)[] CompileOutputRequestJob(
       Simulation simulation,
       ISimData simData,
       DataTable samples,
       Arr<int> noDataIndices
       )
     {
-      var job = new (SimInput Input, bool OutputRequested, NumDataTable Output)[samples.Rows.Count];
+      var job = new (SimInput Input, bool OutputRequested, NumDataTable? Output)[samples.Rows.Count];
       var defaultInput = simulation.SimConfig.SimInput;
 
       var targetParameters = samples.Columns
@@ -535,7 +555,7 @@ namespace Sampling
 
         var output = simData
           .GetOutput(input, simulation)
-          .IfNoneUnsafe(default(NumDataTable));
+          .IfNoneUnsafe(default(NumDataTable)!);
 
         job[row] = (input, false, output);
       }
@@ -551,9 +571,9 @@ namespace Sampling
     private readonly ISimData _simData;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private (SimInput Input, bool OutputRequested, NumDataTable Output)[] _outputRequestJob;
+    private (SimInput Input, bool OutputRequested, NumDataTable? Output)[]? _outputRequestJob;
     private bool _runOutputRequestJob;
-    private IDisposable _jobSubscriptions;
+    private IDisposable? _jobSubscriptions;
     private readonly object _jobSyncLock = new object();
     private bool _disposed = false;
   }

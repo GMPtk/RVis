@@ -14,17 +14,33 @@ namespace Sensitivity
   internal sealed class MuStarSigmaViewModel : IMuStarSigmaViewModel, IDisposable
   {
     internal MuStarSigmaViewModel()
+      : this(new AppService(), new AppSettings())
     {
-      _appSettings = new AppSettings();
-      PlotModel = CreatePlotModel();
     }
 
     internal MuStarSigmaViewModel(IAppService appService, IAppSettings appSettings)
     {
-      _appService = appService;
       _appSettings = appSettings;
 
-      PlotModel = CreatePlotModel();
+      PlotModel = new PlotModel
+      {
+        IsLegendVisible = false
+      };
+
+      _horizontalAxis = new LinearAxis
+      {
+        Title = "µ*",
+        Position = AxisPosition.Bottom
+      };
+      PlotModel.Axes.Add(_horizontalAxis);
+
+      _verticalAxis = new LinearAxis
+      {
+        Title = "σ",
+        Position = AxisPosition.Left
+      };
+      PlotModel.Axes.Add(_verticalAxis);
+
       PlotModel.ApplyThemeToPlotModelAndAxes();
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
@@ -34,7 +50,7 @@ namespace Sensitivity
         _appSettings
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(
               ObserveAppSettingsPropertyChange
               )
             )
@@ -105,31 +121,7 @@ namespace Sensitivity
       }
     }
 
-    private PlotModel CreatePlotModel()
-    {
-      var plotModel = new PlotModel
-      {
-        IsLegendVisible = false
-      };
-
-      _horizontalAxis = new LinearAxis
-      {
-        Title = "µ*",
-        Position = AxisPosition.Bottom
-      };
-      plotModel.Axes.Add(_horizontalAxis);
-
-      _verticalAxis = new LinearAxis
-      {
-        Title = "σ",
-        Position = AxisPosition.Left
-      };
-      plotModel.Axes.Add(_verticalAxis);
-
-      return plotModel;
-    }
-
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (!propertyName.IsThemeProperty()) return;
 
@@ -142,12 +134,11 @@ namespace Sensitivity
         ? OxyPalettes.Cool(numberOfColors)
         : OxyPalettes.Rainbow(numberOfColors);
 
-    private readonly IAppService _appService;
     private readonly IAppSettings _appSettings;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private LinearAxis _horizontalAxis;
-    private LinearAxis _verticalAxis;
+    private readonly LinearAxis _horizontalAxis;
+    private readonly LinearAxis _verticalAxis;
     private bool _disposed = false;
   }
 }

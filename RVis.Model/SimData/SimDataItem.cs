@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RVis.Model
 {
   public class SimDataItem<T>
   {
+    [AllowNull]
     public T Item { get; }
 
     public Simulation Simulation { get; }
@@ -17,7 +19,7 @@ namespace RVis.Model
     public DateTime FulfilledOn { get; }
 
     internal SimDataItem(
-      T item,
+      [AllowNull] T item,
       Simulation simulation,
       object requester,
       object requestToken,
@@ -37,7 +39,7 @@ namespace RVis.Model
   internal static class SimDataItem
   {
     internal static SimDataItem<T> Create<T>(
-      T item,
+      [AllowNull] T item,
       Simulation simulation,
       object requester,
       object requestToken,

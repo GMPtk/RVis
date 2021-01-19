@@ -41,7 +41,7 @@
                   <TextBlock x:Name="text" 
                              Margin="0,0,0,0" 
                              HorizontalAlignment="Center"
-                             Style="{StaticResource MaterialDesignTitleTextBlock}"
+                             Style="{StaticResource MaterialDesignHeadline6TextBlock}"
                              Text="{Binding Tag[0], RelativeSource={RelativeSource AncestorType=DataGrid}}"
                              />
                 </StackPanel>
@@ -77,7 +77,7 @@
       </Grid.RowDefinitions>
 
       <TextBlock Text="{Binding FileName, StringFormat='Importing {0}'}" 
-                 Style="{StaticResource MaterialDesignTitleTextBlock}" 
+                 Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
                  Margin="10" 
                  TextAlignment="Center"
                  />

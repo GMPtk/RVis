@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Input;
 
+#nullable disable
+
 namespace Estimation.Design
 {
   internal class IterationOptionsViewModel : IIterationOptionsViewModel

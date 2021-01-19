@@ -44,7 +44,7 @@ namespace RVis.Model
 
     public Arr<double> Y { get; }
 
-    public override bool Equals(object obj) =>
+    public override bool Equals(object? obj) =>
       obj is SimObservations observations && Equals(observations);
 
     public bool Equals(SimObservations other) =>
@@ -52,7 +52,7 @@ namespace RVis.Model
       (other.ID, other.EvidenceSourceID, other.Subject, other.RefName, other.X, other.Y);
 
     public override int GetHashCode() =>
-      (ID, EvidenceSourceID, Subject, RefName, X, Y).GetHashCode();
+      HashCode.Combine(ID, EvidenceSourceID, Subject, RefName, X, Y);
 
     public static bool operator ==(SimObservations lhs, SimObservations rhs) =>
       lhs.Equals(rhs);

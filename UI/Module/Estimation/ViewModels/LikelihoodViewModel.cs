@@ -76,7 +76,7 @@ namespace Estimation
         _appSettings
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(
               ObserveAppSettingsPropertyChange
             )
           ),
@@ -103,7 +103,7 @@ namespace Estimation
         this
           .WhenAny(vm => vm.SelectedOutputViewModel, _ => default(object))
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<object>(
+            _reactiveSafeInvoke.SuspendAndInvoke<object?>(
               ObserveSelectedOutputViewModel
               )
             ),
@@ -142,12 +142,12 @@ namespace Estimation
     }
     private Arr<IObservationsViewModel> _observationsViewModels;
 
-    public PlotModel PlotModel
+    public PlotModel? PlotModel
     {
       get => _plotModel;
       set => this.RaiseAndSetIfChanged(ref _plotModel, value, PropertyChanged);
     }
-    private PlotModel _plotModel;
+    private PlotModel? _plotModel;
 
     public bool IsVisible
     {
@@ -156,7 +156,7 @@ namespace Estimation
     }
     private bool _isVisible;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -201,7 +201,7 @@ namespace Estimation
       }
     }
 
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (!propertyName.IsThemeProperty()) return;
 
@@ -273,7 +273,7 @@ namespace Estimation
       PlotObservations();
     }
 
-    private void ObserveSelectedOutputViewModel(object _)
+    private void ObserveSelectedOutputViewModel(object? _)
     {
       if (SelectedOutputViewModel.IsFound())
       {
@@ -403,7 +403,7 @@ namespace Estimation
       RequireTrue(SelectedOutputViewModel.IsFound());
       var outputName = SelectedOutputViewModels[SelectedOutputViewModel].Name;
 
-      var verticalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Left);
+      var verticalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Left).AssertNotNull();
       if (!outputName.Equals(verticalAxis.Tag))
       {
         var output = _simulation.SimConfig.SimOutput;
@@ -435,7 +435,7 @@ namespace Estimation
         : NaN;
 
       verticalAxis.Minimum = verticalAxisMin;
-      var horizontalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Bottom);
+      var horizontalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Bottom).AssertNotNull();
       horizontalAxis.Minimum = horizontalAxisMin;
 
       _observationsScatterPlot.Series.Clear();
@@ -483,7 +483,7 @@ namespace Estimation
     private readonly OutputErrorViewModel _outputErrorViewModel;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private IDisposable _observationsViewModelIsSelectedSubscriptions;
+    private IDisposable? _observationsViewModelIsSelectedSubscriptions;
     private bool _disposed = false;
   }
 }

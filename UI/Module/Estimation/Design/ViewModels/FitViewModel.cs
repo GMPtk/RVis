@@ -1,6 +1,7 @@
 ﻿using LanguageExt;
 using OxyPlot;
 using OxyPlot.Axes;
+using OxyPlot.Legends;
 using OxyPlot.Series;
 using System;
 using System.Collections.ObjectModel;
@@ -43,12 +44,14 @@ namespace Estimation.Design
         new BoxPlotItem(5, 13.5, 14.0, 14.5, 15.5, 16.5)
       };
 
-      var plotModel = new PlotModel
+      var plotModel = new PlotModel();
+
+      plotModel.Legends.Add(new Legend
       {
         LegendPlacement = LegendPlacement.Inside,
         LegendPosition = LegendPosition.RightTop,
         LegendOrientation = LegendOrientation.Vertical
-      };
+      });
 
       plotModel.Axes.Add(new LinearAxis { Title = "X Axis", Position = AxisPosition.Bottom });
       plotModel.Axes.Add(new LinearAxis { Title = "Y Axis", Position = AxisPosition.Left });

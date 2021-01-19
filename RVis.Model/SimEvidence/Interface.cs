@@ -9,7 +9,7 @@ namespace RVis.Model
     Arr<SimEvidenceSource> EvidenceSources { get; }
     SimEvidenceSource AddEvidenceSource(
       string name, 
-      string description, 
+      string? description, 
       Set<string> subjects, 
       string reference, 
       string refHash

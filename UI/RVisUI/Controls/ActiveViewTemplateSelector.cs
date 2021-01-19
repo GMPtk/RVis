@@ -1,8 +1,8 @@
-﻿using Splat;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using static RVisUI.Wpf.WpfTools;
 
 namespace RVisUI.Controls
 {
@@ -16,10 +16,13 @@ namespace RVisUI.Controls
         //return GetTemplateForViewModel("SimulationHome");
       }
 
-      if (null == item) return null;
+      if (item is null)
+      {
+        return GetTemplateForViewModel("Starting");
+      }
+      
       var typeName = item.GetType().Name;
       var activeViewName = typeName.Replace("ViewModel", string.Empty);
-
       return GetTemplateForViewModel(activeViewName);
     }
 
@@ -38,7 +41,7 @@ namespace RVisUI.Controls
       return _templates[viewTypeName];
     }
 
-    private static readonly bool _isInDesignMode = PlatformModeDetector.InDesignMode();
+    private static readonly bool _isInDesignMode = IsInDesignMode;
     private readonly IDictionary<string, DataTemplate> _templates = new SortedDictionary<string, DataTemplate>();
   }
 }

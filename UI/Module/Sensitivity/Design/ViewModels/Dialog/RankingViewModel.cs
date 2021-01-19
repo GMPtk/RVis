@@ -3,6 +3,8 @@ using System;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
 
+#nullable disable
+
 namespace Sensitivity.Design
 {
   internal sealed class RankingViewModel : IRankingViewModel

@@ -56,10 +56,8 @@ namespace RVisUI.AppInf
     /// <param name="resolution">The resolution (resolution). The default value is 96.</param>
     public static void Export(IPlotModel plotModel, string fileName, int width, int height, OxyColor background, int resolution = 96)
     {
-      using (var stream = File.Create(fileName))
-      {
-        Export(plotModel, stream, width, height, background, resolution);
-      }
+      using var stream = File.Create(fileName);
+      Export(plotModel, stream, width, height, background, resolution);
     }
 
     /// <summary>
@@ -130,7 +128,7 @@ namespace RVisUI.AppInf
       };
 
       plotModel.Update(true);
-      plotModel.Render(context, canvas.Width, canvas.Height);
+      plotModel.Render(context, new OxyRect(0, 0, canvas.Width, canvas.Height));
 
       canvas.UpdateLayout();
 

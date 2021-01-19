@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
 using static Estimation.Test.ErrorModelImpl;
 using static RVis.Base.Constant;
 
@@ -9,7 +10,7 @@ namespace Estimation.Test
   {
 #if !IS_PIPELINES_BUILD
     [TestMethod]
-    public void TestDTruncNorm()
+    public async Task TestDTruncNorm()
     {
       // arrange
       var lower = -0.5;
@@ -21,9 +22,9 @@ namespace Estimation.Test
       var x2 = lower - 1d;
       var x3 = upper + 1d;
 
-      var expected1 = GetNumData($"truncnorm::dtruncnorm({x1},{lower},{upper},{mean},{standardDeviation})")[0].Data[0];
-      var expected2 = GetNumData($"truncnorm::dtruncnorm({x2},{lower},{upper},{mean},{standardDeviation})")[0].Data[0];
-      var expected3 = GetNumData($"truncnorm::dtruncnorm({x3},{lower},{upper},{mean},{standardDeviation})")[0].Data[0];
+      var expected1 = (await GetNumDataAsync($"truncnorm::dtruncnorm({x1},{lower},{upper},{mean},{standardDeviation})"))[0].Data[0];
+      var expected2 = (await GetNumDataAsync($"truncnorm::dtruncnorm({x2},{lower},{upper},{mean},{standardDeviation})"))[0].Data[0];
+      var expected3 = (await GetNumDataAsync($"truncnorm::dtruncnorm({x3},{lower},{upper},{mean},{standardDeviation})"))[0].Data[0];
 
       // act
       var actual1 = TruncNorm.DTruncNorm(x1, lower, upper, mean, standardDeviation);

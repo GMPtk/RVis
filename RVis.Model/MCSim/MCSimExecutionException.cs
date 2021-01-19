@@ -21,6 +21,6 @@ namespace RVis.Model
       $"{Message}{NewLine}{NewLine}" +
       $"Diagnostics:{NewLine}{NewLine}" +
       $"{Join(NewLine, Diagnostics)}{NewLine}{NewLine}" +
-      $"{StackTrace.ToString()}";
+      $"{StackTrace?.ToString()}";
   }
 }

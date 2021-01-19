@@ -23,8 +23,6 @@ namespace Sampling
 
       IsMc2dInstalled = appState.InstalledRPackages.Exists(p => p.Package == "mc2d");
 
-      if (!IsMc2dInstalled) return;
-
       _rcSetKeyboardTarget = ReactiveCommand.Create<RCParameterViewModel>(HandleSetKeyboardTarget);
 
       Disable = ReactiveCommand.Create(HandleDisable);
@@ -58,26 +56,26 @@ namespace Sampling
     }
     private Arr<string> _parameterNames;
 
-    public IRCParameterViewModel[][] RCParameterViewModels
+    public IRCParameterViewModel[][]? RCParameterViewModels
     {
       get => _rcParameterViewModels;
       set => this.RaiseAndSetIfChanged(ref _rcParameterViewModels, value, PropertyChanged);
     }
-    private IRCParameterViewModel[][] _rcParameterViewModels;
+    private IRCParameterViewModel[][]? _rcParameterViewModels;
 
-    public string TargetParameterV
+    public string? TargetParameterV
     {
       get => _targetParameterV;
       set => this.RaiseAndSetIfChanged(ref _targetParameterV, value, PropertyChanged);
     }
-    private string _targetParameterV;
+    private string? _targetParameterV;
 
-    public string TargetParameterH
+    public string? TargetParameterH
     {
       get => _targetParameterH;
       set => this.RaiseAndSetIfChanged(ref _targetParameterH, value, PropertyChanged);
     }
-    private string _targetParameterH;
+    private string? _targetParameterH;
 
     public Arr<double> TargetCorrelations
     {
@@ -120,13 +118,15 @@ namespace Sampling
     }
     private Arr<(string Parameter, Arr<double> Correlations)> _correlations;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void HandleCancel() =>
       DialogResult = false;
 
     private void HandleSetKeyboardTarget(RCParameterViewModel rcParameterViewModel)
     {
+      RequireNotNull(RCParameterViewModels);
+
       var state =
         Range(0, RCParameterViewModels.Length).Map(i =>
           Range(0, RCParameterViewModels[i].Length).Map(j =>
@@ -187,13 +187,15 @@ namespace Sampling
 
     private void HandleOK()
     {
+      RequireNotNull(RCParameterViewModels);
+
       var correlations = RCParameterViewModels
         .Select((a, i) =>
         {
           var parameterName = ParameterNames[i];
           var correlations = a
             .OfType<RCParameterViewModel>()
-            .Select(vm => vm.CorrelationN.Value)
+            .Select(vm => vm.CorrelationN ?? throw new NullReferenceException($"{vm.Name} has null corr"))
             .ToArr();
           return (parameterName, correlations);
         })
@@ -331,6 +333,6 @@ namespace Sampling
     private readonly IAppService _appService;
     private readonly ICommand _rcSetKeyboardTarget;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
-    private IDisposable _rcParameterViewModelSubscriptions;
+    private IDisposable? _rcParameterViewModelSubscriptions;
   }
 }

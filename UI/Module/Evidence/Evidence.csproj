@@ -1,226 +1,51 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8CCB549C-60EB-422A-ABD8-0A37B3072EEB}</ProjectGuid>
-    <OutputType>library</OutputType>
-    <RootNamespace>Evidence</RootNamespace>
-    <AssemblyName>Evidence</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <Deterministic>true</Deterministic>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>latest</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>latest</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="OxyPlot, Version=2.0.0.0, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\deps\3rd\OxyPlot.dll</HintPath>
-    </Reference>
-    <Reference Include="OxyPlot.Wpf, Version=2.0.0.0, Culture=neutral, PublicKeyToken=75e952ba404cdbb0, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\deps\3rd\OxyPlot.Wpf.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
+    <PackageReference Include="MahApps.Metro" Version="2.4.3" />
+    <PackageReference Include="MahApps.Metro.IconPacks" Version="4.8.0" />
+    <PackageReference Include="MaterialDesignColors" Version="1.2.7" />
+    <PackageReference Include="MaterialDesignThemes" Version="3.2.0" />
+    <PackageReference Include="MaterialDesignThemes.MahApps" Version="0.1.5" />
+    <PackageReference Include="ReactiveUI" Version="13.0.27" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="..\..\..\Version\VersionInfo.cs">
-      <Link>VersionInfo.cs</Link>
-    </Compile>
-    <Compile Include="Controls\Dialogs\ImportObservationsDialog.xaml.cs">
-      <DependentUpon>ImportObservationsDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\BrowseView.xaml.cs">
-      <DependentUpon>BrowseView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Views\ManageView.xaml.cs">
-      <DependentUpon>ManageView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Design\ViewModel.cs" />
-    <Compile Include="Design\ViewModels\Dialog\ImportObservationsViewModel.cs" />
-    <Compile Include="Design\ViewModels\ManageViewModel.cs" />
-    <Compile Include="Design\ViewModels\BrowseViewModel.cs" />
-    <Compile Include="Interface.cs" />
-    <Compile Include="State\ModuleState.cs" />
-    <Compile Include="ViewModel.cs" />
-    <Compile Include="ViewModels\Dialog\ImportObservationsViewModel.cs" />
-    <Compile Include="ViewModels\Dialog\Impl\ObservationsColumnViewModel.cs" />
-    <Compile Include="ViewModels\Impl\EvidenceSourceViewModel.cs" />
-    <Compile Include="ViewModels\Impl\ObservationsViewModel.cs" />
-    <Compile Include="ViewModels\Impl\SubjectViewModel.cs" />
-    <Compile Include="ViewModels\ManageViewModel.cs" />
-    <Compile Include="ViewModels\BrowseViewModel.cs" />
-    <Page Include="Controls\Dialogs\ImportObservationsDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\BrowseView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\Views\ManageView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="Service.cs" />
-    <Compile Include="View.xaml.cs">
-      <DependentUpon>View.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
+    <ProjectReference Include="..\..\RVisUI.AppInf\RVisUI.AppInf.csproj" />
+    <ProjectReference Include="..\..\RVisUI.WPF\RVisUI.Wpf.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
+    <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="Properties\Settings.settings">
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="CsvHelper">
-      <Version>12.2.3</Version>
-    </PackageReference>
-    <PackageReference Include="LanguageExt.Core">
-      <Version>3.3.46</Version>
-    </PackageReference>
-    <PackageReference Include="MahApps.Metro">
-      <Version>1.6.5</Version>
-    </PackageReference>
-    <PackageReference Include="MahApps.Metro.IconPacks">
-      <Version>3.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="MaterialDesignColors">
-      <Version>1.2.1</Version>
-    </PackageReference>
-    <PackageReference Include="MaterialDesignThemes">
-      <Version>2.6.0</Version>
-    </PackageReference>
-    <PackageReference Include="MaterialDesignThemes.MahApps">
-      <Version>0.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="MathNet.Numerics">
-      <Version>4.9.0</Version>
-    </PackageReference>
-    <PackageReference Include="Nett">
-      <Version>0.13.0</Version>
-    </PackageReference>
-    <PackageReference Include="NLog">
-      <Version>4.6.8</Version>
-    </PackageReference>
-    <PackageReference Include="ReactiveUI">
-      <Version>11.0.6</Version>
-    </PackageReference>
-    <PackageReference Include="System.Reactive.Core">
-      <Version>4.3.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.Reactive.Interfaces">
-      <Version>4.3.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.Reactive.Linq">
-      <Version>4.3.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.Reactive.PlatformServices">
-      <Version>4.3.2</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\RVis.Base\RVis.Base.csproj">
-      <Project>{75df8b2f-d179-436d-8107-be640f3c3531}</Project>
-      <Name>RVis.Base</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\RVis.Data\RVis.Data.csproj">
-      <Project>{4dee84dc-ab9e-4ae7-9021-2c0fab41964d}</Project>
-      <Name>RVis.Data</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\RVis.Model\RVis.Model.csproj">
-      <Project>{3edaa788-c299-4133-b59a-d9f3f13fa978}</Project>
-      <Name>RVis.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\RVisUI.AppInf\RVisUI.AppInf.csproj">
-      <Project>{11039298-b9bf-4b94-86bb-c6aa6ac8469f}</Project>
-      <Name>RVisUI.AppInf</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\RVisUI.Model\RVisUI.Model.csproj">
-      <Project>{3b88f57e-4c6d-49e4-8d8e-71bc81ea95da}</Project>
-      <Name>RVisUI.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\RVisUI.WPF\RVisUI.Wpf.csproj">
-      <Project>{306c45cd-7a5f-4ebd-be4b-8be5deddaea5}</Project>
-      <Name>RVisUI.Wpf</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

@@ -9,16 +9,16 @@ namespace RVis.Model
   public class SymbolInfo : ISymbolInfo
   {
     [ProtoMember(1)]
-    public string Symbol { get; set; }
+    public string? Symbol { get; set; }
 
     [ProtoMember(2)]
-    public NumDataTable Value { get; set; }
+    public NumDataTable? Value { get; set; }
 
     [ProtoMember(3)]
     public int Length { get; set; }
 
     [ProtoMember(4)]
-    public string[] Names { get; set; }
+    public string[]? Names { get; set; }
 
     [ProtoMember(5)]
     public SymbolType SymbolType { get; set; }
@@ -27,13 +27,13 @@ namespace RVis.Model
     public int SymbolicExpressionType { get; set; }
 
     [ProtoMember(7)]
-    public string Code { get; set; }
+    public string? Code { get; set; }
 
     [ProtoMember(8)]
-    public string Comment { get; set; }
+    public string? Comment { get; set; }
 
     [ProtoMember(9)]
-    public string Unit { get; set; }
+    public string? Unit { get; set; }
 
     [ProtoMember(10)]
     public int Level { get; set; }

@@ -19,19 +19,19 @@ namespace RVisUI.Ioc.Mvvm
       _moduleInfo = moduleInfo;
     }
 
-    public string Name
+    public string? Name
     {
       get => _name;
       set => this.RaiseAndSetIfChanged(ref _name, value);
     }
-    private string _name;
+    private string? _name;
 
-    public string Description
+    public string? Description
     {
       get => _description;
       set => this.RaiseAndSetIfChanged(ref _description, value);
     }
-    private string _description;
+    private string? _description;
 
     public bool IsEnabled
     {
@@ -40,11 +40,11 @@ namespace RVisUI.Ioc.Mvvm
     }
     private bool _isEnabled;
 
-    public ModuleInfo ModuleInfo
+    public ModuleInfo? ModuleInfo
     {
       get => _moduleInfo;
       set => this.RaiseAndSetIfChanged(ref _moduleInfo, value);
     }
-    private ModuleInfo _moduleInfo;
+    private ModuleInfo? _moduleInfo;
   }
 }

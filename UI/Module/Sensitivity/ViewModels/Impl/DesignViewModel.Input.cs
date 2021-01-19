@@ -1,4 +1,5 @@
 ﻿using LanguageExt;
+using RVis.Base.Extensions;
 using RVis.Model;
 using System.Data;
 using System.Linq;
@@ -40,7 +41,7 @@ namespace Sensitivity
     {
       RequireEqual(inputs.Rows.Count, outputRequestJob.Length);
 
-      var acquiredColumn = inputs.Columns[ACQUIRED_DATACOLUMN_NAME];
+      var acquiredColumn = inputs.Columns[ACQUIRED_DATACOLUMN_NAME].AssertNotNull();
       var foundIssues = false;
 
       for (var i = 0; i < outputRequestJob.Length; ++i)

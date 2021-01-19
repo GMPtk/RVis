@@ -1,11 +1,11 @@
 ﻿using MahApps.Metro.Controls;
 using RVis.Base.Extensions;
 using RVisUI.Ioc.Mvvm;
-using RVisUI.Model;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using static RVisUI.Model.ModuleInfo;
 
 namespace RVisUI.Controls.Dialogs
 {
@@ -22,7 +22,10 @@ namespace RVisUI.Controls.Dialogs
       _moveUp.IsEnabled = false;
       _toggleEnable.IsEnabled = false;
 
-      var moduleInfos = App.Current.AppState.LoadModules();
+      var services = App.Current.AppState.GetServices(rebind: true);
+      var moduleInfos = GetModuleInfos(services);
+      moduleInfos = SortAndEnable(moduleInfos, App.Current.AppSettings.ModuleConfiguration);
+
       var viewModels = moduleInfos.Select(mi => new ModuleConfigViewModel(mi));
       _moduleConfigViewModels = new ObservableCollection<ModuleConfigViewModel>(viewModels);
       _listView.ItemsSource = _moduleConfigViewModels;
@@ -41,7 +44,7 @@ namespace RVisUI.Controls.Dialogs
     {
       var enable = _listView.SelectedIndex.IsFound();
       _toggleEnable.IsEnabled = enable;
-      if (enable) _toggleEnable.IsChecked = (_listView.SelectedItem as ModuleConfigViewModel).IsEnabled;
+      if (enable) _toggleEnable.IsChecked = ((ModuleConfigViewModel)_listView.SelectedItem).IsEnabled;
     }
 
     private void HandleSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -67,14 +70,14 @@ namespace RVisUI.Controls.Dialogs
     private void HandleToggleEnable(object sender, RoutedEventArgs e)
     {
       var isEnabled = _toggleEnable.IsChecked == true;
-      (_listView.SelectedItem as ModuleConfigViewModel).IsEnabled = isEnabled;
-      (_listView.SelectedItem as ModuleConfigViewModel).ModuleInfo.IsEnabled = isEnabled;
+      ((ModuleConfigViewModel)_listView.SelectedItem).IsEnabled = isEnabled;
+      ((ModuleConfigViewModel)_listView.SelectedItem).ModuleInfo.AssertNotNull().IsEnabled = isEnabled;
     }
 
     private void HandleOK(object sender, RoutedEventArgs e)
     {
-      var moduleInfos = _moduleConfigViewModels.Select(vm => vm.ModuleInfo).ToArray();
-      var moduleConfiguration = ModuleInfo.GetModuleConfiguration(moduleInfos);
+      var moduleInfos = _moduleConfigViewModels.Select(vm => vm.ModuleInfo.AssertNotNull()).ToArr();
+      var moduleConfiguration = GetModuleConfiguration(moduleInfos);
       App.Current.AppSettings.ModuleConfiguration = moduleConfiguration;
       DialogResult = true;
       Close();

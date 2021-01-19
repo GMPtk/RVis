@@ -11,7 +11,7 @@ namespace Sampling
 {
   internal sealed class RCParameterViewModel : IRCParameterViewModel, INotifyPropertyChanged
   {
-    internal RCParameterViewModel(string name, ICommand setKeyboardTarget)
+    internal RCParameterViewModel(string name, ICommand? setKeyboardTarget)
     {
       Name = name;
       SetKeyboardTarget = setKeyboardTarget;
@@ -37,7 +37,7 @@ namespace Sampling
 
     public string Name { get; }
 
-    public ICommand SetKeyboardTarget { get; }
+    public ICommand? SetKeyboardTarget { get; }
 
     public double? CorrelationN
     {
@@ -46,14 +46,14 @@ namespace Sampling
     }
     private double? _correlationN;
 
-    public string CorrelationT
+    public string? CorrelationT
     {
       get => _correlationT;
       set => this.RaiseAndSetIfChanged(ref _correlationT, value.CheckParseValue<double>(), PropertyChanged);
     }
-    private string _correlationT;
+    private string? _correlationT;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void ObserveCorrelationN(object obj)
     {

@@ -24,6 +24,9 @@ namespace RVis.Model
 
     public bool IsTruncated => false;
 
+    public IDistribution WithLowerUpper(double lower, double upper) =>
+      this;
+
     public bool IsConfigured => !IsNaN(Value);
 
     public double Mean
@@ -70,7 +73,7 @@ namespace RVis.Model
     public double InverseCumulativeDistribution(double p) =>
       throw new InvalidOperationException("Not a continuous random variable");
 
-    public (string FunctionName, Arr<(string ArgName, double ArgValue)> FunctionParameters) RQuantileSignature =>
+    public (string? FunctionName, Arr<(string ArgName, double ArgValue)> FunctionParameters) RQuantileSignature =>
       default;
 
     public (string FunctionName, Arr<(string ArgName, double ArgValue)> FunctionParameters) RInverseTransformSamplingSignature =>
@@ -95,7 +98,7 @@ namespace RVis.Model
     public bool Equals(InvariantDistribution rhs) =>
       Value.Equals(rhs.Value);
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
       if (obj is InvariantDistribution rhs)
       {
@@ -105,13 +108,8 @@ namespace RVis.Model
       return false;
     }
 
-    public override int GetHashCode()
-    {
-      var hashCode = -774459404;
-      hashCode = hashCode * -1521134295 + DistributionType.GetHashCode();
-      hashCode = hashCode * -1521134295 + Value.GetHashCode();
-      return hashCode;
-    }
+    public override int GetHashCode() => 
+      HashCode.Combine(DistributionType, Value);
 
     public static bool operator ==(InvariantDistribution left, InvariantDistribution right)
     {

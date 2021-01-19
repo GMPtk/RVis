@@ -7,6 +7,8 @@ using static LanguageExt.Prelude;
 using static System.Double;
 using static System.Linq.Enumerable;
 
+#nullable disable
+
 namespace Evidence.Design
 {
   internal class BrowseViewModel : IBrowseViewModel

@@ -25,7 +25,7 @@ namespace RVisUI.Model
 
     public Option<IDistribution> Distribution { get; }
 
-    public override bool Equals(object obj) =>
+    public override bool Equals(object? obj) =>
       obj is SimParameterSharedState parameterSharedState && Equals(parameterSharedState);
 
     public bool Equals(SimParameterSharedState other) =>
@@ -35,13 +35,8 @@ namespace RVisUI.Model
       Maximum.Equals(other.Maximum) &&
       Distribution == other.Distribution;
 
-    public override int GetHashCode()
-    {
-      var hashCode = 174710907;
-      hashCode = hashCode * -1521134295 + (Name, Value, Minimum, Maximum).GetHashCode();
-      hashCode = hashCode * -1521134295 + Distribution.GetHashCode();
-      return hashCode;
-    }
+    public override int GetHashCode() => 
+      HashCode.Combine(Name, Value, Minimum, Maximum, Distribution);
 
     public static bool operator ==(SimParameterSharedState lhs, SimParameterSharedState rhs) =>
       lhs.Equals(rhs);

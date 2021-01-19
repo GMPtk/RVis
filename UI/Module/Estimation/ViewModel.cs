@@ -156,7 +156,7 @@ namespace Estimation
               );
 
             var updated = paired.Map(p => p.PSS.Match(
-              pss => ApplyDistributionAndSelect(pss.Parameter, p.PS, pss.Distribution),
+              pss => ApplyDistributionAndSelect(pss.Parameter, p.PS, pss.Minimum, pss.Maximum, pss.Distribution),
               () => p.PS.WithIsSelected(false)
               ));
 
@@ -181,6 +181,8 @@ namespace Estimation
               var priorState = ApplyDistributionAndSelect(
                 parameterSharedState.Parameter,
                 _moduleState.PriorStates[index],
+                parameterSharedState.Minimum,
+                parameterSharedState.Maximum,
                 parameterSharedState.Distribution
                 );
               _moduleState.PriorStates = _moduleState.PriorStates.SetItem(index, priorState);
@@ -396,6 +398,9 @@ namespace Estimation
 
     public void ExportData(DataExportConfiguration dataExportConfiguration)
     {
+      RequireNotNull(_moduleState.EstimationDesign);
+      RequireNotNull(_moduleState.PosteriorState);
+
       var targetDirectory = Combine(
         dataExportConfiguration.RootExportDirectory,
         dataExportConfiguration.ExportDirectoryName
@@ -522,7 +527,7 @@ namespace Estimation
           .Map(pss => _moduleState.PriorStates
             .Find(ps => ps.Name == pss.Name)
             .Match(
-              ps => ApplyDistributionAndSelect(ps, pss.Value, pss.Distribution),
+              ps => ApplyDistributionAndSelect(ps, pss.Value, pss.Minimum, pss.Maximum, pss.Distribution),
               () => CreateAndApplyDistribution(pss)
             )
           );
@@ -663,29 +668,38 @@ namespace Estimation
     private static ParameterState ApplyDistributionAndSelect(
       SimParameter parameter,
       ParameterState parameterState,
+      double minimum,
+      double maximum,
       Option<IDistribution> maybeDistribution
       ) =>
-      ApplyDistributionAndSelect(parameterState, parameter.Scalar, maybeDistribution);
+      ApplyDistributionAndSelect(parameterState, parameter.Scalar, minimum, maximum, maybeDistribution);
 
     private static ParameterState ApplyDistributionAndSelect(
       ParameterState parameterState,
       double value,
+      double minimum,
+      double maximum,
       Option<IDistribution> maybeDistribution
-      ) =>
-      maybeDistribution.Match(
-        d =>
-        {
-          var index = parameterState.Distributions.FindIndex(e => e.DistributionType == d.DistributionType);
-          var distributions = parameterState.Distributions.SetItem(index, d);
-          return new ParameterState(parameterState.Name, d.DistributionType, distributions, true);
-        },
-        () =>
-        {
-          var invariantDistribution = new InvariantDistribution(value);
-          var distributions = parameterState.Distributions.SetDistribution(invariantDistribution);
-          parameterState = new ParameterState(parameterState.Name, DistributionType.Invariant, distributions, true);
-          return parameterState;
-        });
+      )
+    {
+      var distributions = parameterState.Distributions.Map(
+        d => d.WithLowerUpper(minimum, maximum)
+        );
+      var invariantDistribution = new InvariantDistribution(value);
+      distributions = distributions.SetDistribution(invariantDistribution);
+
+      return maybeDistribution.Match(
+       d =>
+       {
+         var index = distributions.FindIndex(e => e.DistributionType == d.DistributionType);
+         distributions = parameterState.Distributions.SetItem(index, d);
+         return new ParameterState(parameterState.Name, d.DistributionType, distributions, true);
+       },
+       () =>
+       {
+         return new ParameterState(parameterState.Name, parameterState.DistributionType, distributions, true);
+       });
+    }
 
     private static ParameterState CreateAndApplyDistribution(
       (SimParameter Parameter, double Minimum, double Maximum, Option<IDistribution> Distribution) parameterSharedState

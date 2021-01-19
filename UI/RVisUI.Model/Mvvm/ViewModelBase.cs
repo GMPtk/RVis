@@ -14,12 +14,12 @@ namespace RVisUI.Model
     }
     private bool _isRunningTask;
 
-    public string TaskName
+    public string? TaskName
     {
       get => _taskName;
       set => this.RaiseAndSetIfChanged(ref _taskName, value);
     }
-    private string _taskName;
+    private string? _taskName;
 
     public bool CanCancelTask
     {
@@ -36,7 +36,11 @@ namespace RVisUI.Model
 
     protected void RaiseTaskMessageEvent(string message) => _taskMessages.OnNext(message);
 
-    public void Dispose() => Dispose(true);
+    public void Dispose()
+    {
+      GC.SuppressFinalize(this);
+      Dispose(true);
+    }
 
     protected virtual void Dispose(bool disposing)
     {

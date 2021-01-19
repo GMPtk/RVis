@@ -3,6 +3,8 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 
+#nullable disable
+
 namespace RVisUI.Wpf
 {
   public class BrushToHexConverter : IValueConverter
@@ -11,7 +13,7 @@ namespace RVisUI.Wpf
     {
       if (value == null) return null;
 
-      string lowerHexString(int i) => i.ToString("X").ToLower();
+      static string lowerHexString(int i) => i.ToString("X").ToLower();
 
       var brush = (SolidColorBrush)value;
 

@@ -19,8 +19,8 @@ namespace RVis.Model
   {
     public ManagedImport(string pathToRFile, SimLibrary simLibrary)
     {
-      _codeFileName = Path.GetFileName(pathToRFile);
-      SimulationName = Path.GetFileNameWithoutExtension(_codeFileName);
+      _codeFileName = GetFileName(pathToRFile);
+      SimulationName = GetFileNameWithoutExtension(_codeFileName);
       _codeLines = File.ReadAllLines(pathToRFile);
       _simLibrary = simLibrary;
     }
@@ -35,22 +35,18 @@ namespace RVis.Model
 
     public string SimulationName { get; set; }
 
-    public string SimulationDescription { get; set; }
+    public string? SimulationDescription { get; set; }
 
     public async Task InspectAsync(IRVisClient rVisClient)
     {
-      var inspection = Task.Run(
-        () =>
-        {
-          if (_pathToContainingDirectory.IsntAString()) SetUpStaging();
-          var pathToCode = Path.Combine(_pathToContainingDirectory, _codeFileName);
+      if (_pathToContainingDirectory.IsntAString()) SetUpStaging();
+      RequireDirectory(_pathToContainingDirectory);
+      var pathToCode = Combine(_pathToContainingDirectory, _codeFileName);
 
-          rVisClient.Clear();
-          return rVisClient.InspectSymbols(pathToCode).ToArr();
-        }
-      );
+      await rVisClient.ClearAsync();
+      var inspection = await rVisClient.InspectSymbolsAsync(pathToCode);
 
-      SymbolInfos = await inspection;
+      SymbolInfos = inspection.ToArr();
 
       UnaryFunctions = SymbolInfos
         .Filter(si =>
@@ -77,7 +73,7 @@ namespace RVis.Model
           si.Symbol.IsAString() &&
           (si.SymbolType == SymbolType.Vector || si.SymbolType == SymbolType.List) &&
           si.Names?.Length > 1 &&
-          si.Value?.DataColumns.FirstOrDefault()?.Length == 1)
+          si.Value?.NRows == 1)
         .OrderBy(si => si.Symbol)
         .ToArr();
 
@@ -85,7 +81,7 @@ namespace RVis.Model
         .Filter(si =>
           si.Level == 0 &&
           si.Value?.ColumnNames.All(cn => cn.IsAString()) == true &&
-          si.Value?.DataColumns.FirstOrDefault()?.Length > 1)
+          si.Value?.NRows > 1)
         .OrderBy(si => si.Symbol)
         .ToArr();
 
@@ -110,41 +106,42 @@ namespace RVis.Model
 
     public async Task SetExecutorAsync(ISymbolInfo function, ISymbolInfo formal, IRVisClient rVisClient)
     {
-      var executor = Task.Run(
-        () =>
-        {
-          var pathToCode = Path.Combine(_pathToContainingDirectory, _codeFileName);
+      RequireDirectory(_pathToContainingDirectory);
+      var pathToCode = Combine(_pathToContainingDirectory, _codeFileName);
 
-          var code = new SimCode(_codeFileName, function.Symbol, formal.Symbol);
-          var config = new SimConfig(default, default, default, code, default, default);
+      var code = new SimCode(_codeFileName, function.Symbol, formal.Symbol);
+      var config = new SimConfig("Managed import", "dummy", default, code, default, default);
 
-          rVisClient.Clear();
-          rVisClient.RunExec(pathToCode, config);
-          return rVisClient.TabulateExecOutput(config);
-        }
-      );
+      await rVisClient.ClearAsync();
+      await rVisClient.RunExecAsync(pathToCode, config);
+      var output = await rVisClient.TabulateExecOutputAsync(config);
 
-      ExecutorOutput = await executor;
+      ExecutorOutput = output;
       ExecutorFunction = function;
       ExecutorFormal = formal;
       ExecutorParameterCandidates = ParameterCandidate.CreateForExec(ExecutorFormal, SymbolInfos);
       (ExecutorIndependentVariable, ExecutorValueCandidates) = ValueCandidate.CreateForExec(ExecutorOutput, SymbolInfos);
     }
 
-    public ISymbolInfo ExecutorFunction { get; private set; }
+    public ISymbolInfo? ExecutorFunction { get; private set; }
 
-    public ISymbolInfo ExecutorFormal { get; private set; }
+    public ISymbolInfo? ExecutorFormal { get; private set; }
 
     public Arr<ParameterCandidate> ExecutorParameterCandidates { get; private set; }
 
-    public NumDataTable ExecutorOutput { get; private set; }
+    public NumDataTable? ExecutorOutput { get; private set; }
 
-    public ValueCandidate ExecutorIndependentVariable { get; private set; }
+    public ValueCandidate? ExecutorIndependentVariable { get; private set; }
 
     public Arr<ValueCandidate> ExecutorValueCandidates { get; private set; }
 
     public async Task<string> ImportExecToLibraryAsync(IRVisClient rVisClient)
     {
+      RequireNotNull(ExecutorFunction);
+      RequireNotNull(ExecutorFormal);
+      RequireNotNull(ExecutorIndependentVariable);
+      RequireDirectory(_pathToContainingDirectory);
+
       var code = new SimCode(_codeFileName, ExecutorFunction.Symbol, ExecutorFormal.Symbol);
 
       var parameters = ExecutorParameterCandidates
@@ -189,14 +186,11 @@ namespace RVis.Model
 
       config.WriteToFile(_pathToContainingDirectory);
 
-      var trace = await Task.Run(() =>
-      {
-        var pathToCode = Path.Combine(_pathToContainingDirectory, _codeFileName);
+      var pathToCode = Combine(_pathToContainingDirectory, _codeFileName);
 
-        rVisClient.Clear();
-        rVisClient.RunExec(pathToCode, config);
-        return rVisClient.TabulateExecOutput(config);
-      });
+      await rVisClient.ClearAsync();
+      await rVisClient.RunExecAsync(pathToCode, config);
+      var trace = await rVisClient.TabulateExecOutputAsync(config);
 
       CheckTrace(trace);
 
@@ -205,6 +199,8 @@ namespace RVis.Model
 
     public async Task<string> ImportTmplToLibraryAsync(IRVisClient rVisClient)
     {
+      RequireDirectory(_pathToContainingDirectory);
+
       var code = new SimCode(_codeFileName, default, default);
 
       var parameterCandidates = ParameterCandidates.Filter(pc => pc.IsUsed);
@@ -242,14 +238,11 @@ namespace RVis.Model
 
       config.WriteToFile(_pathToContainingDirectory);
 
-      var trace = await Task.Run(() =>
-      {
-        var pathToCode = Path.Combine(_pathToContainingDirectory, _codeFileName);
+      var pathToCode = Combine(_pathToContainingDirectory, _codeFileName);
 
-        rVisClient.Clear();
-        rVisClient.SourceFile(pathToCode);
-        return rVisClient.TabulateTmplOutput(config);
-      });
+      await rVisClient.ClearAsync();
+      await rVisClient.SourceFileAsync(pathToCode);
+      var trace = await rVisClient.TabulateTmplOutputAsync(config);
 
       CheckTrace(trace);
 
@@ -257,12 +250,14 @@ namespace RVis.Model
 
       foreach (var parameterCandidate in parameterCandidates)
       {
+        RequireNotNull(parameterCandidate.SymbolInfo);
+
         var line = $"{parameterCandidate.SymbolInfo.Symbol} <- ${{{parameterCandidate.SymbolInfo.Symbol}}}";
         var index = parameterCandidate.SymbolInfo.LineNo - 1;
         codeLines[index] = line;
       }
 
-      var pathToRFile = Path.Combine(_pathToContainingDirectory, _codeFileName);
+      var pathToRFile = Combine(_pathToContainingDirectory, _codeFileName);
 
       File.WriteAllLines(pathToRFile, codeLines);
 
@@ -279,7 +274,10 @@ namespace RVis.Model
 
         try
         {
-          Directory.Delete(_pathToContainingDirectory, true);
+          if (null != _pathToContainingDirectory)
+          {
+            Directory.Delete(_pathToContainingDirectory, true);
+          }
         }
         catch (Exception) { }
 
@@ -298,14 +296,14 @@ namespace RVis.Model
 
       RequireNotNull(Directory.CreateDirectory(pathToContainingDirectory));
 
-      var pathToRFile = Path.Combine(pathToContainingDirectory, _codeFileName);
+      var pathToRFile = Combine(pathToContainingDirectory, _codeFileName);
 
       File.WriteAllLines(pathToRFile, _codeLines);
 
       _pathToContainingDirectory = pathToContainingDirectory;
     }
 
-    private void CheckTrace(NumDataTable trace)
+    private static void CheckTrace(NumDataTable trace)
     {
       RequireTrue(
         trace.NumDataColumns.AllUnique(ndc => ndc.Name),
@@ -316,7 +314,7 @@ namespace RVis.Model
     private readonly string _codeFileName;
     private readonly Arr<string> _codeLines;
     private readonly SimLibrary _simLibrary;
-    private string _pathToContainingDirectory;
+    private string? _pathToContainingDirectory;
     private bool _disposed = false;
   }
 }

@@ -6,7 +6,7 @@ namespace RVisUI
 {
   public partial class App
   {
-    public void RunDialog<T>(object viewModel = null) where T : Window, new()
+    public void RunDialog<T>(object? viewModel = null) where T : Window, new()
     {
       var dialog = new T();
       if (null != viewModel)
@@ -17,7 +17,7 @@ namespace RVisUI
       dialog.ShowDialog();
     }
 
-    public Window GetActiveWindow()
+    public Window? GetActiveWindow()
     {
       var window = SafeNativeMethods.GetActiveApplicationWindow();
       if (null == window)

@@ -24,7 +24,7 @@ namespace RVis.Model
     public double Alpha { get; }
     public double Beta { get; }
 
-    public InverseGamma Implementation => IsConfigured
+    public InverseGamma? Implementation => IsConfigured
       ? new InverseGamma(Alpha, Beta, Generator)
       : default;
 
@@ -34,6 +34,9 @@ namespace RVis.Model
 
     public bool IsTruncated => false;
 
+    public IDistribution WithLowerUpper(double lower, double upper) =>
+      this;
+
     public bool IsConfigured => !IsNaN(Alpha) && !IsNaN(Beta);
 
     public double Mean
@@ -41,7 +44,7 @@ namespace RVis.Model
       get
       {
         RequireTrue(IsConfigured);
-        return Implementation.Mean;
+        return Implementation!.Mean;
       }
     }
 
@@ -50,7 +53,7 @@ namespace RVis.Model
       get
       {
         RequireTrue(IsConfigured);
-        return Implementation.Variance;
+        return Implementation!.Variance;
       }
     }
 
@@ -62,7 +65,7 @@ namespace RVis.Model
       RequireTrue(IsConfigured);
       RequireNotNull(samples);
 
-      var implementation = Implementation;
+      var implementation = Implementation!;
       implementation.Samples(samples);
     }
 
@@ -74,8 +77,10 @@ namespace RVis.Model
 
     public double GetProposal(double value, double step)
     {
+      RequireTrue(!IsNaN(step) || IsConfigured);
+
       if (IsNaN(value)) value = Mean;
-      if (IsNaN(step)) step = Implementation.Variance;
+      if (IsNaN(step)) step = Implementation!.Variance;
 
       var sample = GetSample();
       value += (sample - value) * step;
@@ -89,7 +94,7 @@ namespace RVis.Model
     public double InverseCumulativeDistribution(double p) =>
       throw new InvalidOperationException("Not a continuous random variable");
 
-    public (string FunctionName, Arr<(string ArgName, double ArgValue)> FunctionParameters) RQuantileSignature =>
+    public (string? FunctionName, Arr<(string ArgName, double ArgValue)> FunctionParameters) RQuantileSignature =>
       (default, default);
 
     public (string FunctionName, Arr<(string ArgName, double ArgValue)> FunctionParameters) RInverseTransformSamplingSignature =>
@@ -115,7 +120,7 @@ namespace RVis.Model
     public bool Equals(InverseGammaDistribution rhs) =>
       Alpha.Equals(rhs.Alpha) && Beta.Equals(rhs.Beta);
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
       if (obj is InverseGammaDistribution rhs)
       {
@@ -125,14 +130,8 @@ namespace RVis.Model
       return false;
     }
 
-    public override int GetHashCode()
-    {
-      var hashCode = -1973367066;
-      hashCode = hashCode * -1521134295 + DistributionType.GetHashCode();
-      hashCode = hashCode * -1521134295 + Alpha.GetHashCode();
-      hashCode = hashCode * -1521134295 + Beta.GetHashCode();
-      return hashCode;
-    }
+    public override int GetHashCode() => 
+      HashCode.Combine(DistributionType, Alpha, Beta);
 
     public static bool operator ==(InverseGammaDistribution left, InverseGammaDistribution right)
     {

@@ -46,7 +46,7 @@ namespace Estimation
 
     public bool IsSelected { get; }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
       if (obj is OutputState rhs) return Equals(rhs);
       return false;

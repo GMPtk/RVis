@@ -10,6 +10,8 @@ using static LanguageExt.Prelude;
 using static System.Linq.Enumerable;
 using static System.String;
 
+#nullable disable
+
 namespace Plot.Design
 {
   public sealed class TraceViewModel : ITraceViewModel

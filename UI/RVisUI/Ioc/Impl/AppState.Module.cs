@@ -8,7 +8,6 @@ using RVisUI.Model.Extensions;
 using System;
 using System.IO;
 using System.Linq;
-using static RVisUI.Model.ModuleInfo;
 using static System.Array;
 using static System.IO.Path;
 using static System.Reflection.Assembly;
@@ -17,15 +16,21 @@ namespace RVisUI.Ioc
 {
   public partial class AppState
   {
-    public string ExtraModulePath
+    public string? ExtraModulePath
     {
       get => _extraModulePath;
       set => this.RaiseAndSetIfChanged(ref _extraModulePath, value, PropertyChanged);
     }
-    private string _extraModulePath;
+    private string? _extraModulePath;
 
-    public Arr<ModuleInfo> LoadModules()
+    public Arr<IRVisExtensibility> GetServices(bool rebind)
     {
+      if (!rebind)
+      {
+        var services = App.Current.NinjectKernel.GetAll<IRVisExtensibility>().ToArr();
+        if (!services.IsEmpty) return services;
+      }
+
       App.Current.NinjectKernel.Unbind<IRVisExtensibility>();
 
       var pathToApp = GetExecutingAssembly().GetDirectory();
@@ -35,6 +40,21 @@ namespace RVisUI.Ioc
         Empty<string>();
 
       if (!directories.Any()) App.Current.Log.Info($"No modules found in {pathToModules}");
+
+      //AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
+      //{
+      //  try
+      //  {
+      //    var assemblyName = new System.Reflection.AssemblyName(e.Name);
+      //    var assemblyPath = Combine(pathToApp, "bin", $"{assemblyName.Name}.dll");
+      //    return File.Exists(assemblyPath) ? System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath) : default;
+      //  }
+      //  catch
+      //  {
+      //    App.Current.Log.Error($"{e.RequestingAssembly?.FullName} wants {e.Name}");
+      //  }
+      //  return default;
+      //};
 
       foreach (var directory in directories) DoDirectoryBind(directory);
 
@@ -57,14 +77,10 @@ namespace RVisUI.Ioc
         }
       }
 
-      var services = App.Current.NinjectKernel.GetAll<IRVisExtensibility>().ToArr();
-      var moduleInfos = GetModuleInfos(services);
-      moduleInfos = SortAndEnable(moduleInfos, _appSettings.ModuleConfiguration);
-
-      return moduleInfos;
+      return App.Current.NinjectKernel.GetAll<IRVisExtensibility>().ToArr();
     }
 
-    private void DoFileBind(string file)
+    private static void DoFileBind(string file)
     {
       try
       {
@@ -82,7 +98,7 @@ namespace RVisUI.Ioc
       }
     }
 
-    private void DoDirectoryBind(string directory)
+    private static void DoDirectoryBind(string directory)
     {
       try
       {

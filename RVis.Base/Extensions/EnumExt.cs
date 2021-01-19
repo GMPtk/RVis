@@ -37,7 +37,7 @@ namespace RVis.Base.Extensions
     public static bool IsAddOrChange(this ObservableQualifier observableQualifier) =>
       (observableQualifier & (ObservableQualifier.Add | ObservableQualifier.Change)) != 0;
 
-    public static string GetDescription(this Enum value)
+    public static string? GetDescription(this Enum value)
     {
       RequireNotNull(value);
 

@@ -40,30 +40,30 @@ namespace RVisUI.Mvvm
 
     public ICommand BrowseForExecutable { get; }
 
-    public string PathToExecutable
+    public string? PathToExecutable
     {
       get => _pathToExecutable;
       set => this.RaiseAndSetIfChanged(ref _pathToExecutable, value);
     }
-    private string _pathToExecutable;
+    private string? _pathToExecutable;
 
     public ICommand BrowseForConfigurationFile { get; }
 
-    public string PathToConfigurationFile
+    public string? PathToConfigurationFile
     {
       get => _pathToConfigurationFile;
       set => this.RaiseAndSetIfChanged(ref _pathToConfigurationFile, value);
     }
-    private string _pathToConfigurationFile;
+    private string? _pathToConfigurationFile;
 
     public ICommand BrowseForTemplateInFile { get; }
 
-    public string PathToTemplateInFile
+    public string? PathToTemplateInFile
     {
       get => _pathToTemplateInFile;
       set => this.RaiseAndSetIfChanged(ref _pathToTemplateInFile, value);
     }
-    private string _pathToTemplateInFile;
+    private string? _pathToTemplateInFile;
 
     public bool OpenOnImport
     {
@@ -88,12 +88,12 @@ namespace RVisUI.Mvvm
     }
     private bool _isBusy;
 
-    public string BusyWith
+    public string? BusyWith
     {
       get => _busyWith;
       set => this.RaiseAndSetIfChanged(ref _busyWith, value);
     }
-    private string _busyWith;
+    private string? _busyWith;
 
     private void HandleBrowseForExecutable()
     {
@@ -105,7 +105,7 @@ namespace RVisUI.Mvvm
         "Select MCSim Executable",
         initialDirectory,
         "Executable Files|*.exe",
-        out string pathToFile
+        out string? pathToFile
         );
 
       if (didBrowse)
@@ -113,7 +113,9 @@ namespace RVisUI.Mvvm
         PathToExecutable = pathToFile;
 
         var rootDir = GetDirectoryName(pathToFile);
+        RequireDirectory(rootDir);
         var rootName = GetFileNameWithoutExtension(pathToFile);
+        RequireNotNullEmptyWhiteSpace(rootName);
         var rootPath = Combine(rootDir, rootName);
 
         var pathToConfigurationFile = rootPath + ".config.R";
@@ -142,7 +144,7 @@ namespace RVisUI.Mvvm
         "Select Configuration File",
         initialDirectory,
         "R Files|*.R",
-        out string pathToFile
+        out string? pathToFile
         );
 
       if (didBrowse)
@@ -162,7 +164,7 @@ namespace RVisUI.Mvvm
         "Select Template .in File",
         initialDirectory,
         "in Files|*.in",
-        out string pathToFile
+        out string? pathToFile
         );
 
       if (didBrowse)
@@ -183,7 +185,7 @@ namespace RVisUI.Mvvm
         {
           using (serverLicense)
           {
-            var simulationName = await HandleImportAsync(serverLicense.GetRClient())
+            var simulationName = await HandleImportAsync(await serverLicense.GetRClientAsync())
               .ConfigureAwait(continueOnCapturedContext: true);
 
             _appState.Status = $"Imported {simulationName}";
@@ -241,6 +243,10 @@ namespace RVisUI.Mvvm
 
     private async Task<string> HandleImportAsync(IRVisClient client)
     {
+      RequireFile(PathToConfigurationFile);
+      RequireFile(PathToExecutable);
+      RequireFile(PathToTemplateInFile);
+
       string pathToContainingDirectory;
       do
       {
@@ -250,18 +256,16 @@ namespace RVisUI.Mvvm
 
       RequireNotNull(Directory.CreateDirectory(pathToContainingDirectory));
 
-      var symbolInfos = await Task.Run(() =>
-      {
-        client.Clear();
-        return client.InspectSymbols(PathToConfigurationFile).ToArr();
-      }
-      ).ConfigureAwait(continueOnCapturedContext: false);
+      await client.ClearAsync().ConfigureAwait(continueOnCapturedContext: false);
+      var inspection = await client.InspectSymbolsAsync(PathToConfigurationFile).ConfigureAwait(continueOnCapturedContext: false);
+      var symbolInfos = inspection.ToArr();
 
       var reAssignment = new Regex("(\\w+)\\W*=\\W*([^\"]+)");
 
       var assignments = symbolInfos
         .Select(si =>
         {
+          if (si.Code.IsntAString()) return None;
           var match = reAssignment.Match(si.Code);
           if (!match.Success) return None;
           var symbol = match.Groups[1].Value;
@@ -271,30 +275,33 @@ namespace RVisUI.Mvvm
         .Somes()
         .ToArray();
 
-      string simulationName;
+      string? simulationName;
       simulationName = (
         from assignment in assignments
         where assignment.Symbol == nameof(simulationName)
         select assignment.Assignment
         ).SingleOrDefault();
+      RequireNotNullEmptyWhiteSpace(simulationName, "Simulation name not specified");
 
-      string description;
+      string? description;
       description = (
         from assignment in assignments
         where assignment.Symbol == nameof(description)
         select assignment.Assignment
         ).SingleOrDefault();
 
-      string importName;
+      string? importName;
       importName = (
         from assignment in assignments
         where assignment.Symbol == nameof(importName)
         select assignment.Assignment
         ).SingleOrDefault();
+      RequireNotNullEmptyWhiteSpace(importName, "Import name not specified");
 
       ISymbolInfo parameters;
       parameters = symbolInfos.SingleOrDefault(si => si.Symbol == nameof(parameters));
       RequireNotNull(parameters, $"{nameof(parameters)} section not found in configuration file");
+      RequireNotNull(parameters.Names, "Unable to read parameter names from configuration file");
 
       var simParameters = parameters.Names
         .Select(pn =>
@@ -319,6 +326,7 @@ namespace RVisUI.Mvvm
       ISymbolInfo independentVariable;
       independentVariable = symbolInfos.SingleOrDefault(si => si.Symbol == nameof(independentVariable));
       RequireNotNull(independentVariable, $"{nameof(independentVariable)} section not found in configuration file");
+      RequireNotNull(independentVariable.Names, "Unable to read independent variable name from configuration file");
 
       var independentVariableName = independentVariable.Names.Single();
       var ivAssignment = assignments.Single(si => si.Symbol == independentVariableName);
@@ -335,6 +343,7 @@ namespace RVisUI.Mvvm
       ISymbolInfo outputs;
       outputs = symbolInfos.SingleOrDefault(si => si.Symbol == nameof(outputs));
       RequireNotNull(outputs, $"{nameof(outputs)} section not found in configuration file");
+      RequireNotNull(outputs.Names, "Unable to read output names from configuration file");
 
       var outputValues = outputs.Names
         .Select(on =>

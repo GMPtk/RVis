@@ -56,7 +56,7 @@ namespace Sampling
 
         SelectedDesignDigestViewModel = DesignDigestViewModels
           .Find(vm => vm.CreatedOn == _moduleState.SamplingDesign.CreatedOn)
-          .Match(vm => vm, () => default);
+          .Match<IDesignDigestViewModel?>(vm => vm, () => default);
       }
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
@@ -82,12 +82,12 @@ namespace Sampling
 
     public ObservableCollection<IDesignDigestViewModel> DesignDigestViewModels { get; }
 
-    public IDesignDigestViewModel SelectedDesignDigestViewModel
+    public IDesignDigestViewModel? SelectedDesignDigestViewModel
     {
       get => _selectedDesignDigestViewModel;
       set => this.RaiseAndSetIfChanged(ref _selectedDesignDigestViewModel, value, PropertyChanged);
     }
-    private IDesignDigestViewModel _selectedDesignDigestViewModel;
+    private IDesignDigestViewModel? _selectedDesignDigestViewModel;
 
     public ICommand LoadSamplingDesign { get; }
 
@@ -102,7 +102,7 @@ namespace Sampling
     }
     private Option<(DateTime CreatedOn, DateTime SelectedOn)> _targetSamplingDesign;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -123,6 +123,8 @@ namespace Sampling
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
+        RequireNotNull(SelectedDesignDigestViewModel);
+
         TargetSamplingDesign = (SelectedDesignDigestViewModel.CreatedOn, DateTime.Now);
       }
     }
@@ -131,6 +133,8 @@ namespace Sampling
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
+        RequireNotNull(SelectedDesignDigestViewModel);
+
         var createdOn = SelectedDesignDigestViewModel.CreatedOn;
 
         DesignDigestViewModels.Remove(SelectedDesignDigestViewModel);
@@ -162,7 +166,7 @@ namespace Sampling
 
         SelectedDesignDigestViewModel = DesignDigestViewModels
           .Find(vm => vm.CreatedOn == _moduleState.SamplingDesign.CreatedOn)
-          .Match(vm => vm, () => default);
+          .Match<IDesignDigestViewModel?>(vm => vm, () => default);
       }
       else
       {

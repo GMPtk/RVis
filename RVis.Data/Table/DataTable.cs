@@ -23,6 +23,10 @@ namespace RVis.Data
 
     public override IReadOnlyList<IDataColumn> DataColumns { get; }
 
-    private DataTable() { }
+    private DataTable() 
+    {
+      Name = null!;
+      DataColumns = null!;
+    }
   }
 }

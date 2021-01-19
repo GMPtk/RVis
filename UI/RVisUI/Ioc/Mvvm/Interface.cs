@@ -33,10 +33,10 @@ namespace RVisUI.Ioc.Mvvm
     Arr<ISwatchViewModel> SwatchViewModels { get; }
     ColorScheme ActiveScheme { get; set; }
 
-    string SecondaryHueLightHex { get; }
-    string SecondaryHueMidHex { get; }
-    string SecondaryHueDarkHex { get; }
-    string SecondaryHueMidForegroundHex { get; }
+    string? SecondaryHueLightHex { get; }
+    string? SecondaryHueMidHex { get; }
+    string? SecondaryHueDarkHex { get; }
+    string? SecondaryHueMidForegroundHex { get; }
 
     ICommand ChangeHue { get; }
     ICommand ChangeToPrimary { get; }

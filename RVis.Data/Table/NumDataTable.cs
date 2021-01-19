@@ -57,7 +57,7 @@ namespace RVis.Data
 
     }
 
-    public NumDataTable(string name, IEnumerable<NumDataColumn> columns)
+    public NumDataTable(string? name, IEnumerable<NumDataColumn> columns)
     {
       Check(columns);
 
@@ -65,13 +65,13 @@ namespace RVis.Data
       _columns = columns.ToArray();
     }
 
-    public NumDataTable(string name, params NumDataColumn[] columns)
+    public NumDataTable(string? name, params NumDataColumn[] columns)
       : this(name, columns as IEnumerable<NumDataColumn>)
     {
     }
 
     [ProtoIgnore]
-    public override string Name => _name;
+    public override string? Name => _name;
 
     [ProtoIgnore]
     public override IReadOnlyList<IDataColumn> DataColumns => NumDataColumns;
@@ -84,9 +84,9 @@ namespace RVis.Data
     public new NumDataColumn this[int index] => NumDataColumns[index];
 
     [ProtoMember(1)]
-    private readonly string _name;
+    private readonly string? _name;
 
     [ProtoMember(2)]
-    private readonly NumDataColumn[] _columns;
+    private readonly NumDataColumn[] _columns = null!;
   }
 }

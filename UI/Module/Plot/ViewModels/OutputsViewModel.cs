@@ -18,6 +18,8 @@ namespace Plot
   {
     public OutputsViewModel(IAppState appState, OutputGroupStore outputGroupStore)
     {
+      RequireNotNull(SynchronizationContext.Current);
+
       _simulation = appState.Target.AssertSome();
       _simData = appState.SimData;
       _outputGroupStore = outputGroupStore;
@@ -72,12 +74,12 @@ namespace Plot
 
     public ObservableCollection<ILogEntryViewModel> LogEntryViewModels { get; }
 
-    public ILogEntryViewModel[] SelectedLogEntryViewModels
+    public ILogEntryViewModel[]? SelectedLogEntryViewModels
     {
       get => _selectedLogEntryViewModels;
       set => this.RaiseAndSetIfChanged(ref _selectedLogEntryViewModels, value, PropertyChanged);
     }
-    public ILogEntryViewModel[] _selectedLogEntryViewModels;
+    public ILogEntryViewModel[]? _selectedLogEntryViewModels;
 
     public ICommand LoadLogEntry { get; }
 
@@ -87,18 +89,18 @@ namespace Plot
 
     public ObservableCollection<IOutputGroupViewModel> OutputGroupViewModels { get; }
 
-    public IOutputGroupViewModel SelectedOutputGroupViewModel
+    public IOutputGroupViewModel? SelectedOutputGroupViewModel
     {
       get => _selectedOutputGroupViewModel;
       set => this.RaiseAndSetIfChanged(ref _selectedOutputGroupViewModel, value, PropertyChanged);
     }
-    public IOutputGroupViewModel _selectedOutputGroupViewModel;
+    public IOutputGroupViewModel? _selectedOutputGroupViewModel;
 
     public ICommand LoadOutputGroup { get; }
 
     public ICommand FollowKeyboardInOutputGroups { get; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -148,6 +150,8 @@ namespace Plot
 
     private void LoadSelectedOutputGroup()
     {
+      RequireNotNull(SelectedOutputGroupViewModel);
+
       var selectedOutputGroup = SelectedOutputGroupViewModel.OutputGroup;
       _outputGroupStore.Activate(selectedOutputGroup);
     }

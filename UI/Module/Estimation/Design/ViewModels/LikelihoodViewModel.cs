@@ -6,6 +6,8 @@ using System.Linq;
 using static LanguageExt.Prelude;
 using static System.Double;
 
+#nullable disable
+
 namespace Estimation.Design
 {
   internal sealed class LikelihoodViewModel : ILikelihoodViewModel

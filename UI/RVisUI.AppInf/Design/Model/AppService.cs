@@ -3,6 +3,8 @@ using RVisUI.Model;
 using System;
 using System.Runtime.CompilerServices;
 
+#nullable disable
+
 namespace RVisUI.AppInf.Design
 {
   public sealed class AppService : IAppService

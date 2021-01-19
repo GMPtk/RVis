@@ -7,7 +7,7 @@ namespace RVis.Model
   [ProtoContract]
   public struct SimElement : IEquatable<SimElement>
   {
-    public SimElement(string name, bool isIndependentVariable, string unit, string description)
+    public SimElement(string name, bool isIndependentVariable, string? unit, string? description)
     {
       _name = name;
       _isIndependentVariable = isIndependentVariable;
@@ -22,10 +22,10 @@ namespace RVis.Model
     public bool IsIndependentVariable => _isIndependentVariable;
 
     [ProtoIgnore]
-    public string Unit => _unit;
+    public string? Unit => _unit;
 
     [ProtoIgnore]
-    public string Description => _description;
+    public string? Description => _description;
 
     [ProtoMember(1)]
     private readonly string _name;
@@ -34,10 +34,10 @@ namespace RVis.Model
     private readonly bool _isIndependentVariable;
 
     [ProtoMember(3)]
-    private readonly string _unit;
+    private readonly string? _unit;
 
     [ProtoMember(4)]
-    private readonly string _description;
+    private readonly string? _description;
 
     public bool Equals(SimElement rhs) =>
       _name == rhs._name &&
@@ -45,18 +45,11 @@ namespace RVis.Model
       _unit == rhs._unit &&
       _description == rhs._description;
 
-    public override int GetHashCode()
-    {
-      var hashCode = 2131522645;
-      hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_name);
-      hashCode = hashCode * -1521134295 + _isIndependentVariable.GetHashCode();
-      hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_unit);
-      hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_description);
-      return hashCode;
-    }
+    public override int GetHashCode() => 
+      HashCode.Combine(_name, _isIndependentVariable, _unit, _description);
 
-    public override bool Equals(object obj) =>
-      obj is SimElement element ? Equals(element) : false;
+    public override bool Equals(object? obj) =>
+      obj is SimElement element && Equals(element);
 
     public static bool operator ==(SimElement element1, SimElement element2) =>
       element1.Equals(element2);

@@ -29,13 +29,13 @@ namespace RVis.Model
           if (symbolInfo.IsNone)
           {
             var re = new Regex($"^{parameterCandidate.Name}\\W*=[^=]");
-            symbolInfo = labelled.Find(si => re.IsMatch(si.Code));
+            symbolInfo = labelled.Filter(si => si.Code.IsAString()).Find(si => re.IsMatch(si.Code!));
           }
 
           symbolInfo.IfSome(si =>
           {
-            parameterCandidate.Description = parameterCandidate.Description ?? si.Comment;
-            parameterCandidate.Unit = parameterCandidate.Unit ?? si.Unit;
+            parameterCandidate.Description ??= si.Comment;
+            parameterCandidate.Unit ??= si.Unit;
           });
         }
       }
@@ -51,6 +51,7 @@ namespace RVis.Model
 
     public ParameterCandidate(ISymbolInfo symbolInfo)
     {
+      RequireNotNullEmptyWhiteSpace(symbolInfo.Symbol);
       RequireTrue(symbolInfo.Scalar.HasValue);
 
       SymbolInfo = symbolInfo;
@@ -61,15 +62,15 @@ namespace RVis.Model
       Unit = symbolInfo.Unit;
     }
 
-    public ISymbolInfo SymbolInfo { get; private set; }
+    public ISymbolInfo? SymbolInfo { get; private set; }
 
     public string Name { get; }
 
     public double Value { get; }
 
-    public string Description { get; set; }
+    public string? Description { get; set; }
 
-    public string Unit { get; set; }
+    public string? Unit { get; set; }
 
     public bool IsUsed { get; set; }
   }

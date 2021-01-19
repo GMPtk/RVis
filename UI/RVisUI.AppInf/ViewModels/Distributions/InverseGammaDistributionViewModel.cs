@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Linq;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
+using static RVisUI.Wpf.WpfTools;
 using static System.Double;
 
 namespace RVisUI.AppInf
@@ -32,7 +33,7 @@ namespace RVisUI.AppInf
       this
         .WhenAny(vm => vm.Distribution, _ => default(object))
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<object>(
+          _reactiveSafeInvoke.SuspendAndInvoke<object?>(
             ObserveDistribution
             )
           );
@@ -40,7 +41,7 @@ namespace RVisUI.AppInf
       this
         .WhenAny(vm => vm.Variable, vm => vm.Unit, (_, __) => default(object))
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<object>(
+          _reactiveSafeInvoke.SuspendAndInvoke<object?>(
             ObserveParameter
             )
           );
@@ -52,7 +53,7 @@ namespace RVisUI.AppInf
           (_, __) => default(object)
           )
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<object>(
+          _reactiveSafeInvoke.SuspendAndInvoke<object?>(
             ObserveDistributionParameters
             )
           );
@@ -61,7 +62,7 @@ namespace RVisUI.AppInf
     public InverseGammaDistributionViewModel()
       : this(new Design.AppService(), new Design.AppSettings())
     {
-      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
+      RequireTrue(IsInDesignMode);
     }
 
     public DistributionType DistributionType => DistributionType.InverseGamma;
@@ -80,25 +81,25 @@ namespace RVisUI.AppInf
     }
     private Option<InverseGammaDistribution> _inverseGammaDistribution;
 
-    public IDistribution DistributionUnsafe
+    public IDistribution? DistributionUnsafe
     {
       get => _inverseGammaDistribution.Match(lnd => lnd, () => default(IDistribution));
       set => Distribution = value == default ? None : Some(RequireInstanceOf<InverseGammaDistribution>(value));
     }
 
-    public string Variable
+    public string? Variable
     {
       get => _variable;
       set => this.RaiseAndSetIfChanged(ref _variable, value, PropertyChanged);
     }
-    private string _variable;
+    private string? _variable;
 
-    public string Unit
+    public string? Unit
     {
       get => _unit;
       set => this.RaiseAndSetIfChanged(ref _unit, value, PropertyChanged);
     }
-    private string _unit;
+    private string? _unit;
 
     public double? Alpha
     {
@@ -116,7 +117,7 @@ namespace RVisUI.AppInf
 
     public PlotModel PlotModel { get; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     protected override void ObserveThemeChange()
     {
@@ -129,7 +130,7 @@ namespace RVisUI.AppInf
       base.ObserveThemeChange();
     }
 
-    private void ObserveDistribution(object _)
+    private void ObserveDistribution(object? _)
     {
       Distribution.Match(
         InverseGamma =>
@@ -149,13 +150,13 @@ namespace RVisUI.AppInf
       PlotModel.InvalidatePlot(true);
     }
 
-    private void ObserveParameter(object _)
+    private void ObserveParameter(object? _)
     {
       UpdateAxes();
       PlotModel.InvalidatePlot(false);
     }
 
-    private void ObserveDistributionParameters(object _)
+    private void ObserveDistributionParameters(object? _)
     {
       if (Alpha.HasValue && Beta.HasValue)
       {
@@ -171,11 +172,11 @@ namespace RVisUI.AppInf
     {
       var variable = Variable ?? "?";
 
-      var horizontalAxis = PlotModel.GetAxis(AxisPosition.Bottom);
+      var horizontalAxis = PlotModel.GetAxis(AxisPosition.Bottom).AssertNotNull();
       horizontalAxis.Title = variable;
       horizontalAxis.Unit = Unit;
 
-      var verticalAxis = PlotModel.GetAxis(AxisPosition.Left);
+      var verticalAxis = PlotModel.GetAxis(AxisPosition.Left).AssertNotNull();
       verticalAxis.Title = $"p({variable}|α,β)";
     }
 
@@ -185,7 +186,7 @@ namespace RVisUI.AppInf
 
       if (Alpha.HasValue && Beta.HasValue)
       {
-        var inverseGamma = Distribution.AssertSome().Implementation;
+        var inverseGamma = Distribution.AssertSome().Implementation.AssertNotNull();
 
         var n = 0;
         var incr = IsNaN(inverseGamma.StdDev) ? inverseGamma.Mode : inverseGamma.StdDev;

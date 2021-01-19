@@ -1,4 +1,6 @@
-﻿using RVisUI.Model;
+﻿using Nett;
+using RVisUI.Model;
+using System;
 using System.ComponentModel;
 
 namespace Plot
@@ -21,6 +23,9 @@ namespace Plot
 
     public object GetViewModel() => 
       new ViewModel(_appState, _appService, _appSettings);
+
+    public IRunControlTask GetRunControlTask(string type, TomlTable taskSpec) =>
+      throw new InvalidOperationException($"{nameof(Plot)} does not support task: {type}");
 
     private readonly IAppState _appState;
     private readonly IAppService _appService;

@@ -9,9 +9,9 @@ namespace Estimation
 {
   public interface IIterationOptionsViewModel
   {
-    string IterationsToAddText { get; set; }
+    string? IterationsToAddText { get; set; }
     int? IterationsToAdd { get; }
-    string TargetAcceptRateText { get; set; }
+    string? TargetAcceptRateText { get; set; }
     double? TargetAcceptRate { get; }
     bool UseApproximation { get; set; }
     ICommand OK { get; }
@@ -22,7 +22,7 @@ namespace Estimation
   internal interface IPriorViewModel
   {
     string Name { get; }
-    string Distribution { get; set; }
+    string? Distribution { get; set; }
     bool IsSelected { get; set; }
     ICommand ToggleSelect { get; }
     string SortKey { get; }
@@ -40,9 +40,9 @@ namespace Estimation
   internal interface IErrorViewModel : IDisposable
   {
     ErrorModelType ErrorModelType { get; }
-    IErrorModel ErrorModelUnsafe { get; set; }
-    string Variable { get; set; }
-    string Unit { get; set; }
+    IErrorModel? ErrorModelUnsafe { get; set; }
+    string? Variable { get; set; }
+    string? Unit { get; set; }
   }
 
   internal interface IErrorViewModel<T> : IErrorViewModel where T : IErrorModel
@@ -95,14 +95,14 @@ namespace Estimation
   {
     Arr<string> ErrorModelNames { get; }
     int SelectedErrorModelName { get; set; }
-    IErrorViewModel ErrorViewModel { get; set; }
+    IErrorViewModel? ErrorViewModel { get; set; }
     Option<OutputState> OutputState { get; set; }
   }
 
   internal interface IOutputViewModel
   {
     string Name { get; }
-    string ErrorModel { get; set; }
+    string? ErrorModel { get; set; }
     bool IsSelected { get; set; }
     ICommand ToggleSelect { get; }
     string SortKey { get; }
@@ -125,7 +125,7 @@ namespace Estimation
     int SelectedOutputViewModel { get; set; }
     IOutputErrorViewModel OutputErrorViewModel { get; }
     Arr<IObservationsViewModel> ObservationsViewModels { get; set; }
-    PlotModel PlotModel { get; set; }
+    PlotModel? PlotModel { get; set; }
     bool IsVisible { get; set; }
   }
 
@@ -205,7 +205,7 @@ namespace Estimation
   internal interface IDesignDigestsViewModel
   {
     ObservableCollection<IDesignDigestViewModel> DesignDigestViewModels { get; }
-    IDesignDigestViewModel SelectedDesignDigestViewModel { get; set; }
+    IDesignDigestViewModel? SelectedDesignDigestViewModel { get; set; }
     ICommand LoadEstimationDesign { get; }
     ICommand DeleteEstimationDesign { get; }
     ICommand FollowKeyboardInDesignDigests { get; }

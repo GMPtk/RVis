@@ -1,6 +1,7 @@
 ﻿using LanguageExt;
 using OxyPlot;
 using OxyPlot.Axes;
+using OxyPlot.Legends;
 using OxyPlot.Series;
 using System;
 using static LanguageExt.Prelude;
@@ -32,12 +33,14 @@ namespace Estimation.Design
 
     private static PlotModel CreatePlotModel()
     {
-      var plotModel = new PlotModel
+      var plotModel = new PlotModel();
+
+      plotModel.Legends.Add(new Legend
       {
         LegendPlacement = LegendPlacement.Inside,
         LegendPosition = LegendPosition.RightTop,
         LegendOrientation = LegendOrientation.Vertical
-      };
+      });
 
       plotModel.Axes.Add(new LinearAxis { Title = "X Axis", Position = AxisPosition.Bottom });
       plotModel.Axes.Add(new LinearAxis { Title = "Y Axis", Position = AxisPosition.Left });
@@ -57,21 +60,21 @@ namespace Estimation.Design
         StrokeThickness = 1,
         FillColor = OxyColors.Transparent
       };
-      histogramSeries.Items.Add(new HistogramItem(0, 0.333333333333333, 0.2803));
-      histogramSeries.Items.Add(new HistogramItem(0.333333333333333, 0.666666666666667, 0.2024));
-      histogramSeries.Items.Add(new HistogramItem(0.666666666666667, 1, 0.1497));
-      histogramSeries.Items.Add(new HistogramItem(1, 1.33333333333333, 0.1046));
-      histogramSeries.Items.Add(new HistogramItem(1.33333333333333, 1.66666666666667, 0.0735));
-      histogramSeries.Items.Add(new HistogramItem(1.66666666666667, 2, 0.0528));
-      histogramSeries.Items.Add(new HistogramItem(2, 2.33333333333333, 0.0373));
-      histogramSeries.Items.Add(new HistogramItem(2.33333333333333, 2.66666666666667, 0.0287));
-      histogramSeries.Items.Add(new HistogramItem(2.66666666666667, 3, 0.0184));
-      histogramSeries.Items.Add(new HistogramItem(3, 3.33333333333333, 0.0146));
-      histogramSeries.Items.Add(new HistogramItem(3.33333333333333, 3.66666666666667, 0.0096));
-      histogramSeries.Items.Add(new HistogramItem(3.66666666666667, 4, 0.0064));
-      histogramSeries.Items.Add(new HistogramItem(4, 4.33333333333333, 0.0066));
-      histogramSeries.Items.Add(new HistogramItem(4.33333333333333, 4.66666666666667, 0.0041));
-      histogramSeries.Items.Add(new HistogramItem(4.66666666666667, 5, 0.0025));
+      histogramSeries.Items.Add(new HistogramItem(0, 0.3333333333333333, 0.2874, 2874));
+      histogramSeries.Items.Add(new HistogramItem(0.3333333333333333, 0.6666666666666666, 0.204, 2040));
+      histogramSeries.Items.Add(new HistogramItem(0.6666666666666666, 1, 0.1384, 1384));
+      histogramSeries.Items.Add(new HistogramItem(1, 1.3333333333333333, 0.1092, 1092));
+      histogramSeries.Items.Add(new HistogramItem(1.3333333333333333, 1.6666666666666667, 0.0755, 755));
+      histogramSeries.Items.Add(new HistogramItem(1.6666666666666667, 2, 0.0534, 534));
+      histogramSeries.Items.Add(new HistogramItem(2, 2.3333333333333335, 0.0374, 374));
+      histogramSeries.Items.Add(new HistogramItem(2.3333333333333335, 2.6666666666666665, 0.0288, 288));
+      histogramSeries.Items.Add(new HistogramItem(2.6666666666666665, 3, 0.02, 200));
+      histogramSeries.Items.Add(new HistogramItem(3, 3.3333333333333335, 0.0115, 115));
+      histogramSeries.Items.Add(new HistogramItem(3.3333333333333335, 3.6666666666666665, 0.0104, 104));
+      histogramSeries.Items.Add(new HistogramItem(3.6666666666666665, 4, 0.0061, 61));
+      histogramSeries.Items.Add(new HistogramItem(4, 4.333333333333333, 0.0052, 52));
+      histogramSeries.Items.Add(new HistogramItem(4.333333333333333, 4.666666666666667, 0.0033, 33));
+      histogramSeries.Items.Add(new HistogramItem(4.666666666666667, 5, 0.0029, 29));
       plotModel.Series.Add(histogramSeries);
 
       return plotModel;

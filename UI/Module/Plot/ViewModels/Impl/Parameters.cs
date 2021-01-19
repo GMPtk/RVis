@@ -35,7 +35,7 @@ namespace Plot
       ViewModels = _moduleState.ParameterEditStates.Map(
         pes =>
         {
-          var parameter = parameters.GetParameter(pes.Name);
+          var parameter = parameters.GetParameter(pes.Name.AssertNotNull());
 
           return new ParameterViewModel(
             _toggleSelect,
@@ -64,7 +64,7 @@ namespace Plot
         .Map(pes => pes
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(
               s => ObserveParameterEditStateProperty(pes, s)
               )
             )
@@ -74,7 +74,7 @@ namespace Plot
         p => p
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(s => ObserveParameterViewModelProperty(p, s))
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(s => ObserveParameterViewModelProperty(p, s))
             )
         );
 
@@ -85,7 +85,7 @@ namespace Plot
 
     public void Dispose() => Dispose(true);
 
-    private void ObserveParameterEditStateProperty(ParameterEditState parameterEditState, string propertyName)
+    private void ObserveParameterEditStateProperty(ParameterEditState parameterEditState, string? propertyName)
     {
       var parameterViewModel = ViewModels
         .Find(p => p.Name == parameterEditState.Name)
@@ -119,7 +119,7 @@ namespace Plot
       }
     }
 
-    private void ObserveParameterViewModelProperty(ParameterViewModel parameterViewModel, string propertyName)
+    private void ObserveParameterViewModelProperty(ParameterViewModel parameterViewModel, string? propertyName)
     {
       var parameterEditState = _moduleState.ParameterEditStates
         .Find(pes => pes.Name == parameterViewModel.Name)

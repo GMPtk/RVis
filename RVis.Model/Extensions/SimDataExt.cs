@@ -25,7 +25,7 @@ namespace RVis.Model.Extensions
 
       if (item.Item is OutputRequest) return $"Output request for {item.Simulation.SimConfig.Title}";
 
-      return $"{item.Item.GetType().Name} for {item.Simulation.SimConfig.Title}";
+      return $"{item.Item?.GetType().Name ?? "?"} for {item.Simulation.SimConfig.Title}";
     }
   }
 }

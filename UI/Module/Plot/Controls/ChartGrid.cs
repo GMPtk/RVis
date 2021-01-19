@@ -34,7 +34,7 @@ namespace Plot.Controls
 
     private static void HandleDataSetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      if (!d.Resolve(out ChartGrid chartGrid)) return;
+      if (!d.Resolve(out ChartGrid? chartGrid)) return;
       ConfigureGrid(chartGrid);
     }
 
@@ -54,7 +54,7 @@ namespace Plot.Controls
 
     private static void HandleTraceDataPlotViewModelsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      if (!d.Resolve(out ChartGrid chartGrid)) return;
+      if (!d.Resolve(out ChartGrid? chartGrid)) return;
       ConfigureGrid(chartGrid);
     }
 
@@ -74,7 +74,7 @@ namespace Plot.Controls
 
     private static void HandleLayoutChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      if (!d.Resolve(out ChartGrid chartGrid)) return;
+      if (!d.Resolve(out ChartGrid? chartGrid)) return;
       ConfigureGrid(chartGrid);
     }
 
@@ -146,11 +146,11 @@ namespace Plot.Controls
 
     private static void HandleGridSplitterDragCompleted(object sender, DragCompletedEventArgs e)
     {
-      if (!((sender as GridSplitter)?.Parent is Grid grid)) return;
+      if ((sender as GridSplitter)?.Parent is not Grid grid) return;
 
       grid.Children.OfType<TraceDataPlotView>().Iter(v =>
       {
-        var viewModel = v.DataContext as ITraceDataPlotViewModel;
+        var viewModel = (ITraceDataPlotViewModel)v.DataContext;
         viewModel.State.ViewHeight = Math.Round(v.ActualHeight);
       });
     }

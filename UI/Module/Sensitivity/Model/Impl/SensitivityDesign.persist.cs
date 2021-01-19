@@ -12,9 +12,10 @@ using System.IO;
 using System.Linq;
 using static RVis.Base.Check;
 using static Sensitivity.Logger;
+using static System.Double;
+using static System.Globalization.CultureInfo;
 using static System.IO.Path;
 using DataTable = System.Data.DataTable;
-using static System.Double;
 
 namespace Sensitivity
 {
@@ -22,21 +23,21 @@ namespace Sensitivity
   {
     private class _DesignParameterDTO
     {
-      public string Name { get; set; }
-      public string Distribution { get; set; }
+      public string? Name { get; set; }
+      public string? Distribution { get; set; }
     }
 
     private class _SensitivityDesignDTO
     {
-      public string CreatedOn { get; set; }
-      public _DesignParameterDTO[] DesignParameters { get; set; }
-      public string SensitivityMethod { get; set; }
-      public string MethodParameters { get; set; }
+      public string? CreatedOn { get; set; }
+      public _DesignParameterDTO[]? DesignParameters { get; set; }
+      public string? SensitivityMethod { get; set; }
+      public string? MethodParameters { get; set; }
     }
 
     private class _RankingParameterDTO
     {
-      public string Name { get; set; }
+      public string? Name { get; set; }
       public double? Score { get; set; }
       public bool IsSelected { get; set; }
     }
@@ -45,8 +46,8 @@ namespace Sensitivity
     {
       public double? XBegin { get; set; }
       public double? XEnd { get; set; }
-      public string[] Outputs { get; set; }
-      public _RankingParameterDTO[] Parameters { get; set; }
+      public string[]? Outputs { get; set; }
+      public _RankingParameterDTO[]? Parameters { get; set; }
     }
 
     private const string DESIGN_FILE_NAME = "design.toml";
@@ -104,17 +105,23 @@ namespace Sensitivity
       try
       {
         var dto = Toml.ReadFile<_SensitivityDesignDTO>(pathToDesign);
+
+        RequireNotNull(dto.DesignParameters);
         designParameters = dto.DesignParameters
           .Select(dp => new DesignParameter(
-            dp.Name,
+            dp.Name.AssertNotNull(),
             Distribution.DeserializeDistribution(dp.Distribution).AssertSome()
             )
           )
           .ToArr();
+
+        RequireNotNull(dto.SensitivityMethod);
         sensitivityMethod = (SensitivityMethod)Enum.Parse(
           typeof(SensitivityMethod),
           dto.SensitivityMethod
           );
+
+        RequireNotNull(dto.MethodParameters);
         methodParameters = dto.MethodParameters;
       }
       catch (Exception ex)
@@ -193,15 +200,13 @@ namespace Sensitivity
         SERIALIZED_TRACE_FILE_NAME
         );
 
-      using (var memoryStream = new MemoryStream())
-      {
-        Serializer.Serialize(memoryStream, trace);
-        memoryStream.Position = 0;
-        File.WriteAllBytes(pathToSerializedTrace, memoryStream.ToArray());
-      }
+      using var memoryStream = new MemoryStream();
+      Serializer.Serialize(memoryStream, trace);
+      memoryStream.Position = 0;
+      File.WriteAllBytes(pathToSerializedTrace, memoryStream.ToArray());
     }
 
-    internal static NumDataTable LoadSensitivityDesignTrace(
+    internal static NumDataTable? LoadSensitivityDesignTrace(
       SensitivityDesign instance,
       string pathToSensitivityDesignsDirectory
       )
@@ -222,10 +227,8 @@ namespace Sensitivity
       if (File.Exists(pathToSerializedTrace))
       {
         var serializedTrace = File.ReadAllBytes(pathToSerializedTrace);
-        using (var memoryStream = new MemoryStream(serializedTrace))
-        {
-          return Serializer.Deserialize<NumDataTable>(memoryStream);
-        }
+        using var memoryStream = new MemoryStream(serializedTrace);
+        return Serializer.Deserialize<NumDataTable>(memoryStream);
       }
 
       return default;
@@ -309,7 +312,7 @@ namespace Sensitivity
             dto.XEnd,
             dto.Outputs ?? default,
             dto.Parameters?
-              .Select(p => (p.Name, p.Score ?? NaN, p.IsSelected))
+              .Select(p => (p.Name.AssertNotNull(), p.Score ?? NaN, p.IsSelected))
               .ToArr() ?? default
             );
           return ranking;
@@ -353,12 +356,10 @@ namespace Sensitivity
 
         try
         {
-          using (var streamReader = new StreamReader(pathToDesignSamples))
-          using (var csvReader = new CsvReader(streamReader))
-          using (var csvDataReader = new CsvDataReader(csvReader))
-          {
-            dataTable.Load(csvDataReader);
-          }
+          using var streamReader = new StreamReader(pathToDesignSamples);
+          using var csvReader = new CsvReader(streamReader, InvariantCulture);
+          using var csvDataReader = new CsvDataReader(csvReader);
+          dataTable.Load(csvDataReader);
         }
         catch (Exception ex)
         {

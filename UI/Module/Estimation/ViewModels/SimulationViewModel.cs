@@ -70,7 +70,38 @@ namespace Estimation
         this.WhenAny(vm => vm.CanSetConvergenceRange, _ => CanSetConvergenceRange)
         );
 
-      PlotModel = CreatePlotModel();
+      PlotModel = new PlotModel();
+
+      _horizontalAxis = new LinearAxis
+      {
+        Position = AxisPosition.Bottom,
+        AbsoluteMinimum = 1d,
+        Minimum = 1d,
+        Title = "Iteration"
+      };
+      PlotModel.Axes.Add(_horizontalAxis);
+
+      _verticalAxis = new LinearAxis
+      {
+        Position = AxisPosition.Left
+      };
+      PlotModel.Axes.Add(_verticalAxis);
+
+      _posteriorAnnotation = new RectangleAnnotation
+      {
+        Fill = OxyColor.FromAColor(120, OxyColors.SkyBlue),
+        MinimumX = 0,
+        MaximumX = 0
+      };
+      PlotModel.Annotations.Add(_posteriorAnnotation);
+
+#pragma warning disable CS0618 // Type or member is obsolete
+      PlotModel.MouseDown += HandlePlotModelMouseDown;
+      PlotModel.MouseMove += HandlePlotModelMouseMove;
+      PlotModel.MouseUp += HandlePlotModelMouseUp;
+#pragma warning restore CS0618 // Type or member is obsolete
+
+      PlotModel.ApplyThemeToPlotModelAndAxes();
 
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
@@ -89,7 +120,7 @@ namespace Estimation
         appSettings
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(ObserveAppSettingsPropertyChange)
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(ObserveAppSettingsPropertyChange)
             ),
 
         _moduleState
@@ -223,7 +254,7 @@ namespace Estimation
     }
     private bool _isVisible;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -246,6 +277,7 @@ namespace Estimation
     {
       RequireNotNull(_estimationDesign);
       RequireNull(_mcmcSim);
+      RequireNotNull(SynchronizationContext.Current);
       RequireNull(_secondIntervalSubscription);
 
       try
@@ -255,7 +287,7 @@ namespace Estimation
         _mcmcSim.ChainsUpdates
           .ObserveOn(SynchronizationContext.Current)
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<Arr<(ChainState, Exception)>>(
+            _reactiveSafeInvoke.SuspendAndInvoke<Arr<(ChainState, Exception?)>>(
               ObserveMcmcSimChainsUpdate
               ),
             _reactiveSafeInvoke.SuspendAndInvoke<Exception>(
@@ -300,6 +332,8 @@ namespace Estimation
 
     private void HandleShowSettings()
     {
+      RequireNotNull(_estimationDesign);
+
       var viewModel = new IterationOptionsViewModel(
         _estimationDesign.TargetAcceptRate,
         _estimationDesign.UseApproximation
@@ -332,6 +366,10 @@ namespace Estimation
 
     private void HandleSetConvergenceRange()
     {
+      RequireNotNull(PosteriorBegin);
+      RequireNotNull(PosteriorEnd);
+      RequireNotNull(_estimationDesign);
+
       _moduleState.PosteriorState = new PosteriorState(PosteriorBegin.Value, PosteriorEnd.Value);
 
       var pathToEstimationDesign = _estimationDesigns.GetPathToEstimationDesign(_estimationDesign);
@@ -340,7 +378,7 @@ namespace Estimation
       UpdateSetConvergenceRangeEnable();
     }
 
-    private void HandlePlotModelMouseDown(object sender, OxyMouseDownEventArgs e)
+    private void HandlePlotModelMouseDown(object? sender, OxyMouseDownEventArgs e)
     {
       if (_mcmcSim?.IsIterating == true) return;
 
@@ -367,7 +405,7 @@ namespace Estimation
       e.Handled = true;
     }
 
-    private void HandlePlotModelMouseMove(object sender, OxyMouseEventArgs e)
+    private void HandlePlotModelMouseMove(object? sender, OxyMouseEventArgs e)
     {
       if (_posteriorAnnotation.Tag == default) return;
 
@@ -394,13 +432,13 @@ namespace Estimation
       e.Handled = true;
     }
 
-    private void HandlePlotModelMouseUp(object sender, OxyMouseEventArgs e)
+    private void HandlePlotModelMouseUp(object? sender, OxyMouseEventArgs e)
     {
       _posteriorAnnotation.Tag = default;
       UpdateSetConvergenceRangeEnable();
     }
 
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (!propertyName.IsThemeProperty()) return;
 
@@ -468,8 +506,11 @@ namespace Estimation
       UpdateSetConvergenceRangeEnable();
     }
 
-    private void ObserveMcmcSimChainsUpdate(Arr<(ChainState ChainState, Exception Fault)> update)
+    private void ObserveMcmcSimChainsUpdate(Arr<(ChainState ChainState, Exception? Fault)> update)
     {
+      RequireNotNull(_estimationDesign);
+      RequireNotNull(_mcmcSim);
+
       try
       {
         var pathToEstimationDesign = _estimationDesigns.GetPathToEstimationDesign(_estimationDesign);
@@ -485,7 +526,7 @@ namespace Estimation
         Logger.Log.Error(ex);
       }
 
-      var faults = update.Filter(u => u.Fault != default).Map(u => u.Fault.Message);
+      var faults = update.Filter(u => u.Fault != default).Map(u => u.Fault!.Message);
       if (!faults.IsEmpty)
       {
         var message = Join(NewLine + NewLine, faults);
@@ -504,7 +545,7 @@ namespace Estimation
       _mcmcSim.Dispose();
       _mcmcSim = default;
 
-      _secondIntervalSubscription.Dispose();
+      _secondIntervalSubscription?.Dispose();
       _secondIntervalSubscription = default;
 
       PlotIterationUpdates();
@@ -514,10 +555,10 @@ namespace Estimation
 
     private void ObserveMcmcSimChainsUpdateError(Exception ex)
     {
-      _mcmcSim.Dispose();
+      _mcmcSim?.Dispose();
       _mcmcSim = default;
 
-      _secondIntervalSubscription.Dispose();
+      _secondIntervalSubscription?.Dispose();
       _secondIntervalSubscription = default;
 
       _appService.Notify(
@@ -601,7 +642,9 @@ namespace Estimation
         .Filter(dp => dp.Distribution.DistributionType != DistributionType.Invariant)
         .Map(dp => dp.Name);
 
-      var index = Parameters.IndexOf(_moduleState.SimulationState.SelectedParameter);
+      var index = _moduleState.SimulationState.SelectedParameter.IsAString()
+        ? Parameters.IndexOf(_moduleState.SimulationState.SelectedParameter)
+        : NOT_FOUND;
       SelectedParameter = index.IsFound() ? index : 0;
 
       var parameter = _simulation.SimConfig.SimInput.SimParameters.GetParameter(Parameters[SelectedParameter]);
@@ -663,7 +706,7 @@ namespace Estimation
 
       _chainStates.Iter((i, cs) =>
       {
-        RequireTrue(columnNames.ForAll(cn => cs.ChainData.Columns.Contains(cn)));
+        RequireTrue(columnNames.ForAll(cn => cs.ChainData?.Columns.Contains(cn) == true));
 
         var chainNo = i + 1;
 
@@ -673,7 +716,7 @@ namespace Estimation
 
         for (var row = 0; row < nCompletedIterations; ++row)
         {
-          var dataRow = cs.ChainData.Rows[row];
+          var dataRow = cs.ChainData!.Rows[row];
 
           columnNames.Iter(cn =>
           {
@@ -740,42 +783,6 @@ namespace Estimation
         : default;
     }
 
-    private PlotModel CreatePlotModel()
-    {
-      var plotModel = new PlotModel();
-
-      _horizontalAxis = new LinearAxis
-      {
-        Position = AxisPosition.Bottom,
-        AbsoluteMinimum = 1d,
-        Minimum = 1d,
-        Title = "Iteration"
-      };
-      plotModel.Axes.Add(_horizontalAxis);
-
-      _verticalAxis = new LinearAxis
-      {
-        Position = AxisPosition.Left
-      };
-      plotModel.Axes.Add(_verticalAxis);
-
-      _posteriorAnnotation = new RectangleAnnotation
-      {
-        Fill = OxyColor.FromAColor(120, OxyColors.SkyBlue),
-        MinimumX = 0,
-        MaximumX = 0
-      };
-      plotModel.Annotations.Add(_posteriorAnnotation);
-
-      plotModel.MouseDown += HandlePlotModelMouseDown;
-      plotModel.MouseMove += HandlePlotModelMouseMove;
-      plotModel.MouseUp += HandlePlotModelMouseUp;
-
-      plotModel.ApplyThemeToPlotModelAndAxes();
-
-      return plotModel;
-    }
-
     private void UpdateEnable()
     {
       var isIterating = _mcmcSim?.IsIterating == true;
@@ -837,16 +844,16 @@ namespace Estimation
     private readonly EstimationDesigns _estimationDesigns;
     private readonly Simulation _simulation;
     private readonly ISimData _simData;
-    private EstimationDesign _estimationDesign;
+    private EstimationDesign? _estimationDesign;
     private Arr<ChainState> _chainStates;
-    private McmcSim _mcmcSim;
+    private McmcSim? _mcmcSim;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private IDisposable _secondIntervalSubscription;
+    private IDisposable? _secondIntervalSubscription;
     private readonly SortedDictionary<int, LineSeries> _series = new SortedDictionary<int, LineSeries>();
-    private LinearAxis _horizontalAxis;
-    private LinearAxis _verticalAxis;
-    private RectangleAnnotation _posteriorAnnotation;
+    private readonly LinearAxis _horizontalAxis;
+    private readonly LinearAxis _verticalAxis;
+    private readonly RectangleAnnotation _posteriorAnnotation;
     private readonly SortedDictionary<string, SortedDictionary<int, List<(int Iteration, double Value)>>> _chartData =
       new SortedDictionary<string, SortedDictionary<int, List<(int, double)>>>();
     private readonly List<IterationUpdateArr> _iterationUpdates = new List<IterationUpdateArr>();

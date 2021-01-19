@@ -7,17 +7,26 @@ using System;
 using System.ComponentModel;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using static RVis.Base.Check;
+using static RVisUI.Wpf.WpfTools;
 using DataTable = System.Data.DataTable;
 
 namespace Sampling
 {
   internal sealed partial class ModuleState : INotifyPropertyChanged, IDisposable
   {
+    internal ModuleState()
+    {
+      RequireTrue(IsInDesignMode);
+    }
+
     internal ParametersState ParametersState { get; } = new ParametersState();
 
     internal SamplesState SamplesState { get; } = new SamplesState();
 
     internal OutputsState OutputsState { get; } = new OutputsState();
+
+    internal FilteredSamplesState FilteredSamplesState { get; } = new FilteredSamplesState { IsUnion = true };
 
     internal Arr<ParameterState> ParameterStates
     {
@@ -32,12 +41,17 @@ namespace Sampling
     }
     private Arr<ParameterState> _parameterStates;
 
-    internal DataTable Samples
+    internal IObservable<(Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier)> ParameterStateChanges =>
+      _parameterStateChangesSubject.AsObservable();
+    private readonly ISubject<(Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier)> _parameterStateChangesSubject =
+      new Subject<(Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier)>();
+
+    internal DataTable? Samples
     {
       get => _samples;
       set => this.RaiseAndSetIfChanged(ref _samples, value, PropertyChanged);
     }
-    private DataTable _samples;
+    private DataTable? _samples;
 
     internal Arr<(int Index, NumDataTable Output)> Outputs
     {
@@ -46,24 +60,33 @@ namespace Sampling
     }
     private Arr<(int Index, NumDataTable Output)> _outputs;
 
-    internal SamplingDesign SamplingDesign
+    internal FilterConfig FilterConfig
+    {
+      get => _filterConfig;
+      set => this.RaiseAndSetIfChanged(ref _filterConfig, value, PropertyChanged);
+    }
+    private FilterConfig _filterConfig = FilterConfig.Default;
+
+    internal Arr<(int Index, bool IsInFilteredSet)> OutputFilters
+    {
+      get => _outputFilters;
+      set => this.RaiseAndSetIfChanged(ref _outputFilters, value, PropertyChanged);
+    }
+    private Arr<(int Index, bool IsInFilteredSet)> _outputFilters;
+
+    internal SamplingDesign? SamplingDesign
     {
       get => _samplingDesign;
       set => this.RaiseAndSetIfChanged(ref _samplingDesign, value, PropertyChanged);
     }
-    private SamplingDesign _samplingDesign;
+    private SamplingDesign? _samplingDesign;
 
-    internal IObservable<(Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier)> ParameterStateChanges =>
-      _parameterStateChangesSubject.AsObservable();
-    private readonly ISubject<(Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier)> _parameterStateChangesSubject =
-      new Subject<(Arr<ParameterState> ParameterStates, ObservableQualifier ObservableQualifier)>();
-
-    internal string RootExportDirectory
+    internal string? RootExportDirectory
     {
       get => _rootExportDirectory;
       set => this.RaiseAndSetIfChanged(ref _rootExportDirectory, value, PropertyChanged);
     }
-    private string _rootExportDirectory;
+    private string? _rootExportDirectory;
 
     internal bool OpenAfterExport
     {
@@ -114,7 +137,7 @@ namespace Sampling
     }
     private bool? _autoShareObservationsSharedState;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 

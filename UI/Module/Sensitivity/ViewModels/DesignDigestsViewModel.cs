@@ -57,7 +57,7 @@ namespace Sensitivity
 
         SelectedDesignDigestViewModel = DesignDigestViewModels
           .Find(vm => vm.CreatedOn == _moduleState.SensitivityDesign.CreatedOn)
-          .Match(vm => vm, () => default);
+          .Match<IDesignDigestViewModel?>(vm => vm, () => default);
       }
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
@@ -83,12 +83,12 @@ namespace Sensitivity
 
     public ObservableCollection<IDesignDigestViewModel> DesignDigestViewModels { get; }
 
-    public IDesignDigestViewModel SelectedDesignDigestViewModel
+    public IDesignDigestViewModel? SelectedDesignDigestViewModel
     {
       get => _selectedDesignDigestViewModel;
       set => this.RaiseAndSetIfChanged(ref _selectedDesignDigestViewModel, value, PropertyChanged);
     }
-    private IDesignDigestViewModel _selectedDesignDigestViewModel;
+    private IDesignDigestViewModel? _selectedDesignDigestViewModel;
 
     public ICommand LoadSensitivityDesign { get; }
 
@@ -103,7 +103,7 @@ namespace Sensitivity
     }
     private Option<(DateTime CreatedOn, DateTime SelectedOn)> _targetSensitivityDesign;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -124,6 +124,8 @@ namespace Sensitivity
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
+        RequireNotNull(SelectedDesignDigestViewModel);
+
         TargetSensitivityDesign = (SelectedDesignDigestViewModel.CreatedOn, DateTime.Now);
       }
     }
@@ -132,6 +134,8 @@ namespace Sensitivity
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
+        RequireNotNull(SelectedDesignDigestViewModel);
+
         var createdOn = SelectedDesignDigestViewModel.CreatedOn;
 
         DesignDigestViewModels.Remove(SelectedDesignDigestViewModel);
@@ -163,7 +167,7 @@ namespace Sensitivity
 
         SelectedDesignDigestViewModel = DesignDigestViewModels
           .Find(vm => vm.CreatedOn == _moduleState.SensitivityDesign.CreatedOn)
-          .Match(vm => vm, () => default);
+          .Match<IDesignDigestViewModel?>(vm => vm, () => default);
       }
       else
       {

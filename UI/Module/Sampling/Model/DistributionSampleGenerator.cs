@@ -3,8 +3,6 @@ using RVis.Model;
 using RVisUI.AppInf;
 using RVisUI.AppInf.Extensions;
 using System;
-using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 using static RVis.Base.Check;
 using DataTable = System.Data.DataTable;
@@ -23,10 +21,7 @@ namespace Sampling
     {
     }
 
-    public override async Task<DataTable> GetSamplesAsync() =>
-      await Task.Run(GetSamples);
-
-    private DataTable GetSamples()
+    public override async Task<DataTable> GetSamplesAsync()
     {
       RandomNumberGenerator.ResetGenerator(_seed);
 
@@ -56,7 +51,7 @@ namespace Sampling
           _ => throw new Exception("No R server available")
         };
 
-        parameterSamples = DoRankCorrelation(parameterSamples, serverLicense.GetRClient());
+        parameterSamples = await DoRankCorrelationAsync(parameterSamples, await serverLicense.GetRClientAsync());
       }
 
       var samples = MakeSamples(selectedParameters, parameterSamples);

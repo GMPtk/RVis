@@ -6,30 +6,51 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:RVisUI.Controls.Views"
              xmlns:mvvmd="clr-namespace:RVisUI.Mvvm.Design;assembly=RVisUI.Mvvm"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
              mc:Ignorable="d" 
              d:DesignHeight="768" 
              d:DesignWidth="1366"
              d:DataContext="{d:DesignInstance Type=mvvmd:HomeViewModel, IsDesignTimeCreatable=True}"
              >
 
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <wpf:BooleanToVisibilityConverter 
+        x:Key="b2vc" 
+        True="Visible" 
+        False="Hidden" 
+        />
+    </ResourceDictionary>    
+  </UserControl.Resources>
+
   <Grid>
     
     <TabControl>
-    
-      <TabItem Header="SIMULATION" ma:ControlsHelper.HeaderFontSize="14">
+
+      <TabControl.Resources>
+        <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+          <Setter Property="ma:HeaderedControlHelper.HeaderFontSize" Value="14"/>
+        </Style>
+      </TabControl.Resources>
+
+      <TabItem Header="SIMULATION">
         <local:SelectSimulationView DataContext="{Binding SelectSimulationViewModel}"/>
       </TabItem>
 
-      <TabItem Header="IMPORT R" ma:ControlsHelper.HeaderFontSize="14">
+      <TabItem Header="IMPORT R">
         <local:ImportSimulationView DataContext="{Binding ImportSimulationViewModel}"/>
       </TabItem>
 
-      <TabItem Header="IMPORT MCSIM" ma:ControlsHelper.HeaderFontSize="14">
+      <TabItem Header="IMPORT MCSIM">
         <local:ImportMCSimView DataContext="{Binding ImportMCSimViewModel}"/>
       </TabItem>
 
-      <TabItem Header="LIBRARY" ma:ControlsHelper.HeaderFontSize="14">
+      <TabItem Header="LIBRARY">
         <local:LibraryView DataContext="{Binding LibraryViewModel}"/>
+      </TabItem>
+
+      <TabItem Header="RUN CONTROL" Visibility="{Binding RunControlViewModel.IsVisible, Converter={StaticResource b2vc}}">
+        <local:RunControlView DataContext="{Binding RunControlViewModel}"/>
       </TabItem>
 
     </TabControl>

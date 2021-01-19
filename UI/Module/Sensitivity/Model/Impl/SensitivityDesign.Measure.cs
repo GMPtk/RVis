@@ -5,6 +5,7 @@ using System.IO;
 using static RVis.Base.Check;
 using static Sensitivity.Logger;
 using static System.IO.Path;
+using static System.Globalization.CultureInfo;
 
 namespace Sensitivity
 {
@@ -278,58 +279,54 @@ namespace Sensitivity
 
     private static DataTable LoadDataTableFromCSV(string pathToCSV)
     {
-      using (var streamReader = new StreamReader(pathToCSV))
+      using var streamReader = new StreamReader(pathToCSV);
+      
+      string[] header;
+
+      using (var csvReader = new CsvReader(streamReader, InvariantCulture, leaveOpen: true))
       {
-        string[] header;
-
-        using (var csvReader = new CsvReader(streamReader, leaveOpen: true))
-        {
-          csvReader.Read();
-          csvReader.ReadHeader();
-          header = csvReader.Context.HeaderRecord;
-        }
-
-        var dataTable = new DataTable();
-        foreach (var name in header)
-        {
-          dataTable.Columns.Add(new DataColumn(name, typeof(double)));
-        }
-
-        streamReader.BaseStream.Position = 0;
-
-        using (var csvReader = new CsvReader(streamReader))
-        {
-          using (var csvDataReader = new CsvDataReader(csvReader))
-          {
-            dataTable.Load(csvDataReader);
-          }
-        }
-
-        return dataTable;
+        csvReader.Read();
+        csvReader.ReadHeader();
+        header = csvReader.Context.HeaderRecord;
       }
+
+      var dataTable = new DataTable();
+      foreach (var name in header)
+      {
+        dataTable.Columns.Add(new DataColumn(name, typeof(double)));
+      }
+
+      streamReader.BaseStream.Position = 0;
+
+      using (var csvReader = new CsvReader(streamReader, InvariantCulture))
+      {
+        using var csvDataReader = new CsvDataReader(csvReader);
+        dataTable.Load(csvDataReader);
+      }
+
+      return dataTable;
     }
 
     private static void SaveDataTableToCSV(string pathToCSV, DataTable dataTable)
     {
-      using (var streamWriter = new StreamWriter(pathToCSV))
-      using (var csvWriter = new CsvWriter(streamWriter))
+      using var streamWriter = new StreamWriter(pathToCSV);
+      using var csvWriter = new CsvWriter(streamWriter, InvariantCulture);
+      
+      foreach (DataColumn column in dataTable.Columns)
       {
-        foreach (DataColumn column in dataTable.Columns)
+        csvWriter.WriteField(column.ColumnName);
+      }
+
+      csvWriter.NextRecord();
+
+      foreach (DataRow row in dataTable.Rows)
+      {
+        for (var i = 0; i < dataTable.Columns.Count; ++i)
         {
-          csvWriter.WriteField(column.ColumnName);
+          csvWriter.WriteField(row[i]);
         }
 
         csvWriter.NextRecord();
-
-        foreach (DataRow row in dataTable.Rows)
-        {
-          for (var i = 0; i < dataTable.Columns.Count; ++i)
-          {
-            csvWriter.WriteField(row[i]);
-          }
-
-          csvWriter.NextRecord();
-        }
       }
     }
   }

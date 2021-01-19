@@ -15,12 +15,12 @@ namespace Estimation
 
     public string Name { get; }
 
-    public string Distribution
+    public string? Distribution
     {
       get => _distribution;
       set => this.RaiseAndSetIfChanged(ref _distribution, value, PropertyChanged);
     }
-    private string _distribution;
+    private string? _distribution;
 
     public bool IsSelected
     {
@@ -33,6 +33,6 @@ namespace Estimation
 
     public string SortKey { get; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

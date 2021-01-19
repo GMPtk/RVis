@@ -78,8 +78,8 @@ namespace Estimation
     internal IObservable<IterationUpdateArr> IterationUpdates => _iterationUpdatesSubject.AsObservable();
     private readonly Subject<IterationUpdateArr> _iterationUpdatesSubject = new Subject<IterationUpdateArr>();
 
-    internal IObservable<Arr<(ChainState ChainState, Exception Fault)>> ChainsUpdates => _chainsUpdatesSubject.AsObservable();
-    private readonly Subject<Arr<(ChainState ChainState, Exception Fault)>> _chainsUpdatesSubject = new Subject<Arr<(ChainState ChainState, Exception Fault)>>();
+    internal IObservable<Arr<(ChainState ChainState, Exception? Fault)>> ChainsUpdates => _chainsUpdatesSubject.AsObservable();
+    private readonly Subject<Arr<(ChainState ChainState, Exception? Fault)>> _chainsUpdatesSubject = new Subject<Arr<(ChainState ChainState, Exception? Fault)>>();
 
     internal bool IsIterating => _ctsIteration != default;
 
@@ -162,6 +162,8 @@ namespace Estimation
 
     private async Task ProposalLoopAsync(Arr<McmcChain> chains)
     {
+      RequireNotNull(_ctsIteration);
+
       try
       {
         var token = _ctsIteration.Token;
@@ -172,10 +174,10 @@ namespace Estimation
 
           while (!_outputRequestQueue.IsEmpty) // there is model output to pass on to chain(s)
           {
-            var didDequeue = _outputRequestQueue.TryDequeue(out SimDataItem<OutputRequest> outputRequest);
+            var didDequeue = _outputRequestQueue.TryDequeue(out SimDataItem<OutputRequest>? outputRequest);
             if (!didDequeue) break;
 
-            var no = RequireInstanceOf<int>(outputRequest.RequestToken);
+            var no = RequireInstanceOf<int>(outputRequest!.RequestToken);
             var chain = chains.Find(c => c.No == no).AssertSome();
 
             // no R subsystem failure while processing proposal
@@ -350,7 +352,7 @@ namespace Estimation
           {
             var didContain = perChainUpdate.TryGetValue(
               pv.Parameter,
-              out List<(int Iteration, double Value)> chainData
+              out List<(int Iteration, double Value)>? chainData
               );
 
             if (!didContain)
@@ -359,7 +361,7 @@ namespace Estimation
               perChainUpdate.Add(pv.Parameter, chainData);
             }
 
-            chainData.Add((iteration, pv.Value));
+            chainData!.Add((iteration, pv.Value));
           });
         }
 
@@ -388,8 +390,8 @@ namespace Estimation
     private readonly ConcurrentQueue<SimDataItem<OutputRequest>> _outputRequestQueue =
       new ConcurrentQueue<SimDataItem<OutputRequest>>();
     private readonly AutoResetEvent _outputRequestEvent = new AutoResetEvent(false);
-    private CancellationTokenSource _ctsIteration;
-    private IDisposable _outputRequestSubscription;
+    private CancellationTokenSource? _ctsIteration;
+    private IDisposable? _outputRequestSubscription;
     private readonly IterationUpdateList _iterationUpdateLst = new IterationUpdateList();
     private bool _disposed = false;
   }

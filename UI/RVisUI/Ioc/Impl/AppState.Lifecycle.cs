@@ -8,7 +8,10 @@ using RVisUI.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using static LanguageExt.Prelude;
+using static RVis.Base.Check;
+using static RVisUI.Model.ModuleInfo;
 
 namespace RVisUI.Ioc
 {
@@ -37,8 +40,10 @@ namespace RVisUI.Ioc
       }
     }
 
-    public bool GetStartUpArg(StartUpOption startUpOption, out string arg)
+    public bool GetStartUpArg(StartUpOption startUpOption, out string? arg)
     {
+      RequireNotNull(_startUpArgs);
+
       var pair = _startUpArgs.SingleOrDefault(t => t.Option == startUpOption);
       arg = pair.Value;
       return pair.Option != StartUpOption.None;
@@ -53,6 +58,7 @@ namespace RVisUI.Ioc
         if (disposing)
         {
           DisposeUIComponents();
+          _runControl?.Dispose();
           _simSharedState?.Dispose();
           _simEvidence?.Dispose();
           _simDataSessionLog?.Dispose();
@@ -79,7 +85,7 @@ namespace RVisUI.Ioc
 
       ).ToCliOptSpecs();
 
-      var startUpArgs = new List<(StartUpOption Option, string Value)>();
+      var startUpArgs = new List<(StartUpOption Option, string? Value)>();
       Option<string> extraModulePath = None;
 
       try
@@ -124,19 +130,29 @@ namespace RVisUI.Ioc
       ifSome(extraModulePath, emp => ExtraModulePath = emp);
     }
 
-    private void CurtailOperations() => ActiveViewModel = new FailedStartUpViewModel();
-
-    private void StartOperations(ServerLicense serverLicense)
+    private Task CurtailOperations()
     {
+      ActiveViewModel = new FailedStartUpViewModel();
+      return Task.CompletedTask;
+    }
+
+    private async Task StartOperations(ServerLicense serverLicense)
+    {
+      _simData = new SimData(_appService.RVisServerPool);
+      _simDataSessionLog = new SimDataSessionLog(_simData, _appService.SecondInterval);
+      _simEvidence = new SimEvidence();
+      _simSharedState = new SimSharedState();
+
       try
       {
-        RVersion = serverLicense.GetRClient().GetRversion();
-        InstalledRPackages = serverLicense.GetRClient().GetInstalledPackages();
+        var rClient = await serverLicense.GetRClientAsync();
+        RVersion = await rClient.GetRversionAsync();
+        InstalledRPackages = await rClient.GetInstalledPackagesAsync();
       }
       catch (Exception ex)
       {
         App.Current.Log.Error(ex);
-        CurtailOperations();
+        var _ = CurtailOperations();
         return;
       }
       finally
@@ -148,11 +164,6 @@ namespace RVisUI.Ioc
         .ObservableForProperty(s => s.ModuleConfiguration)
         .Subscribe(ObserveModuleConfiguration);
 
-      _simData = new SimData(_appService.RVisServerPool);
-      _simDataSessionLog = new SimDataSessionLog(_simData, _appService.SecondInterval);
-      _simEvidence = new SimEvidence();
-      _simSharedState = new SimSharedState();
-
       _secondIntervalSubscription = _appService.SecondInterval.Subscribe(ObserveSecondInterval);
 
       Simulation.Subscribe(
@@ -160,15 +171,34 @@ namespace RVisUI.Ioc
         );
 
       ExecuteStartUpOptions();
+
+      _appService.ScheduleLowPriorityAction(StartBackgroundTasks);
+    }
+
+    private void StartBackgroundTasks()
+    {
+      var jobSpecs = RunControlSpec.LoadJobSpecs(_appSettings);
+
+      if (jobSpecs.IsEmpty) return;
+
+      var services = GetServices(rebind: false);
+      var moduleInfos = GetModuleInfos(services);
+      var runControl = RunControlSpec.ToRunControl(jobSpecs, moduleInfos, _appSettings);
+
+      if (runControl is null) return;
+
+      RunControl = runControl;
+
+      runControl.StartJobs();
     }
 
     private void ExecuteStartUpOptions()
     {
       if (GetStartUpArg(StartUpOption.LoadSim, out string _))
       {
-        GetStartUpArg(StartUpOption.Name, out string directoryName);
+        GetStartUpArg(StartUpOption.Name, out string? directoryName);
 
-        var homeViewModel = App.Current.NinjectKernel.GetService(typeof(IHomeViewModel)) as IHomeViewModel;
+        var homeViewModel = (IHomeViewModel)App.Current.NinjectKernel.GetService(typeof(IHomeViewModel)).AssertNotNull();
         var selectSimulationViewModel = homeViewModel.SelectSimulationViewModel;
 
         var simulationVM = selectSimulationViewModel.SimulationVMs.SingleOrDefault(vm => vm.DirectoryName == directoryName);
@@ -188,9 +218,9 @@ namespace RVisUI.Ioc
       }
     }
 
-    private (StartUpOption Option, string Value)[] _startUpArgs;
-    private IDisposable _moduleConfigurationSubscription;
-    private IDisposable _secondIntervalSubscription;
+    private (StartUpOption Option, string? Value)[]? _startUpArgs;
+    private IDisposable? _moduleConfigurationSubscription;
+    private IDisposable? _secondIntervalSubscription;
     private bool _disposed = false;
   }
 }

@@ -26,13 +26,13 @@ namespace Sensitivity
     }
     private int? _noOfSamples;
 
-    internal string SelectedElementName
+    internal string? SelectedElementName
     {
       get => _selectedElementName;
       set => this.RaiseAndSetIfChanged(ref _selectedElementName, value, PropertyChanged);
     }
-    private string _selectedElementName;
+    private string? _selectedElementName;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

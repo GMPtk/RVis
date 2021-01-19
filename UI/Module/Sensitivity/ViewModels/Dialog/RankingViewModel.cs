@@ -16,7 +16,7 @@ namespace Sensitivity
     internal RankingViewModel(
       double? from,
       double? to,
-      string xUnits,
+      string? xUnits,
       Arr<(string Name, bool IsSelected)> outputs,
       Arr<string> selectedParameters,
       IScorer scorer
@@ -52,27 +52,27 @@ namespace Sensitivity
         );
     }
 
-    public string FromText
+    public string? FromText
     {
       get => _fromText;
       set => this.RaiseAndSetIfChanged(ref _fromText, value.CheckParseValue<double>(), PropertyChanged);
     }
-    private string _fromText;
+    private string? _fromText;
 
     public double? From =>
       double.TryParse(_fromText, out double d) ? d : default(double?);
 
-    public string ToText
+    public string? ToText
     {
       get => _toText;
       set => this.RaiseAndSetIfChanged(ref _toText, value.CheckParseValue<double>(), PropertyChanged);
     }
-    private string _toText;
+    private string? _toText;
 
     public double? To =>
       double.TryParse(_toText, out double d) ? d : default(double?);
 
-    public string XUnits { get; }
+    public string? XUnits { get; }
 
     public Arr<IOutputViewModel> OutputViewModels { get; }
 
@@ -101,19 +101,19 @@ namespace Sensitivity
     }
     private bool? _dialogResult;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void HandleOK() => DialogResult = true;
 
     private void HandleCancel() => DialogResult = false;
 
-    private void ObserveFromText(IObservedChange<RankingViewModel, string> _)
+    private void ObserveFromText(IObservedChange<RankingViewModel, string?> _)
     {
       Populate();
       UpdateEnable();
     }
 
-    private void ObserveToText(IObservedChange<RankingViewModel, string> _)
+    private void ObserveToText(IObservedChange<RankingViewModel, string?> _)
     {
       Populate();
       UpdateEnable();
@@ -144,7 +144,7 @@ namespace Sensitivity
         return;
       }
 
-      var scores = _scorer.GetScores(From.Value, To.Value, outputs);
+      var scores = _scorer.GetScores(From!.Value, To!.Value, outputs);
 
       var selectedParameters = RankedParameterViewModels
         .Filter(vm => vm.IsSelected)
@@ -172,6 +172,6 @@ namespace Sensitivity
     }
 
     private readonly IScorer _scorer;
-    private IDisposable _parameterIsSelectedSubscription;
+    private IDisposable? _parameterIsSelectedSubscription;
   }
 }

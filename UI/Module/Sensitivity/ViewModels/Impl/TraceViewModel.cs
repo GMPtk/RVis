@@ -6,6 +6,7 @@ using OxyPlot.Series;
 using ReactiveUI;
 using RVis.Base.Extensions;
 using RVis.Data;
+using RVisUI.AppInf.Design;
 using RVisUI.AppInf.Extensions;
 using RVisUI.Model;
 using RVisUI.Model.Extensions;
@@ -17,6 +18,7 @@ using System.Reflection;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
+using static RVisUI.Wpf.WpfTools;
 using static Sensitivity.ChartOptionsViewModel;
 using static System.Double;
 using static System.Math;
@@ -25,10 +27,10 @@ namespace Sensitivity
 {
   internal sealed class TraceViewModel : ITraceViewModel, INotifyPropertyChanged, IDisposable
   {
-    internal TraceViewModel()
+    internal TraceViewModel() 
+      : this(new AppService(), new AppSettings(), new TraceState())
     {
-      _traceState = new TraceState { };
-      PlotModel = CreatePlotModel();
+      RequireTrue(IsInDesignMode);
       _traceSeries.IsVisible = true;
     }
 
@@ -40,7 +42,61 @@ namespace Sensitivity
 
       _viewHeight = traceState.ViewHeight ?? 200.0;
 
-      PlotModel = CreatePlotModel();
+      PlotModel = new PlotModel
+      {
+        Title = _traceState.ChartTitle,
+        IsLegendVisible = false
+      };
+#pragma warning disable CS0618 // Type or member is obsolete
+      PlotModel.MouseDown += HandleTracePlotModelMouseDown;
+#pragma warning restore CS0618 // Type or member is obsolete
+
+      _traceHorizontalAxis = new LinearAxis
+      {
+        Position = AxisPosition.Bottom,
+        MinimumPadding = 0,
+        MaximumPadding = 0.06,
+        AbsoluteMinimum = _traceState.HorizontalAxisAbsoluteMinimum,
+        Minimum = _traceState.HorizontalAxisMinimum,
+        AbsoluteMaximum = _traceState.HorizontalAxisAbsoluteMaximum,
+        Maximum = _traceState.HorizontalAxisMaximum
+      };
+      PlotModel.Axes.Add(_traceHorizontalAxis);
+
+      _traceVerticalAxis = new LinearAxis
+      {
+        Position = AxisPosition.Left,
+        MinimumPadding = 0,
+        MaximumPadding = 0.06,
+        AbsoluteMinimum = _traceState.VerticalAxisAbsoluteMinimum,
+        Minimum = _traceState.VerticalAxisMinimum,
+        AbsoluteMaximum = _traceState.VerticalAxisAbsoluteMaximum,
+        Maximum = _traceState.VerticalAxisMaximum,
+        Key = "output"
+      };
+      PlotModel.Axes.Add(_traceVerticalAxis);
+
+      _traceSeries = new LineSeries
+      {
+        MarkerType = MarkerType.Circle,
+        MarkerFill = _traceState.MarkerFill ?? OxyColors.DodgerBlue,
+        Color = _traceState.SeriesColor ?? OxyColors.DodgerBlue,
+        InterpolationAlgorithm = InterpolationAlgorithms.CatmullRomSpline
+      };
+#pragma warning disable CS0618 // Type or member is obsolete
+      _traceSeries.MouseDown += HandleTraceMouseDown;
+#pragma warning restore CS0618 // Type or member is obsolete
+
+      PlotModel.Series.Add(_traceSeries);
+
+      _verticalCursor = new LineAnnotation { Type = LineAnnotationType.Vertical };
+#pragma warning disable CS0618 // Type or member is obsolete
+      _verticalCursor.MouseDown += HandleVerticalCursorMouseDown;
+      _verticalCursor.MouseMove += HandleVerticalCursorMouseMove;
+      _verticalCursor.MouseUp += HandleVerticalCursorMouseUp;
+#pragma warning restore CS0618 // Type or member is obsolete
+      PlotModel.Annotations.Add(_verticalCursor);
+
       PlotModel.ApplyThemeToPlotModelAndAxes();
 
       ResetAxes = ReactiveCommand.Create(HandleResetAxes);
@@ -53,7 +109,7 @@ namespace Sensitivity
         _appSettings
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(ObserveAppSettingsPropertyChange)
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(ObserveAppSettingsPropertyChange)
             ),
 
         this
@@ -104,7 +160,7 @@ namespace Sensitivity
     }
     private double _viewHeight = 200d;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     internal void PlotTraceData(NumDataColumn independent, NumDataColumn dependent)
     {
@@ -162,60 +218,6 @@ namespace Sensitivity
       }
     }
 
-    private PlotModel CreatePlotModel()
-    {
-      var plotModel = new PlotModel
-      {
-        Title = _traceState.ChartTitle,
-        IsLegendVisible = false
-      };
-      plotModel.MouseDown += HandleTracePlotModelMouseDown;
-
-      _traceHorizontalAxis = new LinearAxis
-      {
-        Position = AxisPosition.Bottom,
-        MinimumPadding = 0,
-        MaximumPadding = 0.06,
-        AbsoluteMinimum = _traceState.HorizontalAxisAbsoluteMinimum,
-        Minimum = _traceState.HorizontalAxisMinimum,
-        AbsoluteMaximum = _traceState.HorizontalAxisAbsoluteMaximum,
-        Maximum = _traceState.HorizontalAxisMaximum
-      };
-      plotModel.Axes.Add(_traceHorizontalAxis);
-
-      _traceVerticalAxis = new LinearAxis
-      {
-        Position = AxisPosition.Left,
-        MinimumPadding = 0,
-        MaximumPadding = 0.06,
-        AbsoluteMinimum = _traceState.VerticalAxisAbsoluteMinimum,
-        Minimum = _traceState.VerticalAxisMinimum,
-        AbsoluteMaximum = _traceState.VerticalAxisAbsoluteMaximum,
-        Maximum = _traceState.VerticalAxisMaximum,
-        Key = "output"
-      };
-      plotModel.Axes.Add(_traceVerticalAxis);
-
-      _traceSeries = new LineSeries
-      {
-        MarkerType = MarkerType.Circle,
-        MarkerFill = _traceState.MarkerFill ?? OxyColors.DodgerBlue,
-        Color = _traceState.SeriesColor ?? OxyColors.DodgerBlue,
-        InterpolationAlgorithm = InterpolationAlgorithms.CatmullRomSpline
-      };
-      _traceSeries.MouseDown += HandleTraceMouseDown;
-
-      plotModel.Series.Add(_traceSeries);
-
-      _verticalCursor = new LineAnnotation { Type = LineAnnotationType.Vertical };
-      _verticalCursor.MouseDown += HandleVerticalCursorMouseDown;
-      _verticalCursor.MouseMove += HandleVerticalCursorMouseMove;
-      _verticalCursor.MouseUp += HandleVerticalCursorMouseUp;
-      plotModel.Annotations.Add(_verticalCursor);
-
-      return plotModel;
-    }
-
     private void HandleResetAxes()
     {
       PlotModel.ResetAllAxes();
@@ -225,7 +227,7 @@ namespace Sensitivity
     private void HandleShowOptions() =>
       ShowOptionsDialog(CHART_PAGE);
 
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (!propertyName.IsThemeProperty()) return;
 
@@ -243,7 +245,7 @@ namespace Sensitivity
       PlotModel.InvalidatePlot(false);
     }
 
-    private void HandleTracePlotModelMouseDown(object sender, OxyMouseDownEventArgs e)
+    private void HandleTracePlotModelMouseDown(object? sender, OxyMouseDownEventArgs e)
     {
       if (e.ChangedButton != OxyMouseButton.Left) return;
 
@@ -255,11 +257,11 @@ namespace Sensitivity
 
       if (dataPoint.X < minimumVisibleTime)
       {
-        var actualTitleFontSizeProperty = _traceVerticalAxis.GetType().GetProperty(
-          "ActualTitleFontSize", 
-          BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Instance
-          );
-        var titleFontSize = (double)actualTitleFontSizeProperty.GetValue(_traceVerticalAxis);
+        var actualTitleFontSizeProperty = _traceVerticalAxis
+          .GetType()
+          .GetProperty("ActualTitleFontSize", BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Instance)
+          .AssertNotNull();
+        var titleFontSize = (double)actualTitleFontSizeProperty.GetValue(_traceVerticalAxis).AssertNotNull();
         var titleEndsAt = PlotModel.Padding.Left + titleFontSize + _traceVerticalAxis.AxisTickToLabelDistance;
         var isLabelClick = e.Position.X < titleEndsAt;
 
@@ -267,11 +269,11 @@ namespace Sensitivity
       }
       else if (dataPoint.Y < minimumVisibleOutput)
       {
-        var actualTitleFontSizeProperty = _traceHorizontalAxis.GetType().GetProperty(
-          "ActualTitleFontSize", 
-          BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Instance
-          );
-        var titleFontSize = (double)actualTitleFontSizeProperty.GetValue(_traceHorizontalAxis);
+        var actualTitleFontSizeProperty = _traceHorizontalAxis
+          .GetType()
+          .GetProperty("ActualTitleFontSize", BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Instance)
+          .AssertNotNull();
+        var titleFontSize = (double)actualTitleFontSizeProperty.GetValue(_traceHorizontalAxis).AssertNotNull();
         var titleEndsAt = PlotModel.Padding.Left + titleFontSize + _traceHorizontalAxis.AxisTickToLabelDistance;
         var distanceOver = PlotModel.PlotAndAxisArea.Bottom - e.Position.Y;
         var isLabelClick = distanceOver < titleEndsAt;
@@ -296,7 +298,7 @@ namespace Sensitivity
       e.Handled = true;
     }
 
-    private void HandleTraceMouseDown(object sender, OxyMouseDownEventArgs e)
+    private void HandleTraceMouseDown(object? sender, OxyMouseDownEventArgs e)
     {
       if (!_reactiveSafeInvoke.React) return;
 
@@ -314,7 +316,7 @@ namespace Sensitivity
       e.Handled = true;
     }
 
-    private void HandleVerticalCursorMouseDown(object sender, OxyMouseDownEventArgs e)
+    private void HandleVerticalCursorMouseDown(object? sender, OxyMouseDownEventArgs e)
     {
       if (e.ChangedButton != OxyMouseButton.Left) return;
 
@@ -324,7 +326,7 @@ namespace Sensitivity
       e.Handled = true;
     }
 
-    private void HandleVerticalCursorMouseMove(object sender, OxyMouseEventArgs e)
+    private void HandleVerticalCursorMouseMove(object? sender, OxyMouseEventArgs e)
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
@@ -337,7 +339,7 @@ namespace Sensitivity
       e.Handled = true;
     }
 
-    private void HandleVerticalCursorMouseUp(object sender, OxyMouseEventArgs e)
+    private void HandleVerticalCursorMouseUp(object? sender, OxyMouseEventArgs e)
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
@@ -382,12 +384,12 @@ namespace Sensitivity
         HorizontalAxisMaximum = _traceHorizontalAxis.ActualMaximum,
 
         HorizontalAxisAbsoluteMinimumAuto = _traceHorizontalAxis.AbsoluteMinimum == MinValue,
-        HorizontalAxisAbsoluteMinimum = _traceHorizontalAxis.AbsoluteMinimum == MinValue 
-          ? _traceHorizontalAxis.ActualMinimum 
+        HorizontalAxisAbsoluteMinimum = _traceHorizontalAxis.AbsoluteMinimum == MinValue
+          ? _traceHorizontalAxis.ActualMinimum
           : _traceHorizontalAxis.AbsoluteMinimum,
         HorizontalAxisAbsoluteMaximumAuto = _traceHorizontalAxis.AbsoluteMaximum == MaxValue,
-        HorizontalAxisAbsoluteMaximum = _traceHorizontalAxis.AbsoluteMaximum == MaxValue 
-          ? _traceHorizontalAxis.ActualMaximum 
+        HorizontalAxisAbsoluteMaximum = _traceHorizontalAxis.AbsoluteMaximum == MaxValue
+          ? _traceHorizontalAxis.ActualMaximum
           : _traceHorizontalAxis.ActualMaximum,
 
         VerticalAxisMinimumAuto = IsNaN(_traceVerticalAxis.Minimum),
@@ -396,12 +398,12 @@ namespace Sensitivity
         VerticalAxisMaximum = _traceVerticalAxis.ActualMaximum,
 
         VerticalAxisAbsoluteMinimumAuto = _traceVerticalAxis.AbsoluteMinimum == MinValue,
-        VerticalAxisAbsoluteMinimum = _traceVerticalAxis.AbsoluteMinimum == MinValue 
-          ? _traceVerticalAxis.ActualMinimum 
+        VerticalAxisAbsoluteMinimum = _traceVerticalAxis.AbsoluteMinimum == MinValue
+          ? _traceVerticalAxis.ActualMinimum
           : _traceVerticalAxis.AbsoluteMinimum,
         VerticalAxisAbsoluteMaximumAuto = _traceVerticalAxis.AbsoluteMaximum == MaxValue,
-        VerticalAxisAbsoluteMaximum = _traceVerticalAxis.AbsoluteMaximum == MaxValue 
-          ? _traceVerticalAxis.ActualMaximum 
+        VerticalAxisAbsoluteMaximum = _traceVerticalAxis.AbsoluteMaximum == MaxValue
+          ? _traceVerticalAxis.ActualMaximum
           : _traceVerticalAxis.ActualMaximum,
       };
 
@@ -422,11 +424,11 @@ namespace Sensitivity
         _traceHorizontalAxis.Title = viewModel.XAxisTitle;
         _traceSeries.MarkerFill = OxyColorData.OxyColors[viewModel.ElementColorIndices[MARKER_ELEMENT]].OxyColor;
         _traceSeries.Color = OxyColorData.OxyColors[viewModel.ElementColorIndices[LINE_ELEMENT]].OxyColor;
-        _traceHorizontalAxis.AbsoluteMinimum = viewModel.HorizontalAxisAbsoluteMinimumAuto 
-          ? MinValue 
+        _traceHorizontalAxis.AbsoluteMinimum = viewModel.HorizontalAxisAbsoluteMinimumAuto
+          ? MinValue
           : viewModel.HorizontalAxisAbsoluteMinimum;
-        _traceHorizontalAxis.AbsoluteMaximum = viewModel.HorizontalAxisAbsoluteMaximumAuto 
-          ? MaxValue 
+        _traceHorizontalAxis.AbsoluteMaximum = viewModel.HorizontalAxisAbsoluteMaximumAuto
+          ? MaxValue
           : viewModel.HorizontalAxisAbsoluteMaximum;
 
         double minimum;
@@ -455,17 +457,17 @@ namespace Sensitivity
 
         _traceHorizontalAxis.Zoom(minimum, maximum);
 
-        _traceVerticalAxis.AbsoluteMinimum = viewModel.VerticalAxisAbsoluteMinimumAuto 
-          ? MinValue 
+        _traceVerticalAxis.AbsoluteMinimum = viewModel.VerticalAxisAbsoluteMinimumAuto
+          ? MinValue
           : viewModel.VerticalAxisAbsoluteMinimum;
-        _traceVerticalAxis.AbsoluteMaximum = viewModel.VerticalAxisAbsoluteMaximumAuto 
-          ? MaxValue 
+        _traceVerticalAxis.AbsoluteMaximum = viewModel.VerticalAxisAbsoluteMaximumAuto
+          ? MaxValue
           : viewModel.VerticalAxisAbsoluteMaximum;
-        minimum = viewModel.VerticalAxisMinimumAuto 
-          ? _traceVerticalAxis.ActualMinimum 
+        minimum = viewModel.VerticalAxisMinimumAuto
+          ? _traceVerticalAxis.ActualMinimum
           : viewModel.VerticalAxisMinimum;
-        maximum = viewModel.VerticalAxisMaximumAuto 
-          ? _traceVerticalAxis.ActualMaximum 
+        maximum = viewModel.VerticalAxisMaximumAuto
+          ? _traceVerticalAxis.ActualMaximum
           : viewModel.VerticalAxisMaximum;
 
         if (viewModel.VerticalAxisMinimumAuto)
@@ -522,10 +524,10 @@ namespace Sensitivity
     private readonly TraceState _traceState;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private LineSeries _traceSeries;
-    private LineAnnotation _verticalCursor;
-    private LinearAxis _traceHorizontalAxis;
-    private LinearAxis _traceVerticalAxis;
+    private readonly LineSeries _traceSeries;
+    private readonly LineAnnotation _verticalCursor;
+    private readonly LinearAxis _traceHorizontalAxis;
+    private readonly LinearAxis _traceVerticalAxis;
     private double _horizontalResetMinimum = NaN;
     private double _horizontalResetMaximum = NaN;
     private double _verticalResetMinimum = NaN;

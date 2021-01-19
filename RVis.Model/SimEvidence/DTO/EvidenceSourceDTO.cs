@@ -4,14 +4,14 @@
   {
     public int ID { get; set; }
 
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
 
-    public string Description { get; set; }
+    public string? Description { get; set; }
 
-    public string[] Subjects { get; set; }
+    public string[] Subjects { get; set; } = null!;
 
-    public string RefName { get; set; }
+    public string RefName { get; set; } = null!;
 
-    public string RefHash { get; set; }
+    public string RefHash { get; set; } = null!;
   }
 }

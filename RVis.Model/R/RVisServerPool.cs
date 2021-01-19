@@ -4,7 +4,6 @@ using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
-using System.Threading.Tasks;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static RVis.Model.Logger;
@@ -47,14 +46,14 @@ namespace RVis.Model
           serverSlot =>
           {
             var serverLicense = new ServerLicense(
-              serverSlot.ID, 
-              serverSlot.Server, 
+              serverSlot.ID,
+              serverSlot.Server,
               serverSlot.MCSimExecutors,
               (sl) => ExpireLicense(serverSlot, sl)
               );
 
             serverSlot.IsFree = false;
-            
+
             _serverLicenses.OnNext((serverLicense, HasExpired: false));
 
             Log.Debug($"Issued license for server {serverSlot.ID}");
@@ -80,14 +79,14 @@ namespace RVis.Model
         if (!serverSlot.IsFree) return None;
 
         var renewedServerLicense = new ServerLicense(
-          serverSlot.ID, 
+          serverSlot.ID,
           serverSlot.Server,
           serverSlot.MCSimExecutors,
           (sl) => ExpireLicense(serverSlot, sl)
           );
 
         serverSlot.IsFree = false;
-        
+
         _serverLicenses.OnNext((renewedServerLicense, HasExpired: false));
 
         Log.Debug($"Renewed license for server {serverSlot.ID}");
@@ -148,25 +147,17 @@ namespace RVis.Model
               );
         });
 
-        void StopDisposeServers() =>
-          serverSlots.Iter(ss =>
+        serverSlots.Iter(ss =>
+        {
+          var task = ss.Server.StopAsync();
+          if (disposing)
           {
-            ss.Server.Stop();
-            (ss.Server as IDisposable).Dispose();
-            ss.MCSimExecutors.Values.Iter(me => me.Dispose());
-            ss.MCSimExecutors.Clear();
-          });
-
-        if (disposing)
-        {
-          // shutting down so block
-          StopDisposeServers();
-        }
-        else
-        {
-          // user api call so don't block
-          Task.Run(StopDisposeServers);
-        }
+            task.Wait(500);
+          }
+          ((IDisposable)ss.Server).Dispose();
+          ss.MCSimExecutors.Values.Iter(me => me.Dispose());
+          ss.MCSimExecutors.Clear();
+        });
 
         Log.Debug($"{nameof(RVisServerPool)} destroyed pool");
       }

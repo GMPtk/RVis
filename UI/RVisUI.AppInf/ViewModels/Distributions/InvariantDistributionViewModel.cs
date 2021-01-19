@@ -8,6 +8,7 @@ using System;
 using System.ComponentModel;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
+using static RVisUI.Wpf.WpfTools;
 using static System.Double;
 
 namespace RVisUI.AppInf
@@ -20,7 +21,7 @@ namespace RVisUI.AppInf
       this
         .WhenAny(vm => vm.Distribution, _ => default(object))
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<object>(
+          _reactiveSafeInvoke.SuspendAndInvoke<object?>(
             ObserveDistribution
             )
           );
@@ -28,7 +29,7 @@ namespace RVisUI.AppInf
       this
         .WhenAny(vm => vm.Value, _ => default(object))
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<object>(
+          _reactiveSafeInvoke.SuspendAndInvoke<object?>(
             ObserveDistributionParameters
             )
           );
@@ -37,7 +38,7 @@ namespace RVisUI.AppInf
     public InvariantDistributionViewModel()
       : this(new Design.AppService(), new Design.AppSettings())
     {
-      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
+      RequireTrue(IsInDesignMode);
     }
 
     public DistributionType DistributionType => DistributionType.Invariant;
@@ -56,25 +57,25 @@ namespace RVisUI.AppInf
     }
     private Option<InvariantDistribution> _invariantDistribution;
 
-    public IDistribution DistributionUnsafe
+    public IDistribution? DistributionUnsafe
     {
       get => _invariantDistribution.Match(lnd => lnd, () => default(IDistribution));
       set => Distribution = value == default ? None : Some(RequireInstanceOf<InvariantDistribution>(value));
     }
 
-    public string Variable
+    public string? Variable
     {
       get => _variable;
       set => this.RaiseAndSetIfChanged(ref _variable, value, PropertyChanged);
     }
-    private string _variable;
+    private string? _variable;
 
-    public string Unit
+    public string? Unit
     {
       get => _unit;
       set => this.RaiseAndSetIfChanged(ref _unit, value, PropertyChanged);
     }
-    private string _unit;
+    private string? _unit;
 
     public double? Value
     {
@@ -85,9 +86,9 @@ namespace RVisUI.AppInf
 
     public PlotModel PlotModel => throw new InvalidOperationException("Trying to get plot for invariant");
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-    private void ObserveDistribution(object _)
+    private void ObserveDistribution(object? _)
     {
       Distribution.Match(
         invariant =>
@@ -100,7 +101,7 @@ namespace RVisUI.AppInf
         });
     }
 
-    private void ObserveDistributionParameters(object _)
+    private void ObserveDistributionParameters(object? _)
     {
       if (Value.HasValue)
       {

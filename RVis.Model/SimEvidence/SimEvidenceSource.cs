@@ -10,7 +10,7 @@ namespace RVis.Model
     internal SimEvidenceSource(
       int id,
       string name,
-      string description,
+      string? description,
       Set<string> subjects,
       string refName,
       string refHash
@@ -34,7 +34,7 @@ namespace RVis.Model
 
     public string Name { get; }
 
-    public string Description { get; }
+    public string? Description { get; }
 
     public Set<string> Subjects { get; }
 
@@ -42,7 +42,7 @@ namespace RVis.Model
 
     public string RefHash { get; }
 
-    public override bool Equals(object obj) =>
+    public override bool Equals(object? obj) =>
       obj is SimEvidenceSource evidenceSource && Equals(evidenceSource);
 
     public bool Equals(SimEvidenceSource other) =>
@@ -50,7 +50,7 @@ namespace RVis.Model
       (other.ID, other.Name, other.Description, other.Subjects, other.RefName, other.RefHash);
 
     public override int GetHashCode() =>
-      (ID, Name, Description, Subjects, RefName, RefHash).GetHashCode();
+      HashCode.Combine(ID, Name, Description, Subjects, RefName, RefHash);
 
     public static bool operator ==(SimEvidenceSource lhs, SimEvidenceSource rhs) =>
       lhs.Equals(rhs);

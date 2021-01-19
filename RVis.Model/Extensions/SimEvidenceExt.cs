@@ -1,6 +1,7 @@
 ﻿using LanguageExt;
 using RVis.Base.Extensions;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static RVis.Base.Extensions.LangExt;
@@ -41,7 +42,7 @@ namespace RVis.Model.Extensions
     public static Option<SimEvidenceSource> FindEvidenceSource(this Arr<SimEvidenceSource> evidenceSources, SimEvidenceSource evidenceSource) =>
       FindEvidenceSource(evidenceSources, evidenceSource.RefHash);
 
-    public static bool IsSubject(this ISimEvidence evidence, string subject) =>
+    public static bool IsSubject(this ISimEvidence evidence, [NotNullWhen(true)] string? subject) =>
       subject.IsAString() && evidence.Subjects.Contains(subject);
 
     public static string GetReference(this SimEvidenceSource evidenceSource) =>

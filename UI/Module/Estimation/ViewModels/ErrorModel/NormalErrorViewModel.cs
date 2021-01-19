@@ -8,6 +8,7 @@ using System.Reactive.Disposables;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static System.Double;
+using static RVisUI.Wpf.WpfTools;
 
 namespace Estimation
 {
@@ -23,7 +24,7 @@ namespace Estimation
       this
         .WhenAny(vm => vm.ErrorModel, _ => default(object))
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<object>(
+          _reactiveSafeInvoke.SuspendAndInvoke<object?>(
             ObserveErrorModel
             )
           ),
@@ -31,7 +32,7 @@ namespace Estimation
       this
         .WhenAny(vm => vm.Sigma, vm => vm.StepInitializer, (_, __) => default(object))
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<object>(
+          _reactiveSafeInvoke.SuspendAndInvoke<object?>(
             ObserveErrorModelParameters
             )
           )
@@ -39,10 +40,10 @@ namespace Estimation
         );
     }
 
-    internal NormalErrorViewModel()
+    public NormalErrorViewModel()
       : this(new RVisUI.AppInf.Design.AppService())
     {
-      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
+      RequireTrue(IsInDesignMode);
       ErrorModel = NormalErrorModel.Default;
     }
 
@@ -76,29 +77,29 @@ namespace Estimation
     }
     private Option<NormalErrorModel> _errorModel;
 
-    public IErrorModel ErrorModelUnsafe
+    public IErrorModel? ErrorModelUnsafe
     {
       get => _errorModel.Match(em => em, () => default(IErrorModel));
       set => ErrorModel = value == default ? None : Some(RequireInstanceOf<NormalErrorModel>(value));
     }
 
-    public string Variable
+    public string? Variable
     {
       get => _variable;
       set => this.RaiseAndSetIfChanged(ref _variable, value, PropertyChanged);
     }
-    private string _variable;
+    private string? _variable;
 
-    public string Unit
+    public string? Unit
     {
       get => _unit;
       set => this.RaiseAndSetIfChanged(ref _unit, value, PropertyChanged);
     }
-    private string _unit;
+    private string? _unit;
 
     public void Dispose() => Dispose(true);
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void Dispose(bool disposing)
     {
@@ -113,7 +114,7 @@ namespace Estimation
       }
     }
 
-    private void ObserveErrorModel(object _)
+    private void ObserveErrorModel(object? _)
     {
       ErrorModel.Match(
         errorModel =>
@@ -130,7 +131,7 @@ namespace Estimation
         });
     }
 
-    private void ObserveErrorModelParameters(object _)
+    private void ObserveErrorModelParameters(object? _)
     {
       if (Sigma.HasValue && StepInitializer.HasValue)
       {

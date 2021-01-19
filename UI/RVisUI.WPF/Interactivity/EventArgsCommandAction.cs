@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xaml.Behaviors;
+using RVis.Base.Extensions;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -37,7 +38,7 @@ namespace RVisUI.Wpf
       set => SetValue(EventArgsConverterProperty, value);
     }
 
-    public string CommandName
+    public string? CommandName
     {
       get
       {
@@ -85,12 +86,12 @@ namespace RVisUI.Wpf
 
           if (commandPropertyInfo != null)
           {
-            Command = (ICommand)commandPropertyInfo.GetValue(frameworkElement.DataContext, null);
+            Command = (ICommand)commandPropertyInfo.GetValue(frameworkElement.DataContext, null).AssertNotNull();
           }
         }
       }
     }
 
-    private string _commandName;
+    private string? _commandName;
   }
 }

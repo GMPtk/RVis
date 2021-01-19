@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
+using System.Threading.Tasks;
 using static LanguageExt.Prelude;
 using static RVis.Model.Test.DistributionImpl;
 using static System.Double;
@@ -11,12 +12,12 @@ namespace RVis.Model.Test
   {
 #if !IS_PIPELINES_BUILD
     [TestMethod()]
-    public void TestBetaCumulativeDistributionAtBounds()
+    public async Task TestBetaCumulativeDistributionAtBounds()
     {
       // arrange
       var subject = new BetaDistribution(0.5, 0.5, 0.3, 0.7);
-      var expectedLowerP = GetNumData("pbeta(0.3, 0.5, 0.5)")[0].Data[0];
-      var expectedUpperP = GetNumData("pbeta(0.7, 0.5, 0.5)")[0].Data[0];
+      var expectedLowerP = (await GetNumDataAsync("pbeta(0.3, 0.5, 0.5)"))[0].Data[0];
+      var expectedUpperP = (await GetNumDataAsync("pbeta(0.7, 0.5, 0.5)"))[0].Data[0];
 
       // act
       var (actualLowerP, actualUpperP) = subject.CumulativeDistributionAtBounds;
@@ -56,13 +57,13 @@ namespace RVis.Model.Test
 
 #if !IS_PIPELINES_BUILD
     [TestMethod()]
-    public void TestBetaGetDensities()
+    public async Task TestBetaGetDensities()
     {
       // arrange
       var subject = new BetaDistribution(0.5, 0.5);
-      var expected = GetNumData(
+      var expected = (await GetNumDataAsync(
         "sapply(seq(qbeta(0.3, 0.5, 0.5), qbeta(0.7, 0.5, 0.5), length.out = 5), function(cd){dbeta(cd, 0.5, 0.5)})"
-        )[0].Data.ToArr();
+        ))[0].Data.ToArr();
 
       // act
       var (_, actual) = subject.GetDensities(0.3, 0.7, 5);
@@ -82,7 +83,7 @@ namespace RVis.Model.Test
       // act
       var serialized = expected.ToString();
       var deserialized = Distribution.DeserializeDistribution(serialized);
-      var distribution = deserialized.IfNone(() => { Assert.Fail(); return default; });
+      var distribution = deserialized.IfNone(() => { Assert.Fail(); return default!; });
 
       // assert
       var actual = Base.Check.RequireInstanceOf<BetaDistribution>(distribution);

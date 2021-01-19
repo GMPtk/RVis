@@ -12,6 +12,7 @@ using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
 using static RVis.Base.Check;
+using static RVisUI.Wpf.WpfTools;
 using static System.Globalization.CultureInfo;
 
 namespace RVisUI.Ioc.Mvvm
@@ -39,7 +40,7 @@ namespace RVisUI.Ioc.Mvvm
         .Map(s => new SwatchViewModel(s, ChangeHue))
         .ToArr<ISwatchViewModel>();
 
-      var hueViewModel = FindHueViewModel(ActiveScheme, SwatchViewModels, _appSettings);
+      var hueViewModel = FindHueViewModel(ActiveScheme, SwatchViewModels, _appSettings).AssertNotNull();
 
       hueViewModel.IsSelected = true;
 
@@ -49,7 +50,7 @@ namespace RVisUI.Ioc.Mvvm
     }
 
     public AppSettingsViewModel() : this(new AppSettings()) =>
-      RequireTrue(Splat.PlatformModeDetector.InDesignMode());
+      RequireTrue(IsInDesignMode);
 
     public ICommand View { get; }
 
@@ -101,33 +102,33 @@ namespace RVisUI.Ioc.Mvvm
     }
     private ColorScheme _activeScheme;
 
-    public string SecondaryHueLightHex
+    public string? SecondaryHueLightHex
     {
       get => _secondaryHueLightHex;
       set => this.RaiseAndSetIfChanged(ref _secondaryHueLightHex, value);
     }
-    private string _secondaryHueLightHex;
+    private string? _secondaryHueLightHex;
 
-    public string SecondaryHueMidHex
+    public string? SecondaryHueMidHex
     {
       get => _secondaryHueMidHex;
       set => this.RaiseAndSetIfChanged(ref _secondaryHueMidHex, value);
     }
-    private string _secondaryHueMidHex;
+    private string? _secondaryHueMidHex;
 
-    public string SecondaryHueDarkHex
+    public string? SecondaryHueDarkHex
     {
       get => _secondaryHueDarkHex;
       set => this.RaiseAndSetIfChanged(ref _secondaryHueDarkHex, value);
     }
-    private string _secondaryHueDarkHex;
+    private string? _secondaryHueDarkHex;
 
-    public string SecondaryHueMidForegroundHex
+    public string? SecondaryHueMidForegroundHex
     {
       get => _secondaryHueMidForegroundHex;
       set => this.RaiseAndSetIfChanged(ref _secondaryHueMidForegroundHex, value);
     }
-    private string _secondaryHueMidForegroundHex;
+    private string? _secondaryHueMidForegroundHex;
 
     public ICommand ChangeHue { get; }
     public ICommand ChangeToPrimary { get; }
@@ -145,7 +146,7 @@ namespace RVisUI.Ioc.Mvvm
       }
     }
 
-    private void HandleAppSettingsChanged(object sender, PropertyChangedEventArgs e)
+    private void HandleAppSettingsChanged(object? sender, PropertyChangedEventArgs e)
     {
       switch (e.PropertyName)
       {
@@ -157,9 +158,9 @@ namespace RVisUI.Ioc.Mvvm
       }
     }
 
-    private static IHueViewModel FindHueViewModel(ColorScheme colorScheme, Arr<ISwatchViewModel> swatchViewModels, IAppSettings appSettings)
+    private static IHueViewModel? FindHueViewModel(ColorScheme colorScheme, Arr<ISwatchViewModel> swatchViewModels, IAppSettings appSettings)
     {
-      string colorName;
+      string? colorName;
       int colorHue;
 
       switch (colorScheme)
@@ -277,7 +278,7 @@ namespace RVisUI.Ioc.Mvvm
         int2Hex(c.G) +
         int2Hex(c.B);
 
-      var hueViewModel = FindHueViewModel(ColorScheme.Secondary, SwatchViewModels, _appSettings);
+      var hueViewModel = FindHueViewModel(ColorScheme.Secondary, SwatchViewModels, _appSettings).AssertNotNull();
       var hue = hueViewModel.Hue;
 
       SecondaryHueLightHex = colorToHex(hue.Lighten());

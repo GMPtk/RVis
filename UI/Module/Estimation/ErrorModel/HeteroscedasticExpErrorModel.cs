@@ -126,37 +126,25 @@ namespace Estimation
         Lower
         );
 
-    public bool Equals(HeteroscedasticExpErrorModel rhs) =>
-      ReferenceEquals(rhs, null)
-        ? false
-        : Delta.Equals(rhs.Delta) && DeltaStep.Equals(rhs.DeltaStep) && DeltaStepInitializer.Equals(rhs.DeltaStepInitializer) &&
-          Sigma.Equals(rhs.Sigma) && SigmaStep.Equals(rhs.SigmaStep) && SigmaStepInitializer.Equals(rhs.SigmaStepInitializer) &&
-          Lower.Equals(rhs.Lower);
+    public bool Equals(HeteroscedasticExpErrorModel? rhs) =>
+      rhs is not null &&
+      Delta.Equals(rhs.Delta) && DeltaStep.Equals(rhs.DeltaStep) && DeltaStepInitializer.Equals(rhs.DeltaStepInitializer) &&
+      Sigma.Equals(rhs.Sigma) && SigmaStep.Equals(rhs.SigmaStep) && SigmaStepInitializer.Equals(rhs.SigmaStepInitializer) &&
+      Lower.Equals(rhs.Lower);
 
-    public override bool Equals(object obj) =>
-      obj is HeteroscedasticExpErrorModel rhs ? Equals(rhs) : false;
+    public override bool Equals(object? obj) =>
+      obj is HeteroscedasticExpErrorModel rhs && Equals(rhs);
 
     public static bool operator ==(HeteroscedasticExpErrorModel left, HeteroscedasticExpErrorModel right) =>
-      ReferenceEquals(left, null)
-        ? ReferenceEquals(right, null)
+      left is null
+        ? right is null
         : left.Equals(right);
 
     public static bool operator !=(HeteroscedasticExpErrorModel left, HeteroscedasticExpErrorModel right) =>
       !(left == right);
 
-    public override int GetHashCode()
-    {
-      var hashCode = 1371233633;
-      hashCode = hashCode * -1521134295 + Delta.GetHashCode();
-      hashCode = hashCode * -1521134295 + DeltaStep.GetHashCode();
-      hashCode = hashCode * -1521134295 + DeltaStepInitializer.GetHashCode();
-      hashCode = hashCode * -1521134295 + Sigma.GetHashCode();
-      hashCode = hashCode * -1521134295 + SigmaStep.GetHashCode();
-      hashCode = hashCode * -1521134295 + SigmaStepInitializer.GetHashCode();
-      hashCode = hashCode * -1521134295 + Lower.GetHashCode();
-      hashCode = hashCode * -1521134295 + ErrorModelType.GetHashCode();
-      return hashCode;
-    }
+    public override int GetHashCode() => 
+      HashCode.Combine(Delta, DeltaStep, DeltaStepInitializer, Sigma, SigmaStep, SigmaStepInitializer, Lower, ErrorModelType);
 
     public override string ToString() =>
       SerializeErrorModel(

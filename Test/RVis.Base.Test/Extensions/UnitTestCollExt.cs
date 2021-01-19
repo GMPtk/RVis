@@ -37,7 +37,7 @@ namespace RVis.Base.Test
       // arrange
       var subject1 = new Collection<int>();
       var subject2 = new Collection<int>(new[] { 1, 2, 3 });
-      Collection<int> subject3 = default;
+      Collection<int>? subject3 = default;
 
       // act
       var isColl1 = subject1.IsCollection();

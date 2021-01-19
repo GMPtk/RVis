@@ -18,7 +18,12 @@ namespace RVis.Model
 {
   public sealed partial class SimData
   {
-    private static Arr<SimInput> EvaluateNonScalars(SimInput seriesInput, SimInput defaultInput, ServerLicense serverLicense)
+    private static async Task<Arr<SimInput>> EvaluateNonScalarsAsync(
+      SimInput seriesInput, 
+      SimInput defaultInput, 
+      ServerLicense serverLicense,
+      CancellationToken cancellationToken
+      )
     {
       var nonScalarParameters = seriesInput.SimParameters.Filter(p =>
       {
@@ -31,16 +36,19 @@ namespace RVis.Model
 
       RequireTrue(serverLicense.IsCurrent);
 
-      var client = serverLicense.GetRClient();
+      var client = await serverLicense.GetRClientAsync(cancellationToken);
 
-      var evaluations = nonScalarParameters.Map(
-        p => new
+      var evaluationTasks = nonScalarParameters
+        .Map(async p => new
         {
           Parameter = p,
-          Evaluation = client.EvaluateNumData(p.Value)
+          Evaluation = await client.EvaluateNumDataAsync(p.Value, cancellationToken)
         });
 
+      var evaluations = (await Task.WhenAll(evaluationTasks)).ToArr();
+
       var invalid = evaluations.Filter(a => a.Evaluation.Length != 1);
+
       if (!invalid.IsEmpty)
         throw new InvalidOperationException(
           "Parameter values failed to produce single-column output: " +
@@ -83,19 +91,25 @@ namespace RVis.Model
       return OutputRequest.Create(serieInput, Array(serieInput));
     }
 
-    private OutputRequest FulfilRequest(Simulation simulation, SimInput seriesInput, ServerLicense serverLicense, bool persist)
+    private async Task<OutputRequest> FulfilRequestAsync(
+      Simulation simulation, 
+      SimInput seriesInput, 
+      ServerLicense serverLicense, 
+      bool persist,
+      CancellationToken cancellationToken)
     {
-      var serieInputs = EvaluateNonScalars(
+      var serieInputs = await EvaluateNonScalarsAsync(
         seriesInput,
         simulation.SimConfig.SimInput,
-        serverLicense
+        serverLicense,
+        cancellationToken
         );
 
       Log.Debug($"Evaluating non-scalar parameter values produced n={serieInputs.Count} series");
 
       var useExec = simulation.SimConfig.SimCode.Exec.IsAString();
 
-      (SimInput SerieInput, NumDataTable Serie, bool Persist, OutputOrigin OutputOrigin) AcquireSerieData(SimInput serieInput)
+      async Task<(SimInput SerieInput, NumDataTable Serie, bool Persist, OutputOrigin OutputOrigin)> AcquireSerieDataAsync(SimInput serieInput)
       {
         if (simulation.HasData(serieInput))
         {
@@ -113,24 +127,28 @@ namespace RVis.Model
 
         if (simulation.IsRSimulation())
         {
-          var client = serverLicense.GetRClient();
+          var client = await serverLicense.GetRClientAsync(cancellationToken);
 
           if (useExec)
           {
-            client.RunExec(simulation.PathToCodeFile, serieConfig);
-            serie = client.TabulateExecOutput(serieConfig);
+            var pathToCodeFile = simulation.PathToCodeFile;
+            RequireFile(pathToCodeFile);
+            await client.RunExecAsync(pathToCodeFile, serieConfig, cancellationToken);
+            serie = await client.TabulateExecOutputAsync(serieConfig, cancellationToken);
           }
           else
           {
             var pathToCodeFile = simulation.PopulateTemplate(serieConfig.SimInput.SimParameters);
-            client.SourceFile(pathToCodeFile);
-            serie = client.TabulateTmplOutput(serieConfig);
+            await client.SourceFileAsync(pathToCodeFile, cancellationToken);
+            serie = await client.TabulateTmplOutputAsync(serieConfig, cancellationToken);
           }
         }
         else
         {
           var mcsimExecutor = serverLicense.GetMCSimExecutor(simulation);
-          serie = mcsimExecutor.Execute(serieConfig.SimInput.SimParameters);
+          var numDataTable = mcsimExecutor.Execute(serieConfig.SimInput.SimParameters);
+          RequireNotNull(numDataTable, "MCSim execution failed");
+          serie = numDataTable;
         }
 
         stopWatch.Stop();
@@ -138,7 +156,7 @@ namespace RVis.Model
 
         lock (_syncLock)
         {
-          if (!_executionIntervals.TryGetValue(simulation, out SimExecutionInterval executionInterval))
+          if (!_executionIntervals.TryGetValue(simulation, out SimExecutionInterval? executionInterval))
           {
             executionInterval = new SimExecutionInterval(simulation);
             executionInterval.Load();
@@ -151,7 +169,7 @@ namespace RVis.Model
         return (serieInput, serie, persist, OutputOrigin.Generation);
       }
 
-      var outputs = serieInputs.Map(AcquireSerieData);
+      var outputs = (await Task.WhenAll(serieInputs.Map(AcquireSerieDataAsync))).ToArr();
 
       var outputsRequiringPersistence = outputs
         .Filter(t =>
@@ -175,7 +193,7 @@ namespace RVis.Model
     private ProcessingOutcome Process(
       SimDataItem<OutputRequest> simDataItem,
       CancellationToken cancellationToken,
-      out Task<OutputRequest> outputRequestTask
+      out Task<OutputRequest?> outputRequestTask
       )
     {
       var simulation = simDataItem.Simulation;
@@ -185,12 +203,12 @@ namespace RVis.Model
 
       if (_outputs.TryGetValue((seriesInput.Hash, simulation), out SimDataOutput _))
       {
-        outputRequestTask = Task.FromResult(OutputRequest.Create(seriesInput, Array(seriesInput)));
+        outputRequestTask = Task.FromResult<OutputRequest?>(OutputRequest.Create(seriesInput, Array(seriesInput)));
         processingOutcome = ProcessingOutcome.AlreadyAcquired;
       }
       else if (simulation.HasData(seriesInput))
       {
-        outputRequestTask = Task.Run(
+        outputRequestTask = Task.Run<OutputRequest?>(
           () => FulfilRequest(simulation, seriesInput),
           cancellationToken
           );
@@ -198,21 +216,22 @@ namespace RVis.Model
       }
       else
       {
-        Task<OutputRequest> SomeServerLicense(ServerLicense serverLicense) =>
-          Task.Run(() =>
+        Task<OutputRequest?> SomeServerLicense(ServerLicense serverLicense) =>
+          Task.Run<OutputRequest?>(async () =>
           {
             using (serverLicense)
             {
-              return FulfilRequest(
+              return await FulfilRequestAsync(
                 simulation,
                 seriesInput,
                 serverLicense,
-                simDataItem.Item.Persist
+                simDataItem.Item.Persist,
+                cancellationToken
                 );
             }
           }, cancellationToken);
 
-        static Task<OutputRequest> NoServerLicense() =>
+        static Task<OutputRequest?> NoServerLicense() =>
           Task.FromResult(default(OutputRequest));
 
         _serverPool.SlotFree.WaitOne(50);

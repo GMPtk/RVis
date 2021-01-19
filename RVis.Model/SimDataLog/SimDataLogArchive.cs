@@ -180,10 +180,10 @@ namespace RVis.Model
       return logEntries;
     }
 
-    private IReadOnlyCollection<SimDataLogEntry> _today;
-    private IReadOnlyCollection<SimDataLogEntry> _thisMonth;
-    private IReadOnlyCollection<SimDataLogEntry> _thisYear;
-    private IReadOnlyCollection<SimDataLogEntry> _previousYears;
+    private IReadOnlyCollection<SimDataLogEntry>? _today;
+    private IReadOnlyCollection<SimDataLogEntry>? _thisMonth;
+    private IReadOnlyCollection<SimDataLogEntry>? _thisYear;
+    private IReadOnlyCollection<SimDataLogEntry>? _previousYears;
 
     private readonly Simulation _simulation;
   }

@@ -5,13 +5,13 @@ namespace Estimation
 {
   internal sealed class PriorsState : INotifyPropertyChanged
   {
-    internal string SelectedPrior
+    internal string? SelectedPrior
     {
       get => _selectedPrior;
       set => this.RaiseAndSetIfChanged(ref _selectedPrior, value, PropertyChanged);
     }
-    private string _selectedPrior;
+    private string? _selectedPrior;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

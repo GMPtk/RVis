@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
+#nullable disable
+
 namespace RVisUI.Wpf
 {
   public class EnumMatchToBooleanConverter : IValueConverter
@@ -24,7 +26,7 @@ namespace RVisUI.Wpf
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      if (!(value is bool b) || !b) return null;
+      if (value is not bool b || !b) return null;
 
       if (parameter == null) return null;
 

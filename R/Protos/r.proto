@@ -1,0 +1,352 @@
+syntax = "proto3";
+
+option csharp_namespace = "RVis.R";
+
+package rvisr;
+
+service ROps {
+  rpc GetRversion(RversionRequest) returns (RversionReply);
+  rpc GetInstalledPackages(InstalledPackagesRequest) returns (InstalledPackagesReply);
+  rpc ClearGlobalEnvironment(ClearGlobalEnvironmentRequest) returns (ClearGlobalEnvironmentReply);
+  rpc GarbageCollect(GarbageCollectRequest) returns (GarbageCollectReply);
+  rpc ShutDown(ShutDownRequest) returns (ShutDownReply);
+  rpc EvaluateStrings(EvaluateStringsRequest) returns (EvaluateStringsReply);
+  rpc EvaluateDoubles(EvaluateDoublesRequest) returns (EvaluateDoublesReply);
+  rpc EvaluateNumData(EvaluateNumDataRequest) returns (EvaluateNumDataReply);
+  rpc EvaluateNonQuery(EvaluateNonQueryRequest) returns (EvaluateNonQueryReply);
+  rpc RunExec(RunExecRequest) returns (RunExecReply);
+  rpc SourceFile(SourceFileRequest) returns (SourceFileReply);
+  rpc TabulateExecOutput(TabulateExecOutputRequest) returns (TabulateExecOutputReply);
+  rpc TabulateTmplOutput(TabulateTmplOutputRequest) returns (TabulateTmplOutputReply);
+  rpc InspectSymbols(InspectSymbolsRequest) returns (InspectSymbolsReply);
+  rpc Serialize(SerializeRequest) returns (SerializeReply);
+  rpc Unserialize(UnserializeRequest) returns (UnserializeReply);
+  rpc SaveObjectToBinary(SaveObjectToBinaryRequest) returns (SaveObjectToBinaryReply);
+  rpc LoadFromBinary(LoadFromBinaryRequest) returns (LoadFromBinaryReply);
+  rpc CreateVector(CreateVectorRequest) returns (CreateVectorReply);
+  rpc CreateMatrix(CreateMatrixRequest) returns (CreateMatrixReply);
+
+  rpc Ping(PingRequest) returns (PingReply);
+}
+
+message Error {
+  repeated string messages = 1;
+  repeated string stack_traces = 2;
+}
+
+message StringList {
+  repeated string strings = 1;
+}
+
+message DoubleList {
+  repeated double doubles = 1;
+}
+
+message DoubleColumn {
+  string name = 1;
+  repeated double doubles = 2;
+}
+
+message RversionRequest {
+}
+
+message RversionPayload {
+  map<string, string> rversion = 1;
+}
+
+message RversionReply {
+  oneof reply {
+    Error error = 1;
+    RversionPayload payload = 2;
+  }
+}
+
+message InstalledPackagesRequest {
+}
+
+message InstalledPackagesPayload {
+  map<string, string> installed_packages = 1;
+}
+
+message InstalledPackagesReply {
+  oneof reply {
+    Error error = 1;
+    InstalledPackagesPayload payload = 2;
+  }
+}
+
+message ClearGlobalEnvironmentRequest {
+}
+
+message ClearGlobalEnvironmentPayload {
+}
+
+message ClearGlobalEnvironmentReply {
+  oneof reply {
+    Error error = 1;
+    ClearGlobalEnvironmentPayload payload = 2;
+  }
+}
+
+message GarbageCollectRequest {
+}
+
+message GarbageCollectPayload {
+}
+
+message GarbageCollectReply {
+  oneof reply {
+    Error error = 1;
+    GarbageCollectPayload payload = 2;
+  }
+}
+
+message ShutDownRequest {
+}
+
+message ShutDownPayload {
+}
+
+message ShutDownReply {
+  oneof reply {
+    Error error = 1;
+    ShutDownPayload payload = 2;
+  }
+}
+
+message EvaluateStringsRequest {
+  string code = 1;
+}
+
+message EvaluateStringsPayload {
+  map<string, StringList> strings = 1;
+}
+
+message EvaluateStringsReply {
+  oneof reply {
+    Error error = 1;
+    EvaluateStringsPayload payload = 2;
+  }
+}
+
+message EvaluateDoublesRequest {
+  string code = 1;
+}
+
+message EvaluateDoublesPayload {
+  map<string, DoubleList> doubles = 1;
+}
+
+message EvaluateDoublesReply {
+  oneof reply {
+    Error error = 1;
+    EvaluateDoublesPayload payload = 2;
+  }
+}
+
+message EvaluateNumDataRequest {
+  string code = 1;
+}
+
+message EvaluateNumDataPayload {
+  repeated DoubleColumn double_columns = 1;
+}
+
+message EvaluateNumDataReply {
+  oneof reply {
+    Error error = 1;
+    EvaluateNumDataPayload payload = 2;
+  }
+}
+
+message EvaluateNonQueryRequest {
+  string code = 1;
+}
+
+message EvaluateNonQueryPayload {
+}
+
+message EvaluateNonQueryReply {
+  oneof reply {
+    Error error = 1;
+    EvaluateNonQueryPayload payload = 2;
+  }
+}
+
+message RunExecRequest {
+  string pathToCode = 1;
+  bytes sim_config = 2;
+}
+
+message RunExecPayload {
+}
+
+message RunExecReply {
+  oneof reply {
+    Error error = 1;
+    RunExecPayload payload = 2;
+  }
+}
+
+message SourceFileRequest {
+  string pathToCode = 1;
+}
+
+message SourceFilePayload {
+}
+
+message SourceFileReply {
+  oneof reply {
+    Error error = 1;
+    SourceFilePayload payload = 2;
+  }
+}
+
+message TabulateExecOutputRequest {
+  bytes sim_config = 1;
+}
+
+message TabulateExecOutputPayload {
+  repeated DoubleColumn double_columns = 1;
+}
+
+message TabulateExecOutputReply {
+  oneof reply {
+    Error error = 1;
+    TabulateExecOutputPayload payload = 2;
+  }
+}
+
+message TabulateTmplOutputRequest {
+  bytes sim_config = 1;
+}
+
+message TabulateTmplOutputPayload {
+  repeated DoubleColumn double_columns = 1;
+}
+
+message TabulateTmplOutputReply {
+  oneof reply {
+    Error error = 1;
+    TabulateTmplOutputPayload payload = 2;
+  }
+}
+
+message InspectSymbolsRequest {
+  string pathToCode = 1;
+}
+
+message InspectSymbolsPayload {
+  bytes symbol_infos = 1;
+}
+
+message InspectSymbolsReply {
+  oneof reply {
+    Error error = 1;
+    InspectSymbolsPayload payload = 2;
+  }
+}
+
+message SerializeRequest {
+  string objectName = 1;
+}
+
+message SerializePayload {
+  bytes serialized = 1;
+}
+
+message SerializeReply {
+  oneof reply {
+    Error error = 1;
+    SerializePayload payload = 2;
+  }
+}
+
+message UnserializeRequest {
+  bytes raw = 1;  
+  string objectName = 2;
+}
+
+message UnserializePayload {
+}
+
+message UnserializeReply {
+  oneof reply {
+    Error error = 1;
+    UnserializePayload payload = 2;
+  }
+}
+
+message SaveObjectToBinaryRequest {
+  string objectName = 1;
+}
+
+message SaveObjectToBinaryPayload {
+  bytes binary = 1;
+}
+
+message SaveObjectToBinaryReply {
+  oneof reply {
+    Error error = 1;
+    SaveObjectToBinaryPayload payload = 2;
+  }
+}
+
+message LoadFromBinaryRequest {
+  bytes raw = 1;  
+}
+
+message LoadFromBinaryPayload {
+}
+
+message LoadFromBinaryReply {
+  oneof reply {
+    Error error = 1;
+    LoadFromBinaryPayload payload = 2;
+  }
+}
+
+message CreateVectorRequest {
+  repeated double source = 1;
+  string object_name = 2;
+}
+
+message CreateVectorPayload {
+}
+
+message CreateVectorReply {
+  oneof reply {
+    Error error = 1;
+    CreateVectorPayload payload = 2;
+  }
+}
+
+message CreateMatrixRequest {
+  repeated DoubleList source = 1;
+  string object_name = 2;
+}
+
+message CreateMatrixPayload {
+}
+
+message CreateMatrixReply {
+  oneof reply {
+    Error error = 1;
+    CreateMatrixPayload payload = 2;
+  }
+}
+
+message PingRequest {
+  int32 pid = 1;
+}
+
+message PingPayload {
+  int32 pid = 1;
+}
+
+message PingReply {
+  oneof reply {
+    Error error = 1;
+    PingPayload payload = 2;
+  }
+}

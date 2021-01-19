@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
+using static System.Globalization.CultureInfo;
 using FxDataTable = System.Data.DataTable;
 
 namespace RVis.Data
@@ -15,8 +16,8 @@ namespace RVis.Data
       RequireFile(pathToCSV);
 
       using var streamReader = new StreamReader(pathToCSV);
-      using var csvReader = new CsvReader(streamReader);
-      
+      using var csvReader = new CsvReader(streamReader, InvariantCulture);
+
       var dataTable = new FxDataTable();
 
       csvReader.Read();
@@ -43,8 +44,8 @@ namespace RVis.Data
     public static void SaveToCSV<T>(FxDataTable dataTable, string pathToCSV)
     {
       using var streamWriter = new StreamWriter(pathToCSV);
-      using var csvWriter = new CsvWriter(streamWriter);
-      
+      using var csvWriter = new CsvWriter(streamWriter, InvariantCulture);
+
       foreach (DataColumn column in dataTable.Columns)
       {
         csvWriter.WriteField(column.ColumnName);

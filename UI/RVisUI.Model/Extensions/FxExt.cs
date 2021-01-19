@@ -28,7 +28,7 @@ namespace RVisUI.Model.Extensions
       this T @this,
       ref U backingField,
       U newValue,
-      PropertyChangedEventHandler propertyChangedEventHandler,
+      PropertyChangedEventHandler? propertyChangedEventHandler,
       [CallerMemberName] string propertyName = ""
       ) where T : INotifyPropertyChanged
     {
@@ -45,7 +45,7 @@ namespace RVisUI.Model.Extensions
       this T @this,
       ref Arr<U> backingField,
       Arr<U> newValue,
-      PropertyChangedEventHandler propertyChangedEventHandler,
+      PropertyChangedEventHandler? propertyChangedEventHandler,
       ISubject<(Arr<U> Us, ObservableQualifier ObservableQualifier)> changesSubject,
       Func<U, V> getID,
       [CallerMemberName] string propertyName = ""
@@ -85,7 +85,7 @@ namespace RVisUI.Model.Extensions
       return true;
     }
 
-    public static IObservable<string> GetWhenPropertyChanged(this INotifyPropertyChanged inpc) =>
+    public static IObservable<string?> GetWhenPropertyChanged(this INotifyPropertyChanged inpc) =>
       Observable
         .FromEventPattern<PropertyChangedEventHandler, PropertyChangedEventArgs>(
           h => inpc.PropertyChanged += h,

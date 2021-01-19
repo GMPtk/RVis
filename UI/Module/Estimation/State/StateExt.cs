@@ -10,7 +10,7 @@ namespace Estimation
   internal static class StateExt
   {
     public static int GetCompletedIterations(this ChainState chainState) =>
-      chainState.ChainData.Rows
+      chainState.ChainData.AssertNotNull().Rows
         .Cast<DataRow>()
         .Count(dr => chainState.ModelParameters.All(mp => !IsNaN(dr.Field<double>(mp.Name))));
 

@@ -16,14 +16,14 @@ namespace Sensitivity
 {
   internal sealed partial class DesignViewModel
   {
-    private void CreateMorrisDesign(
+    private async Task CreateMorrisDesignAsync(
       Arr<(string Name, IDistribution Distribution)> parameterDistributions,
       IRVisClient client
       )
     {
       RequireTrue(NoOfRuns > 0);
 
-      var (samples, serializedDesigns) = GetMorrisSamples(
+      var (samples, serializedDesigns) = await GetMorrisSamplesAsync(
         parameterDistributions,
         NoOfRuns.Value,
         client
@@ -106,6 +106,9 @@ namespace Sensitivity
     {
       using (serverLicense)
       {
+        RequireNotNull(_moduleState.SensitivityDesign);
+        RequireNotNull(_moduleState.Trace);
+
         _cancellationTokenSource = new CancellationTokenSource();
 
         TaskName = "Generate Morris Output Measures";
@@ -114,18 +117,15 @@ namespace Sensitivity
 
         try
         {
-          var measures = await Task.Run(
-            () => GenerateMorrisOutputMeasures(
-              _moduleState.SensitivityDesign.SerializedDesigns,
-              _moduleState.SensitivityDesign.Samples,
-              designOutputs,
-              _simulation.SimConfig.SimOutput.GetIndependentData(_moduleState.Trace),
-              serverLicense.GetRClient(),
-              _cancellationTokenSource.Token,
-              s => _appService.ScheduleLowPriorityAction(() => RaiseTaskMessageEvent(s))
-            ),
+          var measures = await Method.GenerateMorrisOutputMeasuresAsync(
+            _moduleState.SensitivityDesign.SerializedDesigns,
+            _moduleState.SensitivityDesign.Samples,
+            designOutputs,
+            _simulation.SimConfig.SimOutput.GetIndependentData(_moduleState.Trace),
+            await serverLicense.GetRClientAsync(),
+            s => _appService.ScheduleLowPriorityAction(() => RaiseTaskMessageEvent(s)),
             _cancellationTokenSource.Token
-            );
+          );
 
           _moduleState.MeasuresState.SelectedOutputName = outputName;
           _moduleState.MeasuresState.MorrisOutputMeasures =

@@ -6,8 +6,8 @@ namespace RVis.Model.Extensions
 {
   public static class DistributionExt
   {
-    public static string ToStringIfSome(this Option<IDistribution> maybeDistribution, string variableName) =>
-      maybeDistribution.MatchUnsafe(d => d.ToString(variableName), () => null);
+    public static string? ToStringIfSome(this Option<IDistribution> maybeDistribution, string variableName) =>
+      maybeDistribution.MatchUnsafe<string?>(d => d.ToString(variableName), () => null);
 
     public static string ToString(this Option<IDistribution> maybeDistribution, string variableName) =>
       maybeDistribution.Match(d => d.ToString(variableName), () => DistributionType.None.ToString());

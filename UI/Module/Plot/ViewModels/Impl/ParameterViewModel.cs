@@ -25,8 +25,8 @@ namespace Plot
       ICommand decreaseMaximum,
       string name,
       string defaultValue,
-      string unit,
-      string description,
+      string? unit,
+      string? description,
       IAppService appService
       )
     {
@@ -72,8 +72,8 @@ namespace Plot
     public string Name { get; }
     public string SortKey { get; }
     public string DefaultValue { get; }
-    public string Unit { get; }
-    public string Description { get; }
+    public string? Unit { get; }
+    public string? Description { get; }
 
     public bool IsSelected
     {
@@ -84,12 +84,12 @@ namespace Plot
 
     public ICommand ToggleSelect { get; }
 
-    public string TValue
+    public string? TValue
     {
       get => _tValue;
       set => this.RaiseAndSetIfChanged(ref _tValue, value, PropertyChanged);
     }
-    private string _tValue;
+    private string? _tValue;
 
     public double? NValue
     {
@@ -136,12 +136,12 @@ namespace Plot
     }
     private bool _canDecreaseMaximum;
 
-    public string Ticks
+    public string? Ticks
     {
       get => _ticks;
       set => this.RaiseAndSetIfChanged(ref _ticks, value, PropertyChanged);
     }
-    private string _ticks;
+    private string? _ticks;
 
     public void Set(double value, double minimum, double maximum)
     {
@@ -160,7 +160,7 @@ namespace Plot
       }
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void ConfigureTicks()
     {

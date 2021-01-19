@@ -17,7 +17,8 @@ namespace RVisUI.Model.Test
         $"desc{id:0000}",
         Array("pkgA", "pkgB"),
         default,
-        default,
+        Array("taskA", "taskB"),
+        default!,
         $"{id:0000}.{id:0000}.{id:0000}.{id:0000}",
         $"key{id:0000}"
         )).ToArr();

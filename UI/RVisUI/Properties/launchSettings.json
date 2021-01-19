@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "RVisUI": {
+      "commandName": "Project",
+      "commandLineArgs": "--extra-module-path=C:\\Users\\Alex\\source\\repos\\RVis\\UI\\Module\\Plot\\bin\\Debug\\net5.0-windows\\Plot.dll;C:\\Users\\Alex\\source\\repos\\RVis\\UI\\Module\\Estimation\\bin\\Debug\\net5.0-windows\\Estimation.dll;C:\\Users\\Alex\\source\\repos\\RVis\\UI\\Module\\Sampling\\bin\\Debug\\net5.0-windows\\Sampling.dll;C:\\Users\\Alex\\source\\repos\\RVis\\UI\\Module\\Evidence\\bin\\Debug\\net5.0-windows\\Evidence.dll;C:\\Users\\Alex\\source\\repos\\RVis\\UI\\Module\\Sensitivity\\bin\\Debug\\net5.0-windows\\Sensitivity.dll"
+    }
+  }
+}

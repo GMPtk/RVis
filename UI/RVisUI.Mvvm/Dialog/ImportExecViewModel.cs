@@ -6,6 +6,7 @@ using RVisUI.Model;
 using System;
 using System.Linq;
 using System.Windows.Input;
+using static RVis.Base.Check;
 
 namespace RVisUI.Mvvm
 {
@@ -13,6 +14,10 @@ namespace RVisUI.Mvvm
   {
     public ImportExecViewModel(ManagedImport managedImport, IAppService appService)
     {
+      RequireNotNull(managedImport.ExecutorFunction);
+      RequireNotNull(managedImport.ExecutorFormal);
+      RequireNotNull(managedImport.ExecutorIndependentVariable);
+
       _managedImport = managedImport;
       _appService = appService;
 
@@ -106,12 +111,12 @@ namespace RVisUI.Mvvm
     }
     private string _simulationName;
 
-    public string SimulationDescription
+    public string? SimulationDescription
     {
       get => _simulationDescription;
       set => this.RaiseAndSetIfChanged(ref _simulationDescription, value);
     }
-    private string _simulationDescription;
+    private string? _simulationDescription;
 
     public ICommand OK { get; }
 
@@ -155,6 +160,8 @@ namespace RVisUI.Mvvm
         _managedImport.ExecutorValueCandidates.Find(
         pc => pc.Name == elementCandidateViewModel.Name
         ).AssertSome();
+
+      RequireNotNull(executorValueCandidate);
 
       var executorElementCandidate = executorValueCandidate.ElementCandidates[0];
 

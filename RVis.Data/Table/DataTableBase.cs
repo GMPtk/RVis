@@ -9,7 +9,7 @@ namespace RVis.Data
   [ProtoContract]
   public abstract class DataTableBase : IDataTable
   {
-    public abstract string Name { get; }
+    public abstract string? Name { get; }
 
     public abstract IReadOnlyList<IDataColumn> DataColumns { get; }
 
@@ -21,7 +21,7 @@ namespace RVis.Data
 
     public bool HasColumn(string name) => DataColumns.Count(c => c.Name == name) == 1;
 
-    public IDataColumn this[string name] => DataColumns.SingleOrDefault(c => c.Name == name);
+    public IDataColumn? this[string name] => DataColumns.SingleOrDefault(c => c.Name == name);
 
     public IDataColumn this[int index] => DataColumns[index];
 

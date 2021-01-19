@@ -15,7 +15,7 @@ namespace RVisUI.Controls.Dialogs
 
     private void HandleSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-      var lineSymDescUnit = _dataGrid.SelectedItem as object[];
+      var lineSymDescUnit = (object[])_dataGrid.SelectedItem;
       _txtDesc.Text = lineSymDescUnit[2] as string;
       _txtUnit.Text = lineSymDescUnit[3] as string;
     }

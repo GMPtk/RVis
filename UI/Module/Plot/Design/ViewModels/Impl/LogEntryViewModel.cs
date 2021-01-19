@@ -1,5 +1,7 @@
 ﻿using RVis.Model;
 
+#nullable disable
+
 namespace Plot.Design
 {
   public class LogEntryViewModel : ILogEntryViewModel

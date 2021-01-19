@@ -16,12 +16,12 @@ namespace Estimation.Test
       // act
       var serialized = expected.ToString();
       var deserialized = ErrorModel.DeserializeErrorModel(serialized);
-      var errorModel = deserialized.IfNone(() => { Assert.Fail(); return default; });
+      var errorModel = deserialized.IfNone(() => { Assert.Fail(); return default!; });
 
       var expectedPerturbed = RequireInstanceOf<HeteroscedasticPowerErrorModel>(expected.GetPerturbed(default));
       var serializedPerturbed = expectedPerturbed.ToString();
       var deserializedPerturbed = ErrorModel.DeserializeErrorModel(serializedPerturbed);
-      var errorModelPerturbed = deserializedPerturbed.IfNone(() => { Assert.Fail(); return default; });
+      var errorModelPerturbed = deserializedPerturbed.IfNone(() => { Assert.Fail(); return default!; });
 
       // assert
       var actual = RequireInstanceOf<HeteroscedasticPowerErrorModel>(errorModel);

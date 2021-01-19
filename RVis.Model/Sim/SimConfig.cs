@@ -7,7 +7,7 @@ namespace RVis.Model
   [ProtoContract]
   public struct SimConfig : IEquatable<SimConfig>
   {
-    public SimConfig(string title, string description, DateTime importedOn, SimCode code, SimInput input, SimOutput output)
+    public SimConfig(string title, string? description, DateTime importedOn, SimCode code, SimInput input, SimOutput output)
     {
       _title = title;
       _description = description;
@@ -21,7 +21,7 @@ namespace RVis.Model
     public string Title => _title;
 
     [ProtoIgnore]
-    public string Description => _description;
+    public string? Description => _description;
 
     [ProtoIgnore]
     public DateTime ImportedOn => _importedOn;
@@ -53,26 +53,17 @@ namespace RVis.Model
       _simInput == rhs._simInput &&
       _simOutput == rhs._simOutput;
 
-    public override int GetHashCode()
-    {
-      var hashCode = -286846682;
-      hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_title);
-      hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_description);
-      hashCode = hashCode * -1521134295 + _importedOn.GetHashCode();
-      hashCode = hashCode * -1521134295 + EqualityComparer<SimCode>.Default.GetHashCode(_simCode);
-      hashCode = hashCode * -1521134295 + EqualityComparer<SimInput>.Default.GetHashCode(_simInput);
-      hashCode = hashCode * -1521134295 + EqualityComparer<SimOutput>.Default.GetHashCode(_simOutput);
-      return hashCode;
-    }
+    public override int GetHashCode() => 
+      HashCode.Combine(_title, _description, _importedOn, _simCode, _simInput, _simOutput);
 
-    public override bool Equals(object obj) =>
-      obj is SimConfig config ? Equals(config) : false;
+    public override bool Equals(object? obj) =>
+      obj is SimConfig config && Equals(config);
 
     [ProtoMember(1)]
     private readonly string _title;
 
     [ProtoMember(2)]
-    private readonly string _description;
+    private readonly string? _description;
 
     [ProtoMember(3)]
     private readonly DateTime _importedOn;

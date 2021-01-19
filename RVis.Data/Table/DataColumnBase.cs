@@ -18,7 +18,7 @@ namespace RVis.Data
 
     public abstract IReadOnlyList<T> Data { get; }
 
-    object IDataColumn.this[int row] => Data[row];
+    object? IDataColumn.this[int row] => Data[row];
 
     IReadOnlyList<object> IDataColumn.Data => Data.Cast<object>().ToArray();
   }

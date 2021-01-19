@@ -11,7 +11,7 @@ namespace Sensitivity
   internal interface IParameterViewModel
   {
     string Name { get; }
-    string Distribution { get; set; }
+    string? Distribution { get; set; }
     bool IsSelected { get; set; }
     ICommand ToggleSelect { get; }
     string SortKey { get; }
@@ -50,7 +50,7 @@ namespace Sensitivity
     ICommand CancelAcquireOutputs { get; }
     bool CanCancelAcquireOutputs { get; }
 
-    DataView Inputs { get; }
+    DataView? Inputs { get; }
     int SelectedInputIndex { get; set; }
     ICommand ShareParameters { get; }
     bool CanShareParameters { get; }
@@ -88,13 +88,13 @@ namespace Sensitivity
 
   internal interface IRankingViewModel
   {
-    string FromText { get; set; }
+    string? FromText { get; set; }
     double? From { get; }
 
-    string ToText { get; set; }
+    string? ToText { get; set; }
     double? To { get; }
 
-    string XUnits { get; }
+    string? XUnits { get; }
 
     Arr<IOutputViewModel> OutputViewModels { get; }
 
@@ -117,12 +117,12 @@ namespace Sensitivity
 
     MorrisMeasureType MorrisMeasureType { get; set; }
 
-    string XUnits { get; }
+    string? XUnits { get; }
 
-    string XBeginText { get; set; }
+    string? XBeginText { get; set; }
     double? XBegin { get; }
 
-    string XEndText { get; set; }
+    string? XEndText { get; set; }
     double? XEnd { get; }
 
     Arr<IRankedParameterViewModel> RankedParameterViewModels { get; }
@@ -163,7 +163,7 @@ namespace Sensitivity
     ICommand PlayFaster { get; }
     bool CanPlayFaster { get; }
 
-    string XUnits { get; }
+    string? XUnits { get; }
 
     Arr<IRankedParameterViewModel> RankedParameterViewModels { get; }
     Arr<string> RankedUsing { get; }
@@ -184,12 +184,12 @@ namespace Sensitivity
 
     Fast99MeasureType Fast99MeasureType { get; set; }
 
-    string XUnits { get; }
+    string? XUnits { get; }
 
-    string XBeginText { get; set; }
+    string? XBeginText { get; set; }
     double? XBegin { get; }
 
-    string XEndText { get; set; }
+    string? XEndText { get; set; }
     double? XEnd { get; }
 
     Arr<IRankedParameterViewModel> RankedParameterViewModels { get; }
@@ -236,7 +236,7 @@ namespace Sensitivity
     ICommand PlayFaster { get; }
     bool CanPlayFaster { get; }
 
-    string XUnits { get; }
+    string? XUnits { get; }
 
     Arr<IRankedParameterViewModel> RankedParameterViewModels { get; }
     Arr<string> RankedUsing { get; }
@@ -255,7 +255,7 @@ namespace Sensitivity
   internal interface IDesignDigestsViewModel
   {
     ObservableCollection<IDesignDigestViewModel> DesignDigestViewModels { get; }
-    IDesignDigestViewModel SelectedDesignDigestViewModel { get; set; }
+    IDesignDigestViewModel? SelectedDesignDigestViewModel { get; set; }
     ICommand LoadSensitivityDesign { get; }
     ICommand DeleteSensitivityDesign { get; }
     ICommand FollowKeyboardInDesignDigests { get; }

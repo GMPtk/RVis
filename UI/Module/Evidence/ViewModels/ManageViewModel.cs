@@ -64,6 +64,8 @@ namespace Evidence
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
+        RequireNotNull(SelectedEvidenceSourceViewModel);
+
         SelectedObservationsViewModel = default;
         ObservationsViewModels = default;
 
@@ -87,6 +89,10 @@ namespace Evidence
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
+        RequireNotNull(SelectedEvidenceSourceViewModel);
+        RequireNotNull(SelectedObservationsViewModel);
+        RequireNotNull(ObservationsViewModels);
+
         var esObservations = _evidence.GetObservations(SelectedEvidenceSourceViewModel.ID);
         var observations = esObservations
           .Find(o => o.ID == SelectedObservationsViewModel.ID)
@@ -106,6 +112,9 @@ namespace Evidence
     private void ObserveSelectedEvidenceSourceViewModel(object _)
     {
       PopulateObservations();
+
+      RequireNotNull(SelectedEvidenceSourceViewModel);
+
       _moduleState.SelectedEvidenceSource = _evidence.EvidenceSources.Find(
         es => es.ID == SelectedEvidenceSourceViewModel.ID
         );
@@ -175,32 +184,32 @@ namespace Evidence
 
     public ObservableCollection<IEvidenceSourceViewModel> EvidenceSourceViewModels { get; }
 
-    public IEvidenceSourceViewModel SelectedEvidenceSourceViewModel
+    public IEvidenceSourceViewModel? SelectedEvidenceSourceViewModel
     {
       get => _selectedEvidenceSourceViewModel;
       set => this.RaiseAndSetIfChanged(ref _selectedEvidenceSourceViewModel, value, PropertyChanged);
     }
-    private IEvidenceSourceViewModel _selectedEvidenceSourceViewModel;
+    private IEvidenceSourceViewModel? _selectedEvidenceSourceViewModel;
 
     public ICommand DeleteEvidenceSource { get; }
 
-    public ObservableCollection<IObservationsViewModel> ObservationsViewModels
+    public ObservableCollection<IObservationsViewModel>? ObservationsViewModels
     {
       get => _observationsViewModels;
       set => this.RaiseAndSetIfChanged(ref _observationsViewModels, value, PropertyChanged);
     }
-    private ObservableCollection<IObservationsViewModel> _observationsViewModels;
+    private ObservableCollection<IObservationsViewModel>? _observationsViewModels;
 
-    public IObservationsViewModel SelectedObservationsViewModel
+    public IObservationsViewModel? SelectedObservationsViewModel
     {
       get => _selectedObservationsViewModel;
       set => this.RaiseAndSetIfChanged(ref _selectedObservationsViewModel, value, PropertyChanged);
     }
-    private IObservationsViewModel _selectedObservationsViewModel;
+    private IObservationsViewModel? _selectedObservationsViewModel;
 
     public ICommand DeleteObservations { get; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 

@@ -9,8 +9,8 @@ namespace RVisUI.Mvvm
       bool isUsed, 
       string name, 
       double value,
-      string unit,
-      string description,
+      string? unit,
+      string? description,
       ICommand changeUnitDescription
       )
     {
@@ -43,19 +43,19 @@ namespace RVisUI.Mvvm
     }
     private double _value;
 
-    public string Unit
+    public string? Unit
     {
       get => _unit;
       set => this.RaiseAndSetIfChanged(ref _unit, value);
     }
-    private string _unit;
+    private string? _unit;
 
-    public string Description
+    public string? Description
     {
       get => _description;
       set => this.RaiseAndSetIfChanged(ref _description, value);
     }
-    private string _description;
+    private string? _description;
 
     public ICommand ChangeUnitDescription
     {

@@ -13,7 +13,7 @@ namespace RVisUI.Interop
     [DllImport("user32.dll")]
     static extern IntPtr GetActiveWindow();
 
-    internal static Window GetActiveApplicationWindow()
+    internal static Window? GetActiveApplicationWindow()
     {
       IntPtr active = GetActiveWindow();
 

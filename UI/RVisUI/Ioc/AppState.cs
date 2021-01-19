@@ -20,7 +20,7 @@ namespace RVisUI.Ioc
       MainWindowTitle = _assemblyTitle;
     }
 
-    public string Status
+    public string? Status
     {
       get => _status;
       set
@@ -29,14 +29,14 @@ namespace RVisUI.Ioc
         this.RaiseAndSetIfChanged(ref _status, value ?? STANDBY_STATUS, PropertyChanged);
       }
     }
-    private string _status = STANDBY_STATUS;
+    private string? _status = STANDBY_STATUS;
 
-    public string MainWindowTitle
+    public string? MainWindowTitle
     {
       get => _mainWindowTitle;
       set => this.RaiseAndSetIfChanged(ref _mainWindowTitle, value, PropertyChanged);
     }
-    private string _mainWindowTitle;
+    private string? _mainWindowTitle;
 
     public Arr<(string Name, string Value)> RVersion
     {
@@ -52,7 +52,14 @@ namespace RVisUI.Ioc
     }
     private Arr<(string Package, string Version)> _installedRPackages;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public RunControl? RunControl 
+    { 
+      get => _runControl;
+      set => this.RaiseAndSetIfChanged(ref _runControl, value, PropertyChanged);
+    }
+    private RunControl? _runControl;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void ObserveSecondInterval(long _)
     {

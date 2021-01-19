@@ -10,6 +10,7 @@ using System.Linq;
 using static RVis.Base.Check;
 using static Sampling.Logger;
 using static System.IO.Path;
+using static System.Globalization.CultureInfo;
 
 namespace Sampling
 {
@@ -47,22 +48,23 @@ namespace Sampling
 
     private class _DesignParameterDTO
     {
-      public string Name { get; set; }
-      public string Distribution { get; set; }
+      public string? Name { get; set; }
+      public string? Distribution { get; set; }
     }
 
     private class _SamplingDesignDTO
     {
-      public string CreatedOn { get; set; }
-      public _DesignParameterDTO[] DesignParameters { get; set; }
-      public _LatinHypercubeDesignDTO LatinHypercubeDesign { get; set; }
-      public _RankCorrelationDesignDTO RankCorrelationDesign { get; set; }
+      public string? CreatedOn { get; set; }
+      public _DesignParameterDTO[]? DesignParameters { get; set; }
+      public _LatinHypercubeDesignDTO? LatinHypercubeDesign { get; set; }
+      public _RankCorrelationDesignDTO? RankCorrelationDesign { get; set; }
       public int? Seed { get; set; }
-      public int[] NoDataIndices { get; set; }
+      public int[]? NoDataIndices { get; set; }
     }
 
     private const string DESIGN_FILE_NAME = "design.toml";
     private const string DESIGN_SAMPLES_FILE_NAME = "samples.csv";
+    private const string FILTER_CONFIG_FILE_NAME = "filter_config.toml";
 
     internal static void RemoveSamplingDesign(string pathToSamplingDesignsDirectory, DateTime createdOn)
     {
@@ -93,16 +95,17 @@ namespace Sampling
       try
       {
         var dto = Toml.ReadFile<_SamplingDesignDTO>(pathToDesign);
+
         designParameters = dto.DesignParameters?
           .Select(dp => new DesignParameter(
-            dp.Name,
+            dp.Name.AssertNotNull(),
             Distribution.DeserializeDistribution(dp.Distribution).AssertSome()
             )
           )
           .OrderBy(dp => dp.Name.ToUpperInvariant())
           .ToArr() ?? default;
-        latinHypercubeDesign = dto.LatinHypercubeDesign.FromDTO();
-        rankCorrelationDesign = dto.RankCorrelationDesign.FromDTO();
+        latinHypercubeDesign = dto.LatinHypercubeDesign?.FromDTO() ?? default;
+        rankCorrelationDesign = dto.RankCorrelationDesign?.FromDTO() ?? default;
         seed = dto.Seed;
         noDataIndices = dto.NoDataIndices.ToArr();
       }
@@ -123,7 +126,7 @@ namespace Sampling
       try
       {
         using var streamReader = new StreamReader(pathToDesignSamples);
-        using var csvReader = new CsvReader(streamReader);
+        using var csvReader = new CsvReader(streamReader, InvariantCulture);
         using var csvDataReader = new CsvDataReader(csvReader);
         
         samples.Load(csvDataReader);
@@ -198,7 +201,7 @@ namespace Sampling
       try
       {
         using var streamWriter = new StreamWriter(pathToDesignSamples);
-        using var csvWriter = new CsvWriter(streamWriter);
+        using var csvWriter = new CsvWriter(streamWriter, InvariantCulture);
         
         foreach (DataColumn column in samples.Columns)
         {
@@ -274,6 +277,57 @@ namespace Sampling
         instance.Samples,
         pathToSamplingDesignDirectory
         );
+    }
+
+    internal static void SaveFilterConfig(SamplingDesign instance, FilterConfig filterConfig, string pathToSamplingDesignsDirectory)
+    {
+      RequireDirectory(pathToSamplingDesignsDirectory);
+
+      var samplingDesignDirectory = instance.CreatedOn.ToDirectoryName();
+      var pathToSamplingDesignDirectory = Combine(pathToSamplingDesignsDirectory, samplingDesignDirectory);
+
+      RequireDirectory(pathToSamplingDesignDirectory);
+
+      var pathToFilterConfig = Combine(pathToSamplingDesignDirectory, FILTER_CONFIG_FILE_NAME);
+
+      var dto = filterConfig.ToDTO();
+
+      try
+      {
+        Toml.WriteFile(dto, pathToFilterConfig);
+      }
+      catch (Exception ex)
+      {
+        var message = $"Failed to save filter config to {pathToFilterConfig}";
+        Log.Error(ex, message);
+        throw new Exception(message);
+      }
+    }
+
+    internal static FilterConfig LoadFilterConfig(SamplingDesign instance, string pathToSamplingDesignsDirectory)
+    {
+      RequireDirectory(pathToSamplingDesignsDirectory);
+
+      var samplingDesignDirectory = instance.CreatedOn.ToDirectoryName();
+      var pathToSamplingDesignDirectory = Combine(pathToSamplingDesignsDirectory, samplingDesignDirectory);
+
+      RequireDirectory(pathToSamplingDesignDirectory);
+
+      var pathToFilterConfig = Combine(pathToSamplingDesignDirectory, FILTER_CONFIG_FILE_NAME);
+
+      if (!File.Exists(pathToFilterConfig)) return FilterConfig.Default;
+      
+      try
+      {
+        var dto = Toml.ReadFile<_FilterConfigDTO>(pathToFilterConfig);
+        return dto.FromDTO();
+      }
+      catch (Exception ex)
+      {
+        var message = $"Failed to load filter config from {pathToFilterConfig}";
+        Log.Error(ex, message);
+        throw new Exception(message);
+      }
     }
   }
 }

@@ -39,9 +39,11 @@ namespace RVisUI.AppInf
 
       var distributionTypes = Distribution.GetDistributionTypes(distributionsInView);
 
-      var distributionViewModelTypes = distributionTypes.Map(
-        dt => typeof(IDistributionViewModel).Assembly.GetType($"{nameof(RVisUI)}.{nameof(AppInf)}.{dt}DistributionViewModel")
-        );
+      var distributionViewModelTypes = distributionTypes
+        .Map(
+          dt => typeof(IDistributionViewModel).Assembly.GetType($"{nameof(RVisUI)}.{nameof(AppInf)}.{dt}DistributionViewModel")
+        )
+        .Map(LangExt.AssertNotNull);
 
       _distributionViewModels = distributionViewModelTypes
         .Select(t => Activator.CreateInstance(t, new object[] { appService, appSettings }))
@@ -66,10 +68,10 @@ namespace RVisUI.AppInf
           )
         );
 
-      _distributionViewModels.Iter(dvm => (dvm as INotifyPropertyChanged)
+      _distributionViewModels.Iter(dvm => ((INotifyPropertyChanged)dvm)
         .GetWhenPropertyChanged()
         .Subscribe(
-          _reactiveSafeInvoke.SuspendAndInvoke<string>(
+          _reactiveSafeInvoke.SuspendAndInvoke<string?>(
             pn => ObserveDistributionViewModelProperty(dvm, pn)
           )
         )
@@ -91,12 +93,12 @@ namespace RVisUI.AppInf
     }
     private int _selectedDistributionName = NOT_FOUND;
 
-    public IDistributionViewModel DistributionViewModel
+    public IDistributionViewModel? DistributionViewModel
     {
       get => _distributionViewModel;
       set => this.RaiseAndSetIfChanged(ref _distributionViewModel, value, PropertyChanged);
     }
-    private IDistributionViewModel _distributionViewModel;
+    private IDistributionViewModel? _distributionViewModel;
 
     public Option<ParameterState> ParameterState
     {
@@ -105,7 +107,7 @@ namespace RVisUI.AppInf
     }
     private Option<ParameterState> _parameterState;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -119,13 +121,13 @@ namespace RVisUI.AppInf
 
       ParameterState = new ParameterState(
         parameterState.Name,
-        DistributionViewModel.DistributionType,
+        DistributionViewModel.AssertNotNull().DistributionType,
         parameterState.Distributions,
         parameterState.IsSelected
         );
     }
 
-    private void ObserveDistributionViewModelProperty(IDistributionViewModel distributionViewModel, string propertyName)
+    private void ObserveDistributionViewModelProperty(IDistributionViewModel distributionViewModel, string? propertyName)
     {
       if (propertyName != nameof(IDistributionViewModel<NormalDistribution>.Distribution)) return;
 
@@ -141,7 +143,7 @@ namespace RVisUI.AppInf
 
       var distributions = parameterState.Distributions.SetItem(
         index,
-        distributionViewModel.DistributionUnsafe
+        distributionViewModel.DistributionUnsafe.AssertNotNull()
         );
 
       ParameterState = new ParameterState(

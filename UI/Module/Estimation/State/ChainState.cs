@@ -10,9 +10,9 @@ namespace Estimation
       int no, 
       Arr<ModelParameter> modelParameters, 
       Arr<ModelOutput> modelOutputs, 
-      DataTable chainData,
-      DataTable errorData,
-      IDictionary<string, DataTable> posteriorData
+      DataTable? chainData,
+      DataTable? errorData,
+      IDictionary<string, DataTable>? posteriorData
       )
     {
       No = no;
@@ -26,8 +26,8 @@ namespace Estimation
     internal int No { get; }
     internal Arr<ModelParameter> ModelParameters { get; }
     internal Arr<ModelOutput> ModelOutputs { get; }
-    internal DataTable ChainData { get; }
-    internal DataTable ErrorData { get; }
-    internal IDictionary<string, DataTable> PosteriorData { get; }
+    internal DataTable? ChainData { get; }
+    internal DataTable? ErrorData { get; }
+    internal IDictionary<string, DataTable>? PosteriorData { get; }
   }
 }

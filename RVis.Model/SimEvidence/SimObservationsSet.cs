@@ -18,14 +18,14 @@ namespace RVis.Model
 
     public Arr<SimObservations> Observations { get; }
 
-    public override bool Equals(object obj) =>
+    public override bool Equals(object? obj) =>
       obj is SimObservationsSet observationsSet && Equals(observationsSet);
 
     public bool Equals(SimObservationsSet other) =>
       (Subject, Observations) == (other.Subject, other.Observations);
 
     public override int GetHashCode() =>
-      (Subject, Observations).GetHashCode();
+      HashCode.Combine(Subject, Observations);
 
     public static bool operator ==(SimObservationsSet lhs, SimObservationsSet rhs) =>
       lhs.Equals(rhs);

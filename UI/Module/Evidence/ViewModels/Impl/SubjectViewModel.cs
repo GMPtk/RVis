@@ -26,6 +26,6 @@ namespace Evidence
     }
     private int _nAvailable;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

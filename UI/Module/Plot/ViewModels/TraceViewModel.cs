@@ -29,6 +29,8 @@ namespace Plot
       OutputGroupStore outputGroupStore
       )
     {
+      RequireNotNull(SynchronizationContext.Current);
+
       _appState = appState;
       _appService = appService;
       _parameterViewModels = parameterViewModels;
@@ -235,7 +237,7 @@ namespace Plot
         .Filter(pes => pes.IsSelected)
         .Map(pes =>
         {
-          var parameter = parameters.GetParameter(pes.Name);
+          var parameter = parameters.GetParameter(pes.Name.AssertNotNull());
           return parameter.Value == pes.Value ? parameter : parameter.With(pes.Value);
         });
 
@@ -316,7 +318,7 @@ namespace Plot
         return;
       }
 
-      if (!(observed.RequestToken is DataRequestType dataRequestType)) return;
+      if (observed.RequestToken is not DataRequestType dataRequestType) return;
       if (dataRequestType != DataRequestType.WorkingSet) return;
 
       void WithSerieInputs(Arr<SimInput> serieInputs)
@@ -329,7 +331,7 @@ namespace Plot
         }
         else
         {
-          OutputGroup outputGroup;
+          OutputGroup? outputGroup;
 
           if (_outputGroupStore.IsActiveGroupSeries(serieInputs))
           {

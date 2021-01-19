@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RVis.Model
 {
@@ -24,11 +26,11 @@ namespace RVis.Model
 
     public bool IsCurrent => !_disposed;
 
-    public IRVisClient GetRClient()
+    public async Task<IRVisClient> GetRClientAsync(CancellationToken cancellationToken = default)
     {
       if (_rClient == default)
       {
-        _rClient = _rServer.OpenChannel();
+        _rClient = await _rServer.OpenChannelAsync(cancellationToken);
       }
 
       return _rClient;
@@ -55,7 +57,6 @@ namespace RVis.Model
       {
         if (disposing)
         {
-          _rClient?.Dispose();
           _expireLicense(this);
         }
 
@@ -68,9 +69,9 @@ namespace RVis.Model
     private ServerLicense() { }
 
     private bool _disposed = false;
-    private readonly Action<ServerLicense> _expireLicense;
-    private readonly IRVisServer _rServer;
-    private IRVisClient _rClient;
-    private readonly IDictionary<Simulation, MCSimExecutor> _mcsimExecutors;
+    private readonly Action<ServerLicense> _expireLicense = null!;
+    private readonly IRVisServer _rServer = null!;
+    private IRVisClient? _rClient;
+    private readonly IDictionary<Simulation, MCSimExecutor> _mcsimExecutors = null!;
   }
 }

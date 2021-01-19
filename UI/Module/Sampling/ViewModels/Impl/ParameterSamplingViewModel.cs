@@ -15,14 +15,19 @@ namespace Sampling
 {
   internal sealed class ParameterSamplingViewModel : IParameterSamplingViewModel, INotifyPropertyChanged
   {
-    internal ParameterSamplingViewModel(SimParameter parameter)
+    internal ParameterSamplingViewModel(SimParameter parameter, ModuleState moduleState)
     {
       RequireNotNull(parameter);
 
       Parameter = parameter;
       SortKey = parameter.Name.ToUpperInvariant();
 
-      var histogram = new PlotModel();
+      _moduleState = moduleState;
+
+      var histogram = new PlotModel
+      {
+        TitleFontSize = 10
+      };
 
       var linearAxis = new LinearAxis
       {
@@ -54,12 +59,12 @@ namespace Sampling
 
     public string SortKey { get; }
 
-    public IDistribution Distribution
+    public IDistribution? Distribution
     {
       get => _distribution;
       set => this.RaiseAndSetIfChanged(ref _distribution, value, PropertyChanged);
     }
-    private IDistribution _distribution;
+    private IDistribution? _distribution;
 
     public Arr<double> Samples
     {
@@ -70,7 +75,7 @@ namespace Sampling
 
     public PlotModel Histogram { get; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void ObserveDistribution(object _)
     {
@@ -78,7 +83,7 @@ namespace Sampling
 
       Histogram.Series.Clear();
 
-      Histogram.Title = Distribution?.ToString(Parameter.Name);
+      SetTitle();
 
       Histogram.InvalidatePlot(true);
     }
@@ -104,7 +109,8 @@ namespace Sampling
             new HistogramItem(
               bucket.LowerBound,
               bucket.UpperBound,
-              bucket.Count / histogram.DataCount
+              bucket.Count / histogram.DataCount,
+              (int)bucket.Count
               )
             );
         }
@@ -112,7 +118,23 @@ namespace Sampling
         Histogram.Series.Add(histogramSeries);
       }
 
+      SetTitle();
+
       Histogram.InvalidatePlot(true);
     }
+
+    private void SetTitle()
+    {
+      var isFiltered =
+        _moduleState.FilterConfig.IsEnabled &&
+        !_moduleState.FilterConfig.Filters.IsEmpty &&
+        !_moduleState.Outputs.IsEmpty;
+
+      Histogram.Title = isFiltered
+        ? $"{Parameter.Name} (filtered)"
+        : Distribution?.ToString(Parameter.Name);
+    }
+
+    private readonly ModuleState _moduleState;
   }
 }

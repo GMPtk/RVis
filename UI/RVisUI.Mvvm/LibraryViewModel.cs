@@ -35,8 +35,7 @@ namespace RVisUI.Mvvm
 
     private void HandleChooseDirectory()
     {
-      var didChoose = _appService.BrowseForDirectory(_appSettings.PathToSimLibrary.ExpandPath(), out string pathToSimLibrary);
-      if (didChoose)
+      if (_appService.BrowseForDirectory(_appSettings.PathToSimLibrary.ExpandPath(), out string? pathToSimLibrary))
       {
         _simLibrary.LoadFrom(pathToSimLibrary);
         _appSettings.PathToSimLibrary = pathToSimLibrary.ContractPath();

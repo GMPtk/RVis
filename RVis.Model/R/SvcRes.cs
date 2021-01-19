@@ -149,10 +149,10 @@ namespace RVis.Model
   public class SvcRes<T>
   {
     [ProtoMember(1)]
-    public T Value { get; set; }
+    public T Value { get; set; } = default!;
 
     [ProtoMember(2)]
-    public string[] Messages { get; set; }
+    public string[] Messages { get; set; } = null!;
 
     public void Void() =>
       AssertNoFault();

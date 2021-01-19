@@ -46,7 +46,7 @@ namespace RVis.ROps.Test
       Assert.AreEqual(expected01.Count, actual01.Count);
 
       var areEqual = expected01.Keys.All(
-        k => actual01.ContainsKey(k) && actual01[k][0] as string == expected01[k][0] as string
+        k => actual01.ContainsKey(k) && actual01[k]?[0] as string == expected01[k][0] as string
         );
       Assert.IsTrue(areEqual);
     }
@@ -105,16 +105,16 @@ namespace RVis.ROps.Test
       var symbolInfos = ROpsApi.InspectSymbols(pathToCode);
       var execSI = symbolInfos.SingleOrDefault(si => si.Symbol == execSymbol && si.Level == 0);
       var parameterSI = symbolInfos.SingleOrDefault(si => si.Symbol == parametersSymbol && si.Level == 0);
-      var pDefs = parameterSI?.Names.ToDictionary(n => n, n => symbolInfos.SingleOrDefault(si => si.Symbol == n && si.Level > 0));
+      var pDefs = parameterSI?.Names?.ToDictionary(n => n, n => symbolInfos.SingleOrDefault(si => si.Symbol == n && si.Level > 0));
       var outputSI = symbolInfos.SingleOrDefault(si => si.Symbol == outputSymbol && si.Level == 0);
-      var oDefs = outputSI?.Names.ToDictionary(n => n, n => symbolInfos.SingleOrDefault(si => si.Symbol == n && si.Level > 0));
+      var oDefs = outputSI?.Names?.ToDictionary(n => n, n => symbolInfos.SingleOrDefault(si => si.Symbol == n && si.Level > 0));
 
       // assert
       Assert.IsNotNull(execSI);
-      Assert.AreEqual("1st param", pDefs?[p1Symbol].Comment);
-      Assert.AreEqual("u", pDefs?[p1Symbol].Unit);
-      Assert.AreEqual("u.v", oDefs?[o2Symbol].Unit);
-      Assert.AreEqual("2nd output", oDefs?[o2Symbol].Comment);
+      Assert.AreEqual("1st param", pDefs?[p1Symbol]?.Comment);
+      Assert.AreEqual("u", pDefs?[p1Symbol]?.Unit);
+      Assert.AreEqual("u.v", oDefs?[o2Symbol]?.Unit);
+      Assert.AreEqual("2nd output", oDefs?[o2Symbol]?.Comment);
       Assert.IsFalse(oDefs?.ContainsKey(o3LocalSymbol) == true);
       Assert.IsNull(oDefs?[o3Symbol]);
     }
@@ -145,18 +145,18 @@ namespace RVis.ROps.Test
       var p2SI = symbolInfos.SingleOrDefault(si => si.Symbol == p2Symbol && si.Level == 0);
 
       var outputSI = symbolInfos.SingleOrDefault(si => si.Symbol == outputSymbol && si.Level == 0);
-      var oDefs = outputSI?.Names.ToDictionary(n => n, n => symbolInfos.SingleOrDefault(si => si.Symbol == n && si.Level > 0));
+      var oDefs = outputSI?.Names?.ToDictionary(n => n, n => symbolInfos.SingleOrDefault(si => si.Symbol == n && si.Level > 0));
       var o4SI = symbolInfos.SingleOrDefault(si => si.Symbol == o4Symbol && si.Level == 0);
       var o4LocalSI = symbolInfos.SingleOrDefault(si => si.Symbol == o4Symbol && si.Level > 0);
 
       // assert
       Assert.IsNotNull(p1SI);
-      Assert.AreEqual("1st param", p1SI.Comment);
+      Assert.AreEqual("1st param", p1SI?.Comment);
       Assert.IsNotNull(p2SI);
-      Assert.AreEqual("u", p1SI.Unit);
+      Assert.AreEqual("u", p1SI?.Unit);
 
-      Assert.AreEqual("u.v", oDefs?[o2Symbol].Unit);
-      Assert.AreEqual("2nd output", oDefs?[o2Symbol].Comment);
+      Assert.AreEqual("u.v", oDefs?[o2Symbol]?.Unit);
+      Assert.AreEqual("2nd output", oDefs?[o2Symbol]?.Comment);
       Assert.IsFalse(oDefs?.ContainsKey(o3LocalSymbol) == true);
       Assert.IsNull(oDefs?[o3Symbol]);
       Assert.IsNotNull(o4SI);

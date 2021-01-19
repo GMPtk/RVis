@@ -43,16 +43,11 @@ namespace RVis.Model
     public bool Equals(SimInput rhs) =>
       _parameters == rhs._parameters && _isDefault == rhs._isDefault;
 
-    public override bool Equals(object obj) =>
-      obj is SimInput rhs ? Equals(rhs) : false;
+    public override bool Equals(object? obj) =>
+      obj is SimInput rhs && Equals(rhs);
 
-    public override int GetHashCode()
-    {
-      var hashCode = -537398035;
-      hashCode = hashCode * -1521134295 + EqualityComparer<Arr<SimParameter>>.Default.GetHashCode(_parameters);
-      hashCode = hashCode * -1521134295 + _isDefault.GetHashCode();
-      return hashCode;
-    }
+    public override int GetHashCode() => 
+      HashCode.Combine(_parameters, _isDefault);
 
     public static bool operator ==(SimInput lhs, SimInput rhs) =>
       lhs.Equals(rhs);
@@ -68,13 +63,17 @@ namespace RVis.Model
     }
 
     [ProtoBeforeSerialization]
+#pragma warning disable IDE0051 // Remove unused private members
     private void OnSerializing()
+#pragma warning restore IDE0051 // Remove unused private members
     {
       _parameterArray = SimParameters.IsEmpty ? default : SimParameters.ToArray();
     }
 
     [ProtoAfterDeserialization]
+#pragma warning disable IDE0051 // Remove unused private members
     private void OnDeserialized()
+#pragma warning restore IDE0051 // Remove unused private members
     {
       _parameters = _parameterArray == default ? default : _parameterArray.ToArr();
     }
@@ -83,12 +82,12 @@ namespace RVis.Model
     private Arr<SimParameter> _parameters;
 
     [ProtoMember(1)]
-    private SimParameter[] _parameterArray;
+    private SimParameter[]? _parameterArray;
 
     [ProtoMember(2)]
-    private bool _isDefault;
+    private readonly bool _isDefault;
 
     [ProtoIgnore]
-    private string _hash;
+    private string? _hash;
   }
 }

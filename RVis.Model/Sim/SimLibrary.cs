@@ -17,7 +17,7 @@ namespace RVis.Model
 
     }
 
-    public string Location { get; private set; }
+    public string? Location { get; private set; }
 
     public Arr<Simulation> Simulations { get; private set; } = Arr<Simulation>.Empty;
 
@@ -36,11 +36,11 @@ namespace RVis.Model
     }
     private void OnLoaded() =>
       Loaded?.Invoke(this, EventArgs.Empty);
-    public event EventHandler<EventArgs> Loaded;
+    public event EventHandler<EventArgs> Loaded = default!;
 
     private void OnDeleted(Simulation simulation) =>
       Deleted?.Invoke(this, new SimulationDeletedEventArgs(simulation));
-    public event EventHandler<SimulationDeletedEventArgs> Deleted;
+    public event EventHandler<SimulationDeletedEventArgs> Deleted = default!;
 
     public (int Successes, int Failures) Refresh()
     {
@@ -57,6 +57,7 @@ namespace RVis.Model
 
     public string ImportRSimulation(string location)
     {
+      RequireDirectory(Location);
       RequireDirectory(location);
 
       var diSimulation = new DirectoryInfo(location);
@@ -64,7 +65,7 @@ namespace RVis.Model
       RequireEqual(rFiles.Length, 1);
 
       var fiR = rFiles[0];
-      var libraryDirectoryName = GetImportDirectoryName(fiR.Name);
+      var libraryDirectoryName = GetImportDirectoryName(fiR.Name, Location);
       var pathToSimulation = Path.Combine(Location, libraryDirectoryName);
 
       Directory.Move(location, pathToSimulation);
@@ -74,6 +75,7 @@ namespace RVis.Model
 
     public string ImportExeSimulation(string location, string libraryDirectoryName)
     {
+      RequireDirectory(Location);
       RequireDirectory(location);
 
       var diSimulation = new DirectoryInfo(location);
@@ -131,12 +133,10 @@ namespace RVis.Model
       return (simulations.ToArr(), exceptions.Length());
     }
 
-    private string GetImportDirectoryName(string codeFileName)
+    private static string GetImportDirectoryName(string codeFileName, string location)
     {
-      RequireDirectory(Location);
-
       var directoryName = Path.GetFileNameWithoutExtension(codeFileName);
-      var pathToImport = Path.Combine(Location, directoryName);
+      var pathToImport = Path.Combine(location, directoryName);
       if (!Directory.Exists(pathToImport)) return directoryName;
 
       var counter = 0;
@@ -145,7 +145,7 @@ namespace RVis.Model
       {
         ++counter;
         mangled = $"{directoryName} ({counter:000})";
-        pathToImport = Path.Combine(Location, mangled);
+        pathToImport = Path.Combine(location, mangled);
       }
       while (Directory.Exists(pathToImport));
 

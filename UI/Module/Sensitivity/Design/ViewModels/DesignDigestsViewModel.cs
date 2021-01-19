@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
 
+#nullable disable
+
 namespace Sensitivity.Design
 {
   internal sealed class DesignDigestsViewModel : IDesignDigestsViewModel

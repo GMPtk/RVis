@@ -62,6 +62,6 @@ namespace Plot
     }
     private bool? _autoShareObservationsSharedState;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

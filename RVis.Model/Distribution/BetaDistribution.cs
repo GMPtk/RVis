@@ -32,7 +32,7 @@ namespace RVis.Model
     public double Lower { get; }
     public double Upper { get; }
 
-    public Beta Implementation => IsConfigured
+    public Beta? Implementation => IsConfigured
       ? new Beta(Alpha, Beta, Generator)
       : default;
 
@@ -41,7 +41,13 @@ namespace RVis.Model
     public bool CanTruncate => true;
 
     public bool IsTruncated => !IsNegativeInfinity(Lower) || !IsPositiveInfinity(Upper);
-    
+
+    IDistribution IDistribution.WithLowerUpper(double lower, double upper) =>
+      WithLowerUpper(lower, upper);
+
+    public BetaDistribution WithLowerUpper(double lower, double upper) => 
+      new BetaDistribution(Alpha, Beta, lower, upper);
+
     public bool IsConfigured => !IsNaN(Alpha) && !IsNaN(Beta);
 
     public double Mean
@@ -49,7 +55,7 @@ namespace RVis.Model
       get
       {
         RequireTrue(IsConfigured);
-        return Implementation.Mean;
+        return Implementation!.Mean;
       }
     }
 
@@ -58,7 +64,7 @@ namespace RVis.Model
       get
       {
         RequireTrue(IsConfigured);
-        return Implementation.Variance;
+        return Implementation!.Variance;
       }
     }
 
@@ -66,7 +72,8 @@ namespace RVis.Model
     {
       get
       {
-        var implementation = Implementation;
+        RequireTrue(IsConfigured);
+        var implementation = Implementation!;
         var lowerP = implementation.CumulativeDistribution(Lower);
         var upperP = implementation.CumulativeDistribution(Upper);
         return (lowerP, upperP);
@@ -78,7 +85,7 @@ namespace RVis.Model
       RequireTrue(IsConfigured);
       RequireNotNull(samples);
 
-      var implementation = Implementation;
+      var implementation = Implementation!;
 
       if (!IsTruncated)
       {
@@ -103,7 +110,7 @@ namespace RVis.Model
 
       if (!IsTruncated) return BetaDist.Sample(Generator, Alpha, Beta);
 
-      var implementation = Implementation;
+      var implementation = Implementation!;
       var lowerP = implementation.CumulativeDistribution(Lower);
       var upperP = implementation.CumulativeDistribution(Upper);
       var sample = ContinuousUniform.Sample(Generator, lowerP, upperP);
@@ -112,8 +119,10 @@ namespace RVis.Model
 
     public double GetProposal(double value, double step)
     {
+      RequireTrue(!IsNaN(step) || IsConfigured);
+
       if (IsNaN(value)) value = Mean;
-      if (IsNaN(step)) step = Implementation.Variance;
+      if (IsNaN(step)) step = Implementation!.Variance;
 
       var sample = GetSample();
       value += (sample - value) * step;
@@ -135,7 +144,7 @@ namespace RVis.Model
       return BetaDist.InvCDF(Alpha, Beta, p);
     }
 
-    public (string FunctionName, Arr<(string ArgName, double ArgValue)> FunctionParameters) RQuantileSignature =>
+    public (string? FunctionName, Arr<(string ArgName, double ArgValue)> FunctionParameters) RQuantileSignature =>
       ("qbeta", Array(("shape1", Alpha), ("shape2", Beta)));
 
     public (string FunctionName, Arr<(string ArgName, double ArgValue)> FunctionParameters) RInverseTransformSamplingSignature
@@ -190,9 +199,9 @@ namespace RVis.Model
       if (!IsTruncated) return distribution;
 
       var interval = "[" +
-        (IsNegativeInfinity(Lower) ? "-∞" : Lower.ToString(InvariantCulture)) +
+        (IsNegativeInfinity(Lower) ? "-∞" : Lower.ToString("G4", InvariantCulture)) +
         ", " +
-        (IsPositiveInfinity(Upper) ? "+∞" : Upper.ToString(InvariantCulture)) +
+        (IsPositiveInfinity(Upper) ? "+∞" : Upper.ToString("G4", InvariantCulture)) +
         "]";
 
       return $"{distribution} {interval}";
@@ -201,7 +210,7 @@ namespace RVis.Model
     public bool Equals(BetaDistribution rhs) =>
       Alpha.Equals(rhs.Alpha) && Beta.Equals(rhs.Beta) && Lower.Equals(rhs.Lower) && Upper.Equals(rhs.Upper);
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
       if (obj is BetaDistribution rhs)
       {
@@ -211,16 +220,8 @@ namespace RVis.Model
       return false;
     }
 
-    public override int GetHashCode()
-    {
-      var hashCode = -1973367066;
-      hashCode = hashCode * -1521134295 + DistributionType.GetHashCode();
-      hashCode = hashCode * -1521134295 + Alpha.GetHashCode();
-      hashCode = hashCode * -1521134295 + Beta.GetHashCode();
-      hashCode = hashCode * -1521134295 + Lower.GetHashCode();
-      hashCode = hashCode * -1521134295 + Upper.GetHashCode();
-      return hashCode;
-    }
+    public override int GetHashCode() => 
+      HashCode.Combine(DistributionType, Alpha, Beta, Lower, Upper);
 
     public static bool operator ==(BetaDistribution left, BetaDistribution right)
     {

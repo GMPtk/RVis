@@ -4,6 +4,8 @@ using System.Linq;
 using System.Windows.Input;
 using static System.Linq.Enumerable;
 
+#nullable disable
+
 namespace Plot.Design
 {
   internal sealed class OutputsViewModel : IOutputsViewModel

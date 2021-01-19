@@ -2,6 +2,8 @@
 using System.Windows.Input;
 using static System.Linq.Enumerable;
 
+#nullable disable
+
 namespace RVisUI.Mvvm.Design
 {
   public class ChangeDescriptionUnitViewModel : IChangeDescriptionUnitViewModel

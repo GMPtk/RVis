@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -10,12 +11,13 @@ using static System.Convert;
 using static System.Environment;
 using static System.Globalization.CultureInfo;
 using static System.String;
+using static RVis.Base.Check;
 
 namespace RVis.Base.Extensions
 {
   public static class StrExt
   {
-    public static string CheckParseValue<T>(this string s)
+    public static string? CheckParseValue<T>(this string? s)
     {
       if (s.IsAString())
       {
@@ -47,7 +49,7 @@ namespace RVis.Base.Extensions
     public static bool IsLessThanOrEqualTo(this string lhs, string rhs) =>
       Compare(lhs, rhs, StringComparison.InvariantCulture) <= 0;
 
-    public static string RejectEmpty(this string s) =>
+    public static string? RejectEmpty(this string? s) =>
       IsNullOrWhiteSpace(s) ? null : s;
 
     public static string ToValidFileName(this string s, string replaceWith = "_") =>
@@ -59,25 +61,26 @@ namespace RVis.Base.Extensions
     public static string ToKey(this string s) =>
       new string(s.Where(c => IsLetterOrDigit(c)).ToArray()).ToLowerInvariant();
 
-    public static string Elide(this string s, int maxLen, string suffix = "...") =>
+    public static string Elide(this string s, int maxLen, string? suffix = "...") =>
       s.Length <= maxLen ?
         s :
         s.Substring(0, maxLen - (suffix ?? Empty).Length) + suffix;
 
     public static string ExpandPath(this string s) =>
-      s?.StartsWith(_docsPrefix, StringComparison.InvariantCulture) == true 
+      s.StartsWith(_docsPrefix, StringComparison.InvariantCulture) == true 
         ? Path.Combine(
           GetFolderPath(SpecialFolder.MyDocuments),
-          s.Substring(_docsPrefix.Length)
+          s[_docsPrefix.Length..]
           )
         : s;
 
     public static string ContractPath(this string s)
     {
       var myDocuments = GetFolderPath(SpecialFolder.MyDocuments);
-      if (s?.StartsWith(myDocuments, StringComparison.InvariantCultureIgnoreCase) == true)
+      RequireDirectory(myDocuments);
+      if (s.StartsWith(myDocuments, StringComparison.InvariantCultureIgnoreCase) == true)
       {
-        s = s.Substring(myDocuments.Length);
+        s = s[myDocuments.Length..];
         s = s.TrimStart(Path.DirectorySeparatorChar);
         s = _docsPrefix + s;
       }
@@ -86,7 +89,7 @@ namespace RVis.Base.Extensions
 
     public static string ToHash(this string s)
     {
-      if (_sha1HashMemo.TryGetValue(s, out string hash)) return hash;
+      if (_sha1HashMemo.TryGetValue(s, out string? hash)) return hash;
 
       var bytes = Encoding.UTF8.GetBytes(s);
       hash = BitConverter.ToString(_sha1.ComputeHash(bytes)).Replace("-", Empty);
@@ -98,23 +101,23 @@ namespace RVis.Base.Extensions
     public static string Replace(this string s, char[] toReplace, string newValue) =>
       Join(newValue, s.Split(toReplace, StringSplitOptions.RemoveEmptyEntries));
 
-    public static bool EqualsCI(this string s, string t) =>
+    public static bool EqualsCI(this string? s, string? t) =>
       string.Equals(s, t, StringComparison.InvariantCultureIgnoreCase);
 
-    public static bool DoesNotEqualCI(this string s, string t) =>
+    public static bool DoesNotEqualCI(this string? s, string? t) =>
       !EqualsCI(s, t);
 
-    public static bool IsAString(this string s) =>
+    public static bool IsAString([NotNullWhen(true)] this string? s) =>
       !IsNullOrWhiteSpace(s);
 
-    public static bool IsntAString(this string s) =>
+    public static bool IsntAString([NotNullWhen(false)] this string? s) =>
       !IsAString(s);
 
-    public static string[] Tokenize(this string s, char[] separators = null) =>
+    public static string[] Tokenize(this string s, char[]? separators = null) =>
       s.Split(separators ?? _separators, StringSplitOptions.RemoveEmptyEntries);
 
-    public static bool ContainsWhiteSpace(this string s) =>
-      s == default ? false : s.Any(IsWhiteSpace);
+    public static bool ContainsWhiteSpace([NotNullWhen(true)] this string? s) =>
+      s != default && s.Any(IsWhiteSpace);
 
     public static string ToCsvQuoted(this string s) =>
       s.ContainsWhiteSpace() ? "\"" + s + "\"" : s;

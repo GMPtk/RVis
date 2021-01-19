@@ -45,7 +45,7 @@ namespace Estimation
 
         SelectedDesignDigestViewModel = DesignDigestViewModels
           .Find(vm => vm.CreatedOn == _moduleState.EstimationDesign.CreatedOn)
-          .Match(vm => vm, () => default);
+          .Match<IDesignDigestViewModel?>(vm => vm, () => default);
       }
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
@@ -71,12 +71,12 @@ namespace Estimation
 
     public ObservableCollection<IDesignDigestViewModel> DesignDigestViewModels { get; }
 
-    public IDesignDigestViewModel SelectedDesignDigestViewModel
+    public IDesignDigestViewModel? SelectedDesignDigestViewModel
     {
       get => _selectedDesignDigestViewModel;
       set => this.RaiseAndSetIfChanged(ref _selectedDesignDigestViewModel, value, PropertyChanged);
     }
-    private IDesignDigestViewModel _selectedDesignDigestViewModel;
+    private IDesignDigestViewModel? _selectedDesignDigestViewModel;
 
     public ICommand LoadEstimationDesign { get; }
 
@@ -91,7 +91,7 @@ namespace Estimation
     }
     private Option<(DateTime CreatedOn, DateTime SelectedOn)> _targetEstimationDesign;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -112,6 +112,8 @@ namespace Estimation
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
+        RequireNotNull(SelectedDesignDigestViewModel);
+
         TargetEstimationDesign = (SelectedDesignDigestViewModel.CreatedOn, DateTime.Now);
       }
     }
@@ -120,6 +122,8 @@ namespace Estimation
     {
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
+        RequireNotNull(SelectedDesignDigestViewModel);
+
         var createdOn = SelectedDesignDigestViewModel.CreatedOn;
 
         DesignDigestViewModels.Remove(SelectedDesignDigestViewModel);
@@ -151,7 +155,7 @@ namespace Estimation
 
         SelectedDesignDigestViewModel = DesignDigestViewModels
           .Find(vm => vm.CreatedOn == _moduleState.EstimationDesign.CreatedOn)
-          .Match(vm => vm, () => default);
+          .Match<IDesignDigestViewModel?>(vm => vm, () => default);
       }
       else
       {

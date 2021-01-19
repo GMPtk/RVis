@@ -82,7 +82,7 @@ namespace Sampling
     }
     private bool? _dialogResult;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void HandleClose() =>
       DialogResult = false;

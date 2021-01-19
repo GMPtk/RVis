@@ -5,6 +5,7 @@ using RVisUI.Model.Extensions;
 using System;
 using System.ComponentModel;
 using System.Windows.Input;
+using static RVis.Base.Check;
 
 namespace RVisUI.Mvvm
 {
@@ -34,28 +35,28 @@ namespace RVisUI.Mvvm
     }
     private DataExportConfiguration _dataExportConfiguration;
 
-    public string Title 
+    public string? Title 
     { 
       get => _title; 
       private set => this.RaiseAndSetIfChanged(ref _title, value, PropertyChanged); 
     }
-    private string _title;
+    private string? _title;
 
-    public string RootExportDirectory
+    public string? RootExportDirectory
     {
       get => _rootExportDirectory;
       set => this.RaiseAndSetIfChanged(ref _rootExportDirectory, value, PropertyChanged);
     }
-    private string _rootExportDirectory;
+    private string? _rootExportDirectory;
 
     public ICommand BrowseForRootExportDirectory { get; }
 
-    public string ExportDirectoryName
+    public string? ExportDirectoryName
     {
       get => _exportDirectoryName;
       set => this.RaiseAndSetIfChanged(ref _exportDirectoryName, value, PropertyChanged);
     }
-    private string _exportDirectoryName;
+    private string? _exportDirectoryName;
 
     public bool OpenAfterExport
     {
@@ -82,10 +83,14 @@ namespace RVisUI.Mvvm
     }
     private bool? _dialogResult;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void HandleOK()
     {
+      RequireNotNull(_title);
+      RequireNotNull(_rootExportDirectory);
+      RequireNotNull(_exportDirectoryName);
+
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
         DataExportConfiguration = new DataExportConfiguration(
@@ -104,7 +109,7 @@ namespace RVisUI.Mvvm
     {
       var didBrowse = _appService.BrowseForDirectory(
         _rootExportDirectory,
-        out string pathToDirectory
+        out string? pathToDirectory
         );
 
       if (didBrowse)

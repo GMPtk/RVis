@@ -33,6 +33,6 @@ namespace Sampling
     }
     private RankCorrelationDesign _rankCorrelationDesign;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

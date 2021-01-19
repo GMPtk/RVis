@@ -4,6 +4,8 @@ using System.Linq;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
 
+#nullable disable
+
 namespace Evidence.Design
 {
   internal sealed class ImportObservationsViewModel : IImportObservationsViewModel

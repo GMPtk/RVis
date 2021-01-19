@@ -77,7 +77,7 @@ namespace Estimation
         this
           .WhenAny(vm => vm.SelectedPriorViewModel, _ => default(object))
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<object>(
+            _reactiveSafeInvoke.SuspendAndInvoke<object?>(
               ObserveSelectedPriorViewModel
               )
             ),
@@ -119,7 +119,7 @@ namespace Estimation
     }
     private bool _isVisible;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -164,7 +164,7 @@ namespace Estimation
       }
     }
 
-    private void ObserveSelectedPriorViewModel(object _)
+    private void ObserveSelectedPriorViewModel(object? _)
     {
       if (SelectedPriorViewModel.IsFound())
       {

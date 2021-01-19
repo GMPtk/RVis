@@ -1,6 +1,7 @@
 ﻿using LanguageExt;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static RVis.Base.Check;
 using static RVis.Base.Extensions.NumExt;
@@ -27,7 +28,7 @@ namespace RVis.Base.Extensions
       return NOT_FOUND;
     }
 
-    public static bool IsCollection<T>(this ICollection<T> c) => c?.Any() == true;
+    public static bool IsCollection<T>([NotNullWhen(true)] this ICollection<T>? c) => c?.Any() == true;
 
     public static bool IsEmpty<T>(this ICollection<T> c) => !c.Any();
 

@@ -23,9 +23,9 @@ namespace RVis.Model
 
     public Arr<double> Values { get; }
 
-    public string Description { get; set; }
+    public string? Description { get; set; }
 
-    public string Unit { get; set; }
+    public string? Unit { get; set; }
 
     public bool IsUsed { get; set; }
 
@@ -52,13 +52,13 @@ namespace RVis.Model
         if (symbolInfo.IsNone)
         {
           var re = new Regex($"^\\w?{Name}\\W*=[^=]");
-          symbolInfo = reversed.Find(si => re.IsMatch(si.Code));
+          symbolInfo = reversed.Filter(si => si.Code.IsAString()).Find(si => re.IsMatch(si.Code!));
         }
 
         symbolInfo.IfSome(si =>
         {
-          Description = Description ?? si.Comment;
-          Unit = Unit ?? si.Unit;
+          Description ??= si.Comment;
+          Unit ??= si.Unit;
         });
       }
     }

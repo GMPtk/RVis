@@ -38,6 +38,7 @@ namespace RVis.Model
 
     public ValueCandidate(ISymbolInfo symbolInfo, Arr<ISymbolInfo> symbolInfos)
     {
+      RequireNotNullEmptyWhiteSpace(symbolInfo.Symbol);
       RequireTrue(symbolInfo.Value?.NColumns > 0);
 
       SymbolInfo = symbolInfo;
@@ -52,12 +53,12 @@ namespace RVis.Model
       if (ElementCandidates.Count == 1)
       {
         var elementCandidate = ElementCandidates.Head();
-        elementCandidate.Description = elementCandidate.Description ?? symbolInfo.Comment;
-        elementCandidate.Unit = elementCandidate.Unit ?? symbolInfo.Unit;
+        elementCandidate.Description ??= symbolInfo.Comment;
+        elementCandidate.Unit ??= symbolInfo.Unit;
       }
     }
 
-    public ISymbolInfo SymbolInfo { get; }
+    public ISymbolInfo? SymbolInfo { get; }
 
     public string Name { get; }
 

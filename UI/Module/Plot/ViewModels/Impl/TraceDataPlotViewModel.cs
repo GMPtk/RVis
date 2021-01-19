@@ -1,11 +1,11 @@
 ﻿using LanguageExt;
 using OxyPlot;
 using OxyPlot.Axes;
+using OxyPlot.Legends;
 using OxyPlot.Series;
 using ReactiveUI;
 using RVis.Base.Extensions;
 using RVis.Data;
-using RVis.Data.Extensions;
 using RVis.Model;
 using RVis.Model.Extensions;
 using RVisUI.AppInf.Extensions;
@@ -15,7 +15,6 @@ using System;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Windows.Input;
-using static RVis.Base.Check;
 using static RVis.Base.Extensions.NumExt;
 
 namespace Plot
@@ -60,17 +59,87 @@ namespace Plot
 
       RemoveChart = ReactiveCommand.Create(HandleRemoveChart);
 
-      SetUpPlotModel();
-      ApplyTheme();
-
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
+
+      _plotModel = new PlotModel
+      {
+        Background = OxyColors.Transparent
+      };
+
+      _plotModel.Legends.Add(new Legend
+      {
+        LegendPosition = LegendPosition.BottomRight
+      });
+
+      _traceHorizontalAxis = new LinearAxis
+      {
+        Position = AxisPosition.Bottom,
+        MinimumPadding = 0,
+        MaximumPadding = 0.06,
+      };
+#pragma warning disable CS0618 // Type or member is obsolete
+      _traceHorizontalAxis.AxisChanged += (s, e) => { if (_reactiveSafeInvoke.React) HandleAxisChanged(); };
+#pragma warning restore CS0618 // Type or member is obsolete
+      _plotModel.Axes.Add(_traceHorizontalAxis);
+
+      _traceVerticalAxis = new LinearAxis
+      {
+        Position = AxisPosition.Left,
+        MinimumPadding = 0,
+        MaximumPadding = 0.06,
+        Key = nameof(_traceVerticalAxis),
+      };
+#pragma warning disable CS0618 // Type or member is obsolete
+      _traceVerticalAxis.AxisChanged += (s, e) => { if (_reactiveSafeInvoke.React) HandleAxisChanged(); };
+#pragma warning restore CS0618 // Type or member is obsolete
+
+      _traceInsetAxis = new LinearAxis
+      {
+        Position = AxisPosition.Right,
+        MinimumPadding = 0,
+        MaximumPadding = 0,
+        MinimumDataMargin = 20,
+        MaximumDataMargin = 20,
+        TickStyle = TickStyle.Inside,
+        LabelFormatter = x => null,
+        StartPosition = 0.4,
+        EndPosition = 0.6,
+        Key = nameof(_traceInsetAxis),
+      };
+
+      _traceLogVerticalAxis = new LogarithmicAxis
+      {
+        Position = AxisPosition.Left,
+        MinimumPadding = 0,
+        MaximumPadding = 0.06,
+        Key = nameof(_traceLogVerticalAxis)
+      };
+#pragma warning disable CS0618 // Type or member is obsolete
+      _traceLogVerticalAxis.AxisChanged += (s, e) => { if (_reactiveSafeInvoke.React) HandleAxisChanged(); };
+#pragma warning restore CS0618 // Type or member is obsolete
+
+      _traceLogInsetAxis = new LogarithmicAxis
+      {
+        Position = AxisPosition.Right,
+        MinimumPadding = 0,
+        MaximumPadding = 0.06,
+        MinimumDataMargin = 20,
+        MaximumDataMargin = 20,
+        TickStyle = TickStyle.Inside,
+        LabelFormatter = x => null,
+        StartPosition = 0.4,
+        EndPosition = 0.6,
+        Key = nameof(_traceLogInsetAxis)
+      };
+
+      ApplyTheme();
 
       _subscriptions = new CompositeDisposable(
 
         _appSettings
           .GetWhenPropertyChanged()
           .Subscribe(
-            _reactiveSafeInvoke.SuspendAndInvoke<string>(ObserveAppSettingsPropertyChange)
+            _reactiveSafeInvoke.SuspendAndInvoke<string?>(ObserveAppSettingsPropertyChange)
             ),
 
         traceDataPlotState
@@ -161,7 +230,9 @@ namespace Plot
       {
         var seriesNames = _dataSet.Map(t => t.SeriesName);
 
-        var selectedIndexSeries = seriesNames.IndexOf(State.SelectedSeriesName);
+        var selectedIndexSeries = State.SelectedSeriesName.IsAString()
+          ? seriesNames.IndexOf(State.SelectedSeriesName)
+          : NOT_FOUND;
         if (selectedIndexSeries.IsntFound()) selectedIndexSeries = 0;
         SeriesNames = seriesNames;
         SelectedIndexSeries = selectedIndexSeries;
@@ -173,10 +244,11 @@ namespace Plot
         PlotModel.Series.Clear();
         ConfigurePlotModel();
         PlotDepVar();
+        PlotInset();
         PlotSupplementaryTraces();
         PlotObservations();
         ConfigureLegend();
-        PlotModel.InvalidatePlot(true);
+        PlotModel.InvalidatePlot(updateData: true);
       }
     }
 
@@ -187,10 +259,11 @@ namespace Plot
 
       PlotModel.Series.Clear();
       PlotDepVar();
+      PlotInset();
       PlotSupplementaryTraces();
       PlotObservations();
       ConfigureLegend();
-      PlotModel.InvalidatePlot(true);
+      PlotModel.InvalidatePlot(updateData: true);
     }
 
     private void HandleToggleIsAxesOriginLockedToZeroZero()
@@ -280,13 +353,13 @@ namespace Plot
       State.IsVisible = false;
     }
 
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (PlotModel is null) return;
       if (!propertyName.IsThemeProperty()) return;
 
       ApplyTheme();
-      PlotModel.InvalidatePlot(true);
+      PlotModel.InvalidatePlot(updateData: true);
     }
 
     private void ObserveTraceDataPlotStateIsVisible(object _)
@@ -296,13 +369,14 @@ namespace Plot
       PlotModel.Series.Clear();
       ConfigurePlotModel();
       PlotDepVar();
+      PlotInset();
       PlotSupplementaryTraces();
       PlotObservations();
       ConfigureLegend();
-      PlotModel.InvalidatePlot(true);
+      PlotModel.InvalidatePlot(updateData: true);
     }
 
-    private void ObserveDepVarConfigStatePropertyChanged(string propertyName)
+    private void ObserveDepVarConfigStatePropertyChanged(string? propertyName)
     {
       if (!State.IsVisible) return;
 
@@ -313,22 +387,28 @@ namespace Plot
           PlotModel.Series.Clear();
           ConfigurePlotModel();
           PlotDepVar();
+          PlotInset();
           PlotSupplementaryTraces();
           PlotObservations();
           ConfigureLegend();
-          PlotModel.InvalidatePlot(true);
+          PlotModel.InvalidatePlot(updateData: true);
+          break;
+
+        case nameof(DepVarConfigState.SelectedInsetElementName):
+          PlotInset();
+          PlotModel.InvalidatePlot(updateData: true);
           break;
 
         case nameof(DepVarConfigState.SupplementaryElementNames):
           PlotSupplementaryTraces();
           ConfigureLegend();
-          PlotModel.InvalidatePlot(true);
+          PlotModel.InvalidatePlot(updateData: true);
           break;
 
         case nameof(DepVarConfigState.ObservationsReferences):
           PlotObservations();
           ConfigureLegend();
-          PlotModel.InvalidatePlot(true);
+          PlotModel.InvalidatePlot(updateData: true);
           break;
       }
     }
@@ -342,44 +422,6 @@ namespace Plot
         var dataSet = DataSet.LookUp(SeriesNames[SelectedIndexSeries]).AssertSome();
         _plotModel.DefaultColors = GetPalette(dataSet[0].Serie.NColumns - 1).Colors;
       }
-    }
-
-    private void SetUpPlotModel()
-    {
-      var plotModel = new PlotModel
-      {
-        LegendPosition = LegendPosition.BottomRight,
-        Background = OxyColors.Transparent
-      };
-
-      _traceHorizontalAxis = new LinearAxis
-      {
-        Position = AxisPosition.Bottom,
-        MinimumPadding = 0,
-        MaximumPadding = 0.06,
-      };
-      _traceHorizontalAxis.AxisChanged += (s, e) => { if (_reactiveSafeInvoke.React) HandleAxisChanged(); };
-      plotModel.Axes.Add(_traceHorizontalAxis);
-
-      _traceVerticalAxis = new LinearAxis
-      {
-        Position = AxisPosition.Left,
-        MinimumPadding = 0,
-        MaximumPadding = 0.06,
-        Key = nameof(_traceVerticalAxis),
-      };
-      _traceVerticalAxis.AxisChanged += (s, e) => { if (_reactiveSafeInvoke.React) HandleAxisChanged(); };
-
-      _traceLogVerticalAxis = new LogarithmicAxis
-      {
-        Position = AxisPosition.Left,
-        MinimumPadding = 0,
-        MaximumPadding = 0.06,
-        Key = nameof(_traceLogVerticalAxis)
-      };
-      _traceLogVerticalAxis.AxisChanged += (s, e) => { if (_reactiveSafeInvoke.React) HandleAxisChanged(); };
-
-      PlotModel = plotModel;
     }
 
     private void ConfigurePlotModel()
@@ -410,6 +452,9 @@ namespace Plot
       verticalAxis.Maximum = _yMaximum;
       _plotModel.Axes.Add(verticalAxis);
 
+      var insetAxis = State.DepVarConfigState.IsScaleLogarithmic ? _traceLogInsetAxis as Axis : _traceInsetAxis;
+      _plotModel.Axes.Add(insetAxis);
+
       _traceHorizontalAxis.AbsoluteMinimum = IsAxesOriginLockedToZeroZero ? 0.0 : double.MinValue;
       verticalAxis.AbsoluteMinimum = IsAxesOriginLockedToZeroZero ? 0.0 : double.MinValue;
     }
@@ -417,6 +462,7 @@ namespace Plot
     private enum SerieType
     {
       DepVar,
+      Inset,
       Supplementary,
       Observations
     }
@@ -525,6 +571,78 @@ namespace Plot
       }
     }
 
+    private void PlotInset()
+    {
+      var existingSeries = PlotModel.Series
+        .Where(s =>
+        {
+          var (serieType, _) = (ValueTuple<SerieType, string>)s.Tag;
+          return serieType == SerieType.Inset;
+        })
+        .ToArr();
+
+      existingSeries.Iter(s => PlotModel.Series.Remove(s));
+
+      var insetAxis = PlotModel.Axes
+        .Find(a => a.Position == AxisPosition.Right)
+        .AssertSome("Missing inset axis");
+
+      if (State.DepVarConfigState.SelectedInsetElementName.IsntAString())
+      {
+        insetAxis.IsAxisVisible = false;
+        return;
+      }
+
+      insetAxis.IsAxisVisible = true;
+
+      var series = DataSet.LookUp(SeriesNames[SelectedIndexSeries]).AssertSome();
+      var (_, serie) = series[0];
+      var independentVariable = _simulation.SimConfig.SimOutput.GetIndependentData(serie);
+      var dependentVariable = serie[State.DepVarConfigState.SelectedInsetElementName];
+
+      var color = OxyColors.LightGray;
+      color = OxyColor.FromArgb(100, color.R, color.G, color.B);
+
+      if (IsSeriesTypeLine)
+      {
+        var interpolatePoints = independentVariable.Length < INTERPOLATION_LIMIT;
+
+        var lineSeries = new LineSeries
+        {
+          YAxisKey = insetAxis.Key,
+          LineStyle = LineStyle.Solid,
+          Color = color,
+          InterpolationAlgorithm = interpolatePoints ? InterpolationAlgorithms.CatmullRomSpline : default,
+          Tag = (SerieType.Inset, State.DepVarConfigState.SelectedInsetElementName)
+        };
+
+        for (var i = 0; i < independentVariable.Length; ++i)
+        {
+          lineSeries.Points.Add(new DataPoint(independentVariable[i], dependentVariable[i]));
+        }
+
+        PlotModel.Series.Add(lineSeries);
+      }
+      else
+      {
+        var scatterSeries = new ScatterSeries
+        {
+          YAxisKey = insetAxis.Key,
+          MarkerType = MarkerType.Plus,
+          MarkerStroke = color,
+          MarkerSize = 1,
+          Tag = (SerieType.Inset, State.DepVarConfigState.SelectedInsetElementName)
+        };
+
+        for (var i = 0; i < independentVariable.Length; ++i)
+        {
+          scatterSeries.Points.Add(new ScatterPoint(independentVariable[i], dependentVariable[i]));
+        }
+
+        PlotModel.Series.Add(scatterSeries);
+      }
+    }
+
     private void ConfigureLegend() =>
       PlotModel.IsLegendVisible = PlotModel.Series.Count > 1;
 
@@ -625,7 +743,6 @@ namespace Plot
         ? OxyPalettes.Cool(numberOfColors)
         : OxyPalettes.Rainbow(numberOfColors);
 
-    private const int SCATTER_THRESHOLD = 100;
     private const int INTERPOLATION_LIMIT = 30;
 
     private readonly IAppState _appState;
@@ -633,9 +750,11 @@ namespace Plot
     private readonly Simulation _simulation;
     private readonly DepVarConfigViewModel _depVarConfigViewModel;
     private readonly IDisposable _subscriptions;
-    private LinearAxis _traceHorizontalAxis;
-    private LinearAxis _traceVerticalAxis;
-    private LogarithmicAxis _traceLogVerticalAxis;
+    private readonly LinearAxis _traceHorizontalAxis;
+    private readonly LinearAxis _traceVerticalAxis;
+    private readonly LinearAxis _traceInsetAxis;
+    private readonly LogarithmicAxis _traceLogVerticalAxis;
+    private readonly LogarithmicAxis _traceLogInsetAxis;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
 
     private double _xAbsoluteMinimum;

@@ -2,6 +2,7 @@
 using MathNet.Numerics.Statistics;
 using OxyPlot;
 using OxyPlot.Axes;
+using OxyPlot.Legends;
 using OxyPlot.Series;
 using ReactiveUI;
 using RVis.Base.Extensions;
@@ -31,7 +32,31 @@ namespace Estimation
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
-      PlotModel = CreatePlotModel();
+      PlotModel = new PlotModel();
+
+      PlotModel.Legends.Add(new Legend
+      {
+        LegendPlacement = LegendPlacement.Inside,
+        LegendPosition = LegendPosition.RightTop,
+        LegendOrientation = LegendOrientation.Vertical
+      });
+
+      var simulation = _appState.Target.AssertSome();
+      var output = simulation.SimConfig.SimOutput;
+      var independentVariable = output.IndependentVariable;
+
+      _horizontalAxis = new LinearAxis
+      {
+        Title = independentVariable.Name,
+        Unit = independentVariable.Unit,
+        Position = AxisPosition.Bottom
+      };
+      PlotModel.Axes.Add(_horizontalAxis);
+
+      _verticalAxis = new LinearAxis { Position = AxisPosition.Left };
+      PlotModel.Axes.Add(_verticalAxis);
+
+      PlotModel.ApplyThemeToPlotModelAndAxes();
 
       using (_reactiveSafeInvoke.SuspendedReactivity)
       {
@@ -40,7 +65,7 @@ namespace Estimation
           appSettings
             .GetWhenPropertyChanged()
             .Subscribe(
-              _reactiveSafeInvoke.SuspendAndInvoke<string>(
+              _reactiveSafeInvoke.SuspendAndInvoke<string?>(
                 ObserveAppSettingsPropertyChange
                 )
               ),
@@ -59,7 +84,7 @@ namespace Estimation
               ms => ms.PosteriorState
               )
             .Subscribe(
-              _reactiveSafeInvoke.SuspendAndInvoke<(Arr<ChainState>, PosteriorState)>(
+              _reactiveSafeInvoke.SuspendAndInvoke<(Arr<ChainState>, PosteriorState?)>(
                 ObserveModuleStateEstimationDataChange
                 )
               ),
@@ -109,7 +134,7 @@ namespace Estimation
     }
     private bool _isVisible;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
@@ -133,7 +158,7 @@ namespace Estimation
     private bool CanViewFit =>
       !_moduleState.ChainStates.IsEmpty &&
       _moduleState.ChainStates.ForAll(cs => cs.PosteriorData?.Count > 0) &&
-      _moduleState.ChainStates.ForAll(cs => cs.PosteriorData.Values.All(dt => dt.Rows.Count > 0)) &&
+      _moduleState.ChainStates.ForAll(cs => cs.PosteriorData?.Values.All(dt => dt.Rows.Count > 0) == true) &&
       _moduleState.PosteriorState?.BeginIteration < _moduleState.PosteriorState?.EndIteration;
 
     private void PopulateControls()
@@ -174,7 +199,9 @@ namespace Estimation
         .OrderBy(n => n)
         .ToArr();
 
-      var index = OutputNames.IndexOf(selectedOutputName);
+      var index = selectedOutputName.IsAString() 
+        ? OutputNames.IndexOf(selectedOutputName)
+        : NOT_FOUND;
 
       SelectedOutputName = index.IsFound() ? index : 0;
     }
@@ -200,13 +227,15 @@ namespace Estimation
         return;
       }
 
+      RequireNotNull(_moduleState.EstimationDesign);
+
       var selectedChainStates = _moduleState.ChainStates.Filter(cs => selectedChainNos.Contains(cs.No));
-      var posteriorData = selectedChainStates.Map(cs => cs.PosteriorData[selectedOutputName]);
+      var posteriorData = selectedChainStates.Map(cs => cs.PosteriorData![selectedOutputName]);
 
       var boxModelData = new List<(double X, List<double> Y)>();
 
-      var startPosteriorRow = _moduleState.PosteriorState.BeginIteration;
-      var endPosteriorRow = _moduleState.PosteriorState.EndIteration;
+      var startPosteriorRow = _moduleState.PosteriorState!.BeginIteration;
+      var endPosteriorRow = _moduleState.PosteriorState!.EndIteration;
 
       posteriorData.Iter(pd =>
       {
@@ -273,7 +302,7 @@ namespace Estimation
       PlotModel.InvalidatePlot(updateData: true);
     }
 
-    private void ObserveAppSettingsPropertyChange(string propertyName)
+    private void ObserveAppSettingsPropertyChange(string? propertyName)
     {
       if (!propertyName.IsThemeProperty()) return;
 
@@ -286,7 +315,7 @@ namespace Estimation
       PopulateControls();
     }
 
-    private void ObserveModuleStateEstimationDataChange((Arr<ChainState>, PosteriorState) _)
+    private void ObserveModuleStateEstimationDataChange((Arr<ChainState>, PosteriorState?) _)
     {
       PopulateChart();
     }
@@ -301,40 +330,11 @@ namespace Estimation
       PopulateChart();
     }
 
-    private PlotModel CreatePlotModel()
-    {
-      var plotModel = new PlotModel
-      {
-        LegendPlacement = LegendPlacement.Inside,
-        LegendPosition = LegendPosition.RightTop,
-        LegendOrientation = LegendOrientation.Vertical
-      };
-
-      var simulation = _appState.Target.AssertSome();
-      var output = simulation.SimConfig.SimOutput;
-      var independentVariable = output.IndependentVariable;
-
-      _horizontalAxis = new LinearAxis
-      {
-        Title = independentVariable.Name,
-        Unit = independentVariable.Unit,
-        Position = AxisPosition.Bottom
-      };
-      plotModel.Axes.Add(_horizontalAxis);
-
-      _verticalAxis = new LinearAxis { Position = AxisPosition.Left };
-      plotModel.Axes.Add(_verticalAxis);
-
-      plotModel.ApplyThemeToPlotModelAndAxes();
-
-      return plotModel;
-    }
-
     private readonly IAppState _appState;
     private readonly ModuleState _moduleState;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private IDisposable _chainViewModelsSubscription;
+    private IDisposable? _chainViewModelsSubscription;
     private LinearAxis _horizontalAxis;
     private LinearAxis _verticalAxis;
     private bool _disposed = false;

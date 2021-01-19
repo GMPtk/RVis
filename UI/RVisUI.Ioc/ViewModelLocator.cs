@@ -1,11 +1,11 @@
 ﻿using CommonServiceLocator;
 using RVisUI.Mvvm;
-using Splat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static RVisUI.Wpf.WpfTools;
 
 namespace RVisUI.Ioc
 {
@@ -13,14 +13,9 @@ namespace RVisUI.Ioc
   {
     public ViewModelLocator()
     {
-      if (PlatformModeDetector.InDesignMode())
-      {
-        NinjectBootstrapper = new Design.NinjectBootstrapper();
-      }
-      else
-      {
-        NinjectBootstrapper = new NinjectBootstrapper();
-      }
+      NinjectBootstrapper = IsInDesignMode 
+        ? new Design.NinjectBootstrapper() 
+        : new NinjectBootstrapper();
 
       NinjectBootstrapper.LoadModules();
 
@@ -41,7 +36,10 @@ namespace RVisUI.Ioc
       var interfaces = assembly.GetTypes().Where(t => t.IsInterface);
       foreach (var @interface in interfaces)
       {
+        if (@interface.FullName is null) continue;
+
         var match = reServiceTypeName.Match(@interface.FullName);
+        
         if (match.Success)
         {
           var serviceName = match.Groups[1].Value;

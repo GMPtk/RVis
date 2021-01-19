@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.Controls;
+﻿using LanguageExt;
+using MahApps.Metro.Controls;
 using ReactiveUI;
 using RVis.Base;
 using RVis.Model;
@@ -7,7 +8,6 @@ using RVisUI.Controls.Dialogs;
 using RVisUI.Properties;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,6 +16,8 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using static RVis.Base.Check;
+using static RVis.Base.ProcessHelper;
 using static System.Double;
 using static System.Math;
 
@@ -29,30 +31,39 @@ namespace RVisUI
     public MainWindow()
     {
       InitializeComponent();
+
+      RequireNotNull(SynchronizationContext.Current);
+
       ToggleFullScreenCommand = ReactiveCommand.Create(() => FullScreen = !FullScreen);
 
       _tbResetRServicesFG = _tbResetRServices.Foreground;
 
-      App.Current.AppService?.RVisServerPool.ServerLicenses
+      if (ShowFrameRate)
+      {
+        CompositionTarget.Rendering += HandleCompositionTargetRendering;
+        _stopwatch.Start();
+      }
+
+      Loaded += HandleLoaded;
+    }
+
+    internal static bool ShowFrameRate { get; set; } = false;
+
+    internal static double MaximumMemoryPressure { get; set; } = 1d;
+
+    private void HandleLoaded(object sender, RoutedEventArgs e)
+    {
+      RequireNotNull(SynchronizationContext.Current);
+
+      Loaded -= HandleLoaded;
+
+      App.Current.AppService.RVisServerPool.ServerLicenses
         .ObserveOn(SynchronizationContext.Current)
         .Subscribe(ObserveServerLicense);
 
       App.Current.AppState?.SimData?.OutputRequests
         .ObserveOn(SynchronizationContext.Current)
         .Subscribe(ObserveOutputRequest);
-
-      var showFrameRate = ConfigurationManager.AppSettings[$"{nameof(RVisUI)}.ShowFrameRate"];
-      if (bool.TryParse(showFrameRate, out bool b) && b)
-      {
-        CompositionTarget.Rendering += HandleCompositionTargetRendering;
-        _stopwatch.Start();
-      }
-
-      var maximumMemoryPressure = ConfigurationManager.AppSettings[$"{nameof(RVisUI)}.MaximumMemoryPressure"];
-      if (double.TryParse(maximumMemoryPressure, out double d))
-      {
-        _maximumMemoryPressure = IsNaN(d) ? 0.95 : d;
-      }
 
       App.Current.AppSettings
         .ObservableForProperty(@as => @as.Zoom)
@@ -134,7 +145,7 @@ namespace RVisUI
     {
       var directory = Path.Combine(DirectoryOps.ApplicationDataDirectory.FullName, "Log");
       if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
-      Process.Start(directory);
+      OpenUrl(directory);
     }
 
     private void HandleConfigureModules(object sender, RoutedEventArgs e)
@@ -187,7 +198,7 @@ namespace RVisUI
       }
     }
 
-    private void HandleCompositionTargetRendering(object sender, EventArgs e)
+    private void HandleCompositionTargetRendering(object? sender, EventArgs e)
     {
       ++_frameCount;
 
@@ -212,7 +223,7 @@ namespace RVisUI
 
       var memoryPressure = (0d + privateMemorySize64) / MAXIMUM_PROCESS_MEMORY;
 
-      if (memoryPressure > _maximumMemoryPressure)
+      if (memoryPressure > MaximumMemoryPressure)
       {
         App.Current.AppState.SimData.Clear(includePendingRequests: false);
         GC.Collect();
@@ -245,7 +256,6 @@ namespace RVisUI
     private readonly Stopwatch _stopwatch = new Stopwatch();
     private int _frameCount;
     private int _memoryEventCount;
-    private readonly double _maximumMemoryPressure;
-    private Process _process;
+    private Process? _process;
   }
 }

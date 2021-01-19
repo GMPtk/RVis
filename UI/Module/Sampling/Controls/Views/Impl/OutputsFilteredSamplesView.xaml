@@ -1,0 +1,228 @@
+﻿<UserControl x:Class="Sampling.Controls.Views.Impl.OutputsFilteredSamplesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             xmlns:design="clr-namespace:Sampling.Design"
+             xmlns:local="clr-namespace:Sampling"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="200"
+             d:DataContext="{d:DesignInstance Type=design:OutputsFilteredSamplesViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <wpf:BooleanToVisibilityConverter 
+        x:Key="b2vc" 
+        True="Visible" 
+        False="Hidden" 
+        />
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid>
+
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+
+    <Grid Margin="0 0 0 2">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+      <StackPanel HorizontalAlignment="Center" 
+                  Orientation="Horizontal">
+        <TextBlock Text="Enable" 
+                   Margin="0 0 4 0"
+                   VerticalAlignment="Center"
+                   />
+        <ToggleButton Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                      IsChecked="{Binding IsEnabled}"
+                      ToolTip="Enable filtering"
+                      Margin="0 6 0 6"
+                      />
+      </StackPanel>
+      <StackPanel Grid.Column="1"
+                  HorizontalAlignment="Center" 
+                  Orientation="Horizontal"
+                  Visibility="{Binding IsEnabled, Converter={StaticResource b2vc}}">
+        <TextBlock Text="&#x2229;" 
+                   FontSize="18"
+                   Margin="0 0 4 0"
+                   />
+        <ToggleButton Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                      IsChecked="{Binding IsUnion}"
+                      ToolTip="Apply filters by union or intersection"
+                      Margin="0 6 0 6"
+                      />
+        <TextBlock Text="&#x222A;" 
+                   FontSize="18"
+                   Margin="4 0 0 0"
+                   />
+      </StackPanel>
+    </Grid>
+
+    <Grid Grid.Row="1" 
+          Margin="0 2 0 2"
+          Visibility="{Binding IsEnabled, Converter={StaticResource b2vc}}">
+      <Grid.RowDefinitions>
+        <RowDefinition/>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock Margin="6 0 6 2">
+        <TextBlock.Text>
+          <MultiBinding StringFormat="{}at {0} = {1:G4} {2}, take {3}">
+            <Binding Path="IndependentVariableName" TargetNullValue=""/>
+            <Binding Path="IndependentVariableValue" TargetNullValue="?" />
+            <Binding Path="IndependentVariableUnit" TargetNullValue="" />
+            <Binding Path="OutputName" TargetNullValue="?" />
+          </MultiBinding>
+        </TextBlock.Text>
+      </TextBlock>
+      <StackPanel Grid.Row="1" 
+                  HorizontalAlignment="Center" 
+                  Orientation="Horizontal"
+                  Margin="6 2 6 0"
+                  >
+        <TextBlock Text="from" 
+                   VerticalAlignment="Center" 
+                   MaxWidth="70"
+                   Margin="0 0 2 0"
+                   TextTrimming="CharacterEllipsis"
+                   />
+        <TextBox Text="{Binding FromT, TargetNullValue=''}"
+                 Width="55"
+                 Margin="1 0 1 0"
+                 />
+        <TextBlock Text="to" 
+                   VerticalAlignment="Center"
+                   Margin="1 0 1 0"
+                   />
+        <TextBox Text="{Binding ToT, TargetNullValue=''}"
+                 Width="55"
+                 Margin="2 0 2 0"
+                 />
+      </StackPanel>
+      <Button Grid.Column="1" 
+              Grid.RowSpan="2" 
+              Height="16"
+              Width="16"
+              Margin="2"
+              Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+              Command="{Binding AddNewFilter}"
+              ToolTip="Add filter">
+        <md:PackIcon Kind="Plus"
+                     Height="12"
+                     Width="12"
+                     />
+      </Button>
+    </Grid>
+
+    <ScrollViewer Grid.Row="2" 
+                  Margin="0 4 0 0"
+                  VerticalScrollBarVisibility="Auto"
+                  Visibility="{Binding IsEnabled, Converter={StaticResource b2vc}}">
+
+      <ItemsControl ItemsSource="{Binding OutputsFilterViewModels}"
+                    Grid.IsSharedSizeScope="True"
+                    Margin="6 0 6 0"
+                    >
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="{x:Type local:OutputsFilterViewModel}">
+            <Border x:Name="_filterBorder" Padding="4">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition SharedSizeGroup="IsEnabled" />
+                  <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <CheckBox VerticalAlignment="Center"
+                          IsChecked="{Binding IsEnabled}"
+                          ToolTip="Enable filter"
+                          Command="{Binding ToggleEnable}"
+                          CommandParameter="{Binding}"
+                          Style="{StaticResource MaterialDesignAccentCheckBox}"
+                          />
+                <Grid Grid.Column="1"
+                      Margin="4 0 0 0"
+                      >
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                  </Grid.RowDefinitions>
+                  <TextBlock FontSize="8" FontWeight="Bold">
+                    <TextBlock.Text>
+                      <MultiBinding StringFormat="{}at {0} = {1} {2}">
+                        <Binding Path="IndependentVariableName" />
+                        <Binding Path="IndependentVariableValue" />
+                        <Binding Path="IndependentVariableUnit" TargetNullValue="" />
+                      </MultiBinding>
+                    </TextBlock.Text>
+                  </TextBlock>
+                  <Button Grid.Column="1"
+                          Height="12"
+                          Width="12"
+                          Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                          ToolTip="Add filter"
+                          Command="{Binding Delete}"
+                          CommandParameter="{Binding}"
+                          >
+                    <md:PackIcon Kind="Delete"
+                                 Height="9"
+                                 Width="9"
+                                 />
+                  </Button>
+                  <TextBlock Grid.Row="1" Grid.ColumnSpan="2" FontSize="10">
+                    <TextBlock.Text>
+                      <MultiBinding StringFormat="{}{0} {1} to {2} {3}">
+                        <Binding Path="OutputName"/>
+                        <Binding Path="From" />
+                        <Binding Path="To" />
+                        <Binding Path="OutputUnit" TargetNullValue="" />
+                      </MultiBinding>
+                    </TextBlock.Text>
+                  </TextBlock>
+                </Grid>
+              </Grid>
+            </Border>
+            <DataTemplate.Triggers>
+              <DataTrigger Binding="{Binding IsEnabled}"
+                           Value="True">
+                <Setter TargetName="_filterBorder"
+                        Property="Background"
+                        Value="{DynamicResource MaterialDesignSelection}" 
+                        />
+              </DataTrigger>
+            </DataTemplate.Triggers>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+    
+  </Grid>
+</UserControl>

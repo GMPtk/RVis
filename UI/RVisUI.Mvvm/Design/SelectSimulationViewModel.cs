@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 
+#nullable disable
+
 namespace RVisUI.Mvvm.Design
 {
   public class SelectSimulationViewModel : ISelectSimulationViewModel

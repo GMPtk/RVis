@@ -27,12 +27,12 @@ namespace Plot
       _maximum = deepCopySource.Maximum;
     }
 
-    public string Name
+    public string? Name
     {
       get => _name;
       set => this.RaiseAndSetIfChanged(ref _name, value, PropertyChanged);
     }
-    private string _name;
+    private string? _name;
 
     public bool IsSelected
     {
@@ -41,12 +41,12 @@ namespace Plot
     }
     private bool _isSelected;
 
-    public string Value
+    public string? Value
     {
       get => _value;
       set => this.RaiseAndSetIfChanged(ref _value, value, PropertyChanged);
     }
-    private string _value;
+    private string? _value;
 
     public double Minimum
     {
@@ -62,7 +62,7 @@ namespace Plot
     }
     private double _maximum;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public ParameterEditState DeepClone() => new ParameterEditState(this);
 

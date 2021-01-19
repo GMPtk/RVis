@@ -1,75 +1,103 @@
 @setlocal enabledelayedexpansion
-@set MSBUILD=
 
-@for /D %%M in ("%ProgramFiles(x86)%\Microsoft Visual Studio\2019"\*) do (
-  @if exist "%%M\MSBuild\Current\Bin\MSBuild.exe" (
-    @set "MSBUILD=%%M\MSBuild\Current\Bin\MSBuild.exe"
-  )
-)
+@set rid=%1
 
-@if ["%MSBUILD%"] == [""] (
-  @for /D %%M in ("%ProgramFiles(x86)%\Microsoft Visual Studio\2017"\*) do (
-    @if exist "%%M\MSBuild\15.0\Bin\MSBuild.exe" (
-      @set "MSBUILD=%%M\MSBuild\15.0\Bin\MSBuild.exe"
-    )
-  )
-)
-
-@if "%MSBUILD%" == "" (
-  @echo Failed to find VS2017 or VS2019 MSBuild
+@if "%rid%" == "" (
+  @echo runtime identifier needed^^!
   @exit /b 1
 )
 
-"%MSBUILD%" RVis.sln /p:Configuration=Release "/p:Platform=Any CPU"
+@set "DOTNET=%ProgramFiles%\dotnet\dotnet.exe"
 
+@if not exist "%DOTNET%" (
+  @echo Failed to find dotnet command
+  @exit /b 1
+)
+
+"%DOTNET%" build .\UI\RVisUI\RVisUI.csproj /p:Configuration=Release -r %rid%
 @if %ERRORLEVEL% neq 0 (
   @pause
   @exit /b 1
 )
 
+"%DOTNET%" build .\UI\Module\Estimation\Estimation.csproj /p:Configuration=Release -r %rid%
+@if %ERRORLEVEL% neq 0 (
+  @pause
+  @exit /b 1
+)
+
+"%DOTNET%" build .\UI\Module\Evidence\Evidence.csproj /p:Configuration=Release -r %rid%
+@if %ERRORLEVEL% neq 0 (
+  @pause
+  @exit /b 1
+)
+
+"%DOTNET%" build .\UI\Module\Plot\Plot.csproj /p:Configuration=Release -r %rid%
+@if %ERRORLEVEL% neq 0 (
+  @pause
+  @exit /b 1
+)
+
+"%DOTNET%" build .\UI\Module\Sampling\Sampling.csproj /p:Configuration=Release -r %rid%
+@if %ERRORLEVEL% neq 0 (
+  @pause
+  @exit /b 1
+)
+
+"%DOTNET%" build .\UI\Module\Sensitivity\Sensitivity.csproj /p:Configuration=Release -r %rid%
+@if %ERRORLEVEL% neq 0 (
+  @pause
+  @exit /b 1
+)
+
+"%DOTNET%" build .\R\RVis.Server\RVis.Server.csproj /p:Configuration=Release -r %rid%
+@if %ERRORLEVEL% neq 0 (
+  @pause
+  @exit /b 1
+)
+
+@if exist rvis_%rid% (
+  @rmdir /Q /S rvis_%rid%
+)
+
+"%DOTNET%" publish .\UI\RVisUI\RVisUI.csproj /p:Configuration=Release /p:SelfContained=true -r %rid% -o .\rvis_%rid%\RVis
+@if %ERRORLEVEL% neq 0 (
+  @pause
+  @exit /b 1
+)
+
+"%DOTNET%" publish .\R\RVis.Server\RVis.Server.csproj /p:Configuration=Release /p:SelfContained=true -r %rid% -o .\rvis_%rid%\RVis\R
+@if %ERRORLEVEL% neq 0 (
+  @pause
+  @exit /b 1
+)
+
+@mkdir .\rvis_%rid%\RVis\module\estimation
+@copy UI\module\Estimation\bin\Release\net5.0-windows\%rid%\Estimation.dll .\rvis_%rid%\RVis\module\estimation\ >nul
+
+@mkdir .\rvis_%rid%\RVis\module\evidence
+@copy UI\module\Evidence\bin\Release\net5.0-windows\%rid%\Evidence.dll .\rvis_%rid%\RVis\module\evidence\ >nul
+
+@mkdir .\rvis_%rid%\RVis\module\plot
+@copy UI\module\Plot\bin\Release\net5.0-windows\%rid%\Plot.dll .\rvis_%rid%\RVis\module\plot\ >nul
+
+@mkdir .\rvis_%rid%\RVis\module\sampling
+@copy UI\module\Sampling\bin\Release\net5.0-windows\%rid%\Sampling.dll .\rvis_%rid%\RVis\module\sampling\ >nul
+
+@mkdir .\rvis_%rid%\RVis\module\sensitivity
+@copy UI\module\Sensitivity\bin\Release\net5.0-windows\%rid%\Sensitivity.dll .\rvis_%rid%\RVis\module\sensitivity\ >nul
+
+@if exist RVis_%rid%.zip (
+  @del RVis_%rid%.zip
+)
+
 @if not exist "%ProgramFiles%\7-zip\7z.exe" (
-	@echo Install 7-zip!
-	@exit /b 1
+  @echo Failed to find 7-zip
+  @exit /b 1
 )
 
-@if exist rvis.zip (
-  @del rvis.zip
-)
+"%ProgramFiles%\7-zip\7z.exe" a RVis_%rid%.zip %cd%\rvis_%rid%\RVis\
 
-@if exist rvis (
-  @rmdir /Q /S rvis
-)
-
-@mkdir rvis
-@mkdir rvis\bin
-
-@copy UI\RVisUI\bin\Release\RVisUI.exe rvis\ >nul
-@copy UI\RVisUI\bin\Release\RVisUI.exe.config rvis\ >nul
-@copy UI\RVisUI\bin\Release\*.dll rvis\bin\ >nul
-
-@copy WinR\RVis.Server\bin\Release\RVis.Server.exe rvis\bin\ >nul
-@copy WinR\RVis.Server\bin\Release\RVis.Server.exe.config rvis\bin\ >nul
-@copy /Y WinR\RVis.Server\bin\Release\*.dll rvis\bin\ >nul
-
-@mkdir rvis\module
-
-@mkdir rvis\module\estimation
-@copy UI\module\Estimation\bin\Release\Estimation.dll rvis\module\estimation\ >nul
-
-@mkdir rvis\module\evidence
-@copy UI\module\Evidence\bin\Release\Evidence.dll rvis\module\evidence\ >nul
-
-@mkdir rvis\module\plot
-@copy UI\module\Plot\bin\Release\Plot.dll rvis\module\plot\ >nul
-
-@mkdir rvis\module\sampling
-@copy UI\module\Sampling\bin\Release\Sampling.dll rvis\module\sampling\ >nul
-
-@mkdir rvis\module\sensitivity
-@copy UI\module\Sensitivity\bin\Release\Sensitivity.dll rvis\module\sensitivity\ >nul
-
-"%ProgramFiles%\7-zip\7z.exe" a rvis.zip %cd%\rvis\
-
-@rmdir /Q /S rvis
+@rmdir /Q /S rvis_%rid%
 
 @exit /b 0

@@ -15,7 +15,7 @@ namespace Plot.Controls.Views
     {
       InitializeComponent();
 
-      _cvsUnselected = Resources["_cvsUnselected"] as CollectionViewSource;
+      _cvsUnselected = (CollectionViewSource)Resources["_cvsUnselected"];
 
       _txtSearch.TextChanged += HandleSearchTextChanged;
 
@@ -41,7 +41,7 @@ namespace Plot.Controls.Views
 
     private bool Predicate(object o)
     {
-      if (!(o is IParameterViewModel parameterViewModel))
+      if (o is not IParameterViewModel parameterViewModel)
       {
         throw new InvalidOperationException($"Expecting {nameof(IParameterViewModel)} instance");
       }

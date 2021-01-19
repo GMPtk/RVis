@@ -1,5 +1,7 @@
 ﻿using RVis.Model;
 
+#nullable disable
+
 namespace RVisUI.Mvvm.Design
 {
   public class SimulationViewModel : ISimulationViewModel

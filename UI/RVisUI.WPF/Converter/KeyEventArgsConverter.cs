@@ -3,6 +3,8 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Input;
 
+#nullable disable
+
 namespace RVisUI.Wpf
 {
   public class KeyEventArgsConverter : IValueConverter
@@ -11,7 +13,7 @@ namespace RVisUI.Wpf
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      if (!(value is KeyEventArgs keyEventArgs)) return default;
+      if (value is not KeyEventArgs keyEventArgs) return default;
 
       return (
         keyEventArgs.Key, 

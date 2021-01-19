@@ -10,7 +10,7 @@ namespace RVisUI.Model
 
     public string Reference { get; }
 
-    public override bool Equals(object obj) => 
+    public override bool Equals(object? obj) => 
       obj is SimObservationsSharedState observationsSharedState && Equals(observationsSharedState);
 
     public bool Equals(SimObservationsSharedState other) => 

@@ -25,7 +25,7 @@ namespace RVis.Model
 
     public SimEvidenceSource AddEvidenceSource(
       string name,
-      string description,
+      string? description,
       Set<string> subjects,
       string refName,
       string refHash
@@ -38,6 +38,7 @@ namespace RVis.Model
           $"Duplicate evidence source: {refHash}"
         );
         RequireTrue(subjects.ForAll(IsSubject));
+        RequireNotNullEmptyWhiteSpace(_pathToEvidenceDirectory);
 
         var id = EvidenceSources.IsEmpty ? 1 : 1 + EvidenceSources.Max(es => es.ID);
 
@@ -55,6 +56,8 @@ namespace RVis.Model
 
     public void RemoveEvidenceSource(int id)
     {
+      RequireNotNullEmptyWhiteSpace(_pathToEvidenceDirectory);
+
       lock (_syncLock)
       {
         var index = EvidenceSources.FindIndex(es => es.ID == id);
@@ -85,6 +88,8 @@ namespace RVis.Model
       Arr<(string Subject, string RefName, Arr<double> X, Arr<double> Y)> additions
       )
     {
+      RequireNotNullEmptyWhiteSpace(_pathToEvidenceDirectory);
+
       lock (_syncLock)
       {
         var esIndex = EvidenceSources.FindIndex(es => es.ID == evidenceSourceID);
@@ -160,6 +165,8 @@ namespace RVis.Model
 
     public void RemoveObservations(SimObservations observations)
     {
+      RequireNotNullEmptyWhiteSpace(_pathToEvidenceDirectory);
+
       lock (_syncLock)
       {
         var observationsSet = FindOrLoadOrCreateObservationsSet(observations.Subject);
@@ -282,6 +289,8 @@ namespace RVis.Model
 
       if (!removed.IsEmpty)
       {
+        RequireNotNullEmptyWhiteSpace(_pathToEvidenceDirectory);
+
         observationsSet = SimObservationsSet.RemoveAllObservations(observationsSet, evidenceSourceID);
 
         SimObservationsSet.Save(observationsSet, _pathToEvidenceDirectory);
@@ -298,18 +307,22 @@ namespace RVis.Model
       return removed;
     }
 
-    private SimObservationsSet FindOrLoadOrCreateObservationsSet(string subject) =>
-      _observationsSets
+    private SimObservationsSet FindOrLoadOrCreateObservationsSet(string subject)
+    {
+      RequireNotNullEmptyWhiteSpace(_pathToEvidenceDirectory);
+
+      return _observationsSets
         .FindObservationsSet(subject)
         .Match(
-          os => os,
-          () => SimObservationsSet.LoadOrCreate(_pathToEvidenceDirectory, subject)
+        os => os,
+        () => SimObservationsSet.LoadOrCreate(_pathToEvidenceDirectory, subject)
         );
+    }
 
     private bool IsSubject(string subject) =>
       SimEvidenceExt.IsSubject(this, subject);
 
-    private string _pathToEvidenceDirectory;
+    private string? _pathToEvidenceDirectory;
     private Arr<SimObservationsSet> _observationsSets;
     private readonly ISubject<(SimEvidenceSource SimEvidenceSource, ObservableQualifier Change)> _evidenceSourcesChangesSubject =
       new Subject<(SimEvidenceSource SimEvidenceSource, ObservableQualifier Change)>();

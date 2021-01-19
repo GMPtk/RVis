@@ -5,13 +5,13 @@ namespace Estimation
 {
   internal sealed class SimulationState : INotifyPropertyChanged
   {
-    internal string SelectedParameter
+    internal string? SelectedParameter
     {
       get => _selectedParameter;
       set => this.RaiseAndSetIfChanged(ref _selectedParameter, value, PropertyChanged);
     }
-    private string _selectedParameter;
+    private string? _selectedParameter;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

@@ -201,7 +201,7 @@ namespace Estimation
     }
     private bool _isSelected;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 

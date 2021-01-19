@@ -14,7 +14,7 @@ namespace Plot
       InactiveSupplementaryElementNames = new SortedDictionary<string, Arr<string>>();
     }
 
-    public string SelectedElementName
+    public string? SelectedElementName
     {
       get => _selectedElementName;
       set
@@ -38,7 +38,7 @@ namespace Plot
         this.RaiseAndSetIfChanged(ref _selectedElementName, value, PropertyChanged);
       }
     }
-    private string _selectedElementName;
+    private string? _selectedElementName;
 
     public Arr<string> MRUElementNames
     {
@@ -46,6 +46,13 @@ namespace Plot
       set => this.RaiseAndSetIfChanged(ref _mruElementNames, value, PropertyChanged);
     }
     private Arr<string> _mruElementNames;
+
+    public string? SelectedInsetElementName
+    {
+      get => _selectedInsetElementName;
+      set => this.RaiseAndSetIfChanged(ref _selectedInsetElementName, value, PropertyChanged);
+    }
+    private string? _selectedInsetElementName;
 
     public Arr<string> SupplementaryElementNames
     {
@@ -70,6 +77,6 @@ namespace Plot
     }
     private bool _isScaleLogarithmic;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
   }
 }

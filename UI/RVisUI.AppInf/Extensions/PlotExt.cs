@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static MathNet.Numerics.Statistics.SortedArrayStatistics;
 using static RVis.Base.Check;
-using static Splat.PlatformModeDetector;
+using static RVisUI.Wpf.WpfTools;
 using static System.Array;
 using static System.Convert;
 using static System.Double;
@@ -52,7 +52,7 @@ namespace RVisUI.AppInf.Extensions
       return GetFreedmanDiaconis(array);
     }
 
-    public static Axis GetAxis(this PlotModel plotModel, AxisPosition axisPosition) =>
+    public static Axis? GetAxis(this PlotModel plotModel, AxisPosition axisPosition) =>
       plotModel.Axes.SingleOrDefault(a => a.Position == axisPosition);
 
     public static void AssignDefaultColors(
@@ -75,8 +75,8 @@ namespace RVisUI.AppInf.Extensions
       Arr<double> x,
       Arr<double> y,
       IList<OxyColor> colors,
-      string yAxisKey,
-      object tag
+      string? yAxisKey,
+      object? tag
       )
     {
       var markerType = MarkerTypes[seriesIndex % MarkerTypes.Count];
@@ -118,7 +118,7 @@ namespace RVisUI.AppInf.Extensions
       }
       catch (Exception)
       {
-        if (!InDesignMode()) throw;
+        if (!IsInDesignMode) throw;
         return;
       }
 
@@ -147,6 +147,18 @@ namespace RVisUI.AppInf.Extensions
       {
         lineAnnotation.Color = plotModel.TextColor;
       }
+
+      var background = OxyColor.FromArgb(
+        theme.Paper.A,
+        theme.Paper.R,
+        theme.Paper.G,
+        theme.Paper.B
+        );
+
+      foreach (var legend in plotModel.Legends)
+      {
+        legend.LegendBackground = background;
+      }
     }
 
     public static void AddAxes(
@@ -154,7 +166,7 @@ namespace RVisUI.AppInf.Extensions
       string xTitle,
       double? xMin,
       double? xMax,
-      string yTitle,
+      string? yTitle,
       double? yMin,
       double? yMax
     )
@@ -192,7 +204,7 @@ namespace RVisUI.AppInf.Extensions
       if (iqr == 0.0) return (PositiveInfinity, 1);
 
       var binWidth = 2.0 * iqr * Pow(array.Length, -1.0 / 3.0);
-      var nBins = ToInt32((array[array.Length - 1] - array[0]) / binWidth);
+      var nBins = ToInt32((array[^1] - array[0]) / binWidth);
       return (binWidth, nBins);
     }
   }

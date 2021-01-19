@@ -23,7 +23,7 @@ namespace RVisUI.Wpf
 
     private static void HandleIsHiddenChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      if (!d.Resolve(out FrameworkElement frameworkElement)) return;
+      if (!d.Resolve(out FrameworkElement? frameworkElement)) return;
       var isHidden = (bool?)e.NewValue == true;
       frameworkElement.Visibility = isHidden ? Visibility.Hidden : Visibility.Visible;
     }
@@ -56,7 +56,7 @@ namespace RVisUI.Wpf
 
     private static void HandlePanelLoaded(object sender, RoutedEventArgs e)
     {
-      UIElementCollection children = default;
+      UIElementCollection? children = default;
 
       if (sender is Panel panel)
       {
@@ -71,8 +71,8 @@ namespace RVisUI.Wpf
       {
         foreach (var child in children)
         {
-          if (!child.Resolve(out FrameworkElement frameworkElement)) continue;
-          frameworkElement.Margin = GetMargin(sender as DependencyObject);
+          if (!child.Resolve(out FrameworkElement? frameworkElement)) continue;
+          frameworkElement.Margin = GetMargin((DependencyObject)sender);
         }
       }
     }

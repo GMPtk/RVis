@@ -1,23 +1,24 @@
-﻿using OxyPlot;
-using RVis.Model;
+﻿using RVis.Model;
 using System.Data;
 using System.Linq;
 using static LanguageExt.Prelude;
+using static RVis.Base.Check;
 
 namespace Sampling.Design
 {
   internal static class Data
   {
-    internal const int SAMPLE_SIZE = 100;
+    public const int SAMPLE_SIZE = 100;
 
-    internal static DataView Samples => GetSamples();
+    public static DataView Samples => GetSamples();
 
-    internal static IParameterSamplingViewModel BetaParameterSamplingViewModel
+    public static IParameterSamplingViewModel BetaParameterSamplingViewModel
     {
       get
       {
         var parameterSamplingViewModel = new ParameterSamplingViewModel(
-          new SimParameter("a", "123", "mg/L", default)
+          new SimParameter("a", "123", "mg/L", default),
+          new ModuleState()
           )
         {
           Distribution = new BetaDistribution(0.5, 0.5)
@@ -29,12 +30,13 @@ namespace Sampling.Design
       }
     }
 
-    internal static IParameterSamplingViewModel BetaScaledParameterSamplingViewModel
+    public static IParameterSamplingViewModel BetaScaledParameterSamplingViewModel
     {
       get
       {
         var parameterSamplingViewModel = new ParameterSamplingViewModel(
-          new SimParameter("b","123","mg/L", default)
+          new SimParameter("b", "123", "mg/L", default),
+          new ModuleState()
           )
         {
           Distribution = new BetaScaledDistribution(0.5, 0.5, 10, 5)
@@ -46,12 +48,13 @@ namespace Sampling.Design
       }
     }
 
-    internal static IParameterSamplingViewModel GammaParameterSamplingViewModel
+    public static IParameterSamplingViewModel GammaParameterSamplingViewModel
     {
       get
       {
         var parameterSamplingViewModel = new ParameterSamplingViewModel(
-          new SimParameter("c","123","mg/L", default)
+          new SimParameter("c", "123", "mg/L", default),
+          new ModuleState()
           )
         {
           Distribution = new GammaDistribution(2, 0.5)
@@ -63,12 +66,13 @@ namespace Sampling.Design
       }
     }
 
-    internal static IParameterSamplingViewModel InvariantParameterSamplingViewModel
+    public static IParameterSamplingViewModel InvariantParameterSamplingViewModel
     {
       get
       {
         var parameterSamplingViewModel = new ParameterSamplingViewModel(
-          new SimParameter("d","123","mg/L", default)
+          new SimParameter("d", "123", "mg/L", default),
+          new ModuleState()
           )
         {
           Distribution = new InvariantDistribution(42)
@@ -80,12 +84,13 @@ namespace Sampling.Design
       }
     }
 
-    internal static IParameterSamplingViewModel InverseGammaParameterSamplingViewModel
+    public static IParameterSamplingViewModel InverseGammaParameterSamplingViewModel
     {
       get
       {
         var parameterSamplingViewModel = new ParameterSamplingViewModel(
-          new SimParameter("e","123","mg/L", default)
+          new SimParameter("e", "123", "mg/L", default),
+          new ModuleState()
           )
         {
           Distribution = new InverseGammaDistribution(1, 1)
@@ -97,12 +102,13 @@ namespace Sampling.Design
       }
     }
 
-    internal static IParameterSamplingViewModel LogNormalParameterSamplingViewModel
+    public static IParameterSamplingViewModel LogNormalParameterSamplingViewModel
     {
       get
       {
         var parameterSamplingViewModel = new ParameterSamplingViewModel(
-          new SimParameter("f","123","mg/L", default)
+          new SimParameter("f", "123", "mg/L", default),
+          new ModuleState()
           )
         {
           Distribution = new LogNormalDistribution(2, 0.6)
@@ -114,12 +120,13 @@ namespace Sampling.Design
       }
     }
 
-    internal static IParameterSamplingViewModel LogUniformParameterSamplingViewModel
+    public static IParameterSamplingViewModel LogUniformParameterSamplingViewModel
     {
       get
       {
         var parameterSamplingViewModel = new ParameterSamplingViewModel(
-          new SimParameter("g","123","mg/L", default)
+          new SimParameter("g", "123", "mg/L", default),
+          new ModuleState()
           )
         {
           Distribution = new LogUniformDistribution(0.6, 2)
@@ -131,12 +138,13 @@ namespace Sampling.Design
       }
     }
 
-    internal static IParameterSamplingViewModel NormalParameterSamplingViewModel
+    public static IParameterSamplingViewModel NormalParameterSamplingViewModel
     {
       get
       {
         var parameterSamplingViewModel = new ParameterSamplingViewModel(
-          new SimParameter("h","123","mg/L", default)
+          new SimParameter("h", "123", "mg/L", default),
+          new ModuleState()
           )
         {
           Distribution = new NormalDistribution(2, 0.6)
@@ -148,12 +156,13 @@ namespace Sampling.Design
       }
     }
 
-    internal static IParameterSamplingViewModel StudentTParameterSamplingViewModel
+    public static IParameterSamplingViewModel StudentTParameterSamplingViewModel
     {
       get
       {
         var parameterSamplingViewModel = new ParameterSamplingViewModel(
-          new SimParameter("i","123","mg/L", default)
+          new SimParameter("i", "123", "mg/L", default),
+          new ModuleState()
           )
         {
           Distribution = new StudentTDistribution(0, 1, 5)
@@ -165,12 +174,13 @@ namespace Sampling.Design
       }
     }
 
-    internal static IParameterSamplingViewModel UniformParameterSamplingViewModel
+    public static IParameterSamplingViewModel UniformParameterSamplingViewModel
     {
       get
       {
         var parameterSamplingViewModel = new ParameterSamplingViewModel(
-          new SimParameter("j","123","mg/L", default)
+          new SimParameter("j", "123", "mg/L", default),
+          new ModuleState()
           )
         {
           Distribution = new UniformDistribution(2, 4)
@@ -184,6 +194,8 @@ namespace Sampling.Design
 
     private static void DoSample(IParameterSamplingViewModel parameterSamplingViewModel)
     {
+      RequireNotNull(parameterSamplingViewModel.Distribution);
+
       parameterSamplingViewModel.Distribution.FillSamples(_samples);
       parameterSamplingViewModel.Samples = _samples.ToArr();
     }

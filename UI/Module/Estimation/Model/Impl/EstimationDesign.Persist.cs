@@ -17,22 +17,22 @@ namespace Estimation
   {
     private class _PriorDTO
     {
-      public string Name { get; set; }
-      public string Distribution { get; set; }
+      public string? Name { get; set; }
+      public string? Distribution { get; set; }
     }
 
     private class _OutputDTO
     {
-      public string Name { get; set; }
-      public string ErrorModel { get; set; }
+      public string? Name { get; set; }
+      public string? ErrorModel { get; set; }
     }
 
     private class _EstimationDesignDTO
     {
-      public string CreatedOn { get; set; }
-      public _PriorDTO[] Priors { get; set; }
-      public _OutputDTO[] Outputs { get; set; }
-      public string[] ObservationsReferences { get; set; }
+      public string? CreatedOn { get; set; }
+      public _PriorDTO[]? Priors { get; set; }
+      public _OutputDTO[]? Outputs { get; set; }
+      public string[]? ObservationsReferences { get; set; }
       public int Iterations { get; set; }
       public int BurnIn { get; set; }
       public int Chains { get; set; }
@@ -74,17 +74,19 @@ namespace Estimation
       try
       {
         var dto = Toml.ReadFile<_EstimationDesignDTO>(pathToDesign);
+        RequireNotNull(dto.Priors);
         var priors = dto.Priors
           .Select(dp => new ModelParameter(
-            dp.Name,
+            dp.Name.AssertNotNull(),
             Distribution.DeserializeDistribution(dp.Distribution).AssertSome()
             )
           )
           .ToArr();
+        RequireNotNull(dto.Outputs);
         var outputs = dto.Outputs
           .Select(@do => new ModelOutput(
-            @do.Name,
-            ErrorModel.DeserializeErrorModel(@do.ErrorModel).AssertSome()
+            @do.Name.AssertNotNull(),
+            ErrorModel.DeserializeErrorModel(@do.ErrorModel.AssertNotNull()).AssertSome()
             )
           )
           .ToArr();

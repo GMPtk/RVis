@@ -19,7 +19,7 @@ namespace RVis.Base.Test
     [TestMethod]
     public void TestAssertRight()
     {
-      Assert.IsTrue(toEither<Exception, bool>(true, default(Exception)).AssertRight());
+      Assert.IsTrue(toEither<Exception?, bool>(true, default(Exception)).AssertRight());
       Assert.ThrowsException<EitherIsNotRightException>(() => toEither<Exception, bool>(default, () => new Exception()).AssertRight());
       Assert.ThrowsException<BottomException>(() => Either<Exception, bool>.Bottom.AssertRight());
     }

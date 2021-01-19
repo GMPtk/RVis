@@ -7,6 +7,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using static RVis.Base.Check;
 
 namespace RVisUI.Mvvm
 {
@@ -19,7 +20,7 @@ namespace RVisUI.Mvvm
 
       FileName = fileName;
 
-      var changeParameterDescriptionUnit = 
+      var changeParameterDescriptionUnit =
         ReactiveCommand.Create<IParameterCandidateViewModel>(HandleChangeParameterDescriptionUnit);
 
       ParameterCandidates = managedImport.ParameterCandidates.Map<IParameterCandidateViewModel>(pc =>
@@ -41,7 +42,7 @@ namespace RVisUI.Mvvm
         this.ObservableForProperty(vm => vm.SelectedElementCandidate, sec => sec != default)
         );
 
-      var changeElementDescriptionUnit = 
+      var changeElementDescriptionUnit =
         ReactiveCommand.Create<IElementCandidateViewModel>(HandleChangeElementDescriptionUnit);
 
       _elementCandidates = managedImport.ValueCandidates
@@ -79,23 +80,23 @@ namespace RVisUI.Mvvm
 
     public ICommand UseNoParameters { get; }
 
-    public IElementCandidateViewModel IndependentVariable
+    public IElementCandidateViewModel? IndependentVariable
     {
       get => _independentVariable;
       set => this.RaiseAndSetIfChanged(ref _independentVariable, value);
     }
-    private IElementCandidateViewModel _independentVariable;
+    private IElementCandidateViewModel? _independentVariable;
 
     public ICommand SetIndependentVariable { get; }
 
     public ObservableCollection<IElementCandidateViewModel> ElementCandidates { get; }
 
-    public IElementCandidateViewModel SelectedElementCandidate
+    public IElementCandidateViewModel? SelectedElementCandidate
     {
       get => _selectedElementCandidate;
       set => this.RaiseAndSetIfChanged(ref _selectedElementCandidate, value);
     }
-    private IElementCandidateViewModel _selectedElementCandidate;
+    private IElementCandidateViewModel? _selectedElementCandidate;
 
     public ICommand UseAllOutputs { get; }
 
@@ -112,12 +113,12 @@ namespace RVisUI.Mvvm
     }
     private string _simulationName;
 
-    public string SimulationDescription
+    public string? SimulationDescription
     {
       get => _simulationDescription;
       set => this.RaiseAndSetIfChanged(ref _simulationDescription, value);
     }
-    private string _simulationDescription;
+    private string? _simulationDescription;
 
     public ICommand OK { get; }
 
@@ -156,6 +157,8 @@ namespace RVisUI.Mvvm
 
     private void HandleSetIndependentVariable()
     {
+      RequireNotNull(SelectedElementCandidate);
+
       if (IndependentVariable != default)
       {
         var insertAt = _elementCandidates.IndexOf(IndependentVariable);
@@ -246,10 +249,10 @@ namespace RVisUI.Mvvm
       if (SimulationName.IsntAString())
       {
         _appService.Notify(
-          NotificationType.Error, 
-          nameof(ImportExecViewModel), 
-          nameof(SimulationName), 
-          "Provide a name for the simulation", 
+          NotificationType.Error,
+          nameof(ImportExecViewModel),
+          nameof(SimulationName),
+          "Provide a name for the simulation",
           this
           );
         return;

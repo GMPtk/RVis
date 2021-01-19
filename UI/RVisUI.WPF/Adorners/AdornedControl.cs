@@ -229,12 +229,12 @@ namespace RVisUI.Wpf
     /// <summary>
     /// Caches the adorner layer.
     /// </summary>
-    private AdornerLayer _adornerLayer = null;
+    private AdornerLayer? _adornerLayer = null;
 
     /// <summary>
     /// The actual adorner create to contain our 'adorner UI content'.
     /// </summary>
-    private FrameworkElementAdorner _adorner = null;
+    private FrameworkElementAdorner? _adorner = null;
 
     #endregion
 

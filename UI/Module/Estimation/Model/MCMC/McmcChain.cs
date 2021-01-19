@@ -59,9 +59,9 @@ namespace Estimation
       Arr<ModelParameter> modelParameters,
       Arr<ModelOutput> modelOutputs,
       Arr<SimObservations> observations,
-      DataTable chainData,
-      DataTable errorData,
-      IDictionary<string, DataTable> posteriorData
+      DataTable? chainData,
+      DataTable? errorData,
+      IDictionary<string, DataTable>? posteriorData
       )
     {
       RequireTrue(no > 0);
@@ -90,7 +90,7 @@ namespace Estimation
 
     internal int No { get; }
 
-    internal Exception Fault { get; private set; }
+    internal Exception? Fault { get; private set; }
 
     internal bool IsFaulted => Fault != default;
 
@@ -333,7 +333,7 @@ namespace Estimation
       ConfigureChainData();
       ConfigureErrorData();
 
-      var lastChainDataRow = _chainData.Rows[_chainData.Rows.Count - 1];
+      var lastChainDataRow = _chainData.Rows[^1];
 
       var isComplete = _modelParameters.All(
         mp => !IsNaN(lastChainDataRow.Field<double>(ToLLColumnName(mp.Name)))
@@ -438,7 +438,7 @@ namespace Estimation
     {
       var message = $"In chain no.{No}, iteration no.{_currentIteration}, error model ({modelOutput.ErrorModel.GetType().Name}) for {modelOutput.Name} failed to compute likelihood";
 
-      string reason = default;
+      string? reason = default;
 
       if (_approximate && !independentColumn.AllUnique(d => d))
       {

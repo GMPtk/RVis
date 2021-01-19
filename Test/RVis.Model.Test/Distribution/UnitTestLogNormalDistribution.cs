@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
+using System.Threading.Tasks;
 using static LanguageExt.Prelude;
 using static RVis.Model.Test.DistributionImpl;
 using static System.Double;
@@ -12,12 +13,12 @@ namespace RVis.Model.Test
   {
 #if !IS_PIPELINES_BUILD
     [TestMethod()]
-    public void TestLogNormalCumulativeDistributionAtBounds()
+    public async Task TestLogNormalCumulativeDistributionAtBounds()
     {
       // arrange
       var subject = new LogNormalDistribution(0d, 1d, Log(0.3), Log(0.7));
-      var expectedLowerP = GetNumData("plnorm(0.3, 0.0, 1.0)")[0].Data[0];
-      var expectedUpperP = GetNumData("plnorm(0.7, 0.0, 1.0)")[0].Data[0];
+      var expectedLowerP = (await GetNumDataAsync("plnorm(0.3, 0.0, 1.0)"))[0].Data[0];
+      var expectedUpperP = (await GetNumDataAsync("plnorm(0.7, 0.0, 1.0)"))[0].Data[0];
 
       // act
       var (actualLowerP, actualUpperP) = subject.CumulativeDistributionAtBounds;
@@ -57,13 +58,13 @@ namespace RVis.Model.Test
 
 #if !IS_PIPELINES_BUILD
     [TestMethod()]
-    public void TestLogNormalGetDensities()
+    public async Task TestLogNormalGetDensities()
     {
       // arrange
       var subject = new LogNormalDistribution(0d, 1d);
-      var expected = GetNumData(
+      var expected = (await GetNumDataAsync(
         "sapply(seq(qlnorm(0.3, 0.0, 1.0), qlnorm(0.7, 0.0, 1.0), length.out = 5), function(cd){dlnorm(cd, 0.0, 1.0)})"
-        )[0].Data.ToArr();
+        ))[0].Data.ToArr();
 
       // act
       var (_, actual) = subject.GetDensities(0.3, 0.7, 5);
@@ -83,7 +84,7 @@ namespace RVis.Model.Test
       // act
       var serialized = expected.ToString();
       var deserialized = Distribution.DeserializeDistribution(serialized);
-      var distribution = deserialized.IfNone(() => { Assert.Fail(); return default; });
+      var distribution = deserialized.IfNone(() => { Assert.Fail(); return default!; });
 
       // assert
       var actual = Base.Check.RequireInstanceOf<LogNormalDistribution>(distribution);

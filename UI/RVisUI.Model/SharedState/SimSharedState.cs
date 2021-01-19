@@ -18,11 +18,11 @@ namespace RVisUI.Model
   {
     private class _SimParameterSharedStateDTO
     {
-      public string Name { get; set; }
+      public string? Name { get; set; }
       public double Value { get; set; }
       public double Minimum { get; set; }
       public double Maximum { get; set; }
-      public string Distribution { get; set; }
+      public string? Distribution { get; set; }
     }
 
     private class _SimSharedStateDTO
@@ -50,7 +50,7 @@ namespace RVisUI.Model
         {
           ParameterSharedStates = dto.ParameterSharedStates
             .Select(pdto => new SimParameterSharedState(
-              pdto.Name,
+              pdto.Name.AssertNotNull(),
               pdto.Value,
               pdto.Minimum,
               pdto.Maximum,
@@ -90,7 +90,7 @@ namespace RVisUI.Model
                 Value = pss.Value,
                 Minimum = pss.Minimum,
                 Maximum = pss.Maximum,
-                Distribution = pss.Distribution.MatchUnsafe(d => d.ToString(), () => default)
+                Distribution = pss.Distribution.MatchUnsafe<string?>(d => d.ToString(), () => default)
               })
               .ToArray(),
 
@@ -398,7 +398,7 @@ namespace RVisUI.Model
       _observationsSharedStateChangesSubject.OnNext((unshared, ObservableQualifier.Remove));
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Dispose() => Dispose(true);
 
