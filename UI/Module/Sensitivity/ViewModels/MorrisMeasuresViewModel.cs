@@ -20,10 +20,8 @@ using System.Windows.Input;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static RVis.Base.Extensions.NumExt;
-using static System.Math;
-using DataTable = System.Data.DataTable;
 using static System.Globalization.CultureInfo;
-using OxyPlot.Legends;
+using static System.Math;
 
 namespace Sensitivity
 {
@@ -62,13 +60,11 @@ namespace Sensitivity
         this.ObservableForProperty(vm => vm.RankedParameterViewModels, _ => RankedParameterViewModels.Count > 0)
         );
 
-      PlotModel = new PlotModel();
-
-      PlotModel.Legends.Add(new Legend
+      PlotModel = new PlotModel()
       {
         LegendPosition = LegendPosition.RightMiddle,
         LegendPlacement = LegendPlacement.Outside
-      });
+      };
 
       PlotModel.Axes.Add(new LinearAxis
       {
@@ -89,11 +85,9 @@ namespace Sensitivity
       };
       PlotModel.Annotations.Add(_annotation);
 
-#pragma warning disable CS0618 // Type or member is obsolete
       PlotModel.MouseDown += HandlePlotModelMouseDown;
       PlotModel.MouseMove += HandlePlotModelMouseMove;
       PlotModel.MouseUp += HandlePlotModelMouseUp;
-#pragma warning restore CS0618 // Type or member is obsolete
 
       PlotModel.ApplyThemeToPlotModelAndAxes();
 
@@ -314,9 +308,9 @@ namespace Sensitivity
         RequireNotNull(_moduleState.SensitivityDesign);
 
         var ranking = new Ranking(
-          rankingViewModel.From, 
-          rankingViewModel.To, 
-          rankingViewModel.OutputViewModels.Filter(vm => vm.IsSelected).Map(vm => vm.Name), 
+          rankingViewModel.From,
+          rankingViewModel.To,
+          rankingViewModel.OutputViewModels.Filter(vm => vm.IsSelected).Map(vm => vm.Name),
           rankingViewModel.RankedParameterViewModels.Map(vm => (vm.Name, vm.Score, vm.IsSelected))
           );
 
@@ -331,7 +325,7 @@ namespace Sensitivity
       var toUse = _moduleState.Ranking.Parameters
         .Filter(p => p.IsSelected)
         .Map(p => p.Parameter);
-      
+
       RequireFalse(toUse.IsEmpty);
 
       var parameterStates = _moduleState.ParameterStates.Map(
@@ -616,7 +610,7 @@ namespace Sensitivity
     {
       RequireFalse(MorrisMeasureType == MorrisMeasureType.None);
 
-      PlotModel.GetAxis(AxisPosition.Left).AssertNotNull().Title = _morrisMeasureNames[MorrisMeasureType];
+      PlotModel.GetAxis(AxisPosition.Left).Title = _morrisMeasureNames[MorrisMeasureType];
     }
 
     private void PopulateSeries()

@@ -62,12 +62,11 @@ namespace Estimation
 
       var parseMethod = _errorModelParserMap[errorModelType];
 
-      var maybeErrorModel = (Option<IErrorModel>)parseMethod
+      var maybeErrorModel = RequireInstanceOf<Option<IErrorModel>>(parseMethod
         .Invoke(
           null,
           new object[] { parts.Skip(1).ToArr() }
-        )
-        .AssertNotNull();
+        ));
 
       if (maybeErrorModel.IsNone)
       {
@@ -98,7 +97,7 @@ namespace Estimation
         dt => typeof(ErrorModel)
           .Assembly
           .GetType($"{nameof(Estimation)}.{dt}{nameof(ErrorModel)}")
-          .AssertNotNull()
+          .AssertNotNull($"{nameof(Estimation)}.{dt}{nameof(ErrorModel)} not found")
         );
 
       _errorModelDefaultMap = _errorModelTypeMap
@@ -107,8 +106,10 @@ namespace Estimation
           kvp =>
           {
             var defaultProperty = kvp.Value.GetField(nameof(NormalErrorModel.Default), BindingFlags.NonPublic | BindingFlags.Static);
-            RequireNotNull(defaultProperty, $"Default property not found on type {kvp.Value.Name}");
-            return (IErrorModel)defaultProperty.GetValue(null).AssertNotNull();
+            return RequireInstanceOf<IErrorModel>(
+              defaultProperty?.GetValue(null), 
+              $"Default property not found on type {kvp.Value.Name}"
+              );
           });
 
       _errorModelParserMap = _errorModelTypeMap

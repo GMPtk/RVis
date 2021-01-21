@@ -1,7 +1,6 @@
 ﻿using LanguageExt;
 using OxyPlot;
 using OxyPlot.Axes;
-using OxyPlot.Legends;
 using OxyPlot.Series;
 using ReactiveUI;
 using RVis.Base.Extensions;
@@ -42,19 +41,15 @@ namespace Sensitivity
       {
         Title = _lowryState.ChartTitle,
         IsLegendVisible = true,
-      };
-      PlotModel.Legends.Add(new Legend
-      {
         LegendPosition = LegendPosition.BottomRight
-      });
-#pragma warning disable CS0618 // Type or member is obsolete
+      };
+
       PlotModel.MouseDown += HandlePlotModelMouseDown;
-#pragma warning restore CS0618 // Type or member is obsolete
 
       _lowryStackAxis = new CategoryAxis
       {
         Position = AxisPosition.Bottom,
-        Key = "stack",
+        Key = nameof(_lowryStackAxis),
         Title = _lowryState.XAxisTitle,
         Angle = -35,
         IsZoomEnabled = false,
@@ -69,7 +64,7 @@ namespace Sensitivity
         MaximumPadding = 0.06,
         AbsoluteMinimum = 0,
         Minimum = 0,
-        Key = "smoke",
+        Key = nameof(_lowrySmokeAxis),
         IsAxisVisible = false,
         IsZoomEnabled = false,
         IsPanEnabled = false
@@ -91,32 +86,30 @@ namespace Sensitivity
       };
       PlotModel.Axes.Add(_lowryVerticalAxis);
 
-      _mainEffectsSeries = new BarSeries
+      _mainEffectsSeries = new ColumnSeries
       {
         Title = "Main Effects",
         IsStacked = true,
         StrokeColor = OxyColors.Black,
         StrokeThickness = 1,
         FillColor = _lowryState.MainEffectsFillColor ?? OxyColors.ForestGreen,
-        XAxisKey = "stack"
+        XAxisKey = nameof(_lowryStackAxis)
       };
-#pragma warning disable CS0618 // Type or member is obsolete
       _mainEffectsSeries.MouseDown += HandleMainEffectsSeriesMouseDown;
-#pragma warning restore CS0618 // Type or member is obsolete
+
       PlotModel.Series.Add(_mainEffectsSeries);
 
-      _interactionsSeries = new BarSeries
+      _interactionsSeries = new ColumnSeries
       {
         Title = "Interactions",
         IsStacked = true,
         StrokeColor = OxyColors.Black,
         StrokeThickness = 1,
         FillColor = _lowryState.InteractionsFillColor ?? OxyColors.DarkGoldenrod,
-        XAxisKey = "stack"
+        XAxisKey = nameof(_lowryStackAxis)
       };
-#pragma warning disable CS0618 // Type or member is obsolete
       _interactionsSeries.MouseDown += HandleInteractionsSeriesMouseDown;
-#pragma warning restore CS0618 // Type or member is obsolete
+
       PlotModel.Series.Add(_interactionsSeries);
 
       _smokeSeries = new AreaSeries
@@ -130,7 +123,7 @@ namespace Sensitivity
         DataFieldX = "IndependentVar",
         DataFieldY = "Maximum",
         Title = "Maximum/Minimum",
-        XAxisKey = "smoke",
+        XAxisKey = nameof(_lowrySmokeAxis),
         RenderInLegend = false
       };
       PlotModel.Series.Add(_smokeSeries);
@@ -215,8 +208,8 @@ namespace Sensitivity
         _interactionsSeries.Items.Clear();
         foreach (var parameterDatum in parameterMeasures)
         {
-          _mainEffectsSeries.Items.Add(new BarItem { Value = parameterDatum.MainEffect });
-          _interactionsSeries.Items.Add(new BarItem { Value = parameterDatum.Interaction });
+          _mainEffectsSeries.Items.Add(new ColumnItem { Value = parameterDatum.MainEffect });
+          _interactionsSeries.Items.Add(new ColumnItem { Value = parameterDatum.Interaction });
         }
       }
 
@@ -406,8 +399,8 @@ namespace Sensitivity
     private readonly LowryState _lowryState;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private readonly BarSeries _mainEffectsSeries;
-    private readonly BarSeries _interactionsSeries;
+    private readonly ColumnSeries _mainEffectsSeries;
+    private readonly ColumnSeries _interactionsSeries;
     private readonly AreaSeries _smokeSeries;
     private readonly CategoryAxis _lowryStackAxis;
     private readonly LinearAxis _lowrySmokeAxis;

@@ -1,10 +1,10 @@
 ﻿using LanguageExt;
 using OxyPlot;
 using OxyPlot.Wpf;
-using RVis.Base.Extensions;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Media;
+using static RVis.Base.Check;
 
 namespace Sensitivity
 {
@@ -27,7 +27,7 @@ namespace Sensitivity
       typeof(OxyColors)
         .GetFields(BindingFlags.Public | BindingFlags.Static)
         .Skip(1)
-        .Select(cd => new { cd.Name, OxyColor = (OxyColor)cd.GetValue(null).AssertNotNull() })
+        .Select(cd => new { cd.Name, OxyColor = RequireInstanceOf<OxyColor>(cd.GetValue(null)) })
         .Select(cd => new OxyColorData(cd.Name, ConverterExtensions.ToBrush(cd.OxyColor), cd.OxyColor))
         .ToArr();
   }

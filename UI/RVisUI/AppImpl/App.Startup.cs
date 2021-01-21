@@ -4,6 +4,7 @@ using NLog;
 using RVis.Base.Extensions;
 using RVisUI.Extensions;
 using RVisUI.Ioc;
+using RVisUI.Model;
 using RVisUI.Properties;
 using System;
 using System.Diagnostics;
@@ -33,9 +34,6 @@ namespace RVisUI
       var rvisUI = configuration.GetSection(nameof(RVisUI));
       RVisUI.MainWindow.ShowFrameRate = rvisUI.GetValue<bool>(
         nameof(RVisUI.MainWindow.ShowFrameRate)
-        );
-      RVisUI.MainWindow.MaximumMemoryPressure = rvisUI.GetValue<double>(
-        nameof(RVisUI.MainWindow.MaximumMemoryPressure)
         );
       DocRoot = rvisUI.GetValue<string>(
         nameof(DocRoot)
@@ -75,7 +73,24 @@ namespace RVisUI
       Exit += HandleExit;
 
       AppService.Initialize();
-      AppState.Initialize(e.Args);
+
+      var appState = new AppState(AppSettings, AppService);
+      NinjectKernel.Bind<IAppState>().ToConstant(appState);
+
+      try
+      {
+        appState.Initialize(e.Args);
+      }
+      catch (Exception ex)
+      {
+        AppService.Notify(
+          nameof(AppState),
+          "Start-up",
+          ex
+          );
+        Log.Error(ex);
+        Shutdown(1);
+      }
     }
 
     private void HandleExit(object sender, ExitEventArgs e)
@@ -87,7 +102,8 @@ namespace RVisUI
     private static string GetBasePath()
     {
       using var processModule = Process.GetCurrentProcess().MainModule;
-      return GetDirectoryName(processModule?.FileName).AssertNotNull();
+      return GetDirectoryName(processModule?.FileName)
+        .AssertNotNull($"Failed to find process main module image directory");
     }
   }
 }

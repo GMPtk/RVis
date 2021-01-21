@@ -1,11 +1,11 @@
 ﻿using Microsoft.Xaml.Behaviors;
-using RVis.Base.Extensions;
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using static RVis.Base.Check;
 
 namespace RVisUI.Wpf
 {
@@ -73,7 +73,7 @@ namespace RVisUI.Wpf
     {
       if (AssociatedObject is FrameworkElement frameworkElement)
       {
-        if (frameworkElement.DataContext != null)
+        if (frameworkElement.DataContext is not null)
         {
           var commandPropertyInfo = frameworkElement.DataContext
             .GetType()
@@ -86,7 +86,9 @@ namespace RVisUI.Wpf
 
           if (commandPropertyInfo != null)
           {
-            Command = (ICommand)commandPropertyInfo.GetValue(frameworkElement.DataContext, null).AssertNotNull();
+            Command = RequireInstanceOf<ICommand>(
+              commandPropertyInfo.GetValue(frameworkElement.DataContext, null)
+              );
           }
         }
       }

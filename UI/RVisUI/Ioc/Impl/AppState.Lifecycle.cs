@@ -17,29 +17,6 @@ namespace RVisUI.Ioc
 {
   public partial class AppState
   {
-    public void Initialize(string[] args)
-    {
-      ProcessStartUpArgs(args);
-
-      try
-      {
-        _appService.RVisServerPool.RequestServer().Match(
-          StartOperations,
-          CurtailOperations
-          );
-      }
-      catch (Exception ex)
-      {
-        _appService.Notify(
-          nameof(AppState),
-          nameof(Initialize),
-          ex
-          );
-        App.Current.Log.Error(ex);
-        App.Current.Shutdown(1);
-      }
-    }
-
     public bool GetStartUpArg(StartUpOption startUpOption, out string? arg)
     {
       RequireNotNull(_startUpArgs);
@@ -198,7 +175,7 @@ namespace RVisUI.Ioc
       {
         GetStartUpArg(StartUpOption.Name, out string? directoryName);
 
-        var homeViewModel = (IHomeViewModel)App.Current.NinjectKernel.GetService(typeof(IHomeViewModel)).AssertNotNull();
+        var homeViewModel = RequireInstanceOf<IHomeViewModel>(App.Current.NinjectKernel.GetService(typeof(IHomeViewModel)));
         var selectSimulationViewModel = homeViewModel.SelectSimulationViewModel;
 
         var simulationVM = selectSimulationViewModel.SimulationVMs.SingleOrDefault(vm => vm.DirectoryName == directoryName);

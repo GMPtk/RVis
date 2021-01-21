@@ -97,7 +97,7 @@ namespace Sampling
           ParameterStates = instance.ParameterStates
           .Map(ps => new _ParameterStateDTO
           {
-            Name = ps.Name.AssertNotNull(),
+            Name = ps.Name,
             DistributionType = ps.DistributionType.ToString(),
             DistributionStates = Distribution.SerializeDistributions(ps.Distributions),
             IsSelected = ps.IsSelected

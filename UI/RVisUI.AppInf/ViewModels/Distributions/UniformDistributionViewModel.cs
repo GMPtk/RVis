@@ -168,11 +168,11 @@ namespace RVisUI.AppInf
     {
       var variable = Variable ?? "?";
 
-      var horizontalAxis = PlotModel.GetAxis(AxisPosition.Bottom).AssertNotNull();
+      var horizontalAxis = PlotModel.GetAxis(AxisPosition.Bottom);
       horizontalAxis.Title = variable;
       horizontalAxis.Unit = Unit;
 
-      var verticalAxis = PlotModel.GetAxis(AxisPosition.Left).AssertNotNull();
+      var verticalAxis = PlotModel.GetAxis(AxisPosition.Left);
       verticalAxis.Title = $"p({variable})";
     }
 
@@ -199,11 +199,11 @@ namespace RVisUI.AppInf
 
         var range = uniform.UpperBound - uniform.LowerBound;
 
-        var horizontalAxis = PlotModel.GetAxis(AxisPosition.Bottom).AssertNotNull();
+        var horizontalAxis = PlotModel.GetAxis(AxisPosition.Bottom);
         horizontalAxis.Minimum = uniform.LowerBound - range;
         horizontalAxis.Maximum = uniform.UpperBound + range;
 
-        var verticalAxis = PlotModel.GetAxis(AxisPosition.Left).AssertNotNull();
+        var verticalAxis = PlotModel.GetAxis(AxisPosition.Left);
         verticalAxis.Maximum = 2.0 * uniform.Density(uniform.LowerBound + range / 2.0);
       }
     }

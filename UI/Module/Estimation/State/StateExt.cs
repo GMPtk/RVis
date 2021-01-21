@@ -10,9 +10,10 @@ namespace Estimation
   internal static class StateExt
   {
     public static int GetCompletedIterations(this ChainState chainState) =>
-      chainState.ChainData.AssertNotNull().Rows
+      chainState.ChainData?.Rows
         .Cast<DataRow>()
-        .Count(dr => chainState.ModelParameters.All(mp => !IsNaN(dr.Field<double>(mp.Name))));
+        .Count(dr => chainState.ModelParameters.All(mp => !IsNaN(dr.Field<double>(mp.Name))))
+      ?? 0;
 
     public static OutputState WithIsSelected(this OutputState outputState, bool isSelected) =>
       new OutputState(outputState.Name, outputState.ErrorModelType, outputState.ErrorModels, isSelected);

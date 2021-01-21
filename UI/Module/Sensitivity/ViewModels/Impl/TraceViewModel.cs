@@ -47,9 +47,8 @@ namespace Sensitivity
         Title = _traceState.ChartTitle,
         IsLegendVisible = false
       };
-#pragma warning disable CS0618 // Type or member is obsolete
+
       PlotModel.MouseDown += HandleTracePlotModelMouseDown;
-#pragma warning restore CS0618 // Type or member is obsolete
 
       _traceHorizontalAxis = new LinearAxis
       {
@@ -83,18 +82,16 @@ namespace Sensitivity
         Color = _traceState.SeriesColor ?? OxyColors.DodgerBlue,
         InterpolationAlgorithm = InterpolationAlgorithms.CatmullRomSpline
       };
-#pragma warning disable CS0618 // Type or member is obsolete
       _traceSeries.MouseDown += HandleTraceMouseDown;
-#pragma warning restore CS0618 // Type or member is obsolete
 
       PlotModel.Series.Add(_traceSeries);
 
       _verticalCursor = new LineAnnotation { Type = LineAnnotationType.Vertical };
-#pragma warning disable CS0618 // Type or member is obsolete
+
       _verticalCursor.MouseDown += HandleVerticalCursorMouseDown;
       _verticalCursor.MouseMove += HandleVerticalCursorMouseMove;
       _verticalCursor.MouseUp += HandleVerticalCursorMouseUp;
-#pragma warning restore CS0618 // Type or member is obsolete
+
       PlotModel.Annotations.Add(_verticalCursor);
 
       PlotModel.ApplyThemeToPlotModelAndAxes();
@@ -260,8 +257,8 @@ namespace Sensitivity
         var actualTitleFontSizeProperty = _traceVerticalAxis
           .GetType()
           .GetProperty("ActualTitleFontSize", BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Instance)
-          .AssertNotNull();
-        var titleFontSize = (double)actualTitleFontSizeProperty.GetValue(_traceVerticalAxis).AssertNotNull();
+          .AssertNotNull("ActualTitleFontSize property not found on Axis");
+        var titleFontSize = RequireInstanceOf<double>(actualTitleFontSizeProperty.GetValue(_traceVerticalAxis));
         var titleEndsAt = PlotModel.Padding.Left + titleFontSize + _traceVerticalAxis.AxisTickToLabelDistance;
         var isLabelClick = e.Position.X < titleEndsAt;
 
@@ -272,8 +269,8 @@ namespace Sensitivity
         var actualTitleFontSizeProperty = _traceHorizontalAxis
           .GetType()
           .GetProperty("ActualTitleFontSize", BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Instance)
-          .AssertNotNull();
-        var titleFontSize = (double)actualTitleFontSizeProperty.GetValue(_traceHorizontalAxis).AssertNotNull();
+          .AssertNotNull("ActualTitleFontSize property not found on Axis");
+        var titleFontSize = RequireInstanceOf<double>(actualTitleFontSizeProperty.GetValue(_traceHorizontalAxis));
         var titleEndsAt = PlotModel.Padding.Left + titleFontSize + _traceHorizontalAxis.AxisTickToLabelDistance;
         var distanceOver = PlotModel.PlotAndAxisArea.Bottom - e.Position.Y;
         var isLabelClick = distanceOver < titleEndsAt;

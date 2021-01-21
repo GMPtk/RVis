@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using static RVis.Base.Check;
 using static RVisUI.Model.ModuleInfo;
 
 namespace RVisUI.Controls.Dialogs
@@ -70,13 +71,14 @@ namespace RVisUI.Controls.Dialogs
     private void HandleToggleEnable(object sender, RoutedEventArgs e)
     {
       var isEnabled = _toggleEnable.IsChecked == true;
-      ((ModuleConfigViewModel)_listView.SelectedItem).IsEnabled = isEnabled;
-      ((ModuleConfigViewModel)_listView.SelectedItem).ModuleInfo.AssertNotNull().IsEnabled = isEnabled;
+      var moduleConfigViewModel = RequireInstanceOf<ModuleConfigViewModel>(_listView.SelectedItem);
+      moduleConfigViewModel.IsEnabled = isEnabled;
+      moduleConfigViewModel.ModuleInfo.IsEnabled = isEnabled;
     }
 
     private void HandleOK(object sender, RoutedEventArgs e)
     {
-      var moduleInfos = _moduleConfigViewModels.Select(vm => vm.ModuleInfo.AssertNotNull()).ToArr();
+      var moduleInfos = _moduleConfigViewModels.Select(vm => vm.ModuleInfo).ToArr();
       var moduleConfiguration = GetModuleConfiguration(moduleInfos);
       App.Current.AppSettings.ModuleConfiguration = moduleConfiguration;
       DialogResult = true;

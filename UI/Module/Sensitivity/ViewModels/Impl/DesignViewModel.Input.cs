@@ -41,7 +41,9 @@ namespace Sensitivity
     {
       RequireEqual(inputs.Rows.Count, outputRequestJob.Length);
 
-      var acquiredColumn = inputs.Columns[ACQUIRED_DATACOLUMN_NAME].AssertNotNull();
+      var acquiredColumn = inputs
+        .Columns[ACQUIRED_DATACOLUMN_NAME]
+        .AssertNotNull($"{ACQUIRED_DATACOLUMN_NAME} not found");
       var foundIssues = false;
 
       for (var i = 0; i < outputRequestJob.Length; ++i)

@@ -1,7 +1,6 @@
 ﻿using LanguageExt;
 using OxyPlot;
 using OxyPlot.Axes;
-using OxyPlot.Legends;
 using OxyPlot.Series;
 using ReactiveUI;
 using RVis.Base.Extensions;
@@ -63,13 +62,9 @@ namespace Plot
 
       _plotModel = new PlotModel
       {
-        Background = OxyColors.Transparent
-      };
-
-      _plotModel.Legends.Add(new Legend
-      {
+        Background = OxyColors.Transparent,
         LegendPosition = LegendPosition.BottomRight
-      });
+      };
 
       _traceHorizontalAxis = new LinearAxis
       {
@@ -77,9 +72,7 @@ namespace Plot
         MinimumPadding = 0,
         MaximumPadding = 0.06,
       };
-#pragma warning disable CS0618 // Type or member is obsolete
       _traceHorizontalAxis.AxisChanged += (s, e) => { if (_reactiveSafeInvoke.React) HandleAxisChanged(); };
-#pragma warning restore CS0618 // Type or member is obsolete
       _plotModel.Axes.Add(_traceHorizontalAxis);
 
       _traceVerticalAxis = new LinearAxis
@@ -89,17 +82,12 @@ namespace Plot
         MaximumPadding = 0.06,
         Key = nameof(_traceVerticalAxis),
       };
-#pragma warning disable CS0618 // Type or member is obsolete
       _traceVerticalAxis.AxisChanged += (s, e) => { if (_reactiveSafeInvoke.React) HandleAxisChanged(); };
-#pragma warning restore CS0618 // Type or member is obsolete
-
       _traceInsetAxis = new LinearAxis
       {
         Position = AxisPosition.Right,
         MinimumPadding = 0,
         MaximumPadding = 0,
-        MinimumDataMargin = 20,
-        MaximumDataMargin = 20,
         TickStyle = TickStyle.Inside,
         LabelFormatter = x => null,
         StartPosition = 0.4,
@@ -114,17 +102,12 @@ namespace Plot
         MaximumPadding = 0.06,
         Key = nameof(_traceLogVerticalAxis)
       };
-#pragma warning disable CS0618 // Type or member is obsolete
       _traceLogVerticalAxis.AxisChanged += (s, e) => { if (_reactiveSafeInvoke.React) HandleAxisChanged(); };
-#pragma warning restore CS0618 // Type or member is obsolete
-
       _traceLogInsetAxis = new LogarithmicAxis
       {
         Position = AxisPosition.Right,
         MinimumPadding = 0,
         MaximumPadding = 0.06,
-        MinimumDataMargin = 20,
-        MaximumDataMargin = 20,
         TickStyle = TickStyle.Inside,
         LabelFormatter = x => null,
         StartPosition = 0.4,

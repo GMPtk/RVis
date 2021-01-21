@@ -14,14 +14,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Linq;
 using System.Reactive.Disposables;
+using static Estimation.McmcChain;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static RVis.Base.Extensions.NumExt;
 using static System.Double;
-using static Estimation.McmcChain;
-using OxyPlot.Legends;
 
 namespace Estimation
 {
@@ -34,14 +32,12 @@ namespace Estimation
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
-      PlotModel = new PlotModel();
-
-      PlotModel.Legends.Add(new Legend
+      PlotModel = new PlotModel()
       {
         LegendPlacement = LegendPlacement.Inside,
         LegendPosition = LegendPosition.RightTop,
         LegendOrientation = LegendOrientation.Vertical
-      });
+      };
 
       _horizontalAxis = new LinearAxis
       {
@@ -215,8 +211,8 @@ namespace Estimation
         .OrderBy(n => n)
         .ToArr();
 
-      var index = selectedParameterName.IsAString() 
-        ? ParameterNames.IndexOf(selectedParameterName) 
+      var index = selectedParameterName.IsAString()
+        ? ParameterNames.IndexOf(selectedParameterName)
         : NOT_FOUND;
 
       SelectedParameterName = index.IsFound() ? index : 0;
@@ -247,7 +243,9 @@ namespace Estimation
       RequireNotNull(_moduleState.PosteriorState);
 
       var selectedChainStates = _moduleState.ChainStates.Filter(cs => selectedChainNos.Contains(cs.No));
-      var chainData = selectedChainStates.Map(cs => cs.ChainData.AssertNotNull());
+      var chainData = selectedChainStates.Map(
+        cs => cs.ChainData.AssertNotNull($"ChainData missing on state no.{cs.No}")
+        );
 
       var parameterData = new List<double>();
 

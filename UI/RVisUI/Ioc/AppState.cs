@@ -20,6 +20,16 @@ namespace RVisUI.Ioc
       MainWindowTitle = _assemblyTitle;
     }
 
+    internal void Initialize(string[] args)
+    {
+      ProcessStartUpArgs(args);
+
+      _appService.RVisServerPool.RequestServer().Match(
+        StartOperations,
+        CurtailOperations
+        );
+    }
+
     public string? Status
     {
       get => _status;

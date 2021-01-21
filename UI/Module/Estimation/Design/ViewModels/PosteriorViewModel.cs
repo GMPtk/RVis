@@ -1,7 +1,6 @@
 ﻿using LanguageExt;
 using OxyPlot;
 using OxyPlot.Axes;
-using OxyPlot.Legends;
 using OxyPlot.Series;
 using System;
 using static LanguageExt.Prelude;
@@ -33,14 +32,12 @@ namespace Estimation.Design
 
     private static PlotModel CreatePlotModel()
     {
-      var plotModel = new PlotModel();
-
-      plotModel.Legends.Add(new Legend
+      var plotModel = new PlotModel()
       {
         LegendPlacement = LegendPlacement.Inside,
         LegendPosition = LegendPosition.RightTop,
         LegendOrientation = LegendOrientation.Vertical
-      });
+      };
 
       plotModel.Axes.Add(new LinearAxis { Title = "X Axis", Position = AxisPosition.Bottom });
       plotModel.Axes.Add(new LinearAxis { Title = "Y Axis", Position = AxisPosition.Left });

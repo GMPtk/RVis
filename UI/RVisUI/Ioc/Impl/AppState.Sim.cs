@@ -24,15 +24,19 @@ namespace RVisUI.Ioc
     private readonly BehaviorSubject<Option<Simulation>> _targetSimulation =
       new BehaviorSubject<Option<Simulation>>(None);
 
-    public ISimData SimData => _simData.AssertNotNull();
+    public ISimData SimData => 
+      _simData ?? throw new InvalidOperationException("Trying to access state after failed start-up");
 
-    public ISimSharedState SimSharedState => _simSharedState.AssertNotNull();
+    public ISimSharedState SimSharedState => 
+      _simSharedState ?? throw new InvalidOperationException("Trying to access state after failed start-up");
 
-    public SimDataSessionLog SimDataSessionLog => _simDataSessionLog.AssertNotNull();
+    public SimDataSessionLog SimDataSessionLog => 
+      _simDataSessionLog ?? throw new InvalidOperationException("Trying to access state after failed start-up");
 
-    public ISimEvidence SimEvidence => _simEvidence.AssertNotNull();
+    public ISimEvidence SimEvidence => 
+      _simEvidence ?? throw new InvalidOperationException("Trying to access state after failed start-up");
 
-    public void ResetSimDataService() => _simData.AssertNotNull().ResetService();
+    public void ResetSimDataService() => _simData?.ResetService();
 
     private void ObserveSimulation(Option<Simulation> observed)
     {
@@ -64,7 +68,7 @@ namespace RVisUI.Ioc
       {
         var type = observed.Match(WithSome, WithNone);
 
-        var viewModel = App.Current.NinjectKernel.GetService(type).AssertNotNull();
+        var viewModel = App.Current.NinjectKernel.GetService(type);
 
         CreateUIComponents(viewModel);
 

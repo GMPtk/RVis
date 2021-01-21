@@ -35,7 +35,9 @@ namespace Plot
       ViewModels = _moduleState.ParameterEditStates.Map(
         pes =>
         {
-          var parameter = parameters.GetParameter(pes.Name.AssertNotNull());
+          var parameter = parameters.GetParameter(
+            pes.Name.AssertNotNull("Invalid module state")
+            );
 
           return new ParameterViewModel(
             _toggleSelect,

@@ -359,7 +359,7 @@ namespace Plot
     }
 
     private SelectableItemViewModel<SimElement> _SelectedElement =>
-      (SelectableItemViewModel<SimElement>)SelectedElement.AssertNotNull();
+      RequireInstanceOf<SelectableItemViewModel<SimElement>>(SelectedElement);
 
     private void Dispose(bool disposing)
     {

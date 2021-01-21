@@ -109,14 +109,22 @@ namespace RVisUI.Wpf
       {
         if (path.Contains('.'))
         {
-          string[] split = path.Split('.');
-          string remainingProperty = path[(path.IndexOf('.') + 1)..];
-          var property = obj.GetType().GetProperty(split[0]).AssertNotNull();
-          obj = property.GetValue(obj, null).AssertNotNull();
+          var split = path.Split('.');
+          var remainingProperty = path[(path.IndexOf('.') + 1)..];
+          var property = obj
+            .GetType()
+            .GetProperty(split[0])
+            .AssertNotNull($"Failed to find property {split[0]} on {obj.GetType()}");
+          obj = property
+            .GetValue(obj, null)
+            .AssertNotNull($"Property {split[0]} on {obj.GetType()} returned null");
           path = remainingProperty;
           continue;
         }
-        return obj.GetType().GetProperty(path).AssertNotNull();
+        return obj
+          .GetType()
+          .GetProperty(path)
+          .AssertNotNull($"Failed to find property {path} on {obj.GetType()}");
       }
     }
 

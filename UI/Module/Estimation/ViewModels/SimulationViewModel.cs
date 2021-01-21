@@ -14,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
@@ -95,11 +94,9 @@ namespace Estimation
       };
       PlotModel.Annotations.Add(_posteriorAnnotation);
 
-#pragma warning disable CS0618 // Type or member is obsolete
       PlotModel.MouseDown += HandlePlotModelMouseDown;
       PlotModel.MouseMove += HandlePlotModelMouseMove;
       PlotModel.MouseUp += HandlePlotModelMouseUp;
-#pragma warning restore CS0618 // Type or member is obsolete
 
       PlotModel.ApplyThemeToPlotModelAndAxes();
 

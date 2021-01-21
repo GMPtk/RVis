@@ -403,7 +403,7 @@ namespace Estimation
       RequireTrue(SelectedOutputViewModel.IsFound());
       var outputName = SelectedOutputViewModels[SelectedOutputViewModel].Name;
 
-      var verticalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Left).AssertNotNull();
+      var verticalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Left);
       if (!outputName.Equals(verticalAxis.Tag))
       {
         var output = _simulation.SimConfig.SimOutput;
@@ -435,7 +435,7 @@ namespace Estimation
         : NaN;
 
       verticalAxis.Minimum = verticalAxisMin;
-      var horizontalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Bottom).AssertNotNull();
+      var horizontalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Bottom);
       horizontalAxis.Minimum = horizontalAxisMin;
 
       _observationsScatterPlot.Series.Clear();

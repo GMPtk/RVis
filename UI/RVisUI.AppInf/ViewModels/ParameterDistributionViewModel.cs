@@ -41,9 +41,10 @@ namespace RVisUI.AppInf
 
       var distributionViewModelTypes = distributionTypes
         .Map(
-          dt => typeof(IDistributionViewModel).Assembly.GetType($"{nameof(RVisUI)}.{nameof(AppInf)}.{dt}DistributionViewModel")
-        )
-        .Map(LangExt.AssertNotNull);
+          dt => typeof(IDistributionViewModel).Assembly
+            .GetType($"{nameof(RVisUI)}.{nameof(AppInf)}.{dt}DistributionViewModel")
+            .AssertNotNull($"{nameof(RVisUI)}.{nameof(AppInf)}.{dt}DistributionViewModel not found")
+        );
 
       _distributionViewModels = distributionViewModelTypes
         .Select(t => Activator.CreateInstance(t, new object[] { appService, appSettings }))
@@ -119,9 +120,11 @@ namespace RVisUI.AppInf
 
       ShowSelectedDistribution(parameterState.Name, parameterState.Distributions);
 
+      RequireNotNull(DistributionViewModel);
+
       ParameterState = new ParameterState(
         parameterState.Name,
-        DistributionViewModel.AssertNotNull().DistributionType,
+        DistributionViewModel.DistributionType,
         parameterState.Distributions,
         parameterState.IsSelected
         );
@@ -140,10 +143,11 @@ namespace RVisUI.AppInf
         );
 
       RequireTrue(index.IsFound());
+      RequireNotNull(distributionViewModel.DistributionUnsafe);
 
       var distributions = parameterState.Distributions.SetItem(
         index,
-        distributionViewModel.DistributionUnsafe.AssertNotNull()
+        distributionViewModel.DistributionUnsafe
         );
 
       ParameterState = new ParameterState(

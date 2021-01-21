@@ -55,7 +55,6 @@ namespace RVisUI.Model
   {
     string? Status { get; set; }
     string? MainWindowTitle { get; set; }
-    void Initialize(string[] args);
     Option<Simulation> Target { get; set; }
     IObservable<Option<Simulation>> Simulation { get; }
     ISimData SimData { get; }

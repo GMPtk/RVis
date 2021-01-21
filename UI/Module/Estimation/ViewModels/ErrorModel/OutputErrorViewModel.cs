@@ -35,7 +35,9 @@ namespace Estimation
       var errorModelTypes = ErrorModel.GetErrorModelTypes(errorModelsInView);
 
       var errorViewModelTypes = errorModelTypes.Map(
-        dt => typeof(IErrorViewModel).Assembly.GetType($"{nameof(Estimation)}.{dt}ErrorViewModel").AssertNotNull()
+        dt => typeof(IErrorViewModel).Assembly
+          .GetType($"{nameof(Estimation)}.{dt}ErrorViewModel")
+          .AssertNotNull($"{nameof(Estimation)}.{dt}ErrorViewModel not found")
         );
 
       _errorViewModels = errorViewModelTypes

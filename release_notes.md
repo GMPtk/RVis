@@ -1,11 +1,11 @@
 # Beta Release
 
-Changes in v0.12:
+Changes in v0.13:
 
-- Code base upgraded to .NET v5
-- In Sampling module, added facility for taking subset of parameter values based on output ranges
-- Added run control feature for executing background tasks
+- OxyPlot downgraded to v2.0
 
-Issues fixed in v0.12: [Monte Carlo Sampling #1](https://github.com/GMPtk/RVis/issues/1), [Access information...question mark #9](https://github.com/GMPtk/RVis/issues/9), [LHS-Provide row numbers #10](https://github.com/GMPtk/RVis/issues/10), [LHS #11](https://github.com/GMPtk/RVis/issues/11), [Sampling Plots Slow #13](https://github.com/GMPtk/RVis/issues/13), [NAN when ranking parameters in eFAST #15](https://github.com/GMPtk/RVis/issues/15), [Batch execution of an input file #16](https://github.com/GMPtk/RVis/issues/16), [Setting R directory through config file #17](https://github.com/GMPtk/RVis/issues/17)
+__ATTENTION!__ The 64-bit build will hang if used with R v4.0.3 (monitor issues in the [R.NET](https://github.com/rdotnet/rdotnet) repository for progress and resolution).
+
+Issues fixed in v0.13: fault in Lowry plotter; async start-up null reference assertion
 
 Please submit bug reports, feature requests and other technical matters to the [issue tracker](https://github.com/GMPtk/RVis/issues) in this repository.

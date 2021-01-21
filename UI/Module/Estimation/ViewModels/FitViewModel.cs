@@ -2,7 +2,6 @@
 using MathNet.Numerics.Statistics;
 using OxyPlot;
 using OxyPlot.Axes;
-using OxyPlot.Legends;
 using OxyPlot.Series;
 using ReactiveUI;
 using RVis.Base.Extensions;
@@ -32,14 +31,12 @@ namespace Estimation
 
       _reactiveSafeInvoke = appService.GetReactiveSafeInvoke();
 
-      PlotModel = new PlotModel();
-
-      PlotModel.Legends.Add(new Legend
+      PlotModel = new PlotModel()
       {
         LegendPlacement = LegendPlacement.Inside,
         LegendPosition = LegendPosition.RightTop,
         LegendOrientation = LegendOrientation.Vertical
-      });
+      };
 
       var simulation = _appState.Target.AssertSome();
       var output = simulation.SimConfig.SimOutput;
@@ -199,7 +196,7 @@ namespace Estimation
         .OrderBy(n => n)
         .ToArr();
 
-      var index = selectedOutputName.IsAString() 
+      var index = selectedOutputName.IsAString()
         ? OutputNames.IndexOf(selectedOutputName)
         : NOT_FOUND;
 
@@ -335,8 +332,8 @@ namespace Estimation
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
     private IDisposable? _chainViewModelsSubscription;
-    private LinearAxis _horizontalAxis;
-    private LinearAxis _verticalAxis;
+    private readonly LinearAxis _horizontalAxis;
+    private readonly LinearAxis _verticalAxis;
     private bool _disposed = false;
   }
 }

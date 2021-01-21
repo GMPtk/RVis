@@ -321,7 +321,7 @@ namespace Evidence
 
       RequireNotNull(SelectedSubjectViewModel);
 
-      var verticalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Left).AssertNotNull();
+      var verticalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Left);
       if (!SelectedSubjectViewModel.Subject.Equals(verticalAxis.Tag))
       {
         var simulation = _appState.Target.AssertSome();
@@ -354,7 +354,7 @@ namespace Evidence
         : NaN;
 
       verticalAxis.Minimum = verticalAxisMin;
-      var horizontalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Bottom).AssertNotNull();
+      var horizontalAxis = _observationsScatterPlot.GetAxis(AxisPosition.Bottom);
       horizontalAxis.Minimum = horizontalAxisMin;
 
       _observationsScatterPlot.Series.Clear();

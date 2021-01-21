@@ -40,8 +40,8 @@ namespace RVisUI.Ioc.Mvvm
         .Map(s => new SwatchViewModel(s, ChangeHue))
         .ToArr<ISwatchViewModel>();
 
-      var hueViewModel = FindHueViewModel(ActiveScheme, SwatchViewModels, _appSettings).AssertNotNull();
-
+      var hueViewModel = FindHueViewModel(ActiveScheme, SwatchViewModels, _appSettings);
+      RequireNotNull(hueViewModel, "Failed to find hue for active color scheme");
       hueViewModel.IsSelected = true;
 
       SetSecondaryHueHexes();
@@ -202,7 +202,7 @@ namespace RVisUI.Ioc.Mvvm
       var currentlySelected = FindHueViewModel(ActiveScheme, SwatchViewModels, _appSettings);
       var isUnset = false;
 
-      if (currentlySelected != default)
+      if (currentlySelected is not null)
       {
         currentlySelected.IsSelected = false;
         isUnset =
@@ -261,12 +261,12 @@ namespace RVisUI.Ioc.Mvvm
     private void ChangeToScheme(ColorScheme colorScheme)
     {
       var currentlySelected = FindHueViewModel(ActiveScheme, SwatchViewModels, _appSettings);
-      if (currentlySelected != default) currentlySelected.IsSelected = false;
+      if (currentlySelected is not null) currentlySelected.IsSelected = false;
 
       ActiveScheme = colorScheme;
 
       currentlySelected = FindHueViewModel(ActiveScheme, SwatchViewModels, _appSettings);
-      if (currentlySelected != default) currentlySelected.IsSelected = true;
+      if (currentlySelected is not null) currentlySelected.IsSelected = true;
     }
 
     private void SetSecondaryHueHexes()
@@ -286,7 +286,7 @@ namespace RVisUI.Ioc.Mvvm
       SecondaryHueDarkHex = colorToHex(hue.Darken());
 
       hueViewModel = FindHueViewModel(ColorScheme.SecondaryForeground, SwatchViewModels, _appSettings);
-      if (hueViewModel == default)
+      if (hueViewModel is null)
       {
         hue = hue.ContrastingForegroundColor();
       }

@@ -62,7 +62,7 @@ namespace RVisUI.Ioc
       RequireTrue(_dialogViews.ContainsKey(dialogViewName));
       var viewType = _dialogViews[dialogViewName];
 
-      var view = (Window)Activator.CreateInstance(viewType).AssertNotNull();
+      var view = RequireInstanceOf<Window>(Activator.CreateInstance(viewType));
       view.DataContext = viewModel;
       view.Owner = GetWindowForDataContext(parentViewModel);
 

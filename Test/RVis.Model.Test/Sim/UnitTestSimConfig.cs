@@ -18,7 +18,7 @@ namespace RVis.Model.Test
       var memoryStream = new MemoryStream();
       var pathToSimLibrary = TestData.SimLibraryDirectory.FullName;
       var pathToConfig = Path.Combine(pathToSimLibrary, "CubicExec", ".rvis", "config.toml");
-      var config = Sim.ReadConfigFromFile(pathToConfig);
+      var config = ReadConfigFromFile(pathToConfig);
       var expected = Toml.WriteString(config);
 
       // act

@@ -172,11 +172,11 @@ namespace RVisUI.AppInf
     {
       var variable = Variable ?? "?";
 
-      var horizontalAxis = PlotModel.GetAxis(AxisPosition.Bottom).AssertNotNull();
+      var horizontalAxis = PlotModel.GetAxis(AxisPosition.Bottom);
       horizontalAxis.Title = variable;
       horizontalAxis.Unit = Unit;
 
-      var verticalAxis = PlotModel.GetAxis(AxisPosition.Left).AssertNotNull();
+      var verticalAxis = PlotModel.GetAxis(AxisPosition.Left);
       verticalAxis.Title = $"p({variable}|α,β)";
     }
 

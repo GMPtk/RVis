@@ -1,7 +1,6 @@
 ﻿using LanguageExt;
 using OxyPlot;
 using OxyPlot.Axes;
-using OxyPlot.Legends;
 using OxyPlot.Series;
 using System;
 using System.Windows.Input;
@@ -55,13 +54,11 @@ namespace Sensitivity.Design
 
     private static PlotModel CreatePlotModel()
     {
-      var plotModel = new PlotModel();
-
-      plotModel.Legends.Add(new Legend
+      var plotModel = new PlotModel()
       {
         LegendPosition = LegendPosition.RightMiddle,
         LegendPlacement = LegendPlacement.Outside
-      });
+      };
 
       var horizontalAxis = new LinearAxis
       {

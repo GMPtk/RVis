@@ -1,7 +1,6 @@
 ﻿using LanguageExt;
 using OxyPlot;
 using OxyPlot.Axes;
-using OxyPlot.Legends;
 using OxyPlot.Series;
 using RVis.Data;
 using System.Windows.Input;
@@ -52,13 +51,9 @@ namespace Plot.Design
 
         var plotModel = new PlotModel
         {
-          Background = OxyColors.Transparent
-        };
-
-        plotModel.Legends.Add(new Legend
-        {
+          Background = OxyColors.Transparent,
           LegendPosition = LegendPosition.BottomRight
-        });
+        };
 
         var traceHorizontalAxis = new LinearAxis
         {

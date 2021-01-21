@@ -3,7 +3,6 @@ using MaterialDesignThemes.Wpf;
 using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Axes;
-using OxyPlot.Legends;
 using OxyPlot.Series;
 using ReactiveUI;
 using RVis.Base.Extensions;
@@ -67,8 +66,6 @@ namespace Sampling
         );
 
       Outputs = new();
-
-      Outputs.Legends.Add(new Legend());
 
       var horizontalAxis = new LinearAxis
       {
@@ -387,7 +384,7 @@ namespace Sampling
         ? _simulation.SimConfig.SimOutput.FindElement(outputName).AssertSome()
         : default;
 
-      var verticalAxis = Outputs.GetAxis(AxisPosition.Left).AssertNotNull();
+      var verticalAxis = Outputs.GetAxis(AxisPosition.Left);
       verticalAxis.Title = simValue.Name;
       verticalAxis.Unit = simValue.Unit;
     }

@@ -128,7 +128,8 @@ namespace RVisUI.AppInf
       };
 
       plotModel.Update(true);
-      plotModel.Render(context, new OxyRect(0, 0, canvas.Width, canvas.Height));
+      plotModel.Render(context, canvas.Width, canvas.Height);
+      //plotModel.Render(context, new OxyRect(0, 0, canvas.Width, canvas.Height));
 
       canvas.UpdateLayout();
 

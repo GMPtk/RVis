@@ -10,7 +10,6 @@ namespace RVisUI.Ioc
     {
       Bind<IAppSettings>().To<AppSettings>().InSingletonScope();
       Bind<IAppService>().To<AppService>().InSingletonScope();
-      Bind<IAppState>().To<AppState>().InSingletonScope();
       Bind<IAppSettingsViewModel>().To<AppSettingsViewModel>().InSingletonScope();
     }
   }

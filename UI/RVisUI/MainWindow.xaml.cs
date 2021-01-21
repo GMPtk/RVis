@@ -5,9 +5,11 @@ using RVis.Base;
 using RVis.Model;
 using RVis.Model.Extensions;
 using RVisUI.Controls.Dialogs;
+using RVisUI.Mvvm;
 using RVisUI.Properties;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -49,8 +51,6 @@ namespace RVisUI
 
     internal static bool ShowFrameRate { get; set; } = false;
 
-    internal static double MaximumMemoryPressure { get; set; } = 1d;
-
     private void HandleLoaded(object sender, RoutedEventArgs e)
     {
       RequireNotNull(SynchronizationContext.Current);
@@ -61,13 +61,36 @@ namespace RVisUI
         .ObserveOn(SynchronizationContext.Current)
         .Subscribe(ObserveServerLicense);
 
-      App.Current.AppState?.SimData?.OutputRequests
-        .ObserveOn(SynchronizationContext.Current)
-        .Subscribe(ObserveOutputRequest);
-
       App.Current.AppSettings
         .ObservableForProperty(@as => @as.Zoom)
         .Subscribe(_ => ScaleClient());
+
+      if (App.Current.AppState.ActiveViewModel is null)
+      {
+        App.Current.AppState.PropertyChanged += HandleAppStatePropertyChanged;
+      }
+      else if (App.Current.AppState.ActiveViewModel is not IFailedStartUpViewModel)
+      {
+        App.Current.AppState.SimData.OutputRequests
+          .ObserveOn(SynchronizationContext.Current)
+          .Subscribe(ObserveOutputRequest);
+      }
+    }
+
+    private void HandleAppStatePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+      if (App.Current.AppState.ActiveViewModel is null) return;
+
+      App.Current.AppState.PropertyChanged -= HandleAppStatePropertyChanged;
+
+      if (App.Current.AppState.ActiveViewModel is not IFailedStartUpViewModel)
+      {
+        RequireNotNull(SynchronizationContext.Current);
+
+        App.Current.AppState.SimData.OutputRequests
+          .ObserveOn(SynchronizationContext.Current)
+          .Subscribe(ObserveOutputRequest);
+      }
     }
 
     public double FrameRate
@@ -192,10 +215,6 @@ namespace RVisUI
         _currentLicenses.Clear();
         _tbResetRServices.Foreground = _tbResetRServicesFG;
       }
-      else
-      {
-        CheckMemoryPressure();
-      }
     }
 
     private void HandleCompositionTargetRendering(object? sender, EventArgs e)
@@ -208,25 +227,6 @@ namespace RVisUI
         _frameCount = 0;
         _stopwatch.Reset();
         _stopwatch.Start();
-      }
-    }
-
-    private void CheckMemoryPressure()
-    {
-      if (++_memoryEventCount % MEMORY_PRESSURE_CHECK_INTERVAL != 0) return;
-
-      _process ??= Process.GetCurrentProcess();
-
-      _process.Refresh();
-
-      var privateMemorySize64 = _process.PrivateMemorySize64;
-
-      var memoryPressure = (0d + privateMemorySize64) / MAXIMUM_PROCESS_MEMORY;
-
-      if (memoryPressure > MaximumMemoryPressure)
-      {
-        App.Current.AppState.SimData.Clear(includePendingRequests: false);
-        GC.Collect();
       }
     }
 
@@ -244,18 +244,9 @@ namespace RVisUI
       ClientScale = IsNaN(value) ? 1d : value;
     }
 
-    private const int MEMORY_PRESSURE_CHECK_INTERVAL = 200;
-    private readonly long MAXIMUM_PROCESS_MEMORY = Environment.Is64BitProcess
-      ? 16L * 1024 * 1024 * 1024 * 1024
-      : Environment.Is64BitOperatingSystem
-        ? 4L * 1024 * 1024 * 1024
-        : 2L * 1024 * 1024 * 1024;
-
     private readonly IDictionary<int, ServerLicense> _currentLicenses = new SortedDictionary<int, ServerLicense>();
     private readonly Brush _tbResetRServicesFG;
     private readonly Stopwatch _stopwatch = new Stopwatch();
     private int _frameCount;
-    private int _memoryEventCount;
-    private Process? _process;
   }
 }

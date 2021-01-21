@@ -237,7 +237,9 @@ namespace Plot
         .Filter(pes => pes.IsSelected)
         .Map(pes =>
         {
-          var parameter = parameters.GetParameter(pes.Name.AssertNotNull());
+          var parameter = parameters.GetParameter(
+            pes.Name.AssertNotNull("Invalid module state")
+            );
           return parameter.Value == pes.Value ? parameter : parameter.With(pes.Value);
         });
 

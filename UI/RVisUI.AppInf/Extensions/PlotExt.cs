@@ -52,8 +52,10 @@ namespace RVisUI.AppInf.Extensions
       return GetFreedmanDiaconis(array);
     }
 
-    public static Axis? GetAxis(this PlotModel plotModel, AxisPosition axisPosition) =>
-      plotModel.Axes.SingleOrDefault(a => a.Position == axisPosition);
+    public static Axis GetAxis(this PlotModel plotModel, AxisPosition axisPosition) =>
+      plotModel.Axes
+        .SingleOrDefault(a => a.Position == axisPosition)
+        .AssertNotNull($"{axisPosition} axis not found on {plotModel.Title ?? "PlotModel"}");
 
     public static void AssignDefaultColors(
       this PlotModel plotModel,
@@ -148,17 +150,19 @@ namespace RVisUI.AppInf.Extensions
         lineAnnotation.Color = plotModel.TextColor;
       }
 
-      var background = OxyColor.FromArgb(
-        theme.Paper.A,
-        theme.Paper.R,
-        theme.Paper.G,
-        theme.Paper.B
-        );
+      // oxyplot v2.1???
 
-      foreach (var legend in plotModel.Legends)
-      {
-        legend.LegendBackground = background;
-      }
+      //var background = OxyColor.FromArgb(
+      //  theme.Paper.A,
+      //  theme.Paper.R,
+      //  theme.Paper.G,
+      //  theme.Paper.B
+      //  );
+
+      //foreach (var legend in plotModel.Legends)
+      //{
+      //  legend.LegendBackground = background;
+      //}
     }
 
     public static void AddAxes(

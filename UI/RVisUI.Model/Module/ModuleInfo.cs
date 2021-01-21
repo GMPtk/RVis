@@ -64,7 +64,7 @@ namespace RVisUI.Model
         var modulePurpose = type.GetCustomAttribute<PurposeAttribute>()?.ModulePurpose ?? ModulePurpose.None;
         var requiredRPackageNames = type.GetCustomAttribute<RequiredRPackagesAttribute>()?.PackageNames ?? default;
         var supportedTaskNames = type.GetCustomAttribute<SupportedTasksAttribute>()?.TaskNames ?? default;
-        var assemblyVersion = type.Assembly.GetName().Version.AssertNotNull().AsMmbrString();
+        var assemblyVersion = type.Assembly.GetName().Version!.AsMmbrString();
 
         var moduleInfo = new ModuleInfo(
           id,

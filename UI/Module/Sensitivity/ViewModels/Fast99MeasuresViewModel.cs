@@ -2,7 +2,6 @@
 using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Axes;
-using OxyPlot.Legends;
 using OxyPlot.Series;
 using ReactiveUI;
 using RVis.Base.Extensions;
@@ -62,13 +61,11 @@ namespace Sensitivity
         this.ObservableForProperty(vm => vm.RankedParameterViewModels, _ => RankedParameterViewModels.Count > 0)
         );
 
-      PlotModel = new PlotModel();
-
-      PlotModel.Legends.Add(new Legend
+      PlotModel = new PlotModel()
       {
         LegendPosition = LegendPosition.RightMiddle,
         LegendPlacement = LegendPlacement.Outside
-      });
+      };
 
       PlotModel.Axes.Add(new LinearAxis
       {
@@ -89,11 +86,9 @@ namespace Sensitivity
       };
       PlotModel.Annotations.Add(_annotation);
 
-#pragma warning disable CS0618 // Type or member is obsolete
       PlotModel.MouseDown += HandlePlotModelMouseDown;
       PlotModel.MouseMove += HandlePlotModelMouseMove;
       PlotModel.MouseUp += HandlePlotModelMouseUp;
-#pragma warning restore CS0618 // Type or member is obsolete
 
       PlotModel.ApplyThemeToPlotModelAndAxes();
 
@@ -614,7 +609,7 @@ namespace Sensitivity
     {
       RequireFalse(Fast99MeasureType == Fast99MeasureType.None);
 
-      PlotModel.GetAxis(AxisPosition.Left).AssertNotNull().Title = _fast99MeasureNames[Fast99MeasureType];
+      PlotModel.GetAxis(AxisPosition.Left).Title = _fast99MeasureNames[Fast99MeasureType];
     }
 
     private void PopulateSeries()
