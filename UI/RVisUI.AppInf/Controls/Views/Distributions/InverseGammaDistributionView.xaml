@@ -45,7 +45,7 @@
                Style="{DynamicResource MaterialDesignTitleTextBlock}"
                >
       <TextBlock.Text>
-        <MultiBinding StringFormat="{}{0} ~ Inv-Gamma(α = {1}, β = {2})">
+        <MultiBinding StringFormat="{}{0} ~ Inv-Gamma(α = {1:G4}, β = {2:G4})">
           <Binding Path="Variable" TargetNullValue="?"/>
           <Binding Path="Alpha" TargetNullValue="?" />
           <Binding Path="Beta" TargetNullValue="?" />

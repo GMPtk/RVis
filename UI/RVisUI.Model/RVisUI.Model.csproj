@@ -8,8 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Acat\ACAT_like.model" />
+    <None Remove="Acat\readme.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Acat\ACAT_like.model" />
+    <EmbeddedResource Include="Acat\readme.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="LanguageExt.Core" Version="3.4.15" />
     <PackageReference Include="MailKit" Version="2.10.1" />
+    <PackageReference Include="Ninject" Version="3.3.4" />
     <PackageReference Include="ReactiveUI" Version="13.0.27" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>

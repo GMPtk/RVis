@@ -12,7 +12,7 @@ namespace RVis.Model
     public static TSimConfig ReadConfigFromFile(string pathToFile) =>
       Toml.ReadFile<TSimConfig>(pathToFile);
 
-    internal static SimInput FromToml(TSimInput input)
+    public static SimInput FromToml(TSimInput input)
     {
       var parameters = input.Parameters?.IsNullOrEmpty() == true
         ? default
@@ -22,7 +22,7 @@ namespace RVis.Model
       return new SimInput(parameters, input.IsDefault);
     }
 
-    internal static TSimConfig ToToml(SimConfig config)
+    public static TSimConfig ToToml(SimConfig config)
     {
       return new TSimConfig
       {
@@ -67,7 +67,7 @@ namespace RVis.Model
       };
     }
 
-    internal static SimConfig FromToml(TSimConfig config)
+    public static SimConfig FromToml(TSimConfig config)
     {
       var code = new SimCode(config.Code?.File, config.Code?.Exec, config.Code?.Formal);
 

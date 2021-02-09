@@ -87,14 +87,14 @@ namespace RVis.Base.Extensions
       return s;
     }
 
+    public static byte[] ToHashBytes(this string s) =>
+      _sha1.ComputeHash(Encoding.UTF8.GetBytes(s));
+
     public static string ToHash(this string s)
     {
       if (_sha1HashMemo.TryGetValue(s, out string? hash)) return hash;
-
-      var bytes = Encoding.UTF8.GetBytes(s);
-      hash = BitConverter.ToString(_sha1.ComputeHash(bytes)).Replace("-", Empty);
+      hash = BitConverter.ToString(s.ToHashBytes()).Replace("-", Empty);
       _sha1HashMemo.TryAdd(s, hash);
-
       return hash;
     }
 

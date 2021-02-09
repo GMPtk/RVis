@@ -18,10 +18,10 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using static LanguageExt.Prelude;
 using static MathNet.Numerics.Statistics.Correlation;
+using static MathNet.Numerics.Statistics.SortedArrayStatistics;
 using static RVis.Base.Check;
 using static RVis.Base.Extensions.LangExt;
 using static RVis.Base.Extensions.NumExt;
-using static MathNet.Numerics.Statistics.SortedArrayStatistics;
 using stats = MathNet.Numerics.Statistics.Statistics;
 
 namespace Sampling
@@ -282,7 +282,10 @@ namespace Sampling
 
     private void HandleShareParameters()
     {
+      RequireNotNull(_moduleState.SamplingDesign);
       RequireNotNull(Samples?.Table);
+
+      var designParameters = _moduleState.SamplingDesign.DesignParameters;
 
       var columnNames = Samples.Table.Columns.OfType<DataColumn>().Select(dc => dc.ColumnName);
       var rowIndices = Range(0, Samples.Table.Rows.Count);
@@ -291,13 +294,38 @@ namespace Sampling
         Data: rowIndices.Select(ri => (double)Samples.Table.Rows[ri][cn]).ToArray()
         ));
       var states = columnData
-        .Select(cd => (
-          cd.Name,
-          Value: cd.Data.Average(),
-          Minimum: cd.Data.Min(),
-          Maximum: cd.Data.Max(),
-          Distribution: NoneOf<IDistribution>()
-        ))
+        .Select(cd =>
+        {
+          var designParameter = designParameters
+            .Find(dp => dp.Name == cd.Name)
+            .AssertSome($"Unexpected sample column {cd.Name}");
+
+          var isInvariant = designParameter.Distribution.DistributionType == DistributionType.Invariant;
+
+          if (isInvariant)
+          {
+            return (
+              cd.Name,
+              Value: designParameter.Distribution.Mean,
+              Minimum: designParameter.Distribution.Mean.GetPreviousOrderOfMagnitude(),
+              Maximum: designParameter.Distribution.Mean.GetNextOrderOfMagnitude(),
+              Distribution: Some(designParameter.Distribution)
+              );
+          }
+
+          var average = cd.Data.Average();
+          var minimum = cd.Data.Min();
+          var maximum = cd.Data.Max();
+          var distribution = designParameter.Distribution.WithLowerUpper(minimum, maximum);
+
+          return (
+            cd.Name,
+            Value: average,
+            Minimum: minimum,
+            Maximum: maximum,
+            Distribution: Some(distribution)
+            );
+        })
         .ToArr();
 
       _appState.SimSharedState.ShareParameterState(states);
@@ -710,10 +738,10 @@ namespace Sampling
           SD: stats.StandardDeviation(t.Data)
         ));
 
-      Statistics = columnData.Select(cd => new[] { 
-        cd.Name, 
+      Statistics = columnData.Select(cd => new[] {
+        cd.Name,
         cd.Median.ToString("G4"),
-        cd.Mean.ToString("G4"), 
+        cd.Mean.ToString("G4"),
         $"{(cd.Mean - cd.SD):G4} - {(cd.Mean + cd.SD):G4}",
         $"{(cd.Mean - 2d * cd.SD):G4} - {(cd.Mean + 2d * cd.SD):G4}",
         $"{(cd.Mean - 3d * cd.SD):G4} - {(cd.Mean + 3d * cd.SD):G4}"

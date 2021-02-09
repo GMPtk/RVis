@@ -13,5 +13,9 @@ namespace RVisUI.Mvvm.Design
     public ILibraryViewModel LibraryViewModel => throw new NotImplementedException();
 
     public IRunControlViewModel RunControlViewModel => new RunControlViewModel();
+
+    public IAcatHostViewModel AcatHostViewModel => new AcatHostViewModel();
+
+    public int SelectedIndex { get => 2; set => throw new NotImplementedException(); }
   }
 }

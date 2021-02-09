@@ -15,7 +15,10 @@
 
   <UserControl.Resources>
     <ResourceDictionary>
-
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+      
       <ControlTemplate x:Key="NoSimulationData">
         <Grid VerticalAlignment="Center">
           <Grid.ColumnDefinitions>
@@ -34,7 +37,7 @@
 
           <TextBlock Grid.Row="1" 
                    Margin="20" 
-                   Text="Go to the IMPORT tab to get started. Click the ? button for more information." 
+                   Text="Use an IMPORT tab to get started. Click the ? button for more information." 
                    TextWrapping="Wrap"
                    />
 

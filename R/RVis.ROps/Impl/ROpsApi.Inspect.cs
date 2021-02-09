@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using static RVis.Base.Extensions.NumExt;
+using static System.String;
 
 namespace RVis.ROps
 {
@@ -256,7 +257,10 @@ namespace RVis.ROps
 
         parts = code.Split(new[] { "#" }, StringSplitOptions.None);
 
-        if (2 < parts.Length) continue;
+        if (2 < parts.Length)
+        {
+          parts = new[] { parts[0], Join(Empty, parts[1..]) };
+        }
 
         if (2 == parts.Length)
         {

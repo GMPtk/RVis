@@ -1,5 +1,6 @@
 ﻿using LanguageExt;
 using Nett;
+using Ninject;
 using RVis.Base;
 using RVis.Model;
 using System;
@@ -82,6 +83,7 @@ namespace RVisUI.Model
 
   public interface IAppService
   {
+    IKernel Factory { get; }
     IObservable<long> SecondInterval { get; }
     bool CheckAccess();
     bool ShowDialog(object view, object viewModel, object? parentViewModel);

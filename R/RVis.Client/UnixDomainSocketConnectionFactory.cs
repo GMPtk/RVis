@@ -24,10 +24,22 @@ namespace RVis.Client
         ProtocolType.Unspecified
         );
 
+      async ValueTask<Stream> DoConnectAsync(Socket s)
+      {
+        await s.ConnectAsync(_endPoint, cancellationToken).ConfigureAwait(false);
+        return new NetworkStream(s, true);
+      }
+
       try
       {
-        await socket.ConnectAsync(_endPoint, cancellationToken).ConfigureAwait(false);
-        return new NetworkStream(socket, true);
+        return await DoConnectAsync(socket).ConfigureAwait(false);
+      }
+      catch (Exception) { }
+
+      try
+      {
+        await Task.Delay(500, cancellationToken).ConfigureAwait(false);
+        return await DoConnectAsync(socket).ConfigureAwait(false);
       }
       catch (Exception ex)
       {

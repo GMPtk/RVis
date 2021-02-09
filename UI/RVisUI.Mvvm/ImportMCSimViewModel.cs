@@ -185,7 +185,7 @@ namespace RVisUI.Mvvm
         {
           using (serverLicense)
           {
-            var simulationName = await HandleImportAsync(await serverLicense.GetRClientAsync())
+            var (simulationName, directoryName) = await HandleImportAsync(await serverLicense.GetRClientAsync())
               .ConfigureAwait(continueOnCapturedContext: true);
 
             _appState.Status = $"Imported {simulationName}";
@@ -194,9 +194,12 @@ namespace RVisUI.Mvvm
 
             if (OpenOnImport)
             {
+              var lookup = $"{DirectorySeparatorChar}{directoryName}";
+
               var simulation = _simLibrary.Simulations.Find(
-                s => s.SimConfig.Title == simulationName
+                s => s.PathToSimulation.EndsWith(directoryName)
                 );
+
               _appState.Target = simulation;
             }
           }
@@ -241,7 +244,7 @@ namespace RVisUI.Mvvm
       var _ = _appService.RVisServerPool.RequestServer().Match(SomeServer, NoServer);
     }
 
-    private async Task<string> HandleImportAsync(IRVisClient client)
+    private async Task<(string SimulationName, string DirectoryName)> HandleImportAsync(IRVisClient client)
     {
       RequireFile(PathToConfigurationFile);
       RequireFile(PathToExecutable);
@@ -386,9 +389,9 @@ namespace RVisUI.Mvvm
       using var executor = new MCSimExecutor(pathToContainingDirectory, config);
       var _ = executor.Execute(default);
 
-      _simLibrary.ImportExeSimulation(pathToContainingDirectory, importName);
+      var directoryName = _simLibrary.ImportExeSimulation(pathToContainingDirectory, importName);
 
-      return simulationName;
+      return (simulationName, directoryName);
     }
 
     private void UpdateEnable()

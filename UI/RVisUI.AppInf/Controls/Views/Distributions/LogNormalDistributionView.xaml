@@ -53,7 +53,7 @@
                Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
                >
       <TextBlock.Text>
-        <MultiBinding StringFormat="ln({0}) ~ N(µ = {1}, σ² = {2})">
+        <MultiBinding StringFormat="ln({0}) ~ N(µ = {1:G4}, σ² = {2:G4})">
           <Binding Path="Variable" TargetNullValue="?"/>
           <Binding Path="Mu" TargetNullValue="?" />
           <Binding Path="Var" TargetNullValue="?" />

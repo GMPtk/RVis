@@ -13,13 +13,13 @@ C:\PS> in2rvis.ps1 perc.in
 
 param (
 
-  [ValidateScript({
-    if (-not ($_ | Test-Path -PathType Leaf))
-    {
-      throw "$_ does not exist"
-    }
-    return $true
-  })]
+  [ValidateScript( {
+      if (-not ($_ | Test-Path -PathType Leaf))
+      {
+        throw "$_ does not exist"
+      }
+      return $true
+    })]
   [System.IO.FileInfo]$inFile
 
 )
@@ -70,7 +70,7 @@ if ($index -eq $nLines)
 }
 
 $parameterAssignments = New-Object -TypeName System.Collections.Generic.List[PSCustomObject]
-$outputNames = New-Object -TypeName System.Collections.Generic.List[string]
+$outputNames = New-Object -TypeName System.Collections.Generic.List[PSCustomObject]
 
 while ($index -lt $nLines)
 {
@@ -82,17 +82,22 @@ while ($index -lt $nLines)
 
   $endSection = $lines[$index] -like "*}*"
 
-  $isParameterAssignment = $lines[$index] -match "\s*(\w+)\s*=\s*([\d+-Ee]+)\s*;\s*$"
+  $isParameterAssignment = $lines[$index] -match "\s*(\w+)\s*=\s*([\d+-Ee]+)\s*;\s*(?:#\s*([^\[]*))(?:\[\s*([^\]]*)\])?"
 
   if ($isParameterAssignment)
   {
     $name = $Matches[1]
     $value = $Matches[2]
+    $comment = $Matches[3]
+    $unit = $Matches[4]
 
     $parameterAssignment = [PSCustomObject]@{
-      Name  = $name
-      Value = $value
+      Name    = $name
+      Value   = $value
+      Comment = $comment
+      Unit    = $unit
     }
+
     $parameterAssignments.Add($parameterAssignment)
 
     $lines[$index] = $lines[$index] -replace $value, "{{$($name)}}"
@@ -100,7 +105,7 @@ while ($index -lt $nLines)
 
   if ($lines[$index] -like "*printstep*")
   {
-    $printStep = $lines[$index]
+    ++$index
 
     while ($index -lt $nLines)
     {
@@ -110,15 +115,22 @@ while ($index -lt $nLines)
         continue
       }
 
-      $line = $lines[$index]
+      $isOutput = $lines[$index] -match "\s*(\w+),?\s*(?:#\s*([^\[]*))(?:\[\s*([^\]]*)\])?"
 
-      $indexOfComment = $line.IndexOf("#")
-      if ($indexOfComment -ne -1)
+      if ($isOutput)
       {
-        $line = $line.SubString(0, $indexOfComment)
-      }
+        $name = $Matches[1]
+        $comment = $Matches[2]
+        $unit = $Matches[3]
+    
+        $outputName = [PSCustomObject]@{
+          Name    = $name
+          Comment = $comment
+          Unit    = $unit
+        }
 
-      $printStep = $printStep + $line
+        $outputNames.Add($outputName)
+      }
 
       if ($lines[$index] -like "*;*")
       {
@@ -126,21 +138,6 @@ while ($index -lt $nLines)
       }
 
       ++$index
-    }
-  
-    $isPrintStep = $printStep -match "PrintStep\s*\(([\w\s,]*)\s*,\s*[\deE+-.]*\s*,\s*[\deE+-.]*\s*,\s*[\deE+-.]*\s*\)\s*;"
-  
-    if (-not $isPrintStep)
-    {
-      Write-Error -Message "Unrecognised PrintStep syntax: $printStep"
-      exit 1
-    }
-  
-    $tokens = $Matches[1] -split ","
-  
-    foreach ($token in $tokens)
-    {
-      $outputNames.Add($token.Trim())  
     }
   }
 
@@ -158,17 +155,55 @@ Set-Content -Path $pathToTemplateIn -Value $lines
 
 $configName = [IO.Path]::GetFileNameWithoutExtension($inFile.Name)
 
-$configParameterAssignments = [string]::Join(", # ? [?]`n", ($parameterAssignments | ForEach-Object { "  $($_.Name) = $($_.Value)" }))
-if ($parameterAssignments.Count -gt 1)
-{
-  $configParameterAssignments = $configParameterAssignments + " # ? [?]"
+$parameterStatements = $parameterAssignments | ForEach-Object { $i = 1 } { 
+  $statement = "  $($_.Name) = $($_.Value)"
+  
+  if ($i -lt $parameterAssignments.Count)
+  {
+    $statement = $statement + ","
+  }
+  
+  if ($_.Comment -or $_.Unit)
+  {
+    $statement = $statement + " # " + $_.Comment
+
+    if ($_.Unit)
+    {
+      $statement = $statement + "[" + $_.Unit + "]"
+    }
+  }
+
+  ++$i
+
+  return $statement
 }
 
-$configOutputNames = [string]::Join(", # ? [?]`n", ($outputNames | ForEach-Object { "  $_ = NA" }))
-if ($outputNames.Count -gt 1)
-{
-  $configOutputNames = $configOutputNames + " # ? [?]"
+$configParameterAssignments = [string]::Join("`n", $parameterStatements)
+
+$outputStatements = $outputNames | ForEach-Object { $i = 1 } { 
+  $statement = "  $($_.Name) = NA"
+  
+  if ($i -lt $outputNames.Count)
+  {
+    $statement = $statement + ","
+  }
+  
+  if ($_.Comment -or $_.Unit)
+  {
+    $statement = $statement + " # " + $_.Comment
+
+    if ($_.Unit)
+    {
+      $statement = $statement + "[" + $_.Unit + "]"
+    }
+  }
+
+  ++$i
+
+  return $statement
 }
+
+$configOutputNames = [string]::Join("`n", $outputStatements)
 
 $configRContent = @"
 import <- list(

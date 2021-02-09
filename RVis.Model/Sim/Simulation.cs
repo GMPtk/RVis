@@ -22,22 +22,30 @@ namespace RVis.Model
 
       var pathToConfig = Path.Combine(pathToPrivate, CONFIG_FILE_NAME);
       RequireFile(pathToConfig);
-
-      TSimConfig fromToml;
-      try
-      {
-        fromToml = Toml.ReadFile<TSimConfig>(pathToConfig);
-      }
-      catch (Exception ex)
-      {
-        throw new ArgumentException($"Failed to load config file", nameof(pathToSimulation), ex);
-      }
-
-      var config = FromToml(fromToml);
+      var config = LoadConfigFrom(pathToConfig);
 
       var simulation = new Simulation(pathToSimulation, config);
 
       return simulation;
+    }
+
+    public static SimConfig LoadConfigFrom(string pathToConfig)
+    {
+      try
+      {
+        var fromToml = Toml.ReadFile<TSimConfig>(pathToConfig);
+        return FromToml(fromToml);
+      }
+      catch (Exception ex)
+      {
+        throw new ArgumentException("Failed to load config file", nameof(pathToConfig), ex);
+      }
+    }
+
+    public Simulation(string pathToSimulation, SimConfig simConfig)
+    {
+      _pathToSimulation = pathToSimulation;
+      _simConfig = simConfig;
     }
 
     [ProtoIgnore]
@@ -113,12 +121,6 @@ namespace RVis.Model
 
     public override int GetHashCode() =>
       HashCode.Combine(_pathToSimulation, _simConfig);
-
-    private Simulation(string pathToSimulation, SimConfig simConfig)
-    {
-      _pathToSimulation = pathToSimulation;
-      _simConfig = simConfig;
-    }
 
     [ProtoMember(1)]
     private readonly string _pathToSimulation;

@@ -1,0 +1,631 @@
+﻿# ==============================================================================
+# Six-compartment PBPK model with openCAT gut model.
+# No difference between arterial and venous blood, no inhalation.
+# Transport to tissues is flow limited.
+#
+# Effective permeability is assumed to be the same for each segment 
+# of the gi tract
+#
+# version 1.
+#
+# Units: 
+# - time in hours
+# - volumes in liters
+# - masses of substances in micromoles
+# - concentrations of substances in microM
+#
+# Frederic Bois - Nov 2016
+# ==============================================================================
+
+States  = {A_kid,          # Quantity in kidney (micromoles)
+           A_rpt,          # ~        richly perfused tissues (viscera)
+           A_liver,        # ~        liver
+           A_adip,         # ~        adipose tissue
+           A_ppt,          # ~        poorly perfused tissues (muscle and skin)
+           A_blood,        # ~        blood
+           A_stom_lu,      # ~        stomach  lumen
+           A_duod_lu,      # ~        duodenum ~
+           A_jeju_lu,      # ~        jejunum  ~
+           A_ileon_lu,     # ~        ileon    ~
+           A_cecum_lu,     # ~        cecum    ~
+           A_colon_lu,     # ~        colon    ~
+           A_stom_ep,      # ~        stomach epithelium
+           A_duod_ep,
+           A_jeju_ep, 
+           A_ileon_ep,  
+           A_cecum_ep,  
+           A_colon_ep,  
+           A_stom_w,       # ~        stomach wall
+           A_duod_w, 
+           A_jeju_w, 
+           A_ileon_w,  
+           A_cecum_w,  
+           A_colon_w,
+           A_absorb_stom,  # ~        absorbed from stomach lumen by epithelium
+           A_absorb_duod,
+           A_absorb_jeju,
+           A_absorb_ileon,
+           A_absorb_cecum,
+           A_absorb_colon,
+           A_absorb_pv,    # ~        reaching the portal vein
+           A_elim_kid,     # ~        urine excreted or metabolized in kidney
+           A_met_liver,    # ~        metabolized in liver 
+           A_met_stom, 
+           A_met_duod, 
+           A_met_jeju, 
+           A_met_ileon, 
+           A_met_cecum, 
+           A_met_colon, 
+           A_feces,        # ~        excreted in feces
+           AUC_blood,      # Integral of blood concentration
+           AUC_liver};     # ~           liver ~
+
+Outputs = {C_plasma,       # Concentration in blood plasma (microM)
+           C_kid,          # ~                kidney
+           C_rpt, 
+           C_liver, 
+           C_adip, 
+           C_ppt, 
+           C_blood, 
+           C_stom_lu, 
+           C_duod_lu, 
+           C_jeju_lu, 
+           C_ileon_lu,  
+           C_cecum_lu,
+           C_colon_lu,  
+           C_stom_ep,
+           C_duod_ep,
+           C_jeju_ep, 
+           C_ileon_ep,  
+           C_cecum_ep,  
+           C_colon_ep,  
+           C_stom_w, 
+           C_duod_w, 
+           C_jeju_w, 
+           C_ileon_w,  
+           C_cecum_w,  
+           C_colon_w,
+           A_gi_lu,        # Quantity in g.i. tract lumen
+           A_gi_ep,        # ~                      epithelium
+           A_gi_w,         # ~                      wall
+           A_absorb,       # ~ absorbed by the g.i. tract
+           A_elim,         # ~ metabolized or excreted
+           A_elim_gi,      # ~ metabolized or excreted from the g.i. tract only
+           A_organ,        # ~ in the body (including lumina)
+           A_total,        # ~ in the body and metabolized or excreted
+           Instant_Ka_gi}; # Instantaenous net absorption ratio by g.i. tract
+
+Inputs  = {Oral_dose_rate};# in micromoles / hours
+
+
+# ------------------------
+# Physiological parameters
+# ------------------------
+
+# Body mass (kg)
+BDM;
+
+# Total blood flow scaling coefficient to body mass
+sc_F_total = 15;
+
+# Fractions of total blood flow going to tissues
+f_Flow_adip      = 0.06;
+f_Flow_kid       = 0.21;
+f_Flow_ppt       = 0.20;
+f_Flow_liver_art = 0.077;
+f_Flow_stom      = 0.024;
+f_Flow_duod      = 0.016;
+f_Flow_jeju      = 0.056;
+f_Flow_ileon     = 0.033;
+f_Flow_cecum     = 0.006;
+f_Flow_colon     = 0.038;
+
+# Tissue fractions of body mass 
+f_BDM_adip  = 0.16;
+f_BDM_blood = 0.065;
+f_BDM_kid   = 0.0096;
+f_BDM_rpt   = 0.1;
+f_BDM_liver = 0.0243;
+f_BDM_stom  = 0.0021;
+f_BDM_duod  = 0.0003;
+f_BDM_jeju  = 0.0009;
+f_BDM_ileon = 0.0006;
+f_BDM_cecum = 0.0005;
+f_BDM_colon = 0.0048;
+
+# Lumina as fractions of body mass 
+f_BDM_stom_lu  = 0.0036;
+f_BDM_duod_lu  = 0.0003;
+f_BDM_jeju_lu  = 0.0023; 
+f_BDM_ileon_lu = 0.0032; 
+f_BDM_cecum_lu = 0.0001; 
+f_BDM_colon_lu = 0.0051;
+
+# Lengths of gi tract segments (decimeters, dm)
+Length_stom  = 2.5;
+Length_duod  = 2.5;
+Length_jeju  = 20;    
+Length_ileon = 30;    
+Length_cecum = 1.7;    
+Length_colon = 12.5;	    
+
+# Radii of gi tract segments (dm)
+Radius_stom  = 0.85;
+Radius_duod  = 0.2;    
+Radius_jeju  = 0.18;    
+Radius_ileon = 0.15;    
+Radius_cecum = 0.35;    
+Radius_colon = 0.25;
+            
+# Transit half-lives in lumina (hours)
+T12_stom_lu  = 0.25; 
+T12_duod_lu  = 0.25; 
+T12_jeju_lu  = 1.02; 
+T12_ileon_lu = 2.04;
+T12_cecum_lu = 4.55;
+T12_colon_lu = 13.5;
+
+# pH of luminal contents (unused for now)
+PH_stom  = 1.7;
+PH_duod  = 6;
+PH_jeju  = 6.5; 
+PH_ileon = 7.4; 
+PH_cecum = 5.9;
+PH_colon = 7;
+
+# Microsomal proteins (mg / g of tissue)
+MicroProt_liver  = 45; # Houston 2012
+MicroProt_stom   = 0;     
+MicroProt_duod   = 18; # Paine 1997
+MicroProt_jeju   = 25; # Paine 1997
+MicroProt_ileon  = 24; # Paine 1997
+MicroProt_cecum  = 0.0;
+MicroProt_colon  = 0.0;
+
+# G.i. tract epithelial volume per unit surface area (L/dm2)
+V_ep = 5.25E-4;
+
+
+#-------------------------------------
+# Susbstance-specific parameters
+#-------------------------------------
+
+# Molecular mass (g/mol)
+MM;
+
+# Administration lagtime, if needed
+Tlag;
+
+# Absorption on(1)/off(0) switches
+f_Abs_stom;
+f_Abs_duod;
+f_Abs_jeju;
+f_Abs_ileon;
+f_Abs_cecum;
+f_Abs_colon;
+
+# Effective permeability of g.i. tract epithelia
+Peff;
+
+# Plasma / blood concentration ratio
+Ratio_BP;
+
+# Tissue / blood partition coefficients
+PC_adip;
+PC_rpt;
+PC_ppt;
+PC_kid;
+PC_liver;
+PC_stom;
+PC_duod;
+PC_jeju;
+PC_ileon;
+PC_cecum;
+PC_colon;
+
+# Fraction unbound in compartments
+Fu_adip     = 1.0;
+Fu_kid      = 1.0;
+Fu_ppt      = 1.0;
+Fu_rpt      = 1.0;
+Fu_blood    = 1.0;
+Fu_liver    = 1.0;
+Fu_portvein = 1.0;
+Fu_stom     = 1.0;
+Fu_duod     = 1.0;
+Fu_jeju     = 1.0;
+Fu_ileon    = 1.0;
+Fu_cecum    = 1.0;
+Fu_colon    = 1.0;
+Fu_plasma   = 1.0;
+
+# Michaelis-Menten Vmax (micromol/min/mg microsomal proteins)
+Vmax_vitro;
+
+# Michaelis-Menten Km (microM)
+Km_vitro;
+
+# Renal elimination clearance (L/h)
+Kle_kid;
+
+
+#-------------------------------------
+# Scaled parameters
+#-------------------------------------
+
+# Blood flows
+F_total; 
+f_Flow_portvein;
+
+# Volumes
+V_adip;
+V_blood;
+V_kid;
+V_liver;
+V_rpt;
+V_ppt;
+V_stom;
+V_duod;
+V_jeju;
+V_ileon;
+V_cecum;
+V_colon;
+
+# Tissue volumes in gi tract
+V_stom_w;
+V_duod_w;
+V_jeju_w;
+V_ileon_w;
+V_cecum_w;
+V_colon_w;
+
+# Luminal volumes in gi tract
+V_stom_lu;
+V_colon_lu;
+V_duod_lu;
+V_jeju_lu;
+V_ileon_lu;
+V_cecum_lu;
+
+# Epithelial volumes in gi tract
+V_stom_ep;
+V_duod_ep;
+V_jeju_ep;
+V_ileon_ep;
+V_cecum_ep;
+V_colon_ep;
+
+# Epithelial surface area in gi tract (dm^2)
+SA_stom;
+SA_duod; 
+SA_jeju;
+SA_ileon;
+SA_cecum;
+SA_colon;
+
+# Blood flows
+Flow_adip;
+Flow_kid;
+Flow_liver;
+Flow_liver_art;
+Flow_rpt;
+Flow_ppt;
+Flow_portvein;
+Flow_stom;
+Flow_duod;
+Flow_jeju;
+Flow_ileon;
+Flow_cecum;
+Flow_colon;
+
+# Elimination rates
+Kle_stom;
+Kle_duod;
+Kle_jeju;
+Kle_ileon;
+Kle_cecum;
+Kle_colon;
+
+# In vivo liver and gi tract Vmax
+Vmax_vivo_liver;
+Vmax_vivo_stom;
+Vmax_vivo_duod;
+Vmax_vivo_jeju;
+Vmax_vivo_ileon;
+Vmax_vivo_cecum;
+Vmax_vivo_colon;
+
+# In vivo Km
+Km_vivo;
+
+
+Initialize {
+
+  # Total blood flow
+  F_total = sc_F_total * pow(BDM, 0.75);
+
+  # Volumes
+  V_adip     = BDM * f_BDM_adip;
+  V_blood    = BDM * f_BDM_blood;
+  V_kid      = BDM * f_BDM_kid;
+  V_liver    = BDM * f_BDM_liver;
+  V_rpt      = BDM * f_BDM_rpt;
+  V_stom_w   = BDM * f_BDM_stom;
+  V_duod_w   = BDM * f_BDM_duod;
+  V_jeju_w   = BDM * f_BDM_jeju;
+  V_ileon_w  = BDM * f_BDM_ileon;
+  V_cecum_w  = BDM * f_BDM_cecum;
+  V_colon_w  = BDM * f_BDM_colon;
+
+  V_ppt = BDM * (1 - f_BDM_adip  - f_BDM_blood - f_BDM_kid -
+                     f_BDM_liver - f_BDM_rpt   - 
+                     f_BDM_stom  - f_BDM_duod  - f_BDM_jeju - 
+                     f_BDM_ileon - f_BDM_cecum - f_BDM_colon);
+
+  # Fraction of total blood flow to portal vein
+  f_Flow_portvein = f_Flow_stom  + f_Flow_duod  + f_Flow_jeju + 
+                    f_Flow_ileon + f_Flow_cecum + f_Flow_colon;
+
+  # Blood flows
+  Flow_adip       = F_total * f_Flow_adip;
+  Flow_kid        = F_total * f_Flow_kid;
+  Flow_ppt        = F_total * f_Flow_ppt;
+  Flow_liver_art  = F_total * f_Flow_liver_art;
+  Flow_portvein   = F_total * f_Flow_portvein;
+  Flow_stom       = F_total * f_Flow_stom;
+  Flow_duod       = F_total * f_Flow_duod;
+  Flow_jeju       = F_total * f_Flow_jeju;
+  Flow_ileon      = F_total * f_Flow_ileon;
+  Flow_cecum      = F_total * f_Flow_cecum;
+  Flow_colon      = F_total * f_Flow_colon;
+
+  Flow_liver      = Flow_liver_art + Flow_portvein; 
+
+  Flow_rpt = F_total - Flow_adip - Flow_kid - Flow_ppt - Flow_liver;
+
+  # Epithelial surface areas
+  SA_stom   = Length_stom  * 2 * 3.1416 * Radius_stom;
+  SA_duod   = Length_duod  * 2 * 3.1416 * Radius_duod; 
+  SA_jeju   = Length_jeju  * 2 * 3.1416 * Radius_jeju;
+  SA_ileon  = Length_ileon * 2 * 3.1416 * Radius_ileon;
+  SA_cecum  = Length_cecum * 2 * 3.1416 * Radius_cecum;
+  SA_colon  = Length_colon * 2 * 3.1416 * Radius_colon;
+
+  # Luminal volumes
+  V_stom_lu  = f_BDM_stom_lu  * BDM;
+  V_duod_lu  = f_BDM_duod_lu  * BDM;
+  V_jeju_lu  = f_BDM_jeju_lu  * BDM;
+  V_ileon_lu = f_BDM_ileon_lu * BDM;
+  V_cecum_lu = f_BDM_cecum_lu * BDM;
+  V_colon_lu = f_BDM_colon_lu * BDM;
+
+  # Epithelial volumes
+  V_stom_ep     = V_ep * SA_stom;
+  V_duod_ep     = V_ep * SA_duod;
+  V_jeju_ep     = V_ep * SA_jeju;
+  V_ileon_ep    = V_ep * SA_ileon;
+  V_cecum_ep    = V_ep * SA_cecum;
+  V_colon_ep    = V_ep * SA_colon;
+
+  # Metabolic parameters, scaled from in vitro values
+  Vmax_vivo_liver = Vmax_vitro * 60 * MM * MicroProt_liver * V_liver;
+  Vmax_vivo_stom  = Vmax_vitro * 60 * MM * MicroProt_stom  * V_stom_ep;
+  Vmax_vivo_duod  = Vmax_vitro * 60 * MM * MicroProt_duod  * V_duod_ep;
+  Vmax_vivo_jeju  = Vmax_vitro * 60 * MM * MicroProt_jeju  * V_jeju_ep;
+  Vmax_vivo_ileon = Vmax_vitro * 60 * MM * MicroProt_ileon * V_ileon_ep;
+  Vmax_vivo_cecum = Vmax_vitro * 60 * MM * MicroProt_cecum * V_cecum_ep;
+  Vmax_vivo_colon = Vmax_vitro * 60 * MM * MicroProt_colon * V_colon_ep;
+
+  Km_vivo = Km_vitro * MM;
+
+  # Epithelial permeability
+  Kle_stom  = Peff * SA_stom  * f_Abs_stom;
+  Kle_duod  = Peff * SA_duod  * f_Abs_duod;
+  Kle_jeju  = Peff * SA_jeju  * f_Abs_jeju;
+  Kle_ileon = Peff * SA_ileon * f_Abs_ileon;
+  Kle_cecum = Peff * SA_cecum * f_Abs_cecum;
+  Kle_colon = Peff * SA_colon * f_Abs_colon;
+
+} # End of model scaling
+
+
+Dynamics {
+
+  # Concentrations in compartments
+  C_adip    = A_adip    / V_adip;
+  C_kid     = A_kid     / V_kid;
+  C_rpt     = A_rpt     / V_rpt;
+  C_ppt     = A_ppt     / V_ppt;
+  C_liver   = A_liver   / V_liver; 
+  C_stom_w  = A_stom_w  / V_stom_w;
+  C_duod_w  = A_duod_w  / V_duod_w;
+  C_jeju_w  = A_jeju_w  / V_jeju_w;
+  C_ileon_w = A_ileon_w / V_ileon_w;
+  C_cecum_w = A_cecum_w / V_cecum_w;
+  C_colon_w = A_colon_w / V_colon_w;
+
+  # Blood concentration
+  C_blood = A_blood / V_blood;
+
+  # Blood concentration at compartment exit
+  Ctb_kid     = C_kid     / PC_kid;
+  Ctb_liver   = C_liver   / PC_liver;
+  Ctb_rpt     = C_rpt     / PC_rpt;
+  Ctb_ppt     = C_ppt     / PC_ppt;
+  Ctb_adip    = C_adip    / PC_adip;
+  Ctb_stom_w  = C_stom_w  / PC_stom;
+  Ctb_duod_w  = C_duod_w  / PC_duod;
+  Ctb_jeju_w  = C_jeju_w  / PC_jeju;
+  Ctb_ileon_w = C_ileon_w / PC_ileon;
+  Ctb_cecum_w = C_cecum_w / PC_cecum;
+  Ctb_colon_w = C_colon_w / PC_colon;
+
+  # Concentrations in lumina
+  C_stom_lu  = A_stom_lu  / V_stom_lu;
+  C_duod_lu  = A_duod_lu  / V_duod_lu;
+  C_jeju_lu  = A_jeju_lu  / V_jeju_lu;
+  C_ileon_lu = A_ileon_lu / V_ileon_lu; 
+  C_cecum_lu = A_cecum_lu / V_cecum_lu;
+  C_colon_lu = A_colon_lu / V_colon_lu;
+
+  # Concentrations in epithelia
+  C_stom_ep  = A_stom_ep  / V_stom_ep;
+  C_duod_ep  = A_duod_ep  / V_duod_ep;
+  C_jeju_ep  = A_jeju_ep  / V_jeju_ep;
+  C_ileon_ep = A_ileon_ep / V_ileon_ep;
+  C_cecum_ep = A_cecum_ep / V_cecum_ep;
+  C_colon_ep = A_colon_ep / V_colon_ep;
+
+  # Transfers from lumen to lumen or feces (intestinal transit)
+  Rate_stl2dul = (log(2.0) * V_stom_lu  / T12_stom_lu)  * C_stom_lu;
+  Rate_dul2jel = (log(2.0) * V_duod_lu  / T12_duod_lu)  * C_duod_lu;
+  Rate_jel2ill = (log(2.0) * V_jeju_lu  / T12_jeju_lu)  * C_jeju_lu;
+  Rate_ill2cel = (log(2.0) * V_ileon_lu / T12_ileon_lu) * C_ileon_lu;
+  Rate_cel2col = (log(2.0) * V_cecum_lu / T12_cecum_lu) * C_cecum_lu;
+  Rate_col2fel = (log(2.0) * V_colon_lu / T12_colon_lu) * C_colon_lu;
+
+  # Transfers from lumina to epithelia
+  Rate_stl2ste = Kle_stom  * (C_stom_lu  - C_stom_ep);
+  Rate_dul2due = Kle_duod  * (C_duod_lu  - C_duod_ep);
+  Rate_jel2jee = Kle_jeju  * (C_jeju_lu  - C_jeju_ep);
+  Rate_ill2ile = Kle_ileon * (C_ileon_lu - C_ileon_ep);
+  Rate_cel2cee = Kle_cecum * (C_cecum_lu - C_cecum_ep);
+  Rate_col2coe = Kle_colon * (C_colon_lu - C_colon_ep);
+
+  # Transfers from epithelia to tissues
+  Rate_ste2stw = Kle_stom  * (C_stom_ep  - Ctb_stom_w);
+  Rate_due2duw = Kle_duod  * (C_duod_ep  - Ctb_duod_w);
+  Rate_jee2jew = Kle_jeju  * (C_jeju_ep  - Ctb_jeju_w);
+  Rate_ile2ilw = Kle_ileon * (C_ileon_ep - Ctb_ileon_w);
+  Rate_cee2cew = Kle_cecum * (C_cecum_ep - Ctb_cecum_w);
+  Rate_coe2cow = Kle_colon * (C_colon_ep - Ctb_colon_w);
+
+  # Transfers from tissues to portal vein 
+  Rate_stw2pv = Flow_stom  * Ctb_stom_w;
+  Rate_duw2pv = Flow_duod  * Ctb_duod_w;
+  Rate_jew2pv = Flow_jeju  * Ctb_jeju_w;
+  Rate_ilw2pv = Flow_ileon * Ctb_ileon_w;
+  Rate_cew2pv = Flow_cecum * Ctb_cecum_w;
+  Rate_cow2pv = Flow_colon * Ctb_colon_w;
+
+  # Portal rate in
+  RateIn_portvein = Rate_stw2pv + Rate_duw2pv + Rate_jew2pv + 
+                    Rate_ilw2pv + Rate_cew2pv + Rate_cow2pv;
+
+  Ctb_portvein = RateIn_portvein / Flow_portvein;
+
+
+  # Differential equations
+
+  # Quantities absorbed
+  dt (A_absorb_stom)  = Rate_stl2ste;
+  dt (A_absorb_duod)  = Rate_dul2due;
+  dt (A_absorb_jeju)  = Rate_jel2jee;
+  dt (A_absorb_ileon) = Rate_ill2ile;
+  dt (A_absorb_cecum) = Rate_cel2cee;
+  dt (A_absorb_colon) = Rate_col2coe;
+
+
+  # Quantity reaching the portal vein
+  dt (A_absorb_pv) = RateIn_portvein;
+
+
+  # Elimination and metabolism
+
+  dt (A_elim_kid) = Kle_kid * Ctb_kid * Fu_kid;
+
+  dt (A_met_liver) = Vmax_vivo_liver * Ctb_liver  / (Km_vivo + Ctb_liver);
+ 
+  dt (A_met_stom)  = Vmax_vivo_stom * C_stom_ep   / (Km_vivo + C_stom_ep);
+
+  dt (A_met_duod)  = Vmax_vivo_duod * C_duod_ep   / (Km_vivo + C_duod_ep);
+
+  dt (A_met_jeju)  = Vmax_vivo_jeju * C_jeju_ep   / (Km_vivo + C_jeju_ep);
+
+  dt (A_met_ileon) = Vmax_vivo_ileon * C_ileon_ep / (Km_vivo + C_ileon_ep);
+
+  dt (A_met_cecum) = Vmax_vivo_cecum * C_cecum_ep / (Km_vivo + C_cecum_ep);
+
+  dt (A_met_colon) = Vmax_vivo_colon * C_colon_ep / (Km_vivo + C_colon_ep);
+
+  dt (A_feces) = Rate_col2fel;
+
+
+  # Distributions
+
+  dt (A_kid)    = Flow_kid  * (C_blood - Ctb_kid) - dt (A_elim_kid);
+  dt (A_adip)   = Flow_adip * (C_blood - Ctb_adip); 
+  dt (A_ppt)    = Flow_ppt  * (C_blood - Ctb_ppt);
+  dt (A_rpt)    = Flow_rpt  * (C_blood - Ctb_rpt);
+  dt (A_liver)  = Flow_liver_art * C_blood + Flow_portvein * Ctb_portvein -
+                  Flow_liver * Ctb_liver - dt (A_met_liver);
+
+  dt(A_blood)   = Flow_rpt  * Ctb_rpt  + Flow_ppt   * Ctb_ppt + 
+                  Flow_adip * Ctb_adip + Flow_liver * Ctb_liver + 
+                  Flow_kid  * Ctb_kid  - F_total * C_blood;
+
+  dt(A_stom_lu) = Oral_dose_rate - Rate_stl2dul - Rate_stl2ste;
+  dt(A_stom_ep) = Rate_stl2ste - Rate_ste2stw - dt (A_met_stom);
+  dt(A_stom_w)  = Flow_stom * C_blood + Rate_ste2stw - Rate_stw2pv;
+
+  dt(A_duod_lu) = Rate_stl2dul - Rate_dul2jel - Rate_dul2due;
+  dt(A_duod_ep) = Rate_dul2due - Rate_due2duw - dt (A_met_duod);
+  dt(A_duod_w)  = Flow_duod * C_blood + Rate_due2duw - Rate_duw2pv;
+
+  dt(A_jeju_lu) = Rate_dul2jel - Rate_jel2ill - Rate_jel2jee;
+  dt(A_jeju_ep) = Rate_jel2jee - Rate_jee2jew - dt (A_met_jeju);
+  dt(A_jeju_w)  = Flow_jeju * C_blood + Rate_jee2jew - Rate_jew2pv;
+
+  dt(A_ileon_lu) = Rate_jel2ill - Rate_ill2cel - Rate_ill2ile;
+  dt(A_ileon_ep) = Rate_ill2ile - Rate_ile2ilw - dt (A_met_ileon);
+  dt(A_ileon_w)  = Flow_ileon * C_blood + Rate_ile2ilw - Rate_ilw2pv;
+
+  dt(A_cecum_lu) = Rate_ill2cel - Rate_cel2col - Rate_cel2cee;
+  dt(A_cecum_ep) = Rate_cel2cee - Rate_cee2cew - dt (A_met_cecum);
+  dt(A_cecum_w)  = Flow_cecum * C_blood + Rate_cee2cew - Rate_cew2pv;
+
+  dt(A_colon_lu) = Rate_cel2col - Rate_col2coe - dt (A_feces);
+  dt(A_colon_ep) = Rate_col2coe - Rate_coe2cow - dt (A_met_colon);
+  dt(A_colon_w)  = Flow_colon * C_blood + Rate_coe2cow - Rate_cow2pv;
+
+  # AUCs
+
+  dt(AUC_blood) = C_blood;
+  dt(AUC_liver) = C_liver;
+
+}
+
+CalcOutputs {
+
+  C_plasma = (C_blood > 0 ? C_blood / Ratio_BP : 1E-10);
+
+  # Mass balance checking
+
+  A_gi_lu   = A_stom_lu  + A_duod_lu + A_jeju_lu + A_ileon_lu +
+              A_cecum_lu + A_colon_lu;
+
+  A_gi_ep   = A_stom_ep  + A_duod_ep + A_jeju_ep + A_ileon_ep + 
+              A_cecum_ep + A_colon_ep;
+
+  A_gi_w    = A_stom_w  + A_duod_w + A_jeju_w + A_ileon_w + 
+              A_cecum_w + A_colon_w;
+
+  A_absorb  = A_absorb_stom  + A_absorb_duod  +
+              A_absorb_jeju  + A_absorb_ileon +
+              A_absorb_cecum + A_absorb_colon;
+
+  A_elim_gi = A_met_stom  + A_met_duod  + A_met_jeju  + 
+              A_met_ileon + A_met_cecum + A_met_colon + A_feces;
+
+  A_elim    = A_elim_kid + A_met_liver + A_elim_gi;
+
+  A_organ   = A_kid   + A_rpt   + A_liver + A_adip + A_ppt + 
+              A_blood + A_gi_lu + A_gi_ep + A_gi_w;
+
+  A_total   = A_organ + A_elim;
+
+  Instant_Ka_gi  = A_absorb_pv / A_gi_lu;
+
+}
+
+End.

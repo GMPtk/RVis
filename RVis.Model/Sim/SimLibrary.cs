@@ -65,7 +65,8 @@ namespace RVis.Model
       RequireEqual(rFiles.Length, 1);
 
       var fiR = rFiles[0];
-      var libraryDirectoryName = GetImportDirectoryName(fiR.Name, Location);
+      var directoryName = Path.GetFileNameWithoutExtension(fiR.Name);
+      var libraryDirectoryName = GetImportDirectoryName(directoryName, Location);
       var pathToSimulation = Path.Combine(Location, libraryDirectoryName);
 
       Directory.Move(location, pathToSimulation);
@@ -82,16 +83,12 @@ namespace RVis.Model
       var exeFiles = diSimulation.GetFiles("*.exe");
       RequireEqual(exeFiles.Length, 1);
 
+      libraryDirectoryName = GetImportDirectoryName(libraryDirectoryName, Location);
       var pathToSimulation = Path.Combine(Location, libraryDirectoryName);
-
-      RequireFalse(
-        Directory.Exists(pathToSimulation), 
-        $"Already exists in library: {pathToSimulation}"
-        );
 
       Directory.Move(location, pathToSimulation);
 
-      return pathToSimulation;
+      return libraryDirectoryName;
     }
 
     public void Delete(Simulation simulation)
@@ -106,7 +103,7 @@ namespace RVis.Model
       }
       catch (Exception)
       {
-        // the sim has gone from the lib so swallow
+        // sim gone from lib so swallow
       }
       Simulations = Simulations.Remove(simulation);
       OnDeleted(simulation);
@@ -133,9 +130,8 @@ namespace RVis.Model
       return (simulations.ToArr(), exceptions.Length());
     }
 
-    private static string GetImportDirectoryName(string codeFileName, string location)
+    private static string GetImportDirectoryName(string directoryName, string location)
     {
-      var directoryName = Path.GetFileNameWithoutExtension(codeFileName);
       var pathToImport = Path.Combine(location, directoryName);
       if (!Directory.Exists(pathToImport)) return directoryName;
 

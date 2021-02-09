@@ -118,11 +118,9 @@ namespace Sampling
 
       Range(0, _nSamples).Iter(i =>
       {
-        targetIndices.Iter((j, ti) =>
-        {
-          var value = parameterSamples[j].Samples[i];
-          itemArray[ti] = value.ToSigFigs(5);
-        });
+        targetIndices.Iter(
+          (j, ti) => itemArray[ti] = parameterSamples[j].Samples[i]
+          );
 
         dataTable.Rows.Add(itemArray);
       });

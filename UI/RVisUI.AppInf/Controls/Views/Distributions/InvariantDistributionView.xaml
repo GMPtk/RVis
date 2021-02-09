@@ -45,7 +45,7 @@
                Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
                >
       <TextBlock.Text>
-        <MultiBinding StringFormat="{}{0} = {1} {2}">
+        <MultiBinding StringFormat="{}{0} = {1:G4} {2}">
           <Binding Path="Variable" TargetNullValue="?"/>
           <Binding Path="Value" TargetNullValue="?" />
           <Binding Path="Unit" />

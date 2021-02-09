@@ -688,17 +688,19 @@ namespace Estimation
       var invariantDistribution = new InvariantDistribution(value);
       distributions = distributions.SetDistribution(invariantDistribution);
 
-      return maybeDistribution.Match(
-       d =>
-       {
-         var index = distributions.FindIndex(e => e.DistributionType == d.DistributionType);
-         distributions = parameterState.Distributions.SetItem(index, d);
-         return new ParameterState(parameterState.Name, d.DistributionType, distributions, true);
-       },
-       () =>
-       {
-         return new ParameterState(parameterState.Name, parameterState.DistributionType, distributions, true);
-       });
+      DistributionType distributionType;
+
+      (distributionType, distributions) = maybeDistribution.Match(
+         d => (d.DistributionType, distributions.SetDistribution(d)),
+         () => (parameterState.DistributionType, distributions)
+         );
+
+      return new ParameterState(
+        parameterState.Name,
+        distributionType,
+        distributions,
+        isSelected: true
+        );
     }
 
     private static ParameterState CreateAndApplyDistribution(

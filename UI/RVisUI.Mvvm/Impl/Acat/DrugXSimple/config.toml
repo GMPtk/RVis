@@ -1,0 +1,420 @@
+﻿Title = "ACAT_like"
+Description = "ACAT_like"
+ImportedOn = 2021-01-23 20:23:56.218651
+
+[Code]
+File = "ACAT_like.exe"
+
+[Input]
+IsDefault = true
+
+[[Input.Parameters]]
+Name = "BDM"
+Value = "65"
+Unit = "kg"
+Description = "Body mass"
+[[Input.Parameters]]
+Name = "end_time"
+Value = "24"
+Unit = "h"
+Description = "End time"
+[[Input.Parameters]]
+Name = "f_Abs_cecum"
+Value = "1"
+Description = "Absorption on/off switch"
+[[Input.Parameters]]
+Name = "f_Abs_colon"
+Value = "1"
+Description = "Absorption on/off switch"
+[[Input.Parameters]]
+Name = "f_Abs_duod"
+Value = "1"
+Description = "Absorption on/off switch"
+[[Input.Parameters]]
+Name = "f_Abs_ileon"
+Value = "1"
+Description = "Absorption on/off switch"
+[[Input.Parameters]]
+Name = "f_Abs_jeju"
+Value = "1"
+Description = "Absorption on/off switch"
+[[Input.Parameters]]
+Name = "f_Abs_stom"
+Value = "0"
+Description = "Absorption on/off switch"
+[[Input.Parameters]]
+Name = "Fu_adip"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_blood"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_cecum"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_colon"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_duod"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_ileon"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_jeju"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_kid"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_liver"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_plasma"
+Value = "0.016"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_portvein"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_ppt"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_rpt"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Fu_stom"
+Value = "1.0"
+Description = "Fraction unbound in compartment"
+[[Input.Parameters]]
+Name = "Kle_kid"
+Value = "0.085"
+Unit = "L/h"
+Description = "Renal elimination clearance"
+[[Input.Parameters]]
+Name = "Km_vitro"
+Value = "3.31"
+Unit = "µmol/L"
+Description = "Michaelis-Menten Km"
+[[Input.Parameters]]
+Name = "MM"
+Value = "325.8"
+Unit = "g/mol"
+Description = "Molecular mass"
+[[Input.Parameters]]
+Name = "oral_dose_rate_exposure_time"
+Value = "0.0125"
+Unit = "h"
+Description = "Dose interval"
+[[Input.Parameters]]
+Name = "oral_dose_rate_magnitude"
+Value = "10000"
+Unit = "µmol"
+Description = "Dose"
+[[Input.Parameters]]
+Name = "oral_dose_rate_period"
+Value = "1000"
+Unit = "h"
+Description = "Dose period"
+[[Input.Parameters]]
+Name = "PC_adip"
+Value = "303"
+Description = "Tissue / blood partition coefficient"
+[[Input.Parameters]]
+Name = "PC_cecum"
+Value = "158"
+Description = "Tissue / blood partition coefficient"
+[[Input.Parameters]]
+Name = "PC_colon"
+Value = "158"
+Description = "Tissue / blood partition coefficient"
+[[Input.Parameters]]
+Name = "PC_duod"
+Value = "158"
+Description = "Tissue / blood partition coefficient"
+[[Input.Parameters]]
+Name = "PC_ileon"
+Value = "158"
+Description = "Tissue / blood partition coefficient"
+[[Input.Parameters]]
+Name = "PC_jeju"
+Value = "158"
+Description = "Tissue / blood partition coefficient"
+[[Input.Parameters]]
+Name = "PC_kid"
+Value = "171"
+Description = "Tissue / blood partition coefficient"
+[[Input.Parameters]]
+Name = "PC_liver"
+Value = "158"
+Description = "Tissue / blood partition coefficient"
+[[Input.Parameters]]
+Name = "PC_ppt"
+Value = "52"
+Description = "Tissue / blood partition coefficient"
+[[Input.Parameters]]
+Name = "PC_rpt"
+Value = "172"
+Description = "Tissue / blood partition coefficient"
+[[Input.Parameters]]
+Name = "PC_stom"
+Value = "158"
+Description = "Tissue / blood partition coefficient"
+[[Input.Parameters]]
+Name = "Peff"
+Value = "0.175"
+Description = "Effective permeability of g.i. tract epithelia"
+[[Input.Parameters]]
+Name = "Ratio_BP"
+Value = "0.824"
+Description = "Plasma / blood concentration ratio"
+[[Input.Parameters]]
+Name = "start_time"
+Value = "0"
+Unit = "h"
+Description = "Start time"
+[[Input.Parameters]]
+Name = "time_step"
+Value = "0.1"
+Unit = "h"
+Description = "Time step"
+[[Input.Parameters]]
+Name = "Tlag"
+Value = "0"
+Unit = "h"
+Description = "Administration lagtime, if needed"
+[[Input.Parameters]]
+Name = "Vmax_vitro"
+Value = "2.48"
+Unit = "µmol/min/mg"
+Description = "Michaelis-Menten Vmax"
+
+[Output]
+
+[[Output.Values]]
+Name = "C_adip"
+
+[[Output.Values.Elements]]
+Name = "C_adip"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_blood"
+
+[[Output.Values.Elements]]
+Name = "C_blood"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_cecum_ep"
+
+[[Output.Values.Elements]]
+Name = "C_cecum_ep"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_cecum_lu"
+
+[[Output.Values.Elements]]
+Name = "C_cecum_lu"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_cecum_w"
+
+[[Output.Values.Elements]]
+Name = "C_cecum_w"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_colon_ep"
+
+[[Output.Values.Elements]]
+Name = "C_colon_ep"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_colon_lu"
+
+[[Output.Values.Elements]]
+Name = "C_colon_lu"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_colon_w"
+
+[[Output.Values.Elements]]
+Name = "C_colon_w"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_duod_ep"
+
+[[Output.Values.Elements]]
+Name = "C_duod_ep"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_duod_lu"
+
+[[Output.Values.Elements]]
+Name = "C_duod_lu"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_duod_w"
+
+[[Output.Values.Elements]]
+Name = "C_duod_w"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_ileon_ep"
+
+[[Output.Values.Elements]]
+Name = "C_ileon_ep"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_ileon_lu"
+
+[[Output.Values.Elements]]
+Name = "C_ileon_lu"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_ileon_w"
+
+[[Output.Values.Elements]]
+Name = "C_ileon_w"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_jeju_ep"
+
+[[Output.Values.Elements]]
+Name = "C_jeju_ep"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_jeju_lu"
+
+[[Output.Values.Elements]]
+Name = "C_jeju_lu"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_jeju_w"
+
+[[Output.Values.Elements]]
+Name = "C_jeju_w"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_kid"
+
+[[Output.Values.Elements]]
+Name = "C_kid"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_liver"
+
+[[Output.Values.Elements]]
+Name = "C_liver"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_plasma"
+
+[[Output.Values.Elements]]
+Name = "C_plasma"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_ppt"
+
+[[Output.Values.Elements]]
+Name = "C_ppt"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_rpt"
+
+[[Output.Values.Elements]]
+Name = "C_rpt"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_stom_ep"
+
+[[Output.Values.Elements]]
+Name = "C_stom_ep"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_stom_lu"
+
+[[Output.Values.Elements]]
+Name = "C_stom_lu"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "C_stom_w"
+
+[[Output.Values.Elements]]
+Name = "C_stom_w"
+IsIndependentVariable = false
+Unit = "µmol/L"
+Description = "Concentration"
+[[Output.Values]]
+Name = "Instant_Ka_gi"
+
+[[Output.Values.Elements]]
+Name = "Instant_Ka_gi"
+IsIndependentVariable = false
+Description = "Instantaenous net absorption ratio by g.i. tract"
+[[Output.Values]]
+Name = "Time"
+
+[[Output.Values.Elements]]
+Name = "Time"
+IsIndependentVariable = true
+Unit = "h"
+Description = "Time"

@@ -7,6 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Impl\Acat\DrugXSimple\ACAT_like.in" />
+    <None Remove="Impl\Acat\DrugXSimple\config.toml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Impl\Acat\DrugXSimple\ACAT_like.in" />
+    <EmbeddedResource Include="Impl\Acat\DrugXSimple\config.toml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UnitsNet" Version="4.86.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\RVisUI.Model\RVisUI.Model.csproj" />
   </ItemGroup>
 

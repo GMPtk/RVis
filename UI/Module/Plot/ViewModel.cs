@@ -298,8 +298,8 @@ namespace Plot
       change.ParameterSharedStates.Iter(pss =>
       {
         var parameterEditState = _moduleState.ParameterEditStates
-        .Find(pes => pes.Name == pss.Name)
-        .AssertSome($"Unknown parameter shared state: {pss.Name}");
+          .Find(pes => pes.Name == pss.Name)
+          .AssertSome($"Unknown parameter shared state: {pss.Name}");
 
         if (change.ObservableQualifier.IsAdd())
         {

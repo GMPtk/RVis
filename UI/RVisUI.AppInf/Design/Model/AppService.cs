@@ -1,4 +1,5 @@
-﻿using RVis.Model;
+﻿using Ninject;
+using RVis.Model;
 using RVisUI.Model;
 using System;
 using System.Runtime.CompilerServices;
@@ -9,6 +10,8 @@ namespace RVisUI.AppInf.Design
 {
   public sealed class AppService : IAppService
   {
+    public IKernel Factory => throw new NotImplementedException();
+
     public IObservable<long> SecondInterval => throw new NotImplementedException();
 
     public IRVisServerPool RVisServerPool => throw new NotImplementedException();

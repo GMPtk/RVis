@@ -55,7 +55,7 @@
                Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
                >
       <TextBlock.Text>
-        <MultiBinding StringFormat="{}{0} ~ Beta(α = {1}, β = {2}, µ = {3}, σ = {4})">
+        <MultiBinding StringFormat="{}{0} ~ Beta(α = {1:G4}, β = {2:G4}, µ = {3:G4}, σ = {4:G4})">
           <Binding Path="Variable" TargetNullValue="?"/>
           <Binding Path="Alpha" TargetNullValue="?" />
           <Binding Path="Beta" TargetNullValue="?" />

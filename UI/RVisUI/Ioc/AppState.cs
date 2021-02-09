@@ -25,8 +25,8 @@ namespace RVisUI.Ioc
       ProcessStartUpArgs(args);
 
       _appService.RVisServerPool.RequestServer().Match(
-        StartOperations,
-        CurtailOperations
+        StartOperationsAsync,
+        CurtailOperationsAsync
         );
     }
 

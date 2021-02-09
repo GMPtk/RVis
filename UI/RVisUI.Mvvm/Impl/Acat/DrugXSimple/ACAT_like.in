@@ -1,0 +1,89 @@
+﻿Integrate (Lsodes, 1e-6, 1e-6, 1);
+  
+Simulation {
+
+  MM   = {{MM}}; # Molecular mass [g/mol]
+  
+  Tlag = {{Tlag}}; # Administration lagtime, if needed [h]
+
+  f_Abs_stom  = {{f_Abs_stom}}; # Absorption on/off switch
+  f_Abs_duod  = {{f_Abs_duod}}; # Absorption on/off switch
+  f_Abs_jeju  = {{f_Abs_jeju}}; # Absorption on/off switch
+  f_Abs_ileon = {{f_Abs_ileon}}; # Absorption on/off switch
+  f_Abs_cecum = {{f_Abs_cecum}}; # Absorption on/off switch
+  f_Abs_colon = {{f_Abs_colon}}; # Absorption on/off switch
+    
+  Peff = {{Peff}}; # Effective permeability of g.i. tract epithelia
+  
+  Ratio_BP = {{Ratio_BP}}; # Plasma / blood concentration ratio
+
+  PC_adip   = {{PC_adip}}; # Tissue / blood partition coefficient
+  PC_kid    = {{PC_kid}}; # Tissue / blood partition coefficient
+  PC_rpt    = {{PC_rpt}}; # Tissue / blood partition coefficient
+  PC_ppt    =  {{PC_ppt}}; # Tissue / blood partition coefficient
+  PC_liver  = {{PC_liver}}; # Tissue / blood partition coefficient
+  PC_stom   = {{PC_stom}}; # Tissue / blood partition coefficient
+  PC_duod   = {{PC_duod}}; # Tissue / blood partition coefficient
+  PC_jeju   = {{PC_jeju}}; # Tissue / blood partition coefficient
+  PC_ileon  = {{PC_ileon}}; # Tissue / blood partition coefficient
+  PC_cecum  = {{PC_cecum}}; # Tissue / blood partition coefficient
+  PC_colon  = {{PC_colon}}; # Tissue / blood partition coefficient
+    
+  Fu_adip     = {{Fu_adip}}; # Fraction unbound in compartment
+  Fu_kid      = {{Fu_kid}}; # Fraction unbound in compartment
+  Fu_ppt      = {{Fu_ppt}}; # Fraction unbound in compartment
+  Fu_rpt      = {{Fu_rpt}}; # Fraction unbound in compartment
+  Fu_blood    = {{Fu_blood}}; # Fraction unbound in compartment
+  Fu_liver    = {{Fu_liver}}; # Fraction unbound in compartment
+  Fu_portvein = {{Fu_portvein}}; # Fraction unbound in compartment
+  Fu_stom     = {{Fu_stom}}; # Fraction unbound in compartment
+  Fu_duod     = {{Fu_duod}}; # Fraction unbound in compartment
+  Fu_jeju     = {{Fu_jeju}}; # Fraction unbound in compartment
+  Fu_ileon    = {{Fu_ileon}}; # Fraction unbound in compartment
+  Fu_cecum    = {{Fu_cecum}}; # Fraction unbound in compartment
+  Fu_colon    = {{Fu_colon}}; # Fraction unbound in compartment
+  Fu_plasma   = {{Fu_plasma}}; # Fraction unbound in compartment
+  
+  Vmax_vitro = {{Vmax_vitro}}; # Michaelis-Menten Vmax [µmol/min/mg]
+
+  Km_vitro = {{Km_vitro}}; # Michaelis-Menten Km [µmol/L]
+  
+  Kle_kid = {{Kle_kid}}; # Renal elimination clearance [L/h]
+
+  BDM = {{BDM}}; # Body mass [kg]
+
+  Oral_dose_rate = PerDose ({{oral_dose_rate_magnitude}}, {{oral_dose_rate_period}}, Tlag, {{oral_dose_rate_exposure_time}});
+  
+  PrintStep (
+    C_plasma, # Concentration [µmol/L]
+    C_kid, # Concentration [µmol/L]
+    C_rpt, # Concentration [µmol/L] 
+    C_liver, # Concentration [µmol/L] 
+    C_adip, # Concentration [µmol/L] 
+    C_ppt, # Concentration [µmol/L] 
+    C_blood, # Concentration [µmol/L] 
+    C_stom_lu, # Concentration [µmol/L] 
+    C_duod_lu, # Concentration [µmol/L] 
+    C_jeju_lu, # Concentration [µmol/L] 
+    C_ileon_lu, # Concentration [µmol/L]  
+    C_cecum_lu, # Concentration [µmol/L]
+    C_colon_lu, # Concentration [µmol/L]  
+    C_stom_ep, # Concentration [µmol/L]
+    C_duod_ep, # Concentration [µmol/L]
+    C_jeju_ep, # Concentration [µmol/L] 
+    C_ileon_ep, # Concentration [µmol/L]  
+    C_cecum_ep, # Concentration [µmol/L]  
+    C_colon_ep, # Concentration [µmol/L]  
+    C_stom_w, # Concentration [µmol/L] 
+    C_duod_w, # Concentration [µmol/L] 
+    C_jeju_w, # Concentration [µmol/L] 
+    C_ileon_w, # Concentration [µmol/L]  
+    C_cecum_w, # Concentration [µmol/L]  
+    C_colon_w, # Concentration [µmol/L]
+    Instant_Ka_gi, # Instantaenous net absorption ratio by g.i. tract
+    {{start_time}}, {{end_time}}, {{time_step}}
+  );
+
+}
+  
+End.

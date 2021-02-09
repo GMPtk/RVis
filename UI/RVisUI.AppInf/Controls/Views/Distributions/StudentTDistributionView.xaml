@@ -54,7 +54,7 @@
                Style="{DynamicResource MaterialDesignTitleTextBlock}"
                >
       <TextBlock.Text>
-        <MultiBinding StringFormat="{}{0} ~ T(µ = {1}, σ = {2}, 𝜈 = {3})">
+        <MultiBinding StringFormat="{}{0} ~ T(µ = {1:G4}, σ = {2:G4}, 𝜈 = {3:G4})">
           <Binding Path="Variable" TargetNullValue="?"/>
           <Binding Path="Mu" TargetNullValue="?" />
           <Binding Path="Sigma" TargetNullValue="?" />

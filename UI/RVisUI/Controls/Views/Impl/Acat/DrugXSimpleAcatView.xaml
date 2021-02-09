@@ -1,0 +1,589 @@
+﻿<UserControl x:Class="RVisUI.Controls.Views.Impl.Acat.DrugXSimpleAcatView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mvvmd="clr-namespace:RVisUI.Mvvm.Design;assembly=RVisUI.Mvvm"
+             xmlns:local="clr-namespace:RVisUI.Controls.Views.Impl.Acat"
+             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="768" 
+             d:DesignWidth="1200"
+             d:DataContext="{d:DesignInstance Type=mvvmd:DrugXSimpleAcatViewModel, IsDesignTimeCreatable=True}"
+             >
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+
+      <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="MinWidth" Value="120"/>
+        <Setter Property="Margin" Value="0 5 0 5"/>
+      </Style>
+      
+      <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+        <Setter Property="Margin" Value="0 0 5 0"/>
+      </Style>
+      
+      <wpf:BinaryToBooleanConverter x:Key="b2bc"/>
+
+    </ResourceDictionary>
+  </UserControl.Resources>
+  
+  <Grid>
+
+    <TabControl SelectedIndex="{Binding SelectedIndex}">
+      
+      <TabItem Header="Substance">
+        <StackPanel Margin="10">
+          <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding IsMMPreset}"/>
+            <TextBox md:HintAssist.Hint="Molecular mass [g/mol]">
+              <TextBox.Text>
+                <Binding Path="MMT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+          </TextBox>
+          </StackPanel>
+        </StackPanel>
+      </TabItem>
+      
+      <TabItem Header="Absorption">
+        <Grid Margin="10">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="200"/>
+            <ColumnDefinition/>
+          </Grid.ColumnDefinitions>
+          <StackPanel>
+            <StackPanel.Resources>
+              <ResourceDictionary>
+                <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+                  <Setter Property="Margin" Value="0 5 0 5"/>
+                </Style>
+              </ResourceDictionary>
+            </StackPanel.Resources>
+            <CheckBox Content="Stomach"
+                    IsChecked="{Binding f_Abs_stomN, Converter={StaticResource b2bc}}"/>
+            <CheckBox Content="Duodenum"
+                    IsChecked="{Binding f_Abs_duodN, Converter={StaticResource b2bc}}"/>
+            <CheckBox Content="Jejunum"
+                    IsChecked="{Binding f_Abs_jejuN, Converter={StaticResource b2bc}}"/>
+            <CheckBox Content="Ilium"
+                    IsChecked="{Binding f_Abs_ileonN, Converter={StaticResource b2bc}}"/>
+            <CheckBox Content="Caecum"
+                    IsChecked="{Binding f_Abs_cecumN, Converter={StaticResource b2bc}}"/>
+            <CheckBox Content="Colon"
+                    IsChecked="{Binding f_Abs_colonN, Converter={StaticResource b2bc}}"/>
+          </StackPanel>
+          <StackPanel Grid.Column="1">
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsPeffPreset}"/>
+              <TextBox md:HintAssist.Hint="Permeability" 
+                       ToolTip="Effective permeability of g.i. tract epithelia">
+                <TextBox.Text>
+                  <Binding Path="PeffT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsRatio_BPPreset}"/>
+              <TextBox md:HintAssist.Hint="Concentration ratio" 
+                       ToolTip="Plasma / blood concentration ratio">
+                <TextBox.Text>
+                  <Binding Path="Ratio_BPT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+          </StackPanel>
+        </Grid>        
+      </TabItem>
+      
+      <TabItem Header="Tissue/Blood Partition Coefficients">
+        <Grid Margin="10">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="200"/>
+            <ColumnDefinition Width="Auto" MinWidth="200"/>
+            <ColumnDefinition/>
+          </Grid.ColumnDefinitions>
+          <StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsPC_adipPreset}"/>
+              <TextBox md:HintAssist.Hint="Adipose">
+                <TextBox.Text>
+                  <Binding Path="PC_adipT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsPC_kidPreset}"/>
+              <TextBox md:HintAssist.Hint="Kidney">
+                <TextBox.Text>
+                  <Binding Path="PC_kidT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsPC_rptPreset}"/>
+              <TextBox md:HintAssist.Hint="Richly perfused">
+                <TextBox.Text>
+                  <Binding Path="PC_rptT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsPC_pptPreset}"/>
+              <TextBox md:HintAssist.Hint="Poorly perfused">
+                <TextBox.Text>
+                  <Binding Path="PC_pptT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+          </StackPanel>
+          <StackPanel Grid.Column="1">
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsPC_liverPreset}"/>
+              <TextBox md:HintAssist.Hint="Liver">
+                <TextBox.Text>
+                  <Binding Path="PC_liverT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsPC_stomPreset}"/>
+              <TextBox md:HintAssist.Hint="Stomach">
+                <TextBox.Text>
+                  <Binding Path="PC_stomT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsPC_duodPreset}"/>
+              <TextBox md:HintAssist.Hint="Duodenum">
+                <TextBox.Text>
+                  <Binding Path="PC_duodT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsPC_jejuPreset}"/>
+              <TextBox md:HintAssist.Hint="Jejunum">
+                <TextBox.Text>
+                  <Binding Path="PC_jejuT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+          </StackPanel>
+          <StackPanel Grid.Column="2">
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsPC_ileonPreset}"/>
+              <TextBox md:HintAssist.Hint="Ilium">
+                <TextBox.Text>
+                  <Binding Path="PC_ileonT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsPC_cecumPreset}"/>
+              <TextBox md:HintAssist.Hint="Caecum">
+                <TextBox.Text>
+                  <Binding Path="PC_cecumT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsPC_colonPreset}"/>
+              <TextBox md:HintAssist.Hint="Colon">
+                <TextBox.Text>
+                  <Binding Path="PC_colonT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+          </StackPanel>
+        </Grid>
+      </TabItem>
+      
+      <TabItem Header="Fraction Unbound in Compartments">
+        <Grid Margin="10">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="200"/>
+            <ColumnDefinition Width="Auto" MinWidth="200"/>
+            <ColumnDefinition Width="Auto" MinWidth="200"/>
+            <ColumnDefinition/>
+          </Grid.ColumnDefinitions>
+          <StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_adipPreset}"/>
+              <TextBox md:HintAssist.Hint="Adipose">
+                <TextBox.Text>
+                  <Binding Path="Fu_adipT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_kidPreset}"/>
+              <TextBox md:HintAssist.Hint="Kidney">
+                <TextBox.Text>
+                  <Binding Path="Fu_kidT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_pptPreset}"/>
+              <TextBox md:HintAssist.Hint="Poorly perfused">
+                <TextBox.Text>
+                  <Binding Path="Fu_pptT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_rptPreset}"/>
+              <TextBox md:HintAssist.Hint="Richly perfused">
+                <TextBox.Text>
+                  <Binding Path="Fu_rptT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+          </StackPanel>
+          <StackPanel Grid.Column="1">
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_bloodPreset}"/>
+              <TextBox md:HintAssist.Hint="Blood">
+                <TextBox.Text>
+                  <Binding Path="Fu_bloodT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_liverPreset}"/>
+              <TextBox md:HintAssist.Hint="Liver">
+                <TextBox.Text>
+                  <Binding Path="Fu_liverT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_portveinPreset}"/>
+              <TextBox md:HintAssist.Hint="Hepatic portal vein">
+                <TextBox.Text>
+                  <Binding Path="Fu_portveinT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_stomPreset}"/>
+              <TextBox md:HintAssist.Hint="Stomach">
+                <TextBox.Text>
+                  <Binding Path="Fu_stomT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+          </StackPanel>
+          <StackPanel Grid.Column="2">
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_duodPreset}"/>
+              <TextBox md:HintAssist.Hint="Duodenum">
+                <TextBox.Text>
+                  <Binding Path="Fu_duodT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_jejuPreset}"/>
+              <TextBox md:HintAssist.Hint="Jejunum">
+                <TextBox.Text>
+                  <Binding Path="Fu_jejuT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_ileonPreset}"/>
+              <TextBox md:HintAssist.Hint="Ilium">
+                <TextBox.Text>
+                  <Binding Path="Fu_ileonT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_cecumPreset}"/>
+              <TextBox md:HintAssist.Hint="Caecum">
+                <TextBox.Text>
+                  <Binding Path="Fu_cecumT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+          </StackPanel>
+          <StackPanel Grid.Column="3">
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_colonPreset}"/>
+              <TextBox md:HintAssist.Hint="Colon">
+                <TextBox.Text>
+                  <Binding Path="Fu_colonT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <CheckBox IsChecked="{Binding IsFu_plasmaPreset}"/>
+              <TextBox md:HintAssist.Hint="Plasma">
+                <TextBox.Text>
+                  <Binding Path="Fu_plasmaT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                      <ExceptionValidationRule/>
+                    </Binding.ValidationRules>
+                  </Binding>
+                </TextBox.Text>
+              </TextBox>
+            </StackPanel>
+          </StackPanel>
+        </Grid>
+      </TabItem>
+      
+      <TabItem Header="Metabolism/Elimination">
+        <StackPanel Margin="10">
+          <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding IsVmax_vitroPreset}"/>
+            <TextBox md:HintAssist.Hint="Vmax [µmol/min/mg]"
+                   ToolTip="Michaelis-Menten Vmax [µmol/min/mg microsomal proteins]">
+              <TextBox.Text>
+                <Binding Path="Vmax_vitroT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+            </TextBox>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding IsKm_vitroPreset}"/>
+            <TextBox md:HintAssist.Hint="Km [µmol/L]"
+                   ToolTip="Michaelis-Menten Km [µmol/L]">
+              <TextBox.Text>
+                <Binding Path="Km_vitroT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+            </TextBox>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding IsKle_kidPreset}"/>
+            <TextBox md:HintAssist.Hint="Clearance [L/h]"
+                   ToolTip="Renal elimination clearance [L/h]">
+              <TextBox.Text>
+                <Binding Path="Kle_kidT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+            </TextBox>
+          </StackPanel>
+        </StackPanel>
+      </TabItem>
+      
+      <TabItem Header="Oral Dose Schedule">
+        <StackPanel Margin="10">
+          <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding Isoral_dose_rate_magnitudePreset}"/>
+            <TextBox md:HintAssist.Hint="Magnitude [µmol]">
+              <TextBox.Text>
+                <Binding Path="oral_dose_rate_magnitudeT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+            </TextBox>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding Isoral_dose_rate_periodPreset}"/>
+            <TextBox md:HintAssist.Hint="Period [h]">
+              <TextBox.Text>
+                <Binding Path="oral_dose_rate_periodT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+            </TextBox>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding IsTlagPreset}"/>
+            <TextBox md:HintAssist.Hint="Lag [h]">
+              <TextBox.Text>
+                <Binding Path="TlagT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+            </TextBox>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding Isoral_dose_rate_exposure_timePreset}"/>
+            <TextBox md:HintAssist.Hint="Exposure time [h]">
+              <TextBox.Text>
+                <Binding Path="oral_dose_rate_exposure_timeT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+            </TextBox>
+          </StackPanel>
+        </StackPanel>
+      </TabItem>
+      
+      <TabItem Header="Time">
+        <StackPanel Margin="10">
+          <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding Isstart_timePreset}"/>
+            <TextBox md:HintAssist.Hint="Start [h]">
+              <TextBox.Text>
+                <Binding Path="start_timeT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+            </TextBox>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding Isend_timePreset}"/>
+            <TextBox md:HintAssist.Hint="End [h]">
+              <TextBox.Text>
+                <Binding Path="end_timeT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+            </TextBox>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding Istime_stepPreset}"/>
+            <TextBox md:HintAssist.Hint="Step [h]">
+              <TextBox.Text>
+                <Binding Path="time_stepT" TargetNullValue="" UpdateSourceTrigger="PropertyChanged">
+                  <Binding.ValidationRules>
+                    <ExceptionValidationRule/>
+                  </Binding.ValidationRules>
+                </Binding>
+              </TextBox.Text>
+            </TextBox>
+          </StackPanel>
+        </StackPanel>
+      </TabItem>
+    </TabControl>
+
+  </Grid>
+
+</UserControl>

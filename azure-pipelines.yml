@@ -17,6 +17,14 @@ steps:
     performMultiLevelLookup: true
 
 - task: DotNetCoreCLI@2
+  displayName: Restore
+  inputs:
+    command: restore
+    projects: '**/*.csproj'
+    feedsToUse: config
+    nugetConfigPath: ./NuGet.config
+
+- task: DotNetCoreCLI@2
   displayName: 'Build 32-bit'
   inputs:
     command: build

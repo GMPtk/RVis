@@ -6,11 +6,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Security.Cryptography;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static System.IO.Path;
-using static System.Text.Encoding;
 
 namespace RVisUI.Model
 {
@@ -64,10 +62,8 @@ namespace RVisUI.Model
     {
       try
       {
-        var sha1 = new SHA1CryptoServiceProvider();
-
         var runControlJobs = jobSpecs
-          .Map(js => ToRunControlJob(js.Name, js.File, js.Spec, moduleInfos, sha1))
+          .Map(js => ToRunControlJob(js.Name, js.File, js.Spec, moduleInfos))
           .ToArr();
 
         return new RunControl(runControlJobs, appSettings);
@@ -84,8 +80,7 @@ namespace RVisUI.Model
       string name,
       string file,
       TomlTable spec,
-      Arr<ModuleInfo> moduleInfos,
-      HashAlgorithm hashAlgorithm
+      Arr<ModuleInfo> moduleInfos
       )
     {
       var taskSpecs = RequireInstanceOf<TomlTableArray>(spec["task"], "Missing or invalid task(s)");
@@ -95,8 +90,8 @@ namespace RVisUI.Model
         .ToArr();
 
       RequireUniqueElements(
-        tasks, 
-        t => t.Name, 
+        tasks,
+        t => t.Name,
         $"Found tasks with duplicate name in {file}"
         );
 
@@ -108,7 +103,7 @@ namespace RVisUI.Model
         ? ToNotification(RequireInstanceOf<TomlTable>(spec["notification"], "Invalid notification"))
         : null;
 
-      var specHash = hashAlgorithm.ComputeHash(UTF8.GetBytes(spec.ToString()));
+      var specHash = spec.ToString().ToHashBytes();
 
       return new RunControlJob(name, file, configuration, notification, tasks, specHash);
     }

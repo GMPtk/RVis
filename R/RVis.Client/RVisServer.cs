@@ -51,11 +51,7 @@ namespace RVis.Client
 
     public async Task<IRVisClient> OpenChannelAsync(CancellationToken cancellationToken = default)
     {
-#if DEBUG
-      var didStartServer = EnsureServer();
-#else
       EnsureServer();
-#endif
 
       if (null == _rOpsClient)
       {
@@ -65,12 +61,7 @@ namespace RVis.Client
           //_channel.Dispose();
           _channel = null;
         }
-#if DEBUG
-        if (didStartServer)
-        {
-          await Task.Delay(500, cancellationToken);
-        }
-#endif
+
         //var socketPath = Path.Combine(Path.GetTempPath(), $"rvis.svr.nix.sock.{ID}.tmp");
 
         //var channel = GrpcChannel.ForAddress("http://localhost", new GrpcChannelOptions
@@ -241,10 +232,8 @@ namespace RVis.Client
       }
     }
 
-    private bool EnsureServer()
+    private void EnsureServer()
     {
-      bool didStartServer = false;
-
       if (_server?.HasExited == true)
       {
         DoServiceShutdown();
@@ -290,11 +279,7 @@ namespace RVis.Client
           TerminateOnAppExit(_server);
         }
         catch (Exception) { }
-
-        didStartServer = true;
       }
-
-      return didStartServer;
     }
 
     private readonly string _executableDirectory;

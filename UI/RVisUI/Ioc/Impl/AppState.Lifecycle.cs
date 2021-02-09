@@ -7,11 +7,13 @@ using RVisUI.Model;
 using RVisUI.Mvvm;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static RVisUI.Model.ModuleInfo;
+using static System.Threading.Tasks.Task;
 
 namespace RVisUI.Ioc
 {
@@ -107,18 +109,34 @@ namespace RVisUI.Ioc
       ifSome(extraModulePath, emp => ExtraModulePath = emp);
     }
 
-    private Task CurtailOperations()
+    private Task CurtailOperationsAsync()
     {
       ActiveViewModel = new FailedStartUpViewModel();
-      return Task.CompletedTask;
+      return CompletedTask;
     }
 
-    private async Task StartOperations(ServerLicense serverLicense)
+    private async Task StartOperationsAsync(ServerLicense serverLicense)
     {
       _simData = new SimData(_appService.RVisServerPool);
       _simDataSessionLog = new SimDataSessionLog(_simData, _appService.SecondInterval);
       _simEvidence = new SimEvidence();
       _simSharedState = new SimSharedState();
+
+      try
+      {
+        var pathToSimLibrary = _appSettings.PathToSimLibrary.ExpandPath();
+        if (!Directory.Exists(pathToSimLibrary)) Directory.CreateDirectory(pathToSimLibrary);
+
+        var simLibrary = new SimLibrary();
+        await Run(() => simLibrary.LoadFrom(pathToSimLibrary));
+        App.Current.NinjectKernel.Bind<SimLibrary>().ToConstant(simLibrary);
+      }
+      catch (Exception ex)
+      {
+        App.Current.Log.Error(ex);
+        var _ = CurtailOperationsAsync();
+        return;
+      }
 
       try
       {
@@ -129,7 +147,7 @@ namespace RVisUI.Ioc
       catch (Exception ex)
       {
         App.Current.Log.Error(ex);
-        var _ = CurtailOperations();
+        var _ = CurtailOperationsAsync();
         return;
       }
       finally

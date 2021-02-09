@@ -24,6 +24,7 @@ namespace RVisUI.Mvvm
       _appService = appService;
 
       SimulationVMs = new ObservableCollection<ISimulationViewModel>();
+      PopulateSimulations();
 
       simLibrary.Loaded += HandleSimLibraryLoaded;
       simLibrary.Deleted += HandleSimulationDeleted;
@@ -64,7 +65,7 @@ namespace RVisUI.Mvvm
     }
     private string? _rVersion;
 
-    private void HandleSimLibraryLoaded(object? sender, System.EventArgs e)
+    private void PopulateSimulations()
     {
       RequireNotNullEmptyWhiteSpace(_simLibrary.Location);
 
@@ -80,6 +81,9 @@ namespace RVisUI.Mvvm
 
       PathToLibrary = _simLibrary.Location.ContractPath();
     }
+
+    private void HandleSimLibraryLoaded(object? sender, System.EventArgs e) => 
+      PopulateSimulations();
 
     private void HandleSimulationDeleted(object? sender, SimulationDeletedEventArgs e)
     {

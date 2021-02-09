@@ -1,30 +1,19 @@
-﻿using RVis.Base.Extensions;
-using RVis.Model;
+﻿using Ninject;
+using ReactiveUI;
 using RVisUI.Model;
-using static System.IO.Directory;
 
 namespace RVisUI.Mvvm
 {
-  public class HomeViewModel : IHomeViewModel
+  public class HomeViewModel : ReactiveObject, IHomeViewModel
   {
-    public HomeViewModel(
-      IAppState appState,
-      IAppService appService,
-      IAppSettings appSettings
-      )
+    public HomeViewModel(IAppService appService)
     {
-      var pathToSimLibrary = appSettings.PathToSimLibrary.ExpandPath();
-      if (!Exists(pathToSimLibrary)) CreateDirectory(pathToSimLibrary);
-
-      var simLibrary = new SimLibrary();
-
-      SelectSimulationViewModel = new SelectSimulationViewModel(simLibrary, appState, appService);
-      ImportSimulationViewModel = new ImportSimulationViewModel(simLibrary, appState, appService);
-      ImportMCSimViewModel = new ImportMCSimViewModel(simLibrary, appState, appService);
-      LibraryViewModel = new LibraryViewModel(simLibrary, appState, appService, appSettings);
-      RunControlViewModel = new RunControlViewModel(appState, appService);
-
-      simLibrary.LoadFrom(pathToSimLibrary);
+      SelectSimulationViewModel = appService.Factory.Get<ISelectSimulationViewModel>();
+      ImportSimulationViewModel = appService.Factory.Get<IImportSimulationViewModel>();
+      ImportMCSimViewModel = appService.Factory.Get<IImportMCSimViewModel>();
+      LibraryViewModel = appService.Factory.Get<ILibraryViewModel>();
+      RunControlViewModel = appService.Factory.Get<IRunControlViewModel>();
+      AcatHostViewModel = appService.Factory.Get<IAcatHostViewModel>();
     }
 
     public ISelectSimulationViewModel SelectSimulationViewModel { get; }
@@ -32,5 +21,13 @@ namespace RVisUI.Mvvm
     public IImportMCSimViewModel ImportMCSimViewModel { get; }
     public ILibraryViewModel LibraryViewModel { get; }
     public IRunControlViewModel RunControlViewModel { get; }
+    public IAcatHostViewModel AcatHostViewModel { get; }
+
+    public int SelectedIndex 
+    { 
+      get => _selectedIndex; 
+      set => this.RaiseAndSetIfChanged(ref _selectedIndex, value); 
+    }
+    private int _selectedIndex;
   }
 }

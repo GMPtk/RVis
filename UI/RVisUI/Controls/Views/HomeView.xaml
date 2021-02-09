@@ -18,14 +18,14 @@
       <wpf:BooleanToVisibilityConverter 
         x:Key="b2vc" 
         True="Visible" 
-        False="Hidden" 
+        False="Collapsed" 
         />
     </ResourceDictionary>    
   </UserControl.Resources>
 
   <Grid>
     
-    <TabControl>
+    <TabControl SelectedIndex="{Binding SelectedIndex}">
 
       <TabControl.Resources>
         <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
@@ -51,6 +51,10 @@
 
       <TabItem Header="RUN CONTROL" Visibility="{Binding RunControlViewModel.IsVisible, Converter={StaticResource b2vc}}">
         <local:RunControlView DataContext="{Binding RunControlViewModel}"/>
+      </TabItem>
+
+      <TabItem Header="ACAT" Visibility="{Binding AcatHostViewModel.IsVisible, Converter={StaticResource b2vc}}">
+        <local:AcatHostView DataContext="{Binding AcatHostViewModel}"/>
       </TabItem>
 
     </TabControl>
