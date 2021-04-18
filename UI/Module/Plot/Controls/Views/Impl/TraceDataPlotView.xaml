@@ -18,16 +18,7 @@
     <ResourceDictionary>
 
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Plot;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
     </ResourceDictionary>
@@ -43,7 +34,7 @@
                 Margin="100 25 0 0">
 
       <Button x:Name="_openDepVarConfig" 
-              Style="{DynamicResource MaterialDesignFlatButton}" 
+              Style="{DynamicResource MaterialDesignFlatAccentButton}" 
               Padding="0"
               Height="Auto"
               Width="Auto"
@@ -102,7 +93,7 @@
               Command="{Binding ToggleSeriesType}"
               >
         <Button.Style>
-          <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
+          <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniAccentButton}">
             <Setter Property="Height" Value="16"/>
             <Setter Property="Width" Value="16"/>
             <Setter Property="Margin" Value="0,0,5,0"/>
@@ -134,7 +125,7 @@
               Command="{Binding ToggleLockAxesOriginToZeroZero}"
               >
         <Button.Style>
-          <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
+          <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniAccentButton}">
             <Setter Property="Height" Value="16"/>
             <Setter Property="Width" Value="16"/>
             <Setter Property="Margin" Value="0,0,5,0"/>
@@ -165,7 +156,7 @@
       <Button Height="16" 
               Width="16"
               Margin="0,0,5,0"
-              Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+              Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
               ToolTip="Reset axis ranges to default" 
               Command="{Binding ResetAxisRanges}"
               >
@@ -178,7 +169,7 @@
       <Button Height="16" 
               Width="16"
               Margin="10,0,0,0"
-              Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+              Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
               ToolTip="Remove chart" 
               Command="{Binding RemoveChart}"
               >

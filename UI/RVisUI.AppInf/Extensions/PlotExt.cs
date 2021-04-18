@@ -125,10 +125,10 @@ namespace RVisUI.AppInf.Extensions
       }
 
       var plotColor = OxyColor.FromArgb(
-        theme.PrimaryMid.Color.A,
-        theme.PrimaryMid.Color.R,
-        theme.PrimaryMid.Color.G,
-        theme.PrimaryMid.Color.B
+        theme.SecondaryMid.Color.A,
+        theme.SecondaryMid.Color.R,
+        theme.SecondaryMid.Color.G,
+        theme.SecondaryMid.Color.B
         );
 
       plotModel.PlotAreaBorderColor = plotColor;

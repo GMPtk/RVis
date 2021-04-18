@@ -4,6 +4,7 @@
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
             xmlns:vi="clr-namespace:RVisUI.Controls.Views.Impl"
             xmlns:mvvm="clr-namespace:RVisUI.Ioc.Mvvm"
             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
@@ -28,13 +29,20 @@
     <TabControl>
       <TabItem Header="SETTINGS">
         <StackPanel Orientation="Vertical" Width="400" HorizontalAlignment="Left" wpf:Layout.Margin="10,10,0,10">
-          <GroupBox Header="Behaviour">
+          <GroupBox Header="Behaviour"
+                    md:ColorZoneAssist.Mode="SecondaryMid"
+                    >
             <StackPanel wpf:Layout.Margin="0,10,0,10" Orientation="Horizontal">
               <Label></Label>
-              <CheckBox Content="Restore window" IsChecked="{Binding RestoreWindow}"/>
+              <CheckBox Content="Restore window" 
+                        IsChecked="{Binding RestoreWindow}"
+                        Style="{StaticResource MaterialDesignAccentCheckBox}"
+                        />
             </StackPanel>
           </GroupBox>
-          <GroupBox Header="System Resources">
+          <GroupBox Header="System Resources"
+                    md:ColorZoneAssist.Mode="SecondaryMid"
+                    >
             <StackPanel Orientation="Horizontal">
               <Label VerticalAlignment="Center" HorizontalContentAlignment="Right" Margin="0,10,10,10">Allow use of</Label>
               <ComboBox ItemsSource="{Binding CoresOptions}" SelectedIndex="{Binding NumberOfCoresSelectedIndex}" Margin="0,10,0,10"/>

@@ -18,16 +18,7 @@
     <ResourceDictionary>
       
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Plot;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
       
       <CollectionViewSource x:Key="_cvsUnselected" Source="{Binding UnselectedParameters}">
@@ -59,7 +50,11 @@
       <RowDefinition Height="2*"/>
     </Grid.RowDefinitions>
 
-    <GroupBox Grid.Row="0" Style="{DynamicResource MaterialDesignCardGroupBox}" Header="WORKING SET">
+    <GroupBox Grid.Row="0" 
+              Style="{DynamicResource MaterialDesignCardGroupBox}" 
+              Header="WORKING SET"
+              md:ColorZoneAssist.Mode="SecondaryMid"
+              >
   
       <ScrollViewer VerticalScrollBarVisibility="Auto">
         <ItemsControl ItemsSource="{Binding SelectedParameters}">
@@ -133,6 +128,7 @@
                     Height="20"
                     Width="20"
                     ToolTip="Clear filter"
+                    Style="{StaticResource MaterialDesignRaisedAccentButton}"
                     >
               <md:PackIcon Kind="FilterRemove"/>
             </Button>

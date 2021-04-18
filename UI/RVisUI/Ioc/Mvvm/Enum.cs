@@ -1,6 +1,6 @@
 ﻿namespace RVisUI.Ioc.Mvvm
 {
-  internal enum ColorScheme
+  public enum ColorScheme
   {
     Primary,
     Secondary,

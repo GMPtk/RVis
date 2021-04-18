@@ -5,17 +5,25 @@
                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                   xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
                    xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
                    xmlns:local="clr-namespace:Sensitivity"
                    xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
                    mc:Ignorable="d"
                    Title="{Binding WindowTitle, TargetNullValue=''}"
                    Height="650" Width="600"
+                   FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
+                   TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+                   TextElement.FontWeight="Regular"
+                   TextElement.FontSize="13"
+                   TextOptions.TextFormattingMode="Ideal" 
+                   TextOptions.TextRenderingMode="Auto"
+                   Foreground="{DynamicResource MaterialDesignBody}"
+                   Background="{DynamicResource MaterialDesignBackground}"					  
                    GlowBrush="{DynamicResource AccentColorBrush}"
                    NonActiveGlowBrush="Red"
                    ResizeMode="CanResizeWithGrip"
                    WindowTransitionsEnabled="False"
+                   WindowTitleBrush="{DynamicResource PrimaryHueMidBrush}"
                    WindowStartupLocation="CenterOwner"
                    wpf:Behaviour.DialogResult="{Binding DialogResult}"
                    d:DataContext="{d:DesignInstance Type=local:ChartOptionsViewModel, IsDesignTimeCreatable=True}"
@@ -25,16 +33,7 @@
     <ResourceDictionary>
 
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Sensitivity;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <swc:BooleanToVisibilityConverter x:Key="b2v"/>

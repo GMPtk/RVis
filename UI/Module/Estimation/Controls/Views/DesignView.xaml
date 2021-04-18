@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:design="clr-namespace:Estimation.Design"
              xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
              mc:Ignorable="d" 
@@ -14,16 +15,7 @@
     <ResourceDictionary>
 
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Estimation;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <Style x:Key="ItemsControlStyle" TargetType="{x:Type ItemsControl}">
@@ -60,7 +52,10 @@
       <RowDefinition/>
     </Grid.RowDefinitions>
 
-    <GroupBox Margin="0 0 4 0" Header="Priors">
+    <GroupBox Margin="0 0 4 0" 
+              Header="Priors"
+              md:ColorZoneAssist.Mode="SecondaryMid"
+              >
       <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
         <ItemsControl ItemsSource="{Binding Priors}" 
                       Tag="(configure a distribution for one or more parameters)" 
@@ -69,7 +64,11 @@
       </ScrollViewer>
     </GroupBox>
 
-    <GroupBox Grid.Row="1" Margin="0 8 4 0" Header="Invariants">
+    <GroupBox Grid.Row="1" 
+              Margin="0 8 4 0" 
+              Header="Invariants"
+              md:ColorZoneAssist.Mode="SecondaryMid"
+              >
       <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
         <ItemsControl ItemsSource="{Binding Invariants}" 
                       Tag="(none)" 
@@ -78,7 +77,11 @@
       </ScrollViewer>
     </GroupBox>
 
-    <GroupBox Grid.Row="2" Margin="0 8 4 0" Header="Output Error Models">
+    <GroupBox Grid.Row="2" 
+              Margin="0 8 4 0" 
+              Header="Output Error Models"
+              md:ColorZoneAssist.Mode="SecondaryMid"
+              >
       <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
         <ItemsControl ItemsSource="{Binding Outputs}"
                       Tag="(configure an error model for one or more outputs)" 
@@ -87,7 +90,11 @@
       </ScrollViewer>
     </GroupBox>
 
-    <GroupBox Grid.Row="3" Margin="0 8 4 0" Header="Observations">
+    <GroupBox Grid.Row="3" 
+              Margin="0 8 4 0" 
+              Header="Observations"
+              md:ColorZoneAssist.Mode="SecondaryMid"
+              >
       <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
         <ItemsControl ItemsSource="{Binding Observations}"
                       Tag="(select one or more observation sets for each output)" 
@@ -160,6 +167,7 @@
               Grid.Column="1"
               HorizontalAlignment="Left"
               Content="Create Design"
+              Style="{StaticResource MaterialDesignRaisedAccentButton}"
               Command="{Binding CreateDesign}"
               />
 
@@ -196,6 +204,7 @@
               Grid.Column="1"
               HorizontalAlignment="Left"
               Content="Unload Design"
+              Style="{StaticResource MaterialDesignRaisedAccentButton}"
               Command="{Binding UnloadDesign}"
               />
 

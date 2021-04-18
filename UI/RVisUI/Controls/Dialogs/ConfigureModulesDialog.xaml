@@ -1,23 +1,31 @@
-﻿<Controls:MetroWindow x:Class="RVisUI.Controls.Dialogs.ConfigureModulesDialog"
-                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                      xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
-                      xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
-                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                      xmlns:local="clr-namespace:RVisUI.Controls.Dialogs"
-                      xmlns:mvvm="clr-namespace:RVisUI.Ioc.Mvvm"
-                      xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
-                      mc:Ignorable="d"
-                      Title="Configure Modules"
-                      Height="500" Width="700"
-                      GlowBrush="{DynamicResource AccentColorBrush}"
-                      NonActiveGlowBrush="Red"
-                      ResizeMode="CanResizeWithGrip"
-                      WindowTransitionsEnabled="False"
-                      Icon="../../Resources/app.ico" 
-                      WindowStartupLocation="CenterOwner"
-                      >
+﻿<ctrls:MetroWindow x:Class="RVisUI.Controls.Dialogs.ConfigureModulesDialog"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ctrls="http://metro.mahapps.com/winfx/xaml/controls"
+                    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:local="clr-namespace:RVisUI.Controls.Dialogs"
+                    xmlns:mvvm="clr-namespace:RVisUI.Ioc.Mvvm"
+                    xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+                    mc:Ignorable="d"
+                    Title="Configure Modules"
+                    Height="500" Width="700"
+                    TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+                    TextElement.FontWeight="Regular"
+                    TextElement.FontSize="13"
+                    TextOptions.TextFormattingMode="Ideal" 
+                    TextOptions.TextRenderingMode="Auto"
+                    Foreground="{DynamicResource MaterialDesignBody}"
+                    Background="{DynamicResource MaterialDesignBackground}"					  
+                    GlowBrush="{DynamicResource AccentColorBrush}"
+                    NonActiveGlowBrush="Red"
+                    ResizeMode="CanResizeWithGrip"
+                    WindowTransitionsEnabled="False"
+                    WindowTitleBrush="{DynamicResource PrimaryHueMidBrush}"
+                    Icon="../../Resources/app.ico" 
+                    WindowStartupLocation="CenterOwner"
+                    >
 
   <Grid>
 
@@ -97,23 +105,21 @@
         </ListView.ItemTemplate>
       </ListView>
 
-      <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" wpf:Layout.Margin="10">
-        <Button x:Name="_moveDown"
+      <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" wpf:Layout.Margin="10">
+        <Button x:Name="_moveUp"
                 Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                HorizontalAlignment="Left"
-                ToolTip="Move down"
-                Click="HandleMoveDown">
-          <md:PackIcon Kind="ArrowDownBold"
+                ToolTip="Move up"
+                Click="HandleMoveUp">
+          <md:PackIcon Kind="ArrowUpBold"
                        Height="24"
                        Width="24" 
                        />
         </Button>
-        <Button x:Name="_moveUp"
+        <Button x:Name="_moveDown"
                 Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                HorizontalAlignment="Left"
-                ToolTip="Move up"
-                Click="HandleMoveUp">
-          <md:PackIcon Kind="ArrowUpBold"
+                ToolTip="Move down"
+                Click="HandleMoveDown">
+          <md:PackIcon Kind="ArrowDownBold"
                        Height="24"
                        Width="24" 
                        />
@@ -160,4 +166,4 @@
 
   </Grid>
 
-</Controls:MetroWindow>
+</ctrls:MetroWindow>

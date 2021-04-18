@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using CsvHelper.Configuration;
 using LanguageExt;
 using ReactiveUI;
 using RVis.Base.Extensions;
@@ -231,20 +232,24 @@ namespace Evidence
       var header = Arr<string>.Empty;
       var rows = new List<Arr<double>>();
 
-      using (var reader = new StringReader(delimited))
-      using (var csv = new CsvReader(reader, InvariantCulture))
+      var csvConfiguration = new CsvConfiguration(InvariantCulture)
       {
-        csv.Configuration.Delimiter = delimiter.ToString(InvariantCulture);
+        Delimiter = delimiter.ToString(InvariantCulture)
+      };
+
+      using (var reader = new StringReader(delimited))
+      using (var csv = new CsvReader(reader, csvConfiguration))
+      {
         while (csv.Read())
         {
           if (header.IsEmpty)
           {
             if (!csv.ReadHeader()) return false;
-            header = csv.Context.Record;
+            header = csv.Parser.Record;
           }
           else
           {
-            var row = csv.Context.Record.Select(
+            var row = csv.Parser.Record.Select(
               f => double.TryParse(f, out double d)
                 ? Some(d)
                 : None

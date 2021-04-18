@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Sensitivity"
              xmlns:design="clr-namespace:Sensitivity.Design"
@@ -15,16 +16,7 @@
     <ResourceDictionary>
 
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Sensitivity;component/Design/Resource/Theme.xaml" />
         <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
       </ResourceDictionary.MergedDictionaries>
 
@@ -81,7 +73,9 @@
         <ColumnDefinition/>
       </Grid.ColumnDefinitions>
 
-      <GroupBox Header="FACTORS/DISTRIBUTIONS">
+      <GroupBox Header="FACTORS/DISTRIBUTIONS"
+                md:ColorZoneAssist.Mode="SecondaryMid"
+                >
 
         <ScrollViewer VerticalScrollBarVisibility="Auto" 
                       HorizontalScrollBarVisibility="Hidden"
@@ -94,7 +88,11 @@
         
       </GroupBox>
 
-      <GroupBox Grid.Column="1" Margin="5 0 0 0" Header="INVARIANTS">
+      <GroupBox Grid.Column="1" 
+                Margin="5 0 0 0" 
+                Header="INVARIANTS"
+                md:ColorZoneAssist.Mode="SecondaryMid"
+                >
 
         <ScrollViewer VerticalScrollBarVisibility="Auto" 
                       HorizontalScrollBarVisibility="Hidden"
@@ -109,7 +107,10 @@
 
       <StackPanel Grid.Column="2" Margin="5 0 0 5">
 
-        <GroupBox Header="METHOD" IsEnabled="{Binding CanCreateDesign}">
+        <GroupBox Header="METHOD" 
+                  IsEnabled="{Binding CanCreateDesign}"
+                  md:ColorZoneAssist.Mode="SecondaryMid"
+                  >
 
           <Grid>
             <Grid.ColumnDefinitions>
@@ -123,6 +124,7 @@
                 <RadioButton Content="Morris" 
                              GroupName="SensitivityMethod" 
                              Margin="10"
+                             Style="{StaticResource MaterialDesignAccentRadioButton}"
                              IsChecked="{Binding 
                                Path=SensitivityMethod, 
                                Mode=TwoWay, 
@@ -133,6 +135,7 @@
                 <RadioButton Content="e-FAST" 
                              GroupName="SensitivityMethod" 
                              Margin="10" 
+                             Style="{StaticResource MaterialDesignAccentRadioButton}"
                              IsChecked="{Binding 
                                Path=SensitivityMethod, 
                                Mode=TwoWay, 
@@ -178,6 +181,7 @@
                     HorizontalAlignment="Center" 
                     Margin="30" 
                     Command="{Binding CreateDesign}" 
+                    Style="{StaticResource MaterialDesignRaisedAccentButton}"
                     Content="Create Design"
                     />
 
@@ -193,7 +197,11 @@
 
         </GroupBox>
 
-        <GroupBox Margin="0 5 0 0" Header="DESIGN" IsEnabled="{Binding CanUnloadDesign}">
+        <GroupBox Margin="0 5 0 0" 
+                  Header="DESIGN" 
+                  IsEnabled="{Binding CanUnloadDesign}"
+                  md:ColorZoneAssist.Mode="SecondaryMid"
+                  >
 
           <StackPanel Orientation="Horizontal">
             <TextBlock Margin="10" 
@@ -203,13 +211,17 @@
                        />
             <Button Margin="10" 
                     Command="{Binding UnloadDesign}" 
+                    Style="{StaticResource MaterialDesignRaisedAccentButton}"
                     Content="Unload Design"
                     />
           </StackPanel>
 
         </GroupBox>
 
-        <GroupBox Margin="0 5 0 0" Header="ACQUIRE OUTPUTS" IsEnabled="{Binding CanUnloadDesign}">
+        <GroupBox Margin="0 5 0 0" 
+                  Header="ACQUIRE OUTPUTS" 
+                  IsEnabled="{Binding CanUnloadDesign}"
+                  md:ColorZoneAssist.Mode="SecondaryMid">
 
           <Grid>
             <Grid.ColumnDefinitions>
@@ -220,6 +232,8 @@
             <StackPanel VerticalAlignment="Center">
               <ProgressBar Margin="10"
                            Value="{Binding AcquireOutputsProgress, Mode=OneWay}"
+                           Foreground="{DynamicResource SecondaryHueMidBrush}"
+                           Background="{DynamicResource SecondaryHueLightBrush}"
                            />
 
               <TextBlock Grid.Column="1"
@@ -245,11 +259,13 @@
             <StackPanel Grid.Column="1">
               <Button Margin="10"
                       Content="Start" 
+                      Style="{StaticResource MaterialDesignRaisedAccentButton}"
                       Command="{Binding AcquireOutputs}"
                       />
               <Button Grid.Column="1" 
                       Margin="10"
                       Content="Stop" 
+                      Style="{StaticResource MaterialDesignRaisedAccentButton}"
                       Command="{Binding CancelAcquireOutputs}"
                       />
             </StackPanel>
@@ -262,7 +278,11 @@
 
     </Grid>
 
-    <GroupBox Grid.Row="1" Margin="0 5 0 0" Header="SAMPLES">
+    <GroupBox Grid.Row="1" 
+              Margin="0 5 0 0" 
+              Header="SAMPLES"
+              md:ColorZoneAssist.Mode="SecondaryMid"
+              >
 
       <Grid>
 
@@ -282,15 +302,18 @@
           <Button Margin="0 10" 
                   Command="{Binding ShareParameters}" 
                   Content="Share"
+                  Style="{StaticResource MaterialDesignRaisedAccentButton}"
                   ToolTip="Upload selected parameters values to shared state"
                   />
           <Button Margin="0 10" 
                   Command="{Binding ViewError}" 
                   Content="View Error"
+                  Style="{StaticResource MaterialDesignRaisedAccentButton}"
                   ToolTip="View diagnostic resulting from selected parameter values"
                   />
           <CheckBox Margin="0 10" 
                     Content="Show issues only" 
+                    Style="{StaticResource MaterialDesignAccentCheckBox}"
                     IsChecked="{Binding ShowIssues}"
                     IsEnabled="{Binding HasIssues}"
                     />

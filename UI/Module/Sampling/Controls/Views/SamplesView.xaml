@@ -17,16 +17,7 @@
     <ResourceDictionary>
 
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Sampling;component/Design/Resource/Theme.xaml" />
         <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
       </ResourceDictionary.MergedDictionaries>
 
@@ -99,7 +90,9 @@
         <ColumnDefinition Width="Auto"/>
       </Grid.ColumnDefinitions>
 
-      <GroupBox x:Name="xxx" Margin="0 0 5 0">
+      <GroupBox Margin="0 0 5 0"
+                md:ColorZoneAssist.Mode="SecondaryMid"
+                >
         <GroupBox.Header>
           <Grid>
             <Grid.ColumnDefinitions>
@@ -140,6 +133,7 @@
       <GroupBox Grid.Column="1" 
                 Margin="5 0 5 0" 
                 Header="INVARIANTS"
+                md:ColorZoneAssist.Mode="SecondaryMid"
                 >
 
         <ScrollViewer VerticalScrollBarVisibility="Auto" 
@@ -156,6 +150,7 @@
       <GroupBox Grid.Column="2"
                 Margin="5 0 0 0"
                 Header="CONFIGURATION"
+                md:ColorZoneAssist.Mode="SecondaryMid"
                 >
         <GroupBox.Style>
           <Style TargetType="GroupBox" BasedOn="{StaticResource MaterialDesignGroupBox}">
@@ -214,6 +209,7 @@
                     Margin="10 10 10 5" 
                     Command="{Binding ConfigureLHS}" 
                     ToolTip="Configure Latin hypercube sampling"
+                    Style="{StaticResource MaterialDesignRaisedAccentButton}"
                     >
               <StackPanel Orientation="Horizontal">
                 <md:PackIcon Margin="0,0,2,0" 
@@ -255,6 +251,7 @@
                     Margin="10 5 10 10" 
                     Command="{Binding ConfigureRC}" 
                     ToolTip="Configure rank correlation"
+                    Style="{StaticResource MaterialDesignRaisedAccentButton}"
                     >
               <StackPanel Orientation="Horizontal">
                 <md:PackIcon Margin="0,0,2,0" 
@@ -314,6 +311,7 @@
     <GroupBox Grid.Row="1" 
               Margin="0 5 0 0"
               Header="SAMPLES"
+              md:ColorZoneAssist.Mode="SecondaryMid"
               >
 
       <Grid>
@@ -407,6 +405,7 @@
                   Padding="0"
                   Height="36"
                   Width="36" 
+                  Style="{StaticResource MaterialDesignRaisedAccentButton}"
                   >
             <md:PackIcon Kind="Flash"
                          Height="24"
@@ -421,6 +420,7 @@
                   Padding="0"
                   Height="36"
                   Width="36" 
+                  Style="{StaticResource MaterialDesignRaisedAccentButton}"
                   >
             <md:PackIcon Kind="NumericZeroBoxMultipleOutline"
                          Height="24"

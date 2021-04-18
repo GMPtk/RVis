@@ -9,20 +9,21 @@
                  xmlns:local="clr-namespace:RVisUI"
                  xmlns:app="clr-namespace:RVisUI"
                  xmlns:ctrls="clr-namespace:RVisUI.Controls"
-                 xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
                  xmlns:vi="clr-namespace:RVisUI.Controls.Views.Impl"
                  mc:Ignorable="d"
-                 FontFamily="{StaticResource MaterialDesignFont}"
+                 FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
                  TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                  TextElement.FontWeight="Regular"
                  TextElement.FontSize="13"
                  TextOptions.TextFormattingMode="Ideal" 
                  TextOptions.TextRenderingMode="Auto"
-                 Background="{DynamicResource MaterialDesignPaper}"					  
+                 Foreground="{DynamicResource MaterialDesignBody}"
+                 Background="{DynamicResource MaterialDesignBackground}"					  
                  GlowBrush="{DynamicResource AccentColorBrush}"
                  NonActiveGlowBrush="Red"
                  ResizeMode="CanResizeWithGrip"
                  WindowTransitionsEnabled="False"
+                 WindowTitleBrush="{DynamicResource PrimaryHueMidBrush}"
                  Title="{Binding Source={x:Static local:App.Current}, Path=AppState.MainWindowTitle}"
                  Icon="Resources/app.ico"
                  SaveWindowPosition="{Binding [AppSettings].RestoreWindow, Source={StaticResource Locator}}"
@@ -128,12 +129,16 @@
       </StatusBar.Resources>
 
       <StatusBarItem>
-        <TextBlock Text="{Binding Source={x:Static local:App.Current}, Path=AppState.Status}"/>
+        <TextBlock Text="{Binding Source={x:Static local:App.Current}, Path=AppState.Status}"
+                   Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                   />
       </StatusBarItem>
 
       <StatusBarItem Grid.Column="1">
         <TextBlock Margin="10 0" 
-                   Text="{Binding FrameRate, StringFormat={}{0:N1} fps, ElementName=_mainWindow}">
+                   Text="{Binding FrameRate, StringFormat={}{0:N1} fps, ElementName=_mainWindow}"
+                   Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                   >
           <TextBlock.Style>
             <Style TargetType="TextBlock">
               <Style.Triggers>

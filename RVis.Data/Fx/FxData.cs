@@ -23,7 +23,7 @@ namespace RVis.Data
       csvReader.Read();
       csvReader.ReadHeader();
 
-      foreach (var header in csvReader.Context.HeaderRecord)
+      foreach (var header in csvReader.HeaderRecord)
       {
         dataTable.Columns.Add(new DataColumn(header, typeof(T)));
       }

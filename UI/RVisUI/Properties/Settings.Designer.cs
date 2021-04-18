@@ -49,7 +49,7 @@ namespace RVisUI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Indigo")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string PrimaryColorName {
             get {
                 return ((string)(this["PrimaryColorName"]));
@@ -61,7 +61,7 @@ namespace RVisUI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Blue")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string SecondaryColorName {
             get {
                 return ((string)(this["SecondaryColorName"]));

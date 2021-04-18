@@ -568,8 +568,7 @@ namespace Sensitivity
     private readonly TraceViewModel _traceViewModel;
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
-    private readonly SortedDictionary<string, IDictionary<double, MuStarSigmaOutputMeasures>> _compiledOutputMeasures =
-      new SortedDictionary<string, IDictionary<double, MuStarSigmaOutputMeasures>>();
+    private readonly SortedDictionary<string, IDictionary<double, MuStarSigmaOutputMeasures>> _compiledOutputMeasures = new();
     private readonly DispatcherTimer _playTicker;
     private int _playSpeedIndex;
     private bool _disposed = false;

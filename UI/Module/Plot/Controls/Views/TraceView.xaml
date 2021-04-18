@@ -17,16 +17,7 @@
   <UserControl.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Plot;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
       <Style x:Key="VerticalToolToggleItemStyle" TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource MaterialDesignToolToggleListBoxItem}">
         <Setter Property="Padding" Value="1 2 2 2" />
@@ -99,7 +90,8 @@
         </Style>
       </Grid.Style>
 
-      <GroupBox Header="WORKING SET">
+      <GroupBox Header="WORKING SET"
+                md:ColorZoneAssist.Mode="SecondaryMid">
 
         <Grid>
           <Grid.RowDefinitions>
@@ -113,6 +105,7 @@
             <Button Padding="0"
                     Margin="5 0"
                     Height="Auto" 
+                    Style="{StaticResource MaterialDesignRaisedAccentButton}"
                     Command="{Binding UndoWorkingChange}">
               <md:PackIcon Kind="Undo" 
                            Width="24" 
@@ -121,6 +114,7 @@
             <Button Padding="0" 
                     Margin="5 0 0 0"
                     Height="Auto" 
+                    Style="{StaticResource MaterialDesignRaisedAccentButton}"
                     Command="{Binding PlotWorkingChanges}">
               <md:PackIcon Kind="PlayBoxOutline" 
                            Width="24" 
@@ -155,7 +149,7 @@
     </Grid>
 
     <md:ColorZone Grid.Column="2" 
-                  Mode="PrimaryLight" 
+                  Mode="SecondaryLight" 
                   VerticalAlignment="Stretch" 
                   Padding="5" 
                   CornerRadius="3"

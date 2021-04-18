@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace RVisUI.Ioc.Mvvm
 {
-  internal interface IHueViewModel
+  public interface IHueViewModel
   {
     int HueIndex { get; }
     Color Hue { get; }
@@ -14,7 +14,7 @@ namespace RVisUI.Ioc.Mvvm
     bool IsSelected { get; set; }
   }
 
-  internal interface ISwatchViewModel
+  public interface ISwatchViewModel
   {
     ISwatch Swatch { get; }
     Arr<IHueViewModel> HueViewModels { get; }

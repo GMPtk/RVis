@@ -82,7 +82,7 @@ while ($index -lt $nLines)
 
   $endSection = $lines[$index] -like "*}*"
 
-  $isParameterAssignment = $lines[$index] -match "\s*(\w+)\s*=\s*([\d+-Ee]+)\s*;\s*(?:#\s*([^\[]*))(?:\[\s*([^\]]*)\])?"
+  $isParameterAssignment = $lines[$index] -match "\s*(\w+)\s*=\s*([\d+-Ee]+)\s*;(?:\s*(?:#\s*([^\[]*))(?:\[\s*([^\]]*)\])?)?"
 
   if ($isParameterAssignment)
   {
@@ -115,7 +115,14 @@ while ($index -lt $nLines)
         continue
       }
 
-      $isOutput = $lines[$index] -match "\s*(\w+),?\s*(?:#\s*([^\[]*))(?:\[\s*([^\]]*)\])?"
+      $isTiming = $lines[$index] -match "\s*[\dEe\.-]+,\s*[\dEe\.-]+,\s*[\dEe\.-]+"
+      if ($isTiming)
+      {
+        ++$index
+        continue
+      }
+
+      $isOutput = $lines[$index] -match "\s*(\w+),?\s*(?:(?:#\s*([^\[]*))(?:\[\s*([^\]]*)\])?)?"
 
       if ($isOutput)
       {

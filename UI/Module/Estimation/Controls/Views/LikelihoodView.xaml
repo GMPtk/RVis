@@ -17,16 +17,7 @@
     <ResourceDictionary>
 
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Estimation;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <Style x:Key="ItemsControlStyle" TargetType="{x:Type ItemsControl}">
@@ -129,6 +120,7 @@
                             IsChecked="{Binding IsSelected}" 
                             Command="{Binding ToggleSelect}"
                             CommandParameter="{Binding}"
+                            Style="{StaticResource MaterialDesignAccentCheckBox}"
                             Content="{Binding Name}"
                             />
                 </DataTemplate>
@@ -166,8 +158,10 @@
                             Padding="0" 
                             Height="Auto"
                             Width="Auto"
-                            ToolTip="Remove">
-                      <md:PackIcon Kind="Clear"/>
+                            ToolTip="Remove"
+                            Style="{StaticResource MaterialDesignFlatAccentBgButton}"
+                            >
+                      <md:PackIcon Kind="Remove"/>
                     </Button>
                   </DataTemplate>
                 </GridViewColumn.CellTemplate>
@@ -187,11 +181,19 @@
         <RowDefinition />
       </Grid.RowDefinitions>
 
-      <GroupBox Header="Error Model" Style="{StaticResource GroupBoxStyle}">
+      <GroupBox Header="Error Model" 
+                Style="{StaticResource GroupBoxStyle}"
+                md:ColorZoneAssist.Mode="SecondaryMid"
+                >
         <local:OutputErrorModelView DataContext="{Binding OutputErrorViewModel}"/>
       </GroupBox>
 
-      <GroupBox Grid.Row="1" Margin="0 10 0 0" Header="Observations" Style="{StaticResource GroupBoxStyle}">
+      <GroupBox Grid.Row="1" 
+                Margin="0 10 0 0" 
+                Header="Observations" 
+                Style="{StaticResource GroupBoxStyle}"
+                md:ColorZoneAssist.Mode="SecondaryMid"
+                >
         <Grid>
           <Grid.RowDefinitions>
             <RowDefinition/>
@@ -210,7 +212,9 @@
                 <GridViewColumn Header="">
                   <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                      <CheckBox IsChecked="{Binding IsSelected}"/>
+                      <CheckBox IsChecked="{Binding IsSelected}"
+                                Style="{StaticResource MaterialDesignAccentCheckBox}"
+                                />
                     </DataTemplate>
                   </GridViewColumn.CellTemplate>
                 </GridViewColumn>

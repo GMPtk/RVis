@@ -12,10 +12,18 @@
                     mc:Ignorable="d"
                     Title="Import Simulation (Tmpl)"
                     Height="750" Width="1000"
+                    TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+                    TextElement.FontWeight="Regular"
+                    TextElement.FontSize="13"
+                    TextOptions.TextFormattingMode="Ideal" 
+                    TextOptions.TextRenderingMode="Auto"
+                    Foreground="{DynamicResource MaterialDesignBody}"
+                    Background="{DynamicResource MaterialDesignBackground}"					  
                     GlowBrush="{DynamicResource AccentColorBrush}"
                     NonActiveGlowBrush="Red"
                     ResizeMode="CanResizeWithGrip"
                     WindowTransitionsEnabled="False"
+                    WindowTitleBrush="{DynamicResource PrimaryHueMidBrush}"
                     Icon="../../Resources/app.ico" 
                     WindowStartupLocation="CenterOwner"
                     wpf:Behaviour.DialogResult="{Binding DialogResult}"
@@ -106,7 +114,7 @@
                                         >
                   <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
-                      <ToggleButton Style="{StaticResource MaterialDesignActionAccentToggleButton}"
+                      <ToggleButton Style="{StaticResource MaterialDesignActionToggleButton}"
                                     IsChecked="{Binding IsUsed, UpdateSourceTrigger=PropertyChanged}"
                                     ToolTip="Present this parameter for manipulation in RVis" 
                                     Width="20"
@@ -149,7 +157,7 @@
                                         >
                   <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
-                      <Button Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                      <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
                               ToolTip="Change description and unit" 
                               Height="20" 
                               Width="20" 
@@ -167,14 +175,14 @@
             </DataGrid>
 
             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0 20 0 0">
-              <Button Style="{StaticResource MaterialDesignRaisedAccentButton}"
+              <Button Style="{StaticResource MaterialDesignRaisedButton}"
                       Width="100"
                       ToolTip="Check all candidates" 
                       Content="Use All"
                       Margin="10 0 10 0"
                       Command="{Binding UseAllParameters}"
                       />
-              <Button Style="{StaticResource MaterialDesignRaisedAccentButton}"
+              <Button Style="{StaticResource MaterialDesignRaisedButton}"
                       Width="100"
                       ToolTip="Uncheck all candidates" 
                       Content="Use None"

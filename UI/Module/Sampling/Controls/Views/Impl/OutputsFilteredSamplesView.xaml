@@ -15,16 +15,7 @@
   <UserControl.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Sampling;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <wpf:BooleanToVisibilityConverter 
@@ -54,7 +45,7 @@
                    Margin="0 0 4 0"
                    VerticalAlignment="Center"
                    />
-        <ToggleButton Style="{StaticResource MaterialDesignSwitchToggleButton}"
+        <ToggleButton Style="{StaticResource MaterialDesignSwitchAccentToggleButton}"
                       IsChecked="{Binding IsEnabled}"
                       ToolTip="Enable filtering"
                       Margin="0 6 0 6"
@@ -68,7 +59,7 @@
                    FontSize="18"
                    Margin="0 0 4 0"
                    />
-        <ToggleButton Style="{StaticResource MaterialDesignSwitchToggleButton}"
+        <ToggleButton Style="{StaticResource MaterialDesignSwitchAccentToggleButton}"
                       IsChecked="{Binding IsUnion}"
                       ToolTip="Apply filters by union or intersection"
                       Margin="0 6 0 6"

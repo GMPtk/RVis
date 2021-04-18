@@ -9,10 +9,18 @@
                     mc:Ignorable="d"
                     Title=""
                     Height="400" Width="500"
+                    TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+                    TextElement.FontWeight="Regular"
+                    TextElement.FontSize="13"
+                    TextOptions.TextFormattingMode="Ideal" 
+                    TextOptions.TextRenderingMode="Auto"
+                    Foreground="{DynamicResource MaterialDesignBody}"
+                    Background="{DynamicResource MaterialDesignBackground}"					  
                     GlowBrush="{DynamicResource AccentColorBrush}"
                     NonActiveGlowBrush="Red"
                     ResizeMode="CanResizeWithGrip"
                     WindowTransitionsEnabled="False"
+                    WindowTitleBrush="{DynamicResource PrimaryHueMidBrush}"
                     Icon="../../Resources/app.ico" 
                     WindowStartupLocation="CenterOwner">
 

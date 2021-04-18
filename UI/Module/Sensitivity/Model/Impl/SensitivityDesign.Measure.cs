@@ -287,7 +287,7 @@ namespace Sensitivity
       {
         csvReader.Read();
         csvReader.ReadHeader();
-        header = csvReader.Context.HeaderRecord;
+        header = csvReader.HeaderRecord;
       }
 
       var dataTable = new DataTable();

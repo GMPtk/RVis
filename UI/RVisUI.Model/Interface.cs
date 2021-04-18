@@ -92,7 +92,7 @@ namespace RVisUI.Model
     bool BrowseForDirectory(string? startPath, [NotNullWhen(true)] out string? pathToDirectory);
     bool OpenFile(string purpose, string? initialDirectory, string filter, [NotNullWhen(true)] out string? pathToFile);
     bool SaveFile(string purpose, string? initialDirectory, string filter, string extension, [NotNullWhen(true)] out string? pathToFile);
-    void Notify(string about, string subject, Exception ex, object originatingViewModel = default);
+    void Notify(string about, string subject, Exception ex, object? originatingViewModel = default);
     void Notify(NotificationType type, string about, string subject, string detail, object? originatingViewModel = default);
     void ScheduleAction(Action action);
     void ScheduleLowPriorityAction(Action action);

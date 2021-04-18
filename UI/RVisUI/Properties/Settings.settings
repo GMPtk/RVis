@@ -9,10 +9,10 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="PrimaryColorName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Indigo</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="SecondaryColorName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Blue</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="RecordRuntimeExceptions" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>

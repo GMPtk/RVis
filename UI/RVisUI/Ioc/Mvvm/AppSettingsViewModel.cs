@@ -1,23 +1,23 @@
 ﻿using LanguageExt;
 using MaterialDesignColors;
 using MaterialDesignColors.ColorManipulation;
-using MaterialDesignThemes.Wpf;
 using ReactiveUI;
 using RVis.Base.Extensions;
+using RVisUI.AppInf.Design;
 using RVisUI.Extensions;
+using RVisUI.Ioc.Mvvm;
 using RVisUI.Model;
 using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
-using static RVis.Base.Check;
-using static RVisUI.Wpf.WpfTools;
 using static System.Globalization.CultureInfo;
+using MDPaletteHelper = MaterialDesignThemes.Wpf.PaletteHelper;
 
 namespace RVisUI.Ioc.Mvvm
 {
-  internal sealed class AppSettingsViewModel : ReactiveObject, IAppSettingsViewModel
+  public sealed class AppSettingsViewModel : ReactiveObject, IAppSettingsViewModel
   {
     public AppSettingsViewModel(IAppSettings appSettings)
     {
@@ -30,6 +30,7 @@ namespace RVisUI.Ioc.Mvvm
         .ToArr();
 
       View = ReactiveCommand.Create(() => Show = !Show);
+
       ChangeHue = ReactiveCommand.Create<IHueViewModel>(HandleChangeHue);
       ChangeToPrimary = ReactiveCommand.Create(() => ChangeToScheme(ColorScheme.Primary));
       ChangeToSecondary = ReactiveCommand.Create(() => ChangeToScheme(ColorScheme.Secondary));
@@ -40,17 +41,23 @@ namespace RVisUI.Ioc.Mvvm
         .Map(s => new SwatchViewModel(s, ChangeHue))
         .ToArr<ISwatchViewModel>();
 
-      var hueViewModel = FindHueViewModel(ActiveScheme, SwatchViewModels, _appSettings);
-      RequireNotNull(hueViewModel, "Failed to find hue for active color scheme");
-      hueViewModel.IsSelected = true;
+      var hueViewModel = FindHueViewModelFromAppSettings(ActiveScheme);
+      if (hueViewModel is null)
+      {
+        var theme = _mdPaletteHelper.GetTheme();
+        hueViewModel = FindHueViewModelFromHue(theme.PrimaryMid.Color);
+      }
+      if (hueViewModel is not null) hueViewModel.IsSelected = true;
 
       SetSecondaryHueHexes();
 
       _appSettings.PropertyChanged += HandleAppSettingsChanged;
     }
 
-    public AppSettingsViewModel() : this(new AppSettings()) =>
-      RequireTrue(IsInDesignMode);
+    public AppSettingsViewModel()
+      : this(new AppSettings() { PrimaryColorHue = 8, PrimaryColorName = "Indigo" })
+    {
+    }
 
     public ICommand View { get; }
 
@@ -88,7 +95,8 @@ namespace RVisUI.Ioc.Mvvm
       get => _appSettings.IsBaseDark;
       set
       {
-        _paletteHelper.ChangeBaseTheme(value);
+        _mdPaletteHelper.ChangeBaseTheme(value);
+        App.Current.SetLightDark(value);
         _appSettings.IsBaseDark = value;
       }
     }
@@ -158,7 +166,17 @@ namespace RVisUI.Ioc.Mvvm
       }
     }
 
-    private static IHueViewModel? FindHueViewModel(ColorScheme colorScheme, Arr<ISwatchViewModel> swatchViewModels, IAppSettings appSettings)
+    private IHueViewModel? FindHueViewModelFromHue(Color hue)
+    {
+      foreach (var swatchViewModel in SwatchViewModels)
+      {
+        var hueViewModel = swatchViewModel.HueViewModels.SingleOrDefault(hvm => hvm.Hue == hue);
+        if (hueViewModel is not null) return hueViewModel;
+      }
+      return null;
+    }
+
+    private IHueViewModel? FindHueViewModelFromAppSettings(ColorScheme colorScheme)
     {
       string? colorName;
       int colorHue;
@@ -166,23 +184,23 @@ namespace RVisUI.Ioc.Mvvm
       switch (colorScheme)
       {
         case ColorScheme.Primary:
-          colorName = appSettings.PrimaryColorName;
-          colorHue = appSettings.PrimaryColorHue;
+          colorName = _appSettings.PrimaryColorName;
+          colorHue = _appSettings.PrimaryColorHue;
           break;
 
         case ColorScheme.PrimaryForeground:
-          colorName = appSettings.PrimaryForegroundColorName;
-          colorHue = appSettings.PrimaryForegroundColorHue;
+          colorName = _appSettings.PrimaryForegroundColorName;
+          colorHue = _appSettings.PrimaryForegroundColorHue;
           break;
 
         case ColorScheme.Secondary:
-          colorName = appSettings.SecondaryColorName;
-          colorHue = appSettings.SecondaryColorHue;
+          colorName = _appSettings.SecondaryColorName;
+          colorHue = _appSettings.SecondaryColorHue;
           break;
 
         case ColorScheme.SecondaryForeground:
-          colorName = appSettings.SecondaryForegroundColorName;
-          colorHue = appSettings.SecondaryForegroundColorHue;
+          colorName = _appSettings.SecondaryForegroundColorName;
+          colorHue = _appSettings.SecondaryForegroundColorHue;
           break;
 
         default: throw new ArgumentOutOfRangeException(nameof(colorScheme));
@@ -190,7 +208,7 @@ namespace RVisUI.Ioc.Mvvm
 
       if (colorName.IsntAString()) return default;
 
-      var swatchViewModel = swatchViewModels
+      var swatchViewModel = SwatchViewModels
         .Find(svm => svm.Swatch.Name.EqualsCI(colorName))
         .AssertSome($"Unknown swatch name: {colorName}");
 
@@ -199,7 +217,9 @@ namespace RVisUI.Ioc.Mvvm
 
     private void HandleChangeHue(IHueViewModel hueViewModel)
     {
-      var currentlySelected = FindHueViewModel(ActiveScheme, SwatchViewModels, _appSettings);
+      var currentlySelected = SwatchViewModels
+        .SelectMany(svm => svm.HueViewModels)
+        .SingleOrDefault(hvm => hvm.IsSelected);
       var isUnset = false;
 
       if (currentlySelected is not null)
@@ -214,7 +234,7 @@ namespace RVisUI.Ioc.Mvvm
       switch (ActiveScheme)
       {
         case ColorScheme.Primary:
-          _paletteHelper.ChangePrimaryColor(hueViewModel.Hue);
+          _mdPaletteHelper.ChangePrimaryColor(hueViewModel.Hue);
           _appSettings.PrimaryColorName = hueViewModel.Swatch.Name;
           _appSettings.PrimaryColorHue = hueViewModel.HueIndex;
           break;
@@ -222,19 +242,19 @@ namespace RVisUI.Ioc.Mvvm
         case ColorScheme.PrimaryForeground:
           if (isUnset)
           {
-            _paletteHelper.ChangePrimaryForegroundColor(default);
+            _mdPaletteHelper.ChangePrimaryForegroundColor(default);
             _appSettings.PrimaryForegroundColorName = default;
           }
           else
           {
-            _paletteHelper.ChangePrimaryForegroundColor(hueViewModel.Hue);
+            _mdPaletteHelper.ChangePrimaryForegroundColor(hueViewModel.Hue);
             _appSettings.PrimaryForegroundColorName = hueViewModel.Swatch.Name;
             _appSettings.PrimaryForegroundColorHue = hueViewModel.HueIndex;
           }
           break;
 
         case ColorScheme.Secondary:
-          _paletteHelper.ChangeSecondaryColor(hueViewModel.Hue);
+          _mdPaletteHelper.ChangeSecondaryColor(hueViewModel.Hue);
           _appSettings.SecondaryColorName = hueViewModel.Swatch.Name;
           _appSettings.SecondaryColorHue = hueViewModel.HueIndex;
           SetSecondaryHueHexes();
@@ -243,12 +263,12 @@ namespace RVisUI.Ioc.Mvvm
         case ColorScheme.SecondaryForeground:
           if (isUnset)
           {
-            _paletteHelper.ChangeSecondaryForegroundColor(default);
+            _mdPaletteHelper.ChangeSecondaryForegroundColor(default);
             _appSettings.SecondaryForegroundColorName = default;
           }
           else
           {
-            _paletteHelper.ChangeSecondaryForegroundColor(hueViewModel.Hue);
+            _mdPaletteHelper.ChangeSecondaryForegroundColor(hueViewModel.Hue);
             _appSettings.SecondaryForegroundColorName = hueViewModel.Swatch.Name;
             _appSettings.SecondaryForegroundColorHue = hueViewModel.HueIndex;
           }
@@ -260,35 +280,65 @@ namespace RVisUI.Ioc.Mvvm
 
     private void ChangeToScheme(ColorScheme colorScheme)
     {
-      var currentlySelected = FindHueViewModel(ActiveScheme, SwatchViewModels, _appSettings);
+      var currentlySelected = SwatchViewModels
+        .SelectMany(svm => svm.HueViewModels)
+        .SingleOrDefault(hvm => hvm.IsSelected);
       if (currentlySelected is not null) currentlySelected.IsSelected = false;
 
       ActiveScheme = colorScheme;
 
-      currentlySelected = FindHueViewModel(ActiveScheme, SwatchViewModels, _appSettings);
+      currentlySelected = FindHueViewModelFromAppSettings(ActiveScheme);
+      if (currentlySelected is null)
+      {
+        var theme = _mdPaletteHelper.GetTheme();
+        currentlySelected = FindHueViewModelFromHue(ActiveScheme == ColorScheme.Primary
+          ? theme.PrimaryMid.Color
+          : theme.SecondaryMid.Color
+          );
+      }
       if (currentlySelected is not null) currentlySelected.IsSelected = true;
     }
 
     private void SetSecondaryHueHexes()
     {
-      static string int2Hex(int i) => i.ToString("X").ToLower();
+      static string int2Hex(int i) => i.ToString("X", InvariantCulture).ToLowerInvariant();
 
       static string colorToHex(Color c) => "#" +
         int2Hex(c.R) +
         int2Hex(c.G) +
         int2Hex(c.B);
 
-      var hueViewModel = FindHueViewModel(ColorScheme.Secondary, SwatchViewModels, _appSettings).AssertNotNull();
-      var hue = hueViewModel.Hue;
+      var theme = _mdPaletteHelper.GetTheme();
+
+      var hueViewModel = FindHueViewModelFromAppSettings(ColorScheme.Secondary);
+      if (hueViewModel is null)
+      {
+        hueViewModel = FindHueViewModelFromHue(theme.SecondaryMid.Color);
+      }
+
+      Color hue;
+      if (hueViewModel is null)
+      {
+        hue = theme.SecondaryMid.Color;
+      }
+      else
+      {
+        hue = hueViewModel!.Hue;
+      }
 
       SecondaryHueLightHex = colorToHex(hue.Lighten());
       SecondaryHueMidHex = colorToHex(hue);
       SecondaryHueDarkHex = colorToHex(hue.Darken());
 
-      hueViewModel = FindHueViewModel(ColorScheme.SecondaryForeground, SwatchViewModels, _appSettings);
+      hueViewModel = FindHueViewModelFromAppSettings(ColorScheme.SecondaryForeground);
+      if (hueViewModel is null && theme.SecondaryMid.ForegroundColor is not null)
+      {
+        hueViewModel = FindHueViewModelFromHue(theme.SecondaryMid.ForegroundColor.Value);
+      }
+
       if (hueViewModel is null)
       {
-        hue = hue.ContrastingForegroundColor();
+        hue = theme.SecondaryMid.ForegroundColor ?? hue.ContrastingForegroundColor();
       }
       else
       {
@@ -298,7 +348,7 @@ namespace RVisUI.Ioc.Mvvm
       SecondaryHueMidForegroundHex = colorToHex(hue);
     }
 
-    private readonly PaletteHelper _paletteHelper = new PaletteHelper();
+    private readonly MDPaletteHelper _mdPaletteHelper = new();
     private readonly IAppSettings _appSettings;
   }
 }

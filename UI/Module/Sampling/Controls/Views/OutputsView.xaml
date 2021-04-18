@@ -17,16 +17,7 @@
   <UserControl.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Sampling;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <swc:BooleanToVisibilityConverter x:Key="b2vc"/>
@@ -69,7 +60,7 @@
               Command="{Binding ToggleSeriesType}"
               >
         <Button.Style>
-          <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
+          <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniAccentButton}">
             <Setter Property="Height" Value="16"/>
             <Setter Property="Width" Value="16"/>
             <Setter Property="Content">
@@ -99,7 +90,7 @@
       <Button Height="16"
               Width="16"
               Margin="5 0 0 0"
-              Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+              Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
               ToolTip="Reset axes" 
               Command="{Binding ResetAxes}"
               >
@@ -113,7 +104,8 @@
 
     <StackPanel Grid.Column="1">
 
-      <GroupBox Header="Output">
+      <GroupBox Header="Output"
+                md:ColorZoneAssist.Mode="SecondaryMid">
         <ComboBox ItemsSource="{Binding OutputNames}" 
                   SelectedIndex="{Binding SelectedOutputName}"
                   MinWidth="200"
@@ -126,7 +118,8 @@
                   Height="400"
                   >
         <TabItem Header="Sample" 
-                 DataContext="{Binding OutputsSelectedSampleViewModel}">
+                 DataContext="{Binding OutputsSelectedSampleViewModel}"
+                 >
           <impl:OutputsSelectedSampleView />
         </TabItem>
         <TabItem Header="Filter"

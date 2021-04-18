@@ -15,16 +15,7 @@
   <UserControl.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Evidence;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </UserControl.Resources>
@@ -36,7 +27,10 @@
       <RowDefinition Height="3*"/>
     </Grid.RowDefinitions>
 
-    <GroupBox Header="Sources" Margin="5">
+    <GroupBox Header="Sources" 
+              Margin="5"
+              md:ColorZoneAssist.Mode="SecondaryMid"
+              >
 
       <Grid>
         <Grid.ColumnDefinitions>
@@ -56,7 +50,7 @@
         </ListView>
 
         <Button Grid.Column="1" 
-            Style="{StaticResource MaterialDesignRaisedDarkButton}"
+            Style="{StaticResource MaterialDesignRaisedAccentButton}"
             ToolTip="Delete source and associated observations" 
             Margin="30 0"
             HorizontalAlignment="Center"
@@ -72,7 +66,11 @@
       
     </GroupBox>
 
-    <GroupBox Grid.Row="1" Margin="5" Header="Observations">
+    <GroupBox Grid.Row="1" 
+              Margin="5" 
+              Header="Observations"
+              md:ColorZoneAssist.Mode="SecondaryMid"
+              >
 
       <Grid>
         <Grid.ColumnDefinitions>
@@ -93,7 +91,7 @@
         </ListView>
 
         <Button Grid.Column="1"
-                Style="{StaticResource MaterialDesignRaisedDarkButton}"
+                Style="{StaticResource MaterialDesignRaisedAccentButton}"
                 ToolTip="Delete observations" 
                 Margin="30 0"
                 HorizontalAlignment="Center"

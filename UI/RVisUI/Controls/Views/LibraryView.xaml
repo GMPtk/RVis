@@ -13,7 +13,6 @@
 
     <GroupBox Header="Location"
               Style="{DynamicResource MaterialDesignGroupBox}"
-              md:ColorZoneAssist.Mode="Accent"
               Margin="100,0,100,0" 
               VerticalAlignment="Center">
       <StackPanel>

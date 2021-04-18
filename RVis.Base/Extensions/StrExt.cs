@@ -21,7 +21,7 @@ namespace RVis.Base.Extensions
     {
       if (s.IsAString())
       {
-        T _ = default;
+        T _ = default!;
         var typeT = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
 
         try
@@ -132,7 +132,7 @@ namespace RVis.Base.Extensions
     private static readonly char[] _separators = new[] { ';', ',' };
     private const string _docsPrefix = "~/";
     private static readonly Regex _invalid = GetInvalid();
-    private static readonly SHA1CryptoServiceProvider _sha1 = new SHA1CryptoServiceProvider();
-    private static readonly ConcurrentDictionary<string, string> _sha1HashMemo = new ConcurrentDictionary<string, string>();
+    private static readonly SHA1CryptoServiceProvider _sha1 = new();
+    private static readonly ConcurrentDictionary<string, string> _sha1HashMemo = new();
   }
 }

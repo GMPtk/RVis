@@ -15,16 +15,7 @@
     <ResourceDictionary>
 
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Plot;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <Style x:Key="MaterialDesignTextStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignBody1TextBlock}">
@@ -78,7 +69,10 @@
                  HorizontalAlignment="Left"
                  Margin="0 0 5 5"
                  Padding="0"
-                 UniformCornerRadius="6">
+                 UniformCornerRadius="6"
+                 Background="{DynamicResource SecondaryHueLightBrush}"
+                 Foreground="{DynamicResource SecondaryHueLightForegroundBrush}"
+                 >
 
           <Grid>
             <Grid.RowDefinitions>
@@ -86,7 +80,7 @@
               <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <md:ColorZone Mode="PrimaryMid" Padding="3">
+            <md:ColorZone Mode="SecondaryMid" Padding="3">
               <TextBlock Text="SELECTED DEPENDENT VARIABLE" 
                          Margin="2" 
                          FontSize="8" 
@@ -107,7 +101,7 @@
                       ItemsSource="{Binding MRUElements}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
-              <Button Style="{DynamicResource MaterialDesignFlatButton}" 
+              <Button Style="{DynamicResource MaterialDesignFlatAccentButton}" 
                       Margin="3"
                       Content="{Binding Label}" 
                       Command="{Binding Select}"
@@ -135,7 +129,7 @@
                       ItemsSource="{Binding LRUElements}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
-              <Button Style="{DynamicResource MaterialDesignFlatButton}" 
+              <Button Style="{DynamicResource MaterialDesignFlatAccentButton}" 
                       Margin="3"
                       Content="{Binding Label}" 
                       Command="{Binding Select}"
@@ -155,6 +149,7 @@
       <CheckBox Grid.Row="5" 
                 IsChecked="{Binding IsScaleLogarithmic}" 
                 Content="Use logarithmic axis"
+                Style="{StaticResource MaterialDesignAccentCheckBox}"
                 />
 
       <StackPanel Grid.Column="1" 
@@ -176,6 +171,7 @@
                 Grid.RowSpan="2" 
                 Margin="5 0 0 5" 
                 Header="Supplementary Traces"
+                md:ColorZoneAssist.Mode="SecondaryMid"
                 >
 
         <ScrollViewer Margin="0"
@@ -211,6 +207,7 @@
                   </Grid.ColumnDefinitions>
                   <CheckBox IsChecked="{Binding IsSelected}" 
                             Margin="3" 
+                            Style="{StaticResource MaterialDesignAccentCheckBox}"
                             Content="{Binding Label}"
                             />
                 </Grid>
@@ -226,6 +223,7 @@
                 Grid.RowSpan="2" 
                 Margin="5 5 0 10" 
                 Header="Observations"
+                md:ColorZoneAssist.Mode="SecondaryMid"
                 >
         <ScrollViewer Margin="0"
                       VerticalScrollBarVisibility="Auto" 
@@ -258,7 +256,11 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition />
                   </Grid.ColumnDefinitions>
-                  <CheckBox IsChecked="{Binding IsSelected}" Margin="3" Content="{Binding Label}"/>
+                  <CheckBox IsChecked="{Binding IsSelected}" 
+                            Margin="3" 
+                            Content="{Binding Label}"
+                            Style="{StaticResource MaterialDesignAccentCheckBox}"
+                            />
                 </Grid>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
@@ -273,7 +275,9 @@
               Width="Auto" 
               Height="Auto"                               
               Command="{Binding ToggleView}" 
-              ToolTip="Close">
+              ToolTip="Close"
+              Style="{StaticResource MaterialDesignFlatAccentBgButton}"
+              >
         <StackPanel Orientation="Horizontal">
           <md:PackIcon VerticalAlignment="Center" 
                        Kind="Close"

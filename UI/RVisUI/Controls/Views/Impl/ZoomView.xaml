@@ -34,6 +34,7 @@
               Height="16" 
               Width="16"
               Command="{Binding Shrink}"
+              Style="{StaticResource MaterialDesignRaisedAccentButton}"
             >
         <md:PackIcon Kind="Minus"/>
       </Button>
@@ -44,6 +45,7 @@
               Value="{Binding Zoom}" 
               Minimum="{Binding MinZoom}" 
               Maximum="{Binding MaxZoom}" LargeChange="0.1"
+              Foreground="{DynamicResource SecondaryHueMidBrush}"
               />
 
       <Button Grid.Column="1" 
@@ -56,6 +58,7 @@
               Width="70"
               Content="{Binding PercentZoom}"
               Command="{Binding Reset}"
+              Style="{StaticResource MaterialDesignRaisedAccentButton}"
               />
 
       <Button Grid.Column="2" 
@@ -64,6 +67,7 @@
               Height="16" 
               Width="16"
               Command="{Binding Enlarge}"
+              Style="{StaticResource MaterialDesignRaisedAccentButton}"
             >
         <md:PackIcon Kind="Plus"/>
       </Button>

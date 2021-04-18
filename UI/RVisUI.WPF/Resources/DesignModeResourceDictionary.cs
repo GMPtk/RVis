@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RVis.Base.Extensions;
+using System;
 using System.ComponentModel;
 using System.Windows;
 
@@ -13,8 +14,9 @@ namespace RVisUI.Wpf
       set
       {
         _designModeSource = value;
+        if (_designModeSource.IsntAString()) return;
         var isInDesignMode = (bool)DesignerProperties.IsInDesignModeProperty.GetMetadata(typeof(DependencyObject)).DefaultValue;
-        if (isInDesignMode && _designModeSource is not null) Source = new Uri(_designModeSource);
+        if (isInDesignMode) Source = new Uri(_designModeSource);
       }
     }
 

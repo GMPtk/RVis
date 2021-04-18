@@ -50,7 +50,11 @@
         <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
 
-      <GroupBox Grid.RowSpan="3" Margin="0 0 5 0" Header="PARAMETERS">
+      <GroupBox Grid.RowSpan="3" 
+                Margin="0 0 5 0" 
+                Header="PARAMETERS"
+                md:ColorZoneAssist.Mode="SecondaryMid"
+                >
 
         <Grid>
           <Grid.ColumnDefinitions>
@@ -105,7 +109,9 @@
                             VerticalAlignment="Center"
                             Command="{Binding [0]}"
                             CommandParameter="{Binding [1]}"
-                            ToolTip="Apply shared parameter state to selected module">
+                            ToolTip="Apply shared parameter state to selected module"
+                            Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                            >
                       <md:PackIcon Width="12" Height="12" Kind="Download"/>
                     </Button>
                     <TextBlock Grid.Column="1" Style="{StaticResource MaterialDesignTextStyle}" Text="{Binding [2]}" />
@@ -124,7 +130,9 @@
                   Height="Auto" 
                   Padding="0"
                   Command="{Binding ShareParametersState}" 
-                  ToolTip="Store selected module's parameter state in shared state">
+                  ToolTip="Store selected module's parameter state in shared state"
+                  Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                  >
             <md:PackIcon Margin="3" Width="15" Height="15" Kind="Upload"/>
           </Button>
 
@@ -134,7 +142,9 @@
                   Height="Auto" 
                   Padding="0" 
                   Command="{Binding ApplyParametersState}" 
-                  ToolTip="Apply shared parameter state to selected module">
+                  ToolTip="Apply shared parameter state to selected module"
+                  Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                  >
             <md:PackIcon Margin="3" Width="15" Height="15" Kind="Download"/>
           </Button>
 
@@ -142,7 +152,11 @@
 
       </GroupBox>
 
-      <GroupBox Grid.Column="1" Margin="5 0 0 5" Header="OUTPUTS">
+      <GroupBox Grid.Column="1" 
+                Margin="5 0 0 5" 
+                Header="OUTPUTS"
+                md:ColorZoneAssist.Mode="SecondaryMid"
+                >
 
         <Grid>
           <Grid.ColumnDefinitions>
@@ -194,7 +208,9 @@
                             VerticalAlignment="Center"
                             Command="{Binding [0]}"
                             CommandParameter="{Binding [1]}"
-                            ToolTip="Apply shared output state to selected module">
+                            ToolTip="Apply shared output state to selected module"
+                            Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                            >
                       <md:PackIcon Width="12" Height="12" Kind="Download"/>
                     </Button>
                     <TextBlock Grid.Column="1" Style="{StaticResource MaterialDesignTextStyle}" Text="{Binding [2]}" />
@@ -210,7 +226,9 @@
                   Height="Auto" 
                   Padding="0"
                   Command="{Binding ShareOutputsState}" 
-                  ToolTip="Store selected module's output state in shared state">
+                  ToolTip="Store selected module's output state in shared state"
+                  Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                  >
             <md:PackIcon Margin="3" Width="15" Height="15" Kind="Upload"/>
           </Button>
 
@@ -220,7 +238,9 @@
                   Height="Auto" 
                   Padding="0" 
                   Command="{Binding ApplyOutputsState}" 
-                  ToolTip="Apply shared output state to selected module">
+                  ToolTip="Apply shared output state to selected module"
+                  Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                  >
             <md:PackIcon Margin="3" Width="15" Height="15" Kind="Download"/>
           </Button>
 
@@ -228,7 +248,12 @@
 
       </GroupBox>
 
-      <GroupBox Grid.Column="1" Grid.Row="1" Margin="5 5 0 5" Header="OBSERVATIONS">
+      <GroupBox Grid.Column="1" 
+                Grid.Row="1" 
+                Margin="5 5 0 5" 
+                Header="OBSERVATIONS"
+                md:ColorZoneAssist.Mode="SecondaryMid"
+                >
 
         <Grid>
           <Grid.ColumnDefinitions>
@@ -280,7 +305,9 @@
                             VerticalAlignment="Center"
                             Command="{Binding [0]}"
                             CommandParameter="{Binding [1]}"
-                            ToolTip="Apply shared observations state to selected module">
+                            ToolTip="Apply shared observations state to selected module"
+                            Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                            >
                       <md:PackIcon Width="12" Height="12" Kind="Download"/>
                     </Button>
                     <TextBlock Grid.Column="1" Style="{StaticResource MaterialDesignTextStyle}" Text="{Binding [2]}" />
@@ -296,7 +323,9 @@
                   Height="Auto" 
                   Padding="0"
                   Command="{Binding ShareObservationsState}" 
-                  ToolTip="Store selected module's observations state in shared state">
+                  ToolTip="Store selected module's observations state in shared state"
+                  Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                  >
             <md:PackIcon Margin="3" Width="15" Height="15" Kind="Upload"/>
           </Button>
 
@@ -306,7 +335,9 @@
                   Height="Auto" 
                   Padding="0" 
                   Command="{Binding ApplyObservationsState}" 
-                  ToolTip="Apply shared observations state to selected module">
+                  ToolTip="Apply shared observations state to selected module"
+                  Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                  >
             <md:PackIcon Margin="3" Width="15" Height="15" Kind="Download"/>
           </Button>
 
@@ -327,7 +358,9 @@
                 Height="Auto" 
                 Padding="0"
                 Command="{Binding ShareState}" 
-                ToolTip="Store selected module's state in shared state">
+                ToolTip="Store selected module's state in shared state"
+                Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                >
           <md:PackIcon Margin="5" Width="18" Height="18" Kind="Upload"/>
         </Button>
         <Button Grid.Column="2"
@@ -336,7 +369,9 @@
                 Height="Auto" 
                 Padding="0" 
                 Command="{Binding ApplyState}" 
-                ToolTip="Apply shared state to selected module">
+                ToolTip="Apply shared state to selected module"
+                Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                >
           <md:PackIcon Margin="5" Width="18" Height="18" Kind="Download"/>
         </Button>
         <Button Grid.Column="3"
@@ -345,14 +380,15 @@
                 Width="Auto" 
                 Height="Auto"                               
                 Command="{Binding CloseView}" 
-                ToolTip="Close">
+                ToolTip="Close"
+                Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                >
           <StackPanel Orientation="Horizontal">
             <md:PackIcon VerticalAlignment="Center" 
                          Kind="Close"
                          />
             <TextBlock Margin="3 0 0 0" 
                        VerticalAlignment="Center" 
-                       Foreground="{StaticResource IdealForegroundColorBrush}" 
                        Text="CLOSE"
                        />
           </StackPanel>

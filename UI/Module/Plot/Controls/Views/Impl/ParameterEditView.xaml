@@ -15,23 +15,14 @@
   <UserControl.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Plot;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
       <sys:Int32 x:Key="digits">4</sys:Int32>
     </ResourceDictionary>
   </UserControl.Resources>
   
   <Border BorderThickness="1"
-          BorderBrush="{DynamicResource PrimaryHueLightBrush}"
+          BorderBrush="{DynamicResource SecondaryHueLightBrush}"
           CornerRadius="8"
           Margin="4"
           Width="200"
@@ -64,6 +55,7 @@
                 Command="{Binding ToggleSelect}"
                 CommandParameter="{Binding}"
                 ToolTip="Deselect for editing"
+                Style="{StaticResource MaterialDesignFlatAccentBgButton}"
                 >
           <md:PackIcon Kind="Minus" Height="20" Width="20"/>
         </Button>
@@ -81,6 +73,7 @@
                 Command="{Binding ResetValue}"
                 CommandParameter="{Binding}"
                 ToolTip="Reset, or update if x &lt; y &lt; z entered"
+                Style="{StaticResource MaterialDesignFlatAccentBgButton}"
                 >
           <md:PackIcon Kind="Refresh" Height="20" Width="20"/>
         </Button>
@@ -117,6 +110,7 @@
                   CommandParameter="{Binding}"
                   IsEnabled="{Binding CanIncreaseMinimum}"
                   ToolTip="Increase minimum"
+                  Style="{StaticResource MaterialDesignFlatAccentBgButton}"
                   >
             <md:PackIcon Kind="Plus" Height="15" Width="15"/>
           </Button>
@@ -127,6 +121,7 @@
                   Command="{Binding DecreaseMinimum}"
                   CommandParameter="{Binding}"
                   ToolTip="Decrease minimum"
+                  Style="{StaticResource MaterialDesignFlatAccentBgButton}"
                   >
             <md:PackIcon Kind="Minus" Height="15" Width="15"/>
           </Button>
@@ -150,6 +145,7 @@
                   Value="{Binding NValue, TargetNullValue=0,Converter={x:Static wpf:SigFigsConverter.Default}, ConverterParameter={StaticResource digits}}" 
                   Ticks="{Binding Ticks}"
                   TickPlacement="BottomRight"
+                  Foreground="{DynamicResource SecondaryHueMidBrush}"
                   >
             <Slider.Style>
               <Style TargetType="Slider" BasedOn="{StaticResource MaterialDesignSlider}">
@@ -177,6 +173,7 @@
                   Command="{Binding IncreaseMaximum}"
                   CommandParameter="{Binding}"
                   ToolTip="Increase maximum"
+                  Style="{StaticResource MaterialDesignFlatAccentBgButton}"
                   >
             <md:PackIcon Kind="Plus" Height="15" Width="15"/>
           </Button>
@@ -187,6 +184,7 @@
                   CommandParameter="{Binding}"
                   IsEnabled="{Binding CanDecreaseMaximum}"
                   ToolTip="Decrease maximum"
+                  Style="{StaticResource MaterialDesignFlatAccentBgButton}"
                   >
             <md:PackIcon Kind="Minus" Height="15" Width="15"/>
           </Button>

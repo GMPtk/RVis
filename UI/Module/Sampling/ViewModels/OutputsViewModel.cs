@@ -630,10 +630,10 @@ namespace Sampling
       {
         var theme = new PaletteHelper().GetTheme();
         var color = OxyColor.FromArgb(
-          theme.PrimaryMid.Color.A,
-          theme.PrimaryMid.Color.R,
-          theme.PrimaryMid.Color.G,
-          theme.PrimaryMid.Color.B
+          theme.SecondaryMid.Color.A,
+          theme.SecondaryMid.Color.R,
+          theme.SecondaryMid.Color.G,
+          theme.SecondaryMid.Color.B
           );
 
         if (seriesToSelect is LineSeries lineSeries)

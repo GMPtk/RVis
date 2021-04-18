@@ -333,7 +333,7 @@ namespace RVisUI.Ioc
     }
 
     private readonly IAppSettings _appSettings;
-    private readonly RVisServerPool _rVisServerPool = new RVisServerPool();
+    private readonly RVisServerPool _rVisServerPool = new();
     private readonly IDictionary<string, Type> _dialogViews = new SortedDictionary<string, Type>();
     private bool _disposed = false;
   }

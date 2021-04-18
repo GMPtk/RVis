@@ -16,16 +16,7 @@
     <ResourceDictionary>
 
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Estimation;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
     </ResourceDictionary>
@@ -44,13 +35,17 @@
                   />
 
     <StackPanel Grid.Column="1">
-      <GroupBox Margin="5" Header="Include Data From">
+      <GroupBox Margin="5" 
+                Header="Include Data From"
+                md:ColorZoneAssist.Mode="SecondaryMid"
+                >
         <ItemsControl ItemsSource="{Binding ChainViewModels}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
               <CheckBox Margin="5 2" 
                         Content="{Binding No}"
                         ContentStringFormat="Chain {0}"
+                        Style="{StaticResource MaterialDesignAccentCheckBox}"
                         IsChecked="{Binding IsSelected}"
                         />
             </DataTemplate>
@@ -62,7 +57,10 @@
           </ItemsControl.ItemsPanel>
         </ItemsControl>
       </GroupBox>
-      <GroupBox Margin="5" Header="Show Fit For">
+      <GroupBox Margin="5" 
+                Header="Show Fit For"
+                md:ColorZoneAssist.Mode="SecondaryMid"
+                >
         <ComboBox Grid.Column="1"
                   Margin="5"
                   VerticalAlignment="Center"

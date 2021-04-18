@@ -511,6 +511,7 @@ namespace Sensitivity
       var targetParameterNames = Inputs.Table.Columns
         .Cast<DataColumn>()
         .Select(dc => dc.ColumnName)
+        .Where(cn => defaultInput.SimParameters.Exists(p => p.Name == cn))
         .ToArr();
 
       var dataRow = Inputs.Table.Rows[SelectedInputIndex];
@@ -951,7 +952,6 @@ namespace Sensitivity
     private void Populate()
     {
       RequireNotNull(_moduleState.SensitivityDesign);
-      RequireTrue(_moduleState.MeasuresState.SelectedOutputName.IsAString());
       RequireNull(_outputRequestJob);
 
       var sensitivityDesign = _moduleState.SensitivityDesign;
@@ -983,6 +983,12 @@ namespace Sensitivity
       PopulateFactors(sensitivityDesign.DesignParameters);
       PopulateInvariants(sensitivityDesign.DesignParameters);
       NOutputsToAcquire = sensitivityDesign.Samples.Sum(dt => dt.Rows.Count);
+
+      if (_moduleState.MeasuresState.SelectedOutputName.IsntAString())
+      {
+        var firstDependentVariable = _simulation.SimConfig.SimOutput.DependentVariables.First();
+        _moduleState.MeasuresState.SelectedOutputName = firstDependentVariable.Name;
+      }
 
       _sampleInputs = CompileSampleInputs(
         _simulation,
@@ -1128,7 +1134,7 @@ namespace Sensitivity
     private bool _runOutputRequestJob;
     private readonly IDictionary<int, Exception> _outputRequestErrors = new SortedDictionary<int, Exception>();
     private IDisposable? _jobSubscriptions;
-    private readonly object _jobSyncLock = new object();
+    private readonly object _jobSyncLock = new();
     private bool _disposed = false;
   }
 }

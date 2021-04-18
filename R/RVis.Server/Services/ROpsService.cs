@@ -142,7 +142,7 @@ namespace RVis.Server
       return error;
     }
 
-    private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+    private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
     private readonly ILogger<ROpsService> _logger;
   }
 }
