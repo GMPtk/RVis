@@ -325,7 +325,7 @@ namespace Sampling
 
     private void ObserveModuleStateOutputs(object _)
     {
-      if (Outputs.Series.Count == 0)
+      if (_moduleState.Outputs.IsEmpty || Outputs.Series.Count == 0)
       {
         PopulateVerticalAxis();
 

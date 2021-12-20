@@ -669,11 +669,12 @@ namespace Sampling
           });
 
         var parameterStates = existingParameterStates + newParameterStates;
+
+        UnloadDesign();
+
         _moduleState.ParameterStates = parameterStates
           .OrderBy(ps => ps.Name.ToUpperInvariant())
           .ToArr();
-
-        UnloadDesign();
 
         _moduleState.SamplesState.NumberOfSamples = samplingDesign.Samples.Rows.Count;
         _moduleState.SamplesState.Seed = samplingDesign.Seed;

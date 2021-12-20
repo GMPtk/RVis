@@ -134,18 +134,35 @@ namespace RVis.Model
 
       RequireNotNull(run, "Failed to start MCSim process");
 
+      var stdOut = new List<string>();
+      var stdErr = new List<string>();
+
+      while (true)
+      {
+        var outLine = run.StandardOutput.ReadLine();
+        if (outLine is not null)
+        {
+          stdOut.Add(outLine);
+        }
+
+        var errLine = run.StandardError.ReadLine();
+        if (errLine is not null)
+        {
+          stdErr.Add(errLine);
+        }
+
+        if (outLine is null && errLine is null) break;
+      }
+
       run.WaitForExit();
 
       if (run.ExitCode != 0)
       {
-        var stdOut = run.StandardOutput.ReadToEnd();
-        var stdErr = run.StandardError.ReadToEnd();
         return HandleFailure(run.ExitCode, stdOut, stdErr);
       }
 
       if (!File.Exists(_pathToOutFile))
       {
-        var stdOut = run.StandardOutput.ReadToEnd();
         return HandleIntegrationFailure(stdOut);
       }
 
@@ -210,13 +227,11 @@ namespace RVis.Model
       return table;
     }
 
-    private static NumDataTable HandleFailure(int exitCode, string stdOut, string stdErr)
+    private static NumDataTable HandleFailure(int exitCode, List<string> stdOut, List<string> stdErr)
     {
-      static Arr<string> ExtractErrors(string s)
+      static Arr<string> ExtractErrors(List<string> lines)
       {
         const string PREFIX = "Error:";
-
-        var lines = s.Split(new[] { NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
         return lines
           .Where(l => l.StartsWith(PREFIX))
@@ -234,16 +249,15 @@ namespace RVis.Model
         );
     }
 
-    private static NumDataTable HandleIntegrationFailure(string stdOut)
+    private static NumDataTable HandleIntegrationFailure(List<string> stdOut)
     {
       const string START_PREFIX = "Doing analysis";
 
-      var lines = stdOut.Split(new[] { NewLine }, StringSplitOptions.RemoveEmptyEntries);
       var startIndex = 0;
 
-      while (!lines[startIndex].StartsWith(START_PREFIX) && ++startIndex < lines.Length) ;
+      while (!stdOut[startIndex].StartsWith(START_PREFIX) && ++startIndex < stdOut.Count) ;
 
-      if (++startIndex >= lines.Length)
+      if (++startIndex >= stdOut.Count)
       {
         throw new MCSimExecutionException("Unknown integration fault", 0, default);
       }
@@ -252,14 +266,14 @@ namespace RVis.Model
 
       var endIndex = startIndex;
 
-      while (!lines[endIndex].StartsWith(END_PREFIX) && ++endIndex < lines.Length) ;
+      while (!stdOut[endIndex].StartsWith(END_PREFIX) && ++endIndex < stdOut.Count) ;
 
-      if (endIndex >= lines.Length)
+      if (endIndex >= stdOut.Count)
       {
         throw new MCSimExecutionException("Unknown integration fault", 0, default);
       }
 
-      var diagnostics = lines.Skip(startIndex).Take(endIndex - startIndex).ToArr();
+      var diagnostics = stdOut.Skip(startIndex).Take(endIndex - startIndex).ToArr();
 
       throw new MCSimExecutionException("MCSim failed to produce data", 0, diagnostics);
     }

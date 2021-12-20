@@ -14,21 +14,18 @@ C:\PS> in2rvis.ps1 perc.in
 param (
 
   [ValidateScript( {
-      if (-not ($_ | Test-Path -PathType Leaf))
-      {
-        throw "$_ does not exist"
-      }
-      return $true
-    })]
+    if (-not ($_ | Test-Path -PathType Leaf))
+    {
+      throw "$_ does not exist"
+    }
+    return $true
+  })]
   [System.IO.FileInfo]$inFile
 
 )
 
-function is_comment
-{
-  param (
-    [string]$line
-  )
+function is_comment {
+  param ([string]$line)
   
   $line.Trim().StartsWith("#")
 }
@@ -37,34 +34,28 @@ $lines = Get-Content $inFile
 $nLines = $lines.Length
 $index = 0
 
-while ($index -lt $nLines)
-{
-  if (-not (is_comment $lines[$index]) -and $lines[$index] -like "*simulation*")
-  {
+while ($index -lt $nLines) {
+  if (-not (is_comment $lines[$index]) -and $lines[$index] -like "*simulation*") {
     break;
   }
 
   ++$index
 }
 
-if ($index -eq $nLines)
-{
+if ($index -eq $nLines) {
   Write-Error -Message "Failed to find keyword Simulation"
   exit 1
 }
 
-while ($index -lt $nLines)
-{
-  if (-not (is_comment $lines[$index]) -and $lines[$index] -like "*{*")
-  {
+while ($index -lt $nLines) {
+  if (-not (is_comment $lines[$index]) -and $lines[$index] -like "*{*") {
     break;
   }
 
   ++$index
 }
 
-if ($index -eq $nLines)
-{
+if ($index -eq $nLines) {
   Write-Error -Message "Failed to find opening brace for keyword Simulation"
   exit 1
 }
@@ -72,24 +63,22 @@ if ($index -eq $nLines)
 $parameterAssignments = New-Object -TypeName System.Collections.Generic.List[PSCustomObject]
 $outputNames = New-Object -TypeName System.Collections.Generic.List[PSCustomObject]
 
-while ($index -lt $nLines)
-{
-  if (is_comment $lines[$index])
-  {
+while ($index -lt $nLines) {
+  if (is_comment $lines[$index]) {
     ++$index
     continue
   }
 
   $endSection = $lines[$index] -like "*}*"
 
-  $isParameterAssignment = $lines[$index] -match "\s*(\w+)\s*=\s*([\d+-Ee]+)\s*;(?:\s*(?:#\s*([^\[]*))(?:\[\s*([^\]]*)\])?)?"
+  $isParameterAssignment = $lines[$index] -match "(\s*)(\w+)\s*=\s*([\d+-Ee]+)\s*;(?:\s*(?:#\s*([^\[]*))(?:\[\s*([^\]]*)\])?)?"
 
-  if ($isParameterAssignment)
-  {
-    $name = $Matches[1]
-    $value = $Matches[2]
-    $comment = $Matches[3]
-    $unit = $Matches[4]
+  if ($isParameterAssignment) {
+    $indent = $Matches[1]
+    $name = $Matches[2]
+    $value = $Matches[3]
+    $comment = $Matches[4]
+    $unit = $Matches[5]
 
     $parameterAssignment = [PSCustomObject]@{
       Name    = $name
@@ -100,32 +89,32 @@ while ($index -lt $nLines)
 
     $parameterAssignments.Add($parameterAssignment)
 
-    $lines[$index] = $lines[$index] -replace $value, "{{$($name)}}"
+    $template = "$indent$name = {{$($name)}}; # $comment"
+    if (!!$unit) {
+      $template = $template + "[$unit]"
+    }
+
+    $lines[$index] = $template
   }
 
-  if ($lines[$index] -like "*printstep*")
-  {
+  if ($lines[$index] -like "*printstep*") {
     ++$index
 
-    while ($index -lt $nLines)
-    {
-      if (is_comment $lines[$index])
-      {
+    while ($index -lt $nLines) {
+      if (is_comment $lines[$index]) {
         ++$index
         continue
       }
 
       $isTiming = $lines[$index] -match "\s*[\dEe\.-]+,\s*[\dEe\.-]+,\s*[\dEe\.-]+"
-      if ($isTiming)
-      {
+      if ($isTiming) {
         ++$index
         continue
       }
 
       $isOutput = $lines[$index] -match "\s*(\w+),?\s*(?:(?:#\s*([^\[]*))(?:\[\s*([^\]]*)\])?)?"
 
-      if ($isOutput)
-      {
+      if ($isOutput) {
         $name = $Matches[1]
         $comment = $Matches[2]
         $unit = $Matches[3]
@@ -139,8 +128,7 @@ while ($index -lt $nLines)
         $outputNames.Add($outputName)
       }
 
-      if ($lines[$index] -like "*;*")
-      {
+      if ($lines[$index] -like "*;*") {
         break;
       }
 
@@ -148,8 +136,7 @@ while ($index -lt $nLines)
     }
   }
 
-  if ($endSection)
-  {
+  if ($endSection) {
     break;
   }
 
@@ -165,17 +152,14 @@ $configName = [IO.Path]::GetFileNameWithoutExtension($inFile.Name)
 $parameterStatements = $parameterAssignments | ForEach-Object { $i = 1 } { 
   $statement = "  $($_.Name) = $($_.Value)"
   
-  if ($i -lt $parameterAssignments.Count)
-  {
+  if ($i -lt $parameterAssignments.Count) {
     $statement = $statement + ","
   }
   
-  if ($_.Comment -or $_.Unit)
-  {
+  if ($_.Comment -or $_.Unit) {
     $statement = $statement + " # " + $_.Comment
 
-    if ($_.Unit)
-    {
+    if ($_.Unit) {
       $statement = $statement + "[" + $_.Unit + "]"
     }
   }
@@ -190,17 +174,14 @@ $configParameterAssignments = [string]::Join("`n", $parameterStatements)
 $outputStatements = $outputNames | ForEach-Object { $i = 1 } { 
   $statement = "  $($_.Name) = NA"
   
-  if ($i -lt $outputNames.Count)
-  {
+  if ($i -lt $outputNames.Count) {
     $statement = $statement + ","
   }
   
-  if ($_.Comment -or $_.Unit)
-  {
+  if ($_.Comment -or $_.Unit) {
     $statement = $statement + " # " + $_.Comment
 
-    if ($_.Unit)
-    {
+    if ($_.Unit) {
       $statement = $statement + "[" + $_.Unit + "]"
     }
   }
@@ -210,6 +191,10 @@ $outputStatements = $outputNames | ForEach-Object { $i = 1 } {
   return $statement
 }
 
+$outputStatements = $outputStatements | Where-Object { -not ($_.Trim() -match "^\d.*") }
+if ($outputStatements.Length -gt 0) {
+  $outputStatements[$outputStatements.Length - 1] = $outputStatements[$outputStatements.Length - 1].Replace(",", "")
+}
 $configOutputNames = [string]::Join("`n", $outputStatements)
 
 $configRContent = @"

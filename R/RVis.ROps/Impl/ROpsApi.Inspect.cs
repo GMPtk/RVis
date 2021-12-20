@@ -356,6 +356,6 @@ namespace RVis.ROps
       return list;
     }
 
-    private static readonly Regex _reProtoAnno = new Regex("#@[prio]");
+    private static readonly Regex _reProtoAnno = new("#@[prio]");
   }
 }

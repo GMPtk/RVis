@@ -127,7 +127,24 @@ namespace Evidence
 
       RequireFile(pathToFile);
 
-      var lines = ReadAllLines(pathToFile);
+      string[] lines;
+
+      try
+      {
+        lines = ReadAllLines(pathToFile);
+      }
+      catch (Exception ex)
+      {
+        _appService.Notify(
+          NotificationType.Error,
+          nameof(Evidence),
+          nameof(HandleSelectFile),
+          "Failed to read file: " + ex.Message,
+          this
+          );
+        return;
+      }
+
       var delimited = Join(NewLine, lines);
       var refHash = (pathToFile + delimited).ToHash();
 
