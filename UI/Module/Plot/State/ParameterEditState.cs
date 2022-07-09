@@ -64,7 +64,7 @@ namespace Plot
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public ParameterEditState DeepClone() => new ParameterEditState(this);
+    public ParameterEditState DeepClone() => new(this);
 
     object IDeepCloneable.DeepClone() => DeepClone();
   }

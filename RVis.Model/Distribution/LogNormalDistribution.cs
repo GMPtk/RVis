@@ -14,7 +14,7 @@ namespace RVis.Model
 {
   public struct LogNormalDistribution : IDistribution<LogNormal>, IEquatable<LogNormalDistribution>
   {
-    public readonly static LogNormalDistribution Default = new LogNormalDistribution(NaN, NaN);
+    public readonly static LogNormalDistribution Default = new(NaN, NaN);
 
     public LogNormalDistribution(double mu, double sigma, double lower = NegativeInfinity, double upper = PositiveInfinity)
     {
@@ -33,7 +33,7 @@ namespace RVis.Model
     public double Upper { get; }
 
     public LogNormal? Implementation => IsConfigured
-      ? new LogNormal(Mu, Sigma, Generator)
+      ? new(Mu, Sigma, Generator)
       : default;
 
     public DistributionType DistributionType => DistributionType.LogNormal;
@@ -47,7 +47,7 @@ namespace RVis.Model
 
     public LogNormalDistribution WithLowerUpper(double lower, double upper) =>
       lower > 0d && upper > 0d 
-      ? new LogNormalDistribution(Mu, Sigma, Log(lower), Log(upper)) 
+      ? new(Mu, Sigma, Log(lower), Log(upper)) 
       : this;
 
     public bool IsConfigured => !IsNaN(Mu) && !IsNaN(Sigma);

@@ -298,7 +298,7 @@ namespace RVisUI.Wpf
     {
       get
       {
-        ArrayList list = new ArrayList
+        ArrayList list = new()
         {
           this.child
         };

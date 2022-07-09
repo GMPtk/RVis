@@ -98,7 +98,7 @@ namespace RVis.Model
     public IObservable<(ServerLicense ServerLicense, bool HasExpired)> ServerLicenses =>
       _serverLicenses.AsObservable();
     private readonly Subject<(ServerLicense ServerLicense, bool HasExpired)> _serverLicenses =
-      new Subject<(ServerLicense ServerLicense, bool HasExpired)>();
+      new();
 
     public void Dispose() => Dispose(disposing: true);
 
@@ -164,8 +164,8 @@ namespace RVis.Model
     }
 
     private Arr<ServerSlot> _serverSlots;
-    private readonly object _syncLock = new object();
-    private readonly ManualResetEventSlim _mreServerSlots = new ManualResetEventSlim(true);
+    private readonly object _syncLock = new();
+    private readonly ManualResetEventSlim _mreServerSlots = new(true);
     private int _id;
     private bool _disposed = false;
   }

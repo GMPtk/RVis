@@ -17,7 +17,7 @@ namespace Sensitivity.Design
 
     public ObservableCollection<IParameterViewModel> SelectedParameterViewModels
     {
-      get => new ObservableCollection<IParameterViewModel>(Range(1, 30)
+      get => new(Range(1, 30)
         .Map(i => new ParameterViewModel($"Param{i:0000}", default)
         {
           IsSelected = true,

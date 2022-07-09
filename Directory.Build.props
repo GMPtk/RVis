@@ -3,8 +3,8 @@
     <Company>HSE</Company>
     <Product>RVis</Product>
     <Copyright>Copyright © HSE 2022</Copyright>
-    <Version>0.16.0</Version>
-    <AssemblyVersion>0.16.11068.0</AssemblyVersion>
+    <Version>0.17.0</Version>
+    <AssemblyVersion>0.17.11068.0</AssemblyVersion>
     <NeutralLanguage>en-GB</NeutralLanguage>
   </PropertyGroup>
 </Project>

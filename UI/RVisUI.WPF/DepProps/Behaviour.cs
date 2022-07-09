@@ -233,6 +233,6 @@ namespace RVisUI.Wpf
       new RoutedCommand();
 
     private static readonly CommandBinding _showDocBinding =
-      new CommandBinding(_showDoc, ExecuteShowDoc);
+      new(_showDoc, ExecuteShowDoc);
   }
 }

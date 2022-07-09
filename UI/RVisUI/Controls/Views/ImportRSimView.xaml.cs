@@ -1,5 +1,4 @@
-﻿using MahApps.Metro.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace RVisUI.Controls
+namespace RVisUI.Controls.Views
 {
   /// <summary>
-  /// Interaction logic for AppSettingsFlyout.xaml
+  /// Interaction logic for ImportRSimView.xaml
   /// </summary>
-  public partial class AppSettingsFlyout : Flyout
+  public partial class ImportRSimView : UserControl
   {
-    public AppSettingsFlyout()
+    public ImportRSimView()
     {
       InitializeComponent();
     }

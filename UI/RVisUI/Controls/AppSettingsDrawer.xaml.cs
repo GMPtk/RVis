@@ -1,5 +1,4 @@
-﻿using MahApps.Metro.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,16 +10,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace RVisUI.Controls.Dialogs
+namespace RVisUI.Controls
 {
   /// <summary>
-  /// Interaction logic for SelectExecDialog.xaml
+  /// Interaction logic for AppSettingsDrawer.xaml
   /// </summary>
-  public partial class SelectExecDialog : MetroWindow
+  public partial class AppSettingsDrawer : UserControl
   {
-    public SelectExecDialog()
+    public AppSettingsDrawer()
     {
       InitializeComponent();
     }

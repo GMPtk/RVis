@@ -18,8 +18,8 @@ namespace RVisUI.Ioc
       Bind<IAcatHostViewModel>().To<AcatHostViewModel>().InSingletonScope();
       Bind<IFailedStartUpViewModel>().To<FailedStartUpViewModel>().InSingletonScope();
       Bind<IHomeViewModel>().To<HomeViewModel>().InSingletonScope();
+      Bind<IImportRSimViewModel>().To<ImportRSimViewModel>().InSingletonScope();
       Bind<IImportMCSimViewModel>().To<ImportMCSimViewModel>().InSingletonScope();
-      Bind<IImportSimulationViewModel>().To<ImportSimulationViewModel>().InSingletonScope();
       Bind<ILibraryViewModel>().To<LibraryViewModel>().InSingletonScope();
       Bind<IModuleNotSupportedViewModel>().To<ModuleNotSupportedViewModel>().InSingletonScope();
       Bind<IRunControlViewModel>().To<RunControlViewModel>().InSingletonScope();

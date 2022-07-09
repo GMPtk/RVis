@@ -46,7 +46,7 @@ namespace RVis.Model
       DateTime requestedOn
       )
       =>
-      new SimDataItem<T>(item, simulation, requester, requestToken, requestedOn, default);
+      new(item, simulation, requester, requestToken, requestedOn, default);
 
     internal static SimDataItem<T> Create<T>(
       T item,
@@ -57,6 +57,6 @@ namespace RVis.Model
       DateTime fulfilledOn
       )
       =>
-      new SimDataItem<T>(item, simulation, requester, requestToken, requestedOn, fulfilledOn);
+      new(item, simulation, requester, requestToken, requestedOn, fulfilledOn);
   }
 }

@@ -8,7 +8,7 @@ namespace RVisUI.Wpf
 {
   public class PixelToGridLengthConverter : IValueConverter
   {
-    public static readonly PixelToGridLengthConverter Default = new PixelToGridLengthConverter();
+    public static readonly PixelToGridLengthConverter Default = new();
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

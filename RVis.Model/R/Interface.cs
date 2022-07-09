@@ -43,7 +43,6 @@ namespace RVis.Model
     Task GarbageCollectAsync(CancellationToken cancellationToken = default);
     Task<(string Package, string Version)[]> GetInstalledPackagesAsync(CancellationToken cancellationToken = default);
     Task<(string Name, string Value)[]> GetRversionAsync(CancellationToken cancellationToken = default);
-    Task<ISymbolInfo[]> InspectSymbolsAsync(string pathToCode, CancellationToken cancellationToken = default);
     Task LoadFromBinaryAsync(byte[] raw, CancellationToken cancellationToken = default);
     Task RunExecAsync(string pathToCode, SimConfig config, CancellationToken cancellationToken = default);
     Task<byte[]> SaveObjectToBinaryAsync(string objectName, CancellationToken cancellationToken = default);
@@ -51,7 +50,6 @@ namespace RVis.Model
     Task SourceFileAsync(string pathToCode, CancellationToken cancellationToken = default);
     Task StopServerAsync(CancellationToken cancellationToken = default);
     Task<NumDataTable> TabulateExecOutputAsync(SimConfig config, CancellationToken cancellationToken = default);
-    Task<NumDataTable> TabulateTmplOutputAsync(SimConfig config, CancellationToken cancellationToken = default);
     Task UnserializeAsync(byte[] raw, string objectName, CancellationToken cancellationToken = default);
   }
 
@@ -92,10 +90,6 @@ namespace RVis.Model
     UnitSvcRes SourceFile(string pathToCode);
 
     NumDataTableSvcRes TabulateExecOutput(SimConfig config);
-
-    NumDataTableSvcRes TabulateTmplOutput(SimConfig config);
-
-    SymbolInfoArraySvcRes InspectSymbols(string pathToCode);
 
     ByteArraySvcRes Serialize(string objectName);
 

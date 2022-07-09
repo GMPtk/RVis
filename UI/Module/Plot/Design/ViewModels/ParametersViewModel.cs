@@ -10,7 +10,7 @@ namespace Plot.Design
   {
     public ObservableCollection<IParameterViewModel> UnselectedParameters
     {
-      get => new ObservableCollection<IParameterViewModel>(
+      get => new(
         Range(1, 40).Select(i => new ParameterViewModel(
           i % 2 == 0 ? $"Unselected{i:0000}" : Join(" ", Repeat($"Unselected{i:0000}", i * 2)),
           i.ToString(),
@@ -25,7 +25,7 @@ namespace Plot.Design
 
     public ObservableCollection<IParameterViewModel> SelectedParameters
     {
-      get => new ObservableCollection<IParameterViewModel>(
+      get => new(
         Range(1, 20).Select(i => new ParameterViewModel(
           i % 2 == 0 ? $"Selected{i:0000}" : Join(" ", Repeat($"Selected{i:0000}", i * 2)),
           i.ToString(),

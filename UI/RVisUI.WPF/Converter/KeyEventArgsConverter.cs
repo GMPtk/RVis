@@ -9,7 +9,7 @@ namespace RVisUI.Wpf
 {
   public class KeyEventArgsConverter : IValueConverter
   {
-    public static readonly KeyEventArgsConverter Default = new KeyEventArgsConverter();
+    public static readonly KeyEventArgsConverter Default = new();
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

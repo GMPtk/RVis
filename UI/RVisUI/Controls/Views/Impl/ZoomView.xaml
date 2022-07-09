@@ -5,6 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:mvvmd="clr-namespace:RVisUI.Mvvm.Design;assembly=RVisUI.Mvvm"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignBackground}"					  
              mc:Ignorable="d" 
              d:DesignHeight="70" 
              d:DesignWidth="250"
@@ -14,7 +17,6 @@
           BorderBrush="Black"
           Margin="0"
           Padding="10"
-          Background="{DynamicResource MaterialDesignPaper}"
           >
 
     <Grid Width="200">

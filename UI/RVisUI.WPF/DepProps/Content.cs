@@ -28,8 +28,8 @@ namespace RVisUI.Wpf
 
     private static void TextBlockRunsPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      if (!(d is TextBlock textBlock)) return;
-      if (!(e.NewValue is Arr<string> runs)) return;
+      if (d is not TextBlock textBlock) return;
+      if (e.NewValue is not Arr<string> runs) return;
 
       textBlock.Inlines.Clear();
       var separator = textBlock.Tag?.ToString();
@@ -37,7 +37,7 @@ namespace RVisUI.Wpf
 
       if (separator?.StartsWith(escapePrefix) == true)
       {
-        separator = separator.Substring(escapePrefix.Length);
+        separator = separator[escapePrefix.Length..];
         var unicodeChar = int.Parse(separator, NumberStyles.HexNumber);
         separator = new string((char)unicodeChar, 1);
       }

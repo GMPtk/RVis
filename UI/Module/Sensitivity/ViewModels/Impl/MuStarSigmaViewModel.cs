@@ -131,7 +131,7 @@ namespace Sensitivity
 
     private OxyPalette GetPalette(int numberOfColors) =>
       _appSettings.IsBaseDark
-        ? OxyPalettes.Cool(numberOfColors)
+        ? OxyPalettes.Hue(numberOfColors)
         : OxyPalettes.Rainbow(numberOfColors);
 
     private readonly IAppSettings _appSettings;

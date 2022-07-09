@@ -270,38 +270,6 @@ namespace RVis.Client
           .ToArray();
       }
 
-      public async Task<ISymbolInfo[]> InspectSymbolsAsync(
-        string pathToCode,
-        CancellationToken cancellationToken = default
-        )
-      {
-        RequireNotNull(_real._rOpsClient);
-
-        var request = new InspectSymbolsRequest
-        {
-          PathToCode = pathToCode
-        };
-
-        var reply = await _real._rOpsClient.InspectSymbolsAsync(
-          request,
-          default,
-          default,
-          cancellationToken
-          );
-
-        if (reply.ReplyCase == InspectSymbolsReply.ReplyOneofCase.Error)
-        {
-          Throw(reply.Error);
-        }
-
-        using var memoryStream = new MemoryStream();
-        reply.Payload.SymbolInfos.WriteTo(memoryStream);
-        memoryStream.Position = 0;
-        var symbolInfos = Serializer.Deserialize<SymbolInfo[]>(memoryStream);
-
-        return symbolInfos;
-      }
-
       public async Task LoadFromBinaryAsync(
         byte[] raw,
         CancellationToken cancellationToken = default)
@@ -467,41 +435,6 @@ namespace RVis.Client
           );
 
         if (reply.ReplyCase == TabulateExecOutputReply.ReplyOneofCase.Error)
-        {
-          Throw(reply.Error);
-        }
-
-        var columns = reply.Payload.DoubleColumns
-          .Select(dc => new NumDataColumn(dc.Name, dc.Doubles.ToArray()))
-          .ToArray();
-
-        return new NumDataTable(config.Title, columns);
-      }
-
-      public async Task<NumDataTable> TabulateTmplOutputAsync(
-        SimConfig config,
-        CancellationToken cancellationToken = default
-        )
-      {
-        RequireNotNull(_real._rOpsClient);
-
-        using var memoryStream = new MemoryStream();
-        Serializer.Serialize(memoryStream, config);
-        memoryStream.Position = 0;
-
-        var request = new TabulateTmplOutputRequest
-        {
-          SimConfig = ByteString.FromStream(memoryStream)
-        };
-
-        var reply = await _real._rOpsClient.TabulateTmplOutputAsync(
-          request,
-          default,
-          default,
-          cancellationToken
-          );
-
-        if (reply.ReplyCase == TabulateTmplOutputReply.ReplyOneofCase.Error)
         {
           Throw(reply.Error);
         }

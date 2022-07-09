@@ -154,7 +154,7 @@ namespace RVis.Server
         memoryStream.Position = 0;
         var simConfig = Serializer.Deserialize<SimConfig>(memoryStream);
 
-        ROpsApi.RunExec(request.PathToCode, simConfig.SimCode, simConfig.SimInput);
+        ROpsApi.RunExec(request.PathToCode, simConfig.SimInput);
 
         reply.Payload = new RunExecPayload();
       }
@@ -225,76 +225,6 @@ namespace RVis.Server
       {
         reply.Error = PopulateError(ex);
         _logger.LogError(ex, nameof(TabulateExecOutput));
-      }
-      finally
-      {
-        _semaphoreSlim.Release();
-      }
-
-      return await Task.FromResult(reply);
-    }
-
-    public override async Task<TabulateTmplOutputReply> TabulateTmplOutput(TabulateTmplOutputRequest request, ServerCallContext context)
-    {
-      await _semaphoreSlim.WaitAsync();
-
-      var reply = new TabulateTmplOutputReply();
-      try
-      {
-        using var memoryStream = new MemoryStream(request.SimConfig.Length);
-        request.SimConfig.WriteTo(memoryStream);
-        memoryStream.Position = 0;
-        var simConfig = Serializer.Deserialize<SimConfig>(memoryStream);
-
-        var numDataColumns = ROpsApi.TabulateTmplOutput(simConfig);
-
-        reply.Payload = new TabulateTmplOutputPayload();
-
-        foreach (var numDataColumn in numDataColumns)
-        {
-          var doubleColumn = new DoubleColumn
-          {
-            Name = numDataColumn.Name
-          };
-          doubleColumn.Doubles.Add(numDataColumn.Data);
-          reply.Payload.DoubleColumns.Add(doubleColumn);
-        }
-      }
-      catch (Exception ex)
-      {
-        reply.Error = PopulateError(ex);
-        _logger.LogError(ex, nameof(TabulateTmplOutput));
-      }
-      finally
-      {
-        _semaphoreSlim.Release();
-      }
-
-      return await Task.FromResult(reply);
-    }
-
-    public override async Task<InspectSymbolsReply> InspectSymbols(InspectSymbolsRequest request, ServerCallContext context)
-    {
-      await _semaphoreSlim.WaitAsync();
-
-      var reply = new InspectSymbolsReply();
-      try
-      {
-        var symbolInfos = ROpsApi.InspectSymbols(request.PathToCode);
-
-        using var memoryStream = new MemoryStream();
-        Serializer.Serialize(memoryStream, symbolInfos);
-        memoryStream.Position = 0;
-
-        reply.Payload = new InspectSymbolsPayload
-        {
-          SymbolInfos = ByteString.FromStream(memoryStream)
-        };
-      }
-      catch (Exception ex)
-      {
-        reply.Error = PopulateError(ex);
-        _logger.LogError(ex, nameof(InspectSymbols));
       }
       finally
       {

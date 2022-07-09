@@ -7,6 +7,9 @@
              xmlns:design="clr-namespace:Estimation.Design"
              xmlns:appinf="clr-namespace:RVisUI.AppInf;assembly=RVisUI.AppInf"
              xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignBackground}"					  
              mc:Ignorable="d" 
              d:DesignHeight="768" d:DesignWidth="1366"
              d:DataContext="{d:DesignInstance Type=design:PriorsViewModel, IsDesignTimeCreatable=True}"
@@ -16,8 +19,8 @@
     <ResourceDictionary>
 
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Estimation;component/Design/Resource/Theme.xaml" />
         <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Estimation;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <Style x:Key="ItemsControlStyle" TargetType="{x:Type ItemsControl}">

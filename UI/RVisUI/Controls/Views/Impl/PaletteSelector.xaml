@@ -1,464 +1,171 @@
 ﻿<UserControl x:Class="RVisUI.Controls.Views.Impl.PaletteSelector"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:RVisUI.Controls.Views.Impl"
-             xmlns:depprops="clr-namespace:RVisUI.DepProps"
-             xmlns:mvvm="clr-namespace:RVisUI.Ioc.Mvvm"
-             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:md="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              xmlns:mdc="clr-namespace:MaterialDesignColors;assembly=MaterialDesignColors"
+             xmlns:mvvm="clr-namespace:RVisUI.Ioc.Mvvm"
+             xmlns:local="clr-namespace:RVisUI.Controls.Views.Impl"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignBackground}"					  
              mc:Ignorable="d" 
-             d:DesignHeight="550" d:DesignWidth="800">
-
-  <UserControl.Resources>
-    <ResourceDictionary>
-            
-      <wpf:ColorToBrushConverter x:Key="ColorToBrushConverter" />
-      <wpf:BrushToHexConverter x:Key="BrushToHexConverter" />
-
-      <Style x:Key="PaletteButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
-        <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="md:ShadowAssist.ShadowDepth" Value="Depth0" />
-        <Setter Property="md:ShadowAssist.ShadowEdges" Value="All" />
-        <Setter Property="md:RippleAssist.Feedback" Value="LightGray" />
-        <Setter Property="md:RippleAssist.RippleOnTop" Value="True" />
-        <Setter Property="Margin" Value="0" />
-        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
-        <Setter Property="Height" Value="Auto" />
-        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
-        <Setter Property="Padding" Value="16" />
-      </Style>
-
-      <Style x:Key="LabelTextBox" TargetType="TextBlock">
-        <Setter Property="FontWeight" Value="Light" />
-        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="Margin" Value="0 0 0 4" />
-      </Style>
-
-      <Style TargetType="Border">
-        <Setter Property="BorderBrush" Value="LightGray" />
-        <Setter Property="BorderThickness" Value="1" />
-      </Style>
-
-      <Style x:Key="LabelTextBoxStyle" TargetType="TextBlock">
-        <Setter Property="FontWeight" Value="Light" />
-        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="Margin" Value="0 0 0 4" />
-      </Style>
-
-      <Style x:Key="HexLabelTextBlock" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignBody2TextBlock}">
-        <Setter Property="Margin" Value="8" />
-      </Style>
-
-      <Style x:Key="HueButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
-        <Setter Property="depprops:Layout.UniformCornerRadius" Value="0" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Margin" Value="1 1 0 0" />
-        <Setter Property="md:RippleAssist.IsDisabled" Value="True" />
-        <Setter Property="md:ShadowAssist.ShadowDepth" Value="Depth0" />
-        <Setter Property="Tag" Value="0" />
-        <Style.Triggers>
-          <Trigger Property="IsMouseOver" Value="True">
-            <Trigger.EnterActions>
-              <BeginStoryboard>
-                <Storyboard>
-                  <DoubleAnimation Storyboard.TargetProperty="(depprops:Layout.UniformCornerRadius)" 
-                                   To="8" 
-                                   Duration="0:0:0.18" 
-                                   />
-                </Storyboard>
-              </BeginStoryboard>
-            </Trigger.EnterActions>
-            <Trigger.ExitActions>
-              <BeginStoryboard>
-                <Storyboard>
-                  <DoubleAnimation Storyboard.TargetProperty="(depprops:Layout.UniformCornerRadius)" 
-                                   From="8" 
-                                   Duration="0:0:0.18" 
-                                   />
-                </Storyboard>
-              </BeginStoryboard>
-            </Trigger.ExitActions>
-          </Trigger>
-          <DataTrigger Binding="{Binding IsSelected}" Value="True">
-            <DataTrigger.EnterActions>
-              <BeginStoryboard>
-                <Storyboard>
-                  <DoubleAnimation Storyboard.TargetProperty="(depprops:Layout.UniformCornerRadius)" 
-                                   To="20"
-                                   Duration="0:0:0.18" 
-                                   />
-                </Storyboard>
-              </BeginStoryboard>
-            </DataTrigger.EnterActions>
-            <DataTrigger.ExitActions>
-              <BeginStoryboard>
-                <Storyboard>
-                  <DoubleAnimation Storyboard.TargetProperty="(depprops:Layout.UniformCornerRadius)" 
-                                   From="20" 
-                                   Duration="0:0:0.18" 
-                                   />
-                </Storyboard>
-              </BeginStoryboard>
-            </DataTrigger.ExitActions>
-          </DataTrigger>
-        </Style.Triggers>
-      </Style>
-
-      <DataTemplate x:Key="SwatchColorTemplate" 
-                    DataType="{x:Type mvvm:HueViewModel}">
-        <Button Height="25" 
-                Width="25" 
-                Background="{Binding Hue, Converter={StaticResource ColorToBrushConverter}}" 
-                Command="{Binding ChangeHue}" 
-                CommandParameter="{Binding}"
-                Style="{StaticResource HueButtonStyle}"
-                />
-      </DataTemplate>
-
-    </ResourceDictionary>
-  </UserControl.Resources>
+             d:DesignHeight="450" d:DesignWidth="800"
+             >
 
   <d:DesignProperties.DataContext>
     <mvvm:AppSettingsViewModel />
   </d:DesignProperties.DataContext>
 
-  <Grid>
+  <UserControl.Resources>
 
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="470"/>
-      <ColumnDefinition/>
-    </Grid.ColumnDefinitions>
+    <DataTemplate DataType="{x:Type mdc:Swatch}">
 
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition/>
-    </Grid.RowDefinitions>
-    
-    <StackPanel Grid.ColumnSpan="2" Orientation="Horizontal">
-      <TextBlock VerticalAlignment="Center">Light</TextBlock>
-      <ToggleButton IsChecked="{Binding IsBaseDark}" />
-      <TextBlock VerticalAlignment="Center">Dark</TextBlock>
-    </StackPanel>
+      <DataTemplate.Resources>
+        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+          <Setter Property="Margin" Value="0"/>
+          <Setter Property="CommandParameter" Value="{Binding}"/>
+          <Setter Property="VerticalAlignment" Value="Stretch"/>
+          <Setter Property="HorizontalAlignment" Value="Stretch"/>
+          <Setter Property="Foreground">
+            <Setter.Value>
+              <SolidColorBrush Color="{Binding ExemplarHue.Foreground, Mode=OneTime}"/>
+            </Setter.Value>
+          </Setter>
+        </Style>
+        <Style x:Key="PalettePath" TargetType="Path">
+          <Setter Property="Data" Value="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8A1.5,1.5 0 0,1 13,6.5A1.5,1.5 0 0,1 14.5,5A1.5,1.5 0 0,1 16,6.5A1.5,1.5 0 0,1 14.5,8M9.5,8A1.5,1.5 0 0,1 8,6.5A1.5,1.5 0 0,1 9.5,5A1.5,1.5 0 0,1 11,6.5A1.5,1.5 0 0,1 9.5,8M6.5,12A1.5,1.5 0 0,1 5,10.5A1.5,1.5 0 0,1 6.5,9A1.5,1.5 0 0,1 8,10.5A1.5,1.5 0 0,1 6.5,12M12,3A9,9 0 0,0 3,12A9,9 0 0,0 12,21A1.5,1.5 0 0,0 13.5,19.5C13.5,19.11 13.35,18.76 13.11,18.5C12.88,18.23 12.73,17.88 12.73,17.5A1.5,1.5 0 0,1 14.23,16H16A5,5 0 0,0 21,11C21,6.58 16.97,3 12,3Z"/>
+          <Setter Property="Fill">
+            <Setter.Value>
+              <SolidColorBrush Color="{Binding ExemplarHue.Foreground, Mode=OneTime}"/>
+            </Setter.Value>
+          </Setter>
+        </Style>
+      </DataTemplate.Resources>
+      
+      <md:Card
+        Margin="2 2 6 6"
+        Width="240">
 
-    <StackPanel Grid.Row="1" Margin="0 10 0 0">
-      <StackPanel Orientation="Horizontal">
-        <StackPanel.Resources>
-          <Style TargetType="TextBlock">
-            <Setter Property="Width" Value="25" />
-            <Setter Property="Margin" Value="1 1 0 0" />
-            <Setter Property="TextAlignment" Value="Center" />
-            <Setter Property="FontSize" Value="8" />
-          </Style>
-        </StackPanel.Resources>
-        <Rectangle Width="80" />
-        <TextBlock>50</TextBlock>
-        <TextBlock>100</TextBlock>
-        <TextBlock>200</TextBlock>
-        <TextBlock>300</TextBlock>
-        <TextBlock>400</TextBlock>
-        <TextBlock>500</TextBlock>
-        <TextBlock>600</TextBlock>
-        <TextBlock>700</TextBlock>
-        <TextBlock>800</TextBlock>
-        <TextBlock>900</TextBlock>
-        <TextBlock>A100</TextBlock>
-        <TextBlock>A200</TextBlock>
-        <TextBlock>A400</TextBlock>
-        <TextBlock>A700</TextBlock>
-      </StackPanel>
-      <ItemsControl ItemsSource="{Binding SwatchViewModels}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate DataType="{x:Type mvvm:ISwatchViewModel}">
-            <StackPanel Orientation="Horizontal">
-              <TextBlock Text="{Binding Swatch.Name}" Width="80" VerticalAlignment="Center" />
-              <ItemsControl ItemsSource="{Binding HueViewModels}" ItemTemplate="{StaticResource SwatchColorTemplate}">
-                <ItemsControl.ItemsPanel>
-                  <ItemsPanelTemplate>
-                    <VirtualizingStackPanel Orientation="Horizontal" />
-                  </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-              </ItemsControl>
-            </StackPanel>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </StackPanel>
+        <Grid>
+        
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
 
-    <Grid Grid.Column="1" Grid.Row="1">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+
+          <TextBlock
+            Text="{Binding Name}"
+            Margin="8"
+            Grid.ColumnSpan="2"/>
+
+          <Border
+            Grid.Row="1"
+            Grid.Column="0"
+            MinWidth="120">
+
+            <Border.Background>
+              <SolidColorBrush Color="{Binding ExemplarHue.Color, Mode=OneTime}"/>
+            </Border.Background>
+
+            <Button
+              Command="{Binding RelativeSource={RelativeSource FindAncestor,
+                        AncestorType={x:Type local:PaletteSelector}},
+                        Path=DataContext.ApplyPrimaryCommand, Mode=OneTime}"
+              CommandParameter="{Binding}">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Primary"/>
+                <Viewbox Width="16" Height="16">
+                  <Canvas Width="24" Height="24">
+                    <Path Style="{StaticResource PalettePath}"/>
+                  </Canvas>
+                </Viewbox>
+              </StackPanel>
+            </Button>
+
+          </Border>
+
+          <Border
+            Grid.Row="1"
+            Grid.Column="1" 
+            Width="120"
+            Visibility="{Binding IsAccented, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneTime}">
+
+            <Border.Background>
+              <SolidColorBrush Color="{Binding AccentExemplarHue.Color, Mode=OneTime}"/>
+            </Border.Background>
+
+            <Button
+              Command="{Binding RelativeSource={RelativeSource FindAncestor,
+                        AncestorType={x:Type local:PaletteSelector}},
+                        Path=DataContext.ApplyAccentCommand, Mode=OneTime}"
+              CommandParameter="{Binding}">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Accent"/>
+                <Viewbox Width="16" Height="16">
+                  <Canvas Width="24" Height="24">
+                    <Path Style="{StaticResource PalettePath}"/>
+                  </Canvas>
+                </Viewbox>
+              </StackPanel>
+            </Button>
+
+          </Border>
+
+        </Grid>
+
+      </md:Card>
+
+    </DataTemplate>
+
+  </UserControl.Resources>
+
+  <DockPanel>
+
+      <local:Palette
+        DockPanel.Dock="Top"
+        HorizontalAlignment="Left"
+        Margin="2"
+        Width="200"/>
+
+    <Grid Margin="0 16 0 0">
+
       <Grid.RowDefinitions>
-        <RowDefinition Height="3*"/>
-        <RowDefinition Height="3*"/>
-        <RowDefinition Height="2*"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
       </Grid.RowDefinitions>
 
-      <Border BorderBrush="LightGray" BorderThickness="0 0 1 0">
-        <Button Command="{Binding ChangeToPrimary}">
-          <Button.Style>
-            <Style TargetType="Button" BasedOn="{StaticResource PaletteButton}">
-              <Style.Triggers>
-                <DataTrigger Binding="{Binding ActiveScheme}" Value="Primary">
-                  <Setter Property="md:ShadowAssist.ShadowDepth" Value="Depth3" />
-                </DataTrigger>
-              </Style.Triggers>
-            </Style>
-          </Button.Style>
-          <Grid>
-            <Grid.RowDefinitions>
-              <RowDefinition Height="Auto" />
-              <RowDefinition Height="2*" />
-              <RowDefinition />
-            </Grid.RowDefinitions>
-            <TextBlock Style="{StaticResource LabelTextBox}">Primary</TextBlock>
-            <Border Background="{DynamicResource PrimaryHueMidBrush}" Grid.Row="1">
-              <Grid>
-                <TextBlock DataContext="{DynamicResource PrimaryHueMidBrush}" 
-                           Text="{Binding Converter={StaticResource BrushToHexConverter}}" 
-                           Style="{StaticResource HexLabelTextBlock}" 
-                           Foreground="{DynamicResource PrimaryHueMidForegroundBrush}" 
-                           />
-                <Border Width="30" Height="30" CornerRadius="15">
-                  <Border.Style>
-                    <Style TargetType="Border">
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding ActiveScheme}" Value="Primary">
-                          <Setter Property="Background" Value="{DynamicResource PrimaryHueMidForegroundBrush}" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </Border.Style>
-                  <TextBlock HorizontalAlignment="Center" 
-                             VerticalAlignment="Center" 
-                             FontSize="22"
-                             Text="P">
-                    <TextBlock.Style>
-                      <Style TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}" />
-                        <Style.Triggers>
-                          <DataTrigger Binding="{Binding ActiveScheme}" Value="Primary">
-                            <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidBrush}" />
-                          </DataTrigger>
-                        </Style.Triggers>
-                      </Style>
-                    </TextBlock.Style>
-                  </TextBlock>
-                </Border>
-              </Grid>
-            </Border>
-            <UniformGrid Rows="1" Grid.Row="2">
-              <Border Background="{DynamicResource PrimaryHueLightBrush}">
-                <TextBlock DataContext="{DynamicResource PrimaryHueLightBrush}" 
-                           Text="{Binding Converter={StaticResource BrushToHexConverter}}" 
-                           Style="{StaticResource HexLabelTextBlock}" 
-                           Foreground="{DynamicResource PrimaryHueLightForegroundBrush}" 
-                           />
-              </Border>
-              <Border Background="{DynamicResource PrimaryHueDarkBrush}">
-                <TextBlock DataContext="{DynamicResource PrimaryHueDarkBrush}" 
-                           Text="{Binding Converter={StaticResource BrushToHexConverter}}" 
-                           Style="{StaticResource HexLabelTextBlock}" 
-                           Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}" 
-                           />
-              </Border>
-            </UniformGrid>
-          </Grid>
-        </Button>
-      </Border>
+      <local:ThemeSettings Margin="8" />
 
-      <Border BorderBrush="LightGray" Grid.Row="1" BorderThickness="0 0 1 0">
-        <Button Command="{Binding ChangeToSecondary}" >
-          <Button.Style>
-            <Style TargetType="Button" BasedOn="{StaticResource PaletteButton}">
-              <Style.Triggers>
-                <DataTrigger Binding="{Binding ActiveScheme}" Value="Secondary">
-                  <Setter Property="md:ShadowAssist.ShadowDepth" Value="Depth3" />
-                </DataTrigger>
-              </Style.Triggers>
-            </Style>
-          </Button.Style>
-          <Grid>
-            <Grid.RowDefinitions>
-              <RowDefinition Height="Auto" />
-              <RowDefinition Height="2*" />
-              <RowDefinition />
-            </Grid.RowDefinitions>
-            <TextBlock Style="{StaticResource LabelTextBox}">Secondary</TextBlock>
-            <Border Background="{DynamicResource SecondaryHueMidBrush}" Grid.Row="1">
-              <Grid>
-                <TextBlock Text="{Binding SecondaryHueMidHex}" 
-                           Style="{StaticResource HexLabelTextBlock}" 
-                           Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" />
-                <Border Width="30" Height="30" CornerRadius="15">
-                  <Border.Style>
-                    <Style TargetType="Border">
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding ActiveScheme}" Value="Secondary">
-                          <Setter Property="Background" Value="{DynamicResource SecondaryHueMidForegroundBrush}" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </Border.Style>
-                  <TextBlock HorizontalAlignment="Center" 
-                             VerticalAlignment="Center" 
-                             FontSize="22"
-                             Text="S"
-                             >
-                    <TextBlock.Style>
-                      <Style TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="{DynamicResource SecondaryHueMidForegroundBrush}" />
-                        <Style.Triggers>
-                          <DataTrigger Binding="{Binding ActiveScheme}" Value="Secondary">
-                            <Setter Property="Foreground" Value="{DynamicResource SecondaryHueMidBrush}" />
-                          </DataTrigger>
-                        </Style.Triggers>
-                      </Style>
-                    </TextBlock.Style>
-                  </TextBlock>
-                </Border>
-              </Grid>
-            </Border>
-            <UniformGrid Rows="1" Grid.Row="2">
-              <Border Background="{DynamicResource SecondaryHueLightBrush}">
-                <TextBlock Text="{Binding SecondaryHueLightHex}" 
-                           Style="{StaticResource HexLabelTextBlock}" 
-                           Foreground="{DynamicResource SecondaryHueLightForegroundBrush}" 
-                           />
-              </Border>
-              <Border Background="{DynamicResource SecondaryHueDarkBrush}">
-                <TextBlock Text="{Binding SecondaryHueDarkHex}" 
-                           Style="{StaticResource HexLabelTextBlock}" 
-                           Foreground="{DynamicResource SecondaryHueDarkForegroundBrush}" 
-                           />
-              </Border>
-            </UniformGrid>
-          </Grid>
-        </Button>
-      </Border>
+      <ItemsControl
+        Grid.Row="1"
+        Margin="0 12 0 0"
+        ItemsSource="{Binding Swatches, Mode=OneTime}">
 
-      <UniformGrid Grid.Row="2" Rows="1" Columns="2">
-     
-        <Border BorderBrush="LightGray" BorderThickness="0 0 0 1">
-          <Button Command="{Binding ChangeToPrimaryForeground}">
-            <Button.Style>
-              <Style TargetType="Button" BasedOn="{StaticResource PaletteButton}">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding ActiveScheme}" Value="PrimaryForeground">
-                    <Setter Property="md:ShadowAssist.ShadowDepth" Value="Depth3" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Button.Style>
-            <Grid>
-              <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-              </Grid.RowDefinitions>
-              <TextBlock Style="{StaticResource LabelTextBox}">Text on P</TextBlock>
-              <Border Background="{DynamicResource PrimaryHueMidBrush}" Grid.Row="1">
-                <Grid>
-                  <TextBlock DataContext="{DynamicResource PrimaryHueMidForegroundBrush}" 
-                             Text="{Binding Converter={StaticResource BrushToHexConverter}}" 
-                             Style="{StaticResource HexLabelTextBlock}" 
-                             Foreground="{DynamicResource PrimaryHueMidForegroundBrush}" 
-                             />
-                  <Border Width="30" Height="30" CornerRadius="15">
-                    <Border.Style>
-                      <Style TargetType="Border">
-                        <Style.Triggers>
-                          <DataTrigger Binding="{Binding ActiveScheme}" Value="PrimaryForeground">
-                            <Setter Property="Background" Value="{DynamicResource PrimaryHueMidForegroundBrush}" />
-                          </DataTrigger>
-                        </Style.Triggers>
-                      </Style>
-                    </Border.Style>
-                    <TextBlock HorizontalAlignment="Center" 
-                               VerticalAlignment="Center" 
-                               FontSize="22"
-                               Text="T"
-                               >
-                      <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                          <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}" />
-                          <Style.Triggers>
-                            <DataTrigger Binding="{Binding ActiveScheme}" Value="PrimaryForeground">
-                              <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidBrush}" />
-                            </DataTrigger>
-                          </Style.Triggers>
-                        </Style>
-                      </TextBlock.Style>
-                    </TextBlock>
-                  </Border>
-                </Grid>
-              </Border>
-            </Grid>
-          </Button>
-        </Border>
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel/>
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
 
-        <Border BorderBrush="LightGray" BorderThickness="0 0 0 1">
-          <Button Command="{Binding ChangeToSecondaryForeground}">
-            <Button.Style>
-              <Style TargetType="Button" BasedOn="{StaticResource PaletteButton}">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding ActiveScheme}" Value="SecondaryForeground">
-                    <Setter Property="md:ShadowAssist.ShadowDepth" Value="Depth3" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Button.Style>
-            <Grid>
-              <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-              </Grid.RowDefinitions>
-              <TextBlock Style="{StaticResource LabelTextBox}">Text on S</TextBlock>
-              <Border Background="{DynamicResource SecondaryHueMidBrush}" Grid.Row="1">
-                <Grid>
-                  <TextBlock Text="{Binding SecondaryHueMidForegroundHex}" 
-                             Style="{StaticResource HexLabelTextBlock}" 
-                             Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" 
-                             />
-                  <Border Width="30" Height="30" CornerRadius="15">
-                    <Border.Style>
-                      <Style TargetType="Border">
-                        <Style.Triggers>
-                          <DataTrigger Binding="{Binding ActiveScheme}" Value="SecondaryForeground">
-                            <Setter Property="Background" Value="{DynamicResource SecondaryHueMidForegroundBrush}" />
-                          </DataTrigger>
-                        </Style.Triggers>
-                      </Style>
-                    </Border.Style>
-                    <TextBlock HorizontalAlignment="Center" 
-                               VerticalAlignment="Center" 
-                               FontSize="22"
-                               Text="T"
-                               >
-                      <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                          <Setter Property="Foreground" Value="{DynamicResource SecondaryHueMidForegroundBrush}" />
-                          <Style.Triggers>
-                            <DataTrigger Binding="{Binding ActiveScheme}" Value="SecondaryForeground">
-                              <Setter Property="Foreground" Value="{DynamicResource SecondaryHueMidBrush}" />
-                            </DataTrigger>
-                          </Style.Triggers>
-                        </Style>
-                      </TextBlock.Style>
-                    </TextBlock>
-                  </Border>
-                </Grid>
-              </Border>
-            </Grid>
-          </Button>
-        </Border>
-        
-      </UniformGrid>
+        <ItemsControl.Template>
+          <ControlTemplate TargetType="{x:Type ItemsControl}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+              <ItemsPresenter />
+            </ScrollViewer>
+          </ControlTemplate>
+        </ItemsControl.Template>
+          
+      </ItemsControl>
 
     </Grid>
 
-  </Grid>
+  </DockPanel>
 
 </UserControl>

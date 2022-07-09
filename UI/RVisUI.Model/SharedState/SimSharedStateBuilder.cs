@@ -125,11 +125,11 @@ namespace RVisUI.Model
     private readonly ISimEvidence _evidence;
 
     private readonly SCG.List<(string Name, double Value, double Minimum, double Maximum, Option<IDistribution> Distribution)> _parameterSharedStates =
-      new SCG.List<(string Name, double Value, double Minimum, double Maximum, Option<IDistribution> Distribution)>();
+      new();
     private readonly SCG.HashSet<string> _elementNames =
-      new SCG.HashSet<string>();
+      new();
     private readonly SCG.HashSet<string> _observationsReferences =
-      new SCG.HashSet<string>();
+      new();
 
     private bool _disposed = false;
   }

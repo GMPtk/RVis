@@ -14,7 +14,7 @@ namespace RVis.ROps
 {
   public static partial class ROpsApi
   {
-    public static void RunExec(string pathToCode, SimCode code, SimInput input)
+    public static void RunExec(string pathToCode, SimInput input)
     {
       var sourceFile = new FileInfo(pathToCode);
 
@@ -28,38 +28,42 @@ namespace RVis.ROps
       {
         var symbolNames = instance.GlobalEnvironment.GetSymbolNames();
         firstRun =
-          !symbolNames.Contains(code.Exec) ||
-          !symbolNames.Contains(code.Formal);
+          !symbolNames.Contains(SimCode.R_ASSIGN_PARAMETERS) ||
+          !symbolNames.Contains(SimCode.R_RUN_MODEL);
       }
 
       if (firstRun)
       {
-        var clearOutput = $"if(exists(\"{ _execOutputName}\")) rm({_execOutputName})";
+        var clearOutput = $"if(exists(\"{_execOutputName}\")) rm({_execOutputName})";
         instance.Evaluate(clearOutput);
 
         SourceFile(sourceFile.FullName, instance);
 
         var symbolNames = instance.GlobalEnvironment.GetSymbolNames();
+
         RequireFalse(
           symbolNames.Contains(_execOutputName),
           "Script contains reserved symbol: " + _execOutputName
           );
+
         RequireTrue(
-          symbolNames.Contains(code.Exec),
-          "Failed to find exec function: " + code.Exec
+          symbolNames.Contains(SimCode.R_ASSIGN_PARAMETERS),
+          "Failed to find parameter source function: " + SimCode.R_ASSIGN_PARAMETERS
+          );
+        RequireTrue(
+          symbolNames.Contains(SimCode.R_RUN_MODEL),
+          "Failed to find model executive function: " + SimCode.R_RUN_MODEL
           );
 
-        RequireTrue(symbolNames.Contains(
-          code.Formal),
-          "Failed to find exec fn arg: " + code.Formal
-          );
+        var srcStatement = $"{_execSrcName} <- {SimCode.R_ASSIGN_PARAMETERS}()";
+        instance.Evaluate(srcStatement);
 
-        var execArg = instance.GetSymbol(code.Formal);
+        var execSrc = instance.GetSymbol(_execSrcName);
         RequireTrue(
-          execArg.IsVector() || execArg.IsList(),
-          $"Expecting {code.Formal} to be a list or vector"
+          execSrc.IsVector() || execSrc.IsList(),
+          $"Expecting return type from {SimCode.R_ASSIGN_PARAMETERS} to be list or vector"
           );
-        _execFormalType = execArg.Type;
+        _execFormalType = execSrc.Type;
 
         _pathToLastSourcedFile = sourceFile.FullName;
         _lastSourcedFileLastWriteTime = sourceFile.LastWriteTimeUtc;
@@ -77,7 +81,7 @@ namespace RVis.ROps
         _execArgName + "[\"{0}\"] <- {1}";
 
       // R clone and copy on modify
-      statements.Add(_execArgName + " <- " + code.Formal);
+      statements.Add(_execArgName + " <- " + _execSrcName);
 
       if (input != default)
       {
@@ -93,7 +97,7 @@ namespace RVis.ROps
         }
       }
 
-      var execStatement = $"{_execOutputName} <- {code.Exec}({_execArgName})";
+      var execStatement = $"{_execOutputName} <- {SimCode.R_RUN_MODEL}({_execArgName})";
       statements.Add(execStatement);
 
       var lines = string.Join(Environment.NewLine, statements);
@@ -103,87 +107,21 @@ namespace RVis.ROps
     public static NumDataColumn[] TabulateExecOutput(SimOutput output)
     {
       var instance = REngine.GetInstance();
-
-      var sexpOutput = instance.GetSymbol(_execOutputName);
-      var matrices = SexpToMatrices(sexpOutput);
-
-      if (0 == matrices.Length) return Array.Empty<NumDataColumn>();
-
-      var targetColumnNames = output.SimValues.IsEmpty 
-        ? default 
-        : output.SimValues.Select(v => v.Name).ToArray();
-
       var tabulated = new List<NumDataColumn>();
 
-      foreach (var (columnNames, array) in matrices)
+      var iv = instance.GetSymbol(output.IndependentVariable.Name).AsNumeric().ToArray();
+      tabulated.Add(new NumDataColumn(output.IndependentVariable.Name, iv));
+
+      foreach (var element in output.DependentVariables)
       {
-        int[]? excludedColumnIndexes = default;
-
-        if (default != targetColumnNames)
-        {
-          RequireNotNull(columnNames);
-
-          excludedColumnIndexes = columnNames
-               .Select((cn, i) => new { cn, i })
-               .Where(a => !targetColumnNames.Contains(a.cn))
-               .Select(a => a.i)
-               .ToArray();
-        }
-
-        var numDataColumns = MatrixToNumDataColumns(
-          array,
-          columnNames,
-          excludedColumnIndexes
-          );
-
-        tabulated.AddRange(numDataColumns);
+        var dv = instance.GetSymbol(element.Name).AsNumeric().ToArray();
+        tabulated.Add(new NumDataColumn(element.Name, dv));
       }
 
       return tabulated.ToArray();
     }
 
-    public static NumDataColumn[] TabulateTmplOutput(SimConfig config)
-    {
-      var tabulatedData = new List<NumDataColumn>();
-      var instance = REngine.GetInstance();
-
-      foreach (var value in config.SimOutput.SimValues)
-      {
-        var sexp = instance.GetSymbol(value.Name);
-        var matrices = SexpToMatrices(sexp, value.Name);
-
-        foreach (var matrix in matrices)
-        {
-          var columnNames = matrix.ColumnNames;
-          var array = matrix.Array;
-
-          if (null == columnNames)
-          {
-            var nColumns = array.GetLength(1);
-            RequireTrue(1 == nColumns, "Multi-column output has no column names");
-            columnNames = new[] { value.Name }; // output was R vector
-          }
-
-          var toTabulate = value.SimElements.Select(e => e.Name).ToArray();
-
-          var excludedColumnIndexes = columnNames
-            .Select((cn, i) => new { cn, i })
-            .Where(a => !toTabulate.Contains(a.cn))
-            .Select(a => a.i)
-            .ToArray();
-
-          var numDataColumns = MatrixToNumDataColumns(
-            array,
-            columnNames,
-            excludedColumnIndexes
-            );
-          tabulatedData.AddRange(numDataColumns);
-        }
-      }
-
-      return tabulatedData.ToArray();
-    }
-
+    private const string _execSrcName = "rvis_service_src";
     private const string _execArgName = "rvis_service_in";
     private const string _execOutputName = "rvis_service_out";
     private static string? _pathToLastSourcedFile;

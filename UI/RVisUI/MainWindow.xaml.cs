@@ -246,7 +246,7 @@ namespace RVisUI
 
     private readonly IDictionary<int, ServerLicense> _currentLicenses = new SortedDictionary<int, ServerLicense>();
     private readonly Brush _tbResetRServicesFG;
-    private readonly Stopwatch _stopwatch = new Stopwatch();
+    private readonly Stopwatch _stopwatch = new();
     private int _frameCount;
   }
 }

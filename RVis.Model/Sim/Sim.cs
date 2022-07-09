@@ -31,9 +31,7 @@ namespace RVis.Model
         ImportedOn = config.ImportedOn,
         Code = new TSimCode
         {
-          File = config.SimCode.File,
-          Exec = config.SimCode.Exec,
-          Formal = config.SimCode.Formal
+          File = config.SimCode.File
         },
         Input = new TSimInput
         {
@@ -69,7 +67,7 @@ namespace RVis.Model
 
     public static SimConfig FromToml(TSimConfig config)
     {
-      var code = new SimCode(config.Code?.File, config.Code?.Exec, config.Code?.Formal);
+      var code = new SimCode(config.Code?.File);
 
       var parameters = config.Input?.Parameters?.IsNullOrEmpty() == true
         ? default

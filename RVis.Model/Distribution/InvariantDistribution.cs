@@ -11,7 +11,7 @@ namespace RVis.Model
 {
   public struct InvariantDistribution : IDistribution, IEquatable<InvariantDistribution>
   {
-    public readonly static InvariantDistribution Default = new InvariantDistribution(NaN);
+    public readonly static InvariantDistribution Default = new(NaN);
 
     public InvariantDistribution(double value)
       => Value = value;

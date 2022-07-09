@@ -1,13 +1,12 @@
 # Beta Release
 
-Changes in v0.16: (none)
+Changes in v0.17:
 
-__ATTENTION!__ The 64-bit build will hang if used with R v4.0.3 or later (monitor issues in the [R.NET](https://github.com/rdotnet/rdotnet) repository for progress and resolution).
+* Upgrade to .NET 6
+* Simplified MCSim import procedure
 
-Issues fixed in v0.16:
+__ATTENTION!__ The 64-bit build requires R v4.0.2 or earlier, or R v4.2.0 or later.
 
-- MCSim hangs if exe writes diagnstics to stdout
-- Graceful handling of error if imported evidence open in other app
-- Incomplete design unload in sampling
+Issues fixed in v0.16: (none)
 
 Please submit bug reports, feature requests and other technical matters to the [issue tracker](https://github.com/GMPtk/RVis/issues) in this repository.

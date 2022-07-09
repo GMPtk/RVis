@@ -15,7 +15,7 @@ namespace RVis.Model
 {
   public struct NormalDistribution : IDistribution<Normal>, IEquatable<NormalDistribution>
   {
-    public readonly static NormalDistribution Default = new NormalDistribution(NaN, NaN);
+    public readonly static NormalDistribution Default = new(NaN, NaN);
 
     public static NormalDistribution CreateDefault(double mu)
     {
@@ -44,7 +44,7 @@ namespace RVis.Model
     public double Upper { get; }
 
     public Normal? Implementation => IsConfigured
-      ? new Normal(Mu, Sigma, Generator)
+      ? new(Mu, Sigma, Generator)
       : default;
 
     public DistributionType DistributionType => DistributionType.Normal;
@@ -57,7 +57,7 @@ namespace RVis.Model
       WithLowerUpper(lower, upper);
 
     public NormalDistribution WithLowerUpper(double lower, double upper) =>
-      new NormalDistribution(Max(lower, Min(Mu, upper)), Sigma, lower, upper);
+      new(Max(lower, Min(Mu, upper)), Sigma, lower, upper);
 
     public bool IsConfigured => !IsNaN(Mu) && !IsNaN(Sigma);
 

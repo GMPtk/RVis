@@ -7,7 +7,7 @@ namespace RVis.Model
 {
   public sealed class ServerLicense : IDisposable
   {
-    public readonly static ServerLicense NullLicense = new ServerLicense();
+    public readonly static ServerLicense NullLicense = new();
 
     internal ServerLicense(
       int id,

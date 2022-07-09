@@ -21,7 +21,7 @@ namespace Plot.Design
       set => throw new NotImplementedException();
     }
 
-    public ObservableCollection<ISelectableItemViewModel> MRUElements => new ObservableCollection<ISelectableItemViewModel>(
+    public ObservableCollection<ISelectableItemViewModel> MRUElements => new(
       new[]
       {
         new SelectableItemViewModel<string>(default, "A short name", default, default, false),
@@ -29,7 +29,7 @@ namespace Plot.Design
         new SelectableItemViewModel<string>(default, "Short", default, default, false),
       });
 
-    public ObservableCollection<ISelectableItemViewModel> LRUElements => new ObservableCollection<ISelectableItemViewModel>(
+    public ObservableCollection<ISelectableItemViewModel> LRUElements => new(
       Range('a', 'z').Map(c => new SelectableItemViewModel<string>(default, new string(c, c % 10), default, default, false)).ToArr<ISelectableItemViewModel>()
       );
 

@@ -48,7 +48,7 @@ namespace RVisUI.AppInf.Extensions
     }
 
     public static ParameterState WithIsSelected(this ParameterState parameterState, bool isSelected) =>
-      new ParameterState(parameterState.Name, parameterState.DistributionType, parameterState.Distributions, isSelected);
+      new(parameterState.Name, parameterState.DistributionType, parameterState.Distributions, isSelected);
 
     public static IDistribution GetDistribution(this ParameterState parameterState) =>
       parameterState.Distributions

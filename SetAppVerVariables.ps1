@@ -1,4 +1,4 @@
-$pathToDLL = "$((Get-Location).Path)\RVis.Base\bin\Release\net5.0\RVis.Base.dll"
+$pathToDLL = "$((Get-Location).Path)\RVis.Base\bin\Release\net6.0\RVis.Base.dll"
 $fileVersionInfo = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($pathToDLL)
 Write-Host "##vso[task.setvariable variable=AppVer]$($fileVersionInfo.FileVersion)"
 Write-Host "##vso[task.setvariable variable=AppVerMajor]$($fileVersionInfo.FileMajorPart)"

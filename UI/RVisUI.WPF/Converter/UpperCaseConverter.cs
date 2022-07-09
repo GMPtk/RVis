@@ -6,11 +6,11 @@ namespace RVisUI.Wpf
 {
   public class UpperCaseConverter : IValueConverter
   {
-    public static readonly UpperCaseConverter Default = new UpperCaseConverter();
+    public static readonly UpperCaseConverter Default = new();
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      if (!(value is string s)) return value;
+      if (value is not string s) return value;
       return s.ToUpper(culture);
     }
 

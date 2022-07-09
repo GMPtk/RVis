@@ -69,8 +69,8 @@ namespace RVisUI.Wpf
     /// <summary>
     /// Commands.
     /// </summary>
-    public static readonly RoutedCommand ShowAdornerCommand = new RoutedCommand("ShowAdorner", typeof(AdornedControl));
-    public static readonly RoutedCommand HideAdornerCommand = new RoutedCommand("HideAdorner", typeof(AdornedControl));
+    public static readonly RoutedCommand ShowAdornerCommand = new("ShowAdorner", typeof(AdornedControl));
+    public static readonly RoutedCommand HideAdornerCommand = new("HideAdorner", typeof(AdornedControl));
 
     public AdornedControl()
     {
@@ -223,8 +223,8 @@ namespace RVisUI.Wpf
     /// <summary>
     /// Command bindings.
     /// </summary>
-    private static readonly CommandBinding ShowAdornerCommandBinding = new CommandBinding(ShowAdornerCommand, ShowAdornerCommand_Executed);
-    private static readonly CommandBinding HideAdornerCommandBinding = new CommandBinding(HideAdornerCommand, HideAdornerCommand_Executed);
+    private static readonly CommandBinding ShowAdornerCommandBinding = new(ShowAdornerCommand, ShowAdornerCommand_Executed);
+    private static readonly CommandBinding HideAdornerCommandBinding = new(HideAdornerCommand, HideAdornerCommand_Executed);
 
     /// <summary>
     /// Caches the adorner layer.

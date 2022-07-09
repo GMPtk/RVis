@@ -29,38 +29,38 @@
 set moduleDirectory="%artifactStagingDirectory%\win-x86\RVis_v%version%\module"
 
 @mkdir %moduleDirectory%\estimation
-@copy UI\module\Estimation\bin\Release\net5.0-windows\win-x86\Estimation.dll %moduleDirectory%\estimation\ >nul
+@copy UI\module\Estimation\bin\Release\net6.0-windows\win-x86\Estimation.dll %moduleDirectory%\estimation\ >nul
 
 @mkdir %moduleDirectory%\evidence
-@copy UI\module\Evidence\bin\Release\net5.0-windows\win-x86\Evidence.dll %moduleDirectory%\evidence\ >nul
+@copy UI\module\Evidence\bin\Release\net6.0-windows\win-x86\Evidence.dll %moduleDirectory%\evidence\ >nul
 
 @mkdir %moduleDirectory%\plot
-@copy UI\module\Plot\bin\Release\net5.0-windows\win-x86\Plot.dll %moduleDirectory%\plot\ >nul
+@copy UI\module\Plot\bin\Release\net6.0-windows\win-x86\Plot.dll %moduleDirectory%\plot\ >nul
 
 @mkdir %moduleDirectory%\sampling
-@copy UI\module\Sampling\bin\Release\net5.0-windows\win-x86\Sampling.dll %moduleDirectory%\sampling\ >nul
+@copy UI\module\Sampling\bin\Release\net6.0-windows\win-x86\Sampling.dll %moduleDirectory%\sampling\ >nul
 
 @mkdir %moduleDirectory%\sensitivity
-@copy UI\module\Sensitivity\bin\Release\net5.0-windows\win-x86\Sensitivity.dll %moduleDirectory%\sensitivity\ >nul
+@copy UI\module\Sensitivity\bin\Release\net6.0-windows\win-x86\Sensitivity.dll %moduleDirectory%\sensitivity\ >nul
 
 @mkdir %artifactStagingDirectory%\win-x64\RVis_v%version%\module
 
 set moduleDirectory="%artifactStagingDirectory%\win-x64\RVis_v%version%\module"
 
 @mkdir %moduleDirectory%\estimation
-@copy UI\module\Estimation\bin\Release\net5.0-windows\win-x64\Estimation.dll %moduleDirectory%\estimation\ >nul
+@copy UI\module\Estimation\bin\Release\net6.0-windows\win-x64\Estimation.dll %moduleDirectory%\estimation\ >nul
 
 @mkdir %moduleDirectory%\evidence
-@copy UI\module\Evidence\bin\Release\net5.0-windows\win-x64\Evidence.dll %moduleDirectory%\evidence\ >nul
+@copy UI\module\Evidence\bin\Release\net6.0-windows\win-x64\Evidence.dll %moduleDirectory%\evidence\ >nul
 
 @mkdir %moduleDirectory%\plot
-@copy UI\module\Plot\bin\Release\net5.0-windows\win-x64\Plot.dll %moduleDirectory%\plot\ >nul
+@copy UI\module\Plot\bin\Release\net6.0-windows\win-x64\Plot.dll %moduleDirectory%\plot\ >nul
 
 @mkdir %moduleDirectory%\sampling
-@copy UI\module\Sampling\bin\Release\net5.0-windows\win-x64\Sampling.dll %moduleDirectory%\sampling\ >nul
+@copy UI\module\Sampling\bin\Release\net6.0-windows\win-x64\Sampling.dll %moduleDirectory%\sampling\ >nul
 
 @mkdir %moduleDirectory%\sensitivity
-@copy UI\module\Sensitivity\bin\Release\net5.0-windows\win-x64\Sensitivity.dll %moduleDirectory%\sensitivity\ >nul
+@copy UI\module\Sensitivity\bin\Release\net6.0-windows\win-x64\Sensitivity.dll %moduleDirectory%\sensitivity\ >nul
 
 @endlocal
 

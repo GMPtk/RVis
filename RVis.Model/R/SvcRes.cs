@@ -10,19 +10,19 @@ namespace RVis.Model
 
   public static class SvcRes
   {
-    public static readonly UnitSvcRes Unit = new UnitSvcRes();
+    public static readonly UnitSvcRes Unit = new();
 
     internal static SvcRes<T> Create<T>(Exception exception) =>
-      new SvcRes<T> { Messages = ExceptionToMessages(exception) };
+      new() { Messages = ExceptionToMessages(exception) };
 
     internal static SvcRes<T> Create<T>(T t) =>
-      new SvcRes<T> { Value = t };
+      new() { Value = t };
 
     internal static T Create<T, U>(U u) where T : SvcRes<U>, new() =>
-      new T { Value = u };
+      new() { Value = u };
 
     internal static T Create<T, U>(Exception exception) where T : SvcRes<U>, new() =>
-      new T { Messages = ExceptionToMessages(exception) };
+      new() { Messages = ExceptionToMessages(exception) };
 
     internal static void AssertNoFault(string[] messages)
     {
@@ -107,16 +107,6 @@ namespace RVis.Model
   }
 
   [ProtoContract]
-  public class SymbolInfoArraySvcRes : SvcRes<SymbolInfo[]>
-  {
-    public static implicit operator SymbolInfoArraySvcRes(SymbolInfo[] value) =>
-      SvcRes.Create<SymbolInfoArraySvcRes, SymbolInfo[]>(value);
-
-    public static implicit operator SymbolInfoArraySvcRes(Exception exception) =>
-      SvcRes.Create<SymbolInfoArraySvcRes, SymbolInfo[]>(exception);
-  }
-
-  [ProtoContract]
   public class ByteArraySvcRes : SvcRes<byte[]>
   {
     public static implicit operator ByteArraySvcRes(byte[] value) =>
@@ -143,7 +133,6 @@ namespace RVis.Model
   [ProtoInclude(6, typeof(NameDoublesMapSvcRes))]
   [ProtoInclude(7, typeof(NumDataColumnArraySvcRes))]
   [ProtoInclude(8, typeof(NumDataTableSvcRes))]
-  [ProtoInclude(9, typeof(SymbolInfoArraySvcRes))]
   [ProtoInclude(10, typeof(ByteArraySvcRes))]
   [ProtoInclude(11, typeof(NameStringsMapSvcRes))]
   public class SvcRes<T>

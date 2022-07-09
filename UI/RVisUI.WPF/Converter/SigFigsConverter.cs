@@ -9,7 +9,7 @@ namespace RVisUI.Wpf
 {
   public class SigFigsConverter : IValueConverter
   {
-    public static readonly SigFigsConverter Default = new SigFigsConverter();
+    public static readonly SigFigsConverter Default = new();
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

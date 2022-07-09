@@ -258,7 +258,7 @@ namespace Estimation
         }
       });
 
-      var boxPlotSeries = new BoxPlotSeries { Title = "Fit" };
+      var boxPlotSeries = new BoxPlotSeries { Title = "Fit", Stroke = PlotModel.TextColor };
 
       boxModelData.ForEach(t =>
       {

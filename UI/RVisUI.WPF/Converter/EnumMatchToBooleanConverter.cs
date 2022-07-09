@@ -12,7 +12,7 @@ namespace RVisUI.Wpf
 {
   public class EnumMatchToBooleanConverter : IValueConverter
   {
-    public static readonly EnumMatchToBooleanConverter Default = new EnumMatchToBooleanConverter();
+    public static readonly EnumMatchToBooleanConverter Default = new();
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

@@ -279,6 +279,7 @@ namespace Estimation
       var histogramSeries = new HistogramSeries
       {
         Title = "Posterior",
+        StrokeColor = PlotModel.TextColor,
         StrokeThickness = 1,
         FillColor = OxyColors.Transparent,
         YAxisKey = nameof(_leftVerticalAxis)

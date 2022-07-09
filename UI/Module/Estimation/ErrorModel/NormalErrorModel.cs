@@ -14,7 +14,7 @@ namespace Estimation
 {
   internal sealed class NormalErrorModel : IErrorModel, IEquatable<NormalErrorModel>
   {
-    internal readonly static NormalErrorModel Default = new NormalErrorModel(
+    internal readonly static NormalErrorModel Default = new(
       NaN, 
       NaN, 
       DEFAULT_SIGMA_STEP_INITIALIZER

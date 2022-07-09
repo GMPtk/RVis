@@ -106,7 +106,7 @@ namespace RVis.Model
       private const string EXECUTION_INTERVAL_FILE_NAME = "execution-interval.toml";
 
       private Option<(int ms, int n)> _executionInterval;
-      private readonly List<long> _executionIntervals = new List<long>();
+      private readonly List<long> _executionIntervals = new();
     }
   }
 }

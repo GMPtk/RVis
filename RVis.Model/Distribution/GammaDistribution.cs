@@ -14,7 +14,7 @@ namespace RVis.Model
 {
   public struct GammaDistribution : IDistribution<Gamma>, IEquatable<GammaDistribution>
   {
-    public readonly static GammaDistribution Default = new GammaDistribution(NaN, NaN);
+    public readonly static GammaDistribution Default = new(NaN, NaN);
 
     public GammaDistribution(double alpha, double beta, double lower = NegativeInfinity, double upper = PositiveInfinity)
     {
@@ -32,7 +32,7 @@ namespace RVis.Model
     public double Upper { get; }
 
     public Gamma? Implementation => IsConfigured
-      ? new Gamma(Alpha, Beta, Generator)
+      ? new(Alpha, Beta, Generator)
       : default;
 
     public DistributionType DistributionType => DistributionType.Gamma;
@@ -45,7 +45,7 @@ namespace RVis.Model
       WithLowerUpper(lower, upper);
 
     public GammaDistribution WithLowerUpper(double lower, double upper) =>
-      new GammaDistribution(Alpha, Beta, lower, upper);
+      new(Alpha, Beta, lower, upper);
 
     public bool IsConfigured => !IsNaN(Alpha) && !IsNaN(Beta);
 

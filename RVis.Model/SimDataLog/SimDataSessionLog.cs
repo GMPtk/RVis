@@ -220,10 +220,9 @@ namespace RVis.Model
     private IDisposable? _outputRequestSubscription;
 
     private int _logIndex;
-    private readonly List<SimDataLogEntry> _logEntries = new List<SimDataLogEntry>();
-    private readonly object _logEntriesSyncLock = new object();
-    private readonly ConcurrentQueue<(Simulation Simulation, SimDataLogEntry LogEntry)> _pendingToFile =
-      new ConcurrentQueue<(Simulation Simulation, SimDataLogEntry LogEntry)>();
+    private readonly List<SimDataLogEntry> _logEntries = new();
+    private readonly object _logEntriesSyncLock = new();
+    private readonly ConcurrentQueue<(Simulation Simulation, SimDataLogEntry LogEntry)> _pendingToFile = new();
     private Task? _writeLogEntriesTask;
 
     private bool _disposed = false;

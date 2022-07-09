@@ -35,7 +35,7 @@ namespace Sampling
     {
       using var serverLicense = _serverPool.RequestServer().Case switch
       {
-        SomeCase<ServerLicense>(var sl) => sl,
+        ServerLicense sl => sl,
         _ => throw new Exception("No R server available")
       };
 

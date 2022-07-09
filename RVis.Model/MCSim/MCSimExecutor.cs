@@ -306,7 +306,7 @@ namespace RVis.Model
     private readonly Arr<string> _dependentVariableNames;
     private readonly string _tableName;
     private readonly Arr<SimParameter> _defaultSource;
-    private readonly object _syncLock = new object();
+    private readonly object _syncLock = new();
     private bool _disposed = false;
   }
 }

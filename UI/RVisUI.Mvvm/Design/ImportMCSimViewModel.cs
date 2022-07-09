@@ -11,13 +11,7 @@ namespace RVisUI.Mvvm.Design
 
     public string PathToExecutable { get => @"C:\something\or\other.exe"; set => throw new NotImplementedException(); }
 
-    public ICommand BrowseForConfigurationFile => throw new NotImplementedException();
-
-    public string PathToConfigurationFile { get => @"C:\something\or\other.R"; set => throw new NotImplementedException(); }
-
-    public ICommand BrowseForTemplateInFile => throw new NotImplementedException();
-
-    public string PathToTemplateInFile { get => @"C:\something\or\other.in"; set => throw new NotImplementedException(); }
+    public string PathToInFile { get => @"C:\something\or\other.in"; set => throw new NotImplementedException(); }
 
     public bool OpenOnImport { get => true; set => throw new NotImplementedException(); }
 

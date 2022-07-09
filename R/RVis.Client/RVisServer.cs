@@ -257,7 +257,7 @@ namespace RVis.Client
           var buildTargetDirectory = "Release";
 #endif
 
-          workingDirectory = Path.Combine(pathToRVis, $@"R\RVis.Server\bin\{buildTargetDirectory}\net5.0");
+          workingDirectory = Path.Combine(pathToRVis, $@"R\RVis.Server\bin\{buildTargetDirectory}\net6.0");
 
           pathToServer = Path.Combine(workingDirectory, "RVis.Server.exe");
 

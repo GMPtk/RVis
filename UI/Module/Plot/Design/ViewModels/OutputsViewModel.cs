@@ -11,7 +11,7 @@ namespace Plot.Design
   internal sealed class OutputsViewModel : IOutputsViewModel
   {
     public ObservableCollection<ILogEntryViewModel> LogEntryViewModels =>
-      new ObservableCollection<ILogEntryViewModel>(
+      new(
         Range(1, 100).Select(i => new LogEntryViewModel
         {
           EnteredOn = DateTime.Now.AddDays(i).ToString("o"),
@@ -29,7 +29,7 @@ namespace Plot.Design
     public ICommand FollowKeyboardInLogEntries => throw new NotImplementedException();
 
     public ObservableCollection<IOutputGroupViewModel> OutputGroupViewModels =>
-      new ObservableCollection<IOutputGroupViewModel>(
+      new(
         Range(1, 100).Select(i => new OutputGroupViewModel
         {
           CreatedOn = DateTime.Now.AddDays(i).ToString("o"),

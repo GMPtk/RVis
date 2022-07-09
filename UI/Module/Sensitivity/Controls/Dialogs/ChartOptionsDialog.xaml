@@ -55,7 +55,8 @@
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
-    <TabControl SelectedIndex="{Binding Page}">
+    <TabControl SelectedIndex="{Binding Page}"
+                HorizontalContentAlignment="Left">
 
       <TabItem Header="Labels">
 

@@ -8,6 +8,9 @@
              xmlns:local="clr-namespace:Sampling"
              xmlns:design="clr-namespace:Sampling.Design"
              xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignBackground}"					  
              mc:Ignorable="d" 
              d:DesignHeight="768" d:DesignWidth="1366"
              d:DataContext="{d:DesignInstance Type=design:SamplesViewModel, IsDesignTimeCreatable=True}"
@@ -17,8 +20,8 @@
     <ResourceDictionary>
 
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Sampling;component/Design/Resource/Theme.xaml" />
         <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Sampling;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <Style x:Key="SamplesDataGridStyle" TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
@@ -72,6 +75,11 @@
                                     DataContext="{Binding}"
                                     />
       </DataTemplate>
+
+      <Style x:Key="_tiStyle" TargetType="TabItem" BasedOn="{StaticResource MaterialDesignTabItem}">
+        <Setter Property="Padding" Value="2"/>
+        <Setter Property="Height" Value="24"/>
+      </Style>
 
     </ResourceDictionary>
   </UserControl.Resources>
@@ -322,15 +330,21 @@
         </Grid.ColumnDefinitions>
 
         <TabControl Margin="0 10 0 0"
+                    HorizontalContentAlignment="Left"
+                    md:ColorZoneAssist.Mode="SecondaryMid"
                     >
-          <TabItem Header="Samples">
+          <TabItem Header="Samples"
+                   Style="{StaticResource _tiStyle}"
+                   >
             <DataGrid ItemsSource="{Binding Samples}" 
                       Style="{StaticResource SamplesDataGridStyle}" 
                       IsReadOnly="True"
                       CanUserSortColumns="False"
                       />
           </TabItem>
-          <TabItem Header="Statistics">
+          <TabItem Header="Statistics"
+                   Style="{StaticResource _tiStyle}"
+                   >
             <DataGrid x:Name="_dataGrid" 
                 Grid.Row="1" 
                 AutoGenerateColumns="False"

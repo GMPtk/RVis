@@ -51,7 +51,7 @@ namespace RVis.Model.Extensions
         var value = parts[1].Trim();
         if (parameter.Unit.IsAString() && value.EndsWith(parameter.Unit, System.StringComparison.InvariantCulture))
         {
-          value = value.Substring(0, value.Length - parameter.Unit.Length).TrimEnd();
+          value = value[..^parameter.Unit.Length].TrimEnd();
         }
         return parameter.With(value);
       }

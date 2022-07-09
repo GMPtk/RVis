@@ -64,7 +64,7 @@ namespace RVisUI.AppInf.Extensions
       )
     {
       var palette = isBaseDark
-        ? OxyPalettes.Cool(nSeries)
+        ? OxyPalettes.Hue(nSeries)
         : OxyPalettes.Rainbow(nSeries);
 
       plotModel.DefaultColors = palette.Colors;
@@ -148,6 +148,18 @@ namespace RVisUI.AppInf.Extensions
       foreach (var lineAnnotation in plotModel.Annotations.OfType<LineAnnotation>())
       {
         lineAnnotation.Color = plotModel.TextColor;
+      }
+
+      foreach (var series in plotModel.Series)
+      {
+        if (series is BoxPlotSeries boxPlotSeries)
+        {
+          boxPlotSeries.Stroke = plotModel.TextColor;
+        }
+        else if (series is HistogramSeries histogramSeries)
+        {
+          histogramSeries.StrokeColor = plotModel.TextColor;
+        }
       }
 
       // oxyplot v2.1???

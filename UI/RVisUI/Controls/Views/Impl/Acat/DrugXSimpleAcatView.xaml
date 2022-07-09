@@ -5,8 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:mvvmd="clr-namespace:RVisUI.Mvvm.Design;assembly=RVisUI.Mvvm"
-             xmlns:local="clr-namespace:RVisUI.Controls.Views.Impl.Acat"
              xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignBackground}"					  
              mc:Ignorable="d" 
              d:DesignHeight="768" 
              d:DesignWidth="1200"
@@ -33,7 +35,7 @@
   
   <Grid>
 
-    <TabControl SelectedIndex="{Binding SelectedIndex}">
+    <TabControl SelectedIndex="{Binding SelectedIndex}" HorizontalContentAlignment="Left">
       
       <TabItem Header="Substance">
         <StackPanel Margin="10">

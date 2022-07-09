@@ -6,6 +6,9 @@
              xmlns:acat="clr-namespace:RVisUI.Controls.Views.Impl.Acat"
              xmlns:mvvmd="clr-namespace:RVisUI.Mvvm.Design;assembly=RVisUI.Mvvm"
              xmlns:mvvm="clr-namespace:RVisUI.Mvvm;assembly=RVisUI.Mvvm"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignBackground}"					  
              mc:Ignorable="d" 
              d:DesignHeight="768" 
              d:DesignWidth="1200"
@@ -22,6 +25,7 @@
     <TabControl ItemsSource="{Binding AcatViewModels}"
                 SelectedItem="{Binding SelectedAcatViewModel}"
                 Margin="10"
+                HorizontalContentAlignment="Left"
                 >
       
       <TabControl.ItemContainerStyle>

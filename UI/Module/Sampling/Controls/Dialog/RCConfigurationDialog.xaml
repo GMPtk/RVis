@@ -33,8 +33,8 @@
     <ResourceDictionary>
 
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Sampling;component/Design/Resource/Theme.xaml" />
         <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Sampling;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <wpf:BooleanToVisibilityConverter 

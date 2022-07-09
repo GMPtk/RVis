@@ -64,7 +64,7 @@ namespace RVis.Base.Extensions
     public static string Elide(this string s, int maxLen, string? suffix = "...") =>
       s.Length <= maxLen ?
         s :
-        s.Substring(0, maxLen - (suffix ?? Empty).Length) + suffix;
+        Concat(s.AsSpan(0, maxLen - (suffix ?? Empty).Length), suffix);
 
     public static string ExpandPath(this string s) =>
       s.StartsWith(_docsPrefix, StringComparison.InvariantCulture) == true 
@@ -132,7 +132,7 @@ namespace RVis.Base.Extensions
     private static readonly char[] _separators = new[] { ';', ',' };
     private const string _docsPrefix = "~/";
     private static readonly Regex _invalid = GetInvalid();
-    private static readonly SHA1CryptoServiceProvider _sha1 = new();
+    private static readonly SHA1 _sha1 = SHA1.Create();
     private static readonly ConcurrentDictionary<string, string> _sha1HashMemo = new();
   }
 }

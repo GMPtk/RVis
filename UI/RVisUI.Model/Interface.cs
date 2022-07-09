@@ -17,14 +17,12 @@ namespace RVisUI.Model
   {
     bool RestoreWindow { get; set; }
     string PrimaryColorName { get; set; }
-    int PrimaryColorHue { get; set; }
     string SecondaryColorName { get; set; }
-    int SecondaryColorHue { get; set; }
-    string? PrimaryForegroundColorName { get; set; }
-    int PrimaryForegroundColorHue { get; set; }
-    string? SecondaryForegroundColorName { get; set; }
-    int SecondaryForegroundColorHue { get; set; }
     bool IsBaseDark { get; set; }
+    bool IsColorAdjusted { get; set; }
+    float DesiredContrastRatio { get; set; }
+    int ContrastValue { get; set; }
+    int ColorSelectionValue { get; set; }
     string ModuleConfiguration { get; set; }
     int RThrottlingUseCores { get; set; }
     string PathToSimLibrary { get; set; }

@@ -15,7 +15,7 @@ namespace RVis.Model
 {
   public struct BetaDistribution : IDistribution<Beta>, IEquatable<BetaDistribution>
   {
-    public readonly static BetaDistribution Default = new BetaDistribution(NaN, NaN);
+    public readonly static BetaDistribution Default = new(NaN, NaN);
 
     public BetaDistribution(double alpha, double beta, double lower = NegativeInfinity, double upper = PositiveInfinity)
     {
@@ -33,7 +33,7 @@ namespace RVis.Model
     public double Upper { get; }
 
     public Beta? Implementation => IsConfigured
-      ? new Beta(Alpha, Beta, Generator)
+      ? new(Alpha, Beta, Generator)
       : default;
 
     public DistributionType DistributionType => DistributionType.Beta;
@@ -46,7 +46,7 @@ namespace RVis.Model
       WithLowerUpper(lower, upper);
 
     public BetaDistribution WithLowerUpper(double lower, double upper) => 
-      new BetaDistribution(Alpha, Beta, lower, upper);
+      new(Alpha, Beta, lower, upper);
 
     public bool IsConfigured => !IsNaN(Alpha) && !IsNaN(Beta);
 

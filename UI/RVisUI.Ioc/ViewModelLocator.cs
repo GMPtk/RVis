@@ -1,5 +1,4 @@
-﻿using CommonServiceLocator;
-using RVisUI.Mvvm;
+﻿using RVisUI.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,17 +12,14 @@ namespace RVisUI.Ioc
   {
     public ViewModelLocator()
     {
-      NinjectBootstrapper = IsInDesignMode 
-        ? new Design.NinjectBootstrapper() 
+      NinjectBootstrapper = IsInDesignMode
+        ? new Design.NinjectBootstrapper()
         : new NinjectBootstrapper();
 
       NinjectBootstrapper.LoadModules();
 
-      _serviceLocator = new NinjectServiceLocator(NinjectBootstrapper.Kernel);
-      ServiceLocator.SetLocatorProvider(() => _serviceLocator);
-
       SubscribeToServiceTypes(
-        typeof(IHomeViewModel).Assembly, 
+        typeof(IHomeViewModel).Assembly,
         $"{nameof(RVisUI)}.{nameof(Mvvm)}"
         );
     }
@@ -39,7 +35,7 @@ namespace RVisUI.Ioc
         if (@interface.FullName is null) continue;
 
         var match = reServiceTypeName.Match(@interface.FullName);
-        
+
         if (match.Success)
         {
           var serviceName = match.Groups[1].Value;
@@ -50,15 +46,14 @@ namespace RVisUI.Ioc
 
     public INinjectBootstrapper NinjectBootstrapper { get; }
 
-    public object this[string serviceName] => 
-      ServiceLocator.Current.GetInstance(_serviceLookUp[serviceName]);
+    public object? this[string serviceName] =>
+      NinjectBootstrapper.Kernel.GetService(_serviceLookUp[serviceName]);
 
     public static void Cleanup()
     {
       // TODO Clear the ViewModels
     }
 
-    private readonly IServiceLocator _serviceLocator;
     private readonly IDictionary<string, Type> _serviceLookUp = new SortedDictionary<string, Type>();
   }
 }

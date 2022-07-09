@@ -7,6 +7,9 @@
              xmlns:oxy="http://oxyplot.org/wpf"
              xmlns:design="clr-namespace:Estimation.Design"
              xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignBackground}"					  
              mc:Ignorable="d" 
              d:DesignHeight="768" d:DesignWidth="1366"
              d:DataContext="{d:DesignInstance Type=design:PosteriorViewModel, IsDesignTimeCreatable=True}"
@@ -14,11 +17,9 @@
 
   <UserControl.Resources>
     <ResourceDictionary>
-
       <ResourceDictionary.MergedDictionaries>
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Estimation;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
-
     </ResourceDictionary>
   </UserControl.Resources>
 

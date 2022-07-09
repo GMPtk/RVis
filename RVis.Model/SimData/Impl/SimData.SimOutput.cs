@@ -15,10 +15,10 @@ namespace RVis.Model
         DateTime acquiredOn, 
         bool persist
         ) =>
-        new SimDataOutput(simulation, serieInput, serie, outputOrigin, acquiredOn, persist, default);
+        new(simulation, serieInput, serie, outputOrigin, acquiredOn, persist, default);
 
       internal SimDataOutput ToPersisted(DateTime persistedOn) =>
-        new SimDataOutput(Simulation, SerieInput, Serie, OutputOrigin, AcquiredOn, Persist, persistedOn);
+        new(Simulation, SerieInput, Serie, OutputOrigin, AcquiredOn, Persist, persistedOn);
 
       private SimDataOutput(
         Simulation simulation, 

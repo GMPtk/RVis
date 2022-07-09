@@ -1,13 +1,11 @@
 ﻿using LanguageExt;
 using Nett;
-using RVis.Base.Extensions;
 using System;
-using System.Diagnostics;
 using System.IO;
 using static LanguageExt.Prelude;
+using static RVis.Base.Check;
 using static RVis.Model.Constant;
 using static RVis.Model.Sim;
-using static RVis.Base.Check;
 
 namespace RVis.Model.Extensions
 {
@@ -17,7 +15,7 @@ namespace RVis.Model.Extensions
       simulation.SimConfig.SimCode.File?.EndsWith(".R", StringComparison.InvariantCultureIgnoreCase) == true;
 
     internal static bool IsMCSimSimulation(this Simulation simulation) =>
-      simulation.SimConfig.SimCode.File?.EndsWith(".exe", StringComparison.InvariantCultureIgnoreCase) == true;
+      !IsRSimulation(simulation);
 
     internal static Option<SimConfig> LoadConfig(this Simulation simulation, string inputHash)
     {
@@ -39,12 +37,6 @@ namespace RVis.Model.Extensions
       var config = simulation.SimConfig.With(input);
       return Some(config);
     }
-
-    public static bool IsExecType(this Simulation simulation) =>
-      simulation.SimConfig.SimCode.Exec.IsAString();
-
-    public static bool IsTmplType(this Simulation simulation) =>
-      !simulation.IsExecType();
 
     public static void WriteToFile(this SimConfig config, string pathToSimulation)
     {

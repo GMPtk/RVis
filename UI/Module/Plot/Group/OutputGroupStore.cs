@@ -121,8 +121,8 @@ namespace Plot
     private readonly ISubject<(OutputGroup OutputGroup, bool Added)> _activatedOutputGroupsSubject =
       new Subject<(OutputGroup OutputGroup, bool Added)>();
     private readonly string _pathToStoreDirectory;
-    private readonly List<OutputGroup> _outputGroups = new List<OutputGroup>();
-    private readonly object _syncLock = new object();
+    private readonly List<OutputGroup> _outputGroups = new();
+    private readonly object _syncLock = new();
     private bool _disposed = false;
   }
 }

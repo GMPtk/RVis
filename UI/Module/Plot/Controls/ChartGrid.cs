@@ -14,7 +14,7 @@ namespace Plot.Controls
   {
     public ChartGrid()
     {
-      _grid = new Grid();
+      _grid = new();
       Content = _grid;
     }
 
@@ -116,7 +116,7 @@ namespace Plot.Controls
 
       var viewModel = visibleViewModels.Head();
 
-      grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(viewModel.State.ViewHeight, GridUnitType.Star) });
+      grid.RowDefinitions.Add(new RowDefinition { Height = new(viewModel.State.ViewHeight, GridUnitType.Star) });
 
       var view = new TraceDataPlotView();
       Grid.SetRow(view, 0);
@@ -127,15 +127,15 @@ namespace Plot.Controls
       {
         viewModel = visibleViewModels[i];
 
-        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) });
+        grid.RowDefinitions.Add(new RowDefinition { Height = new(5, GridUnitType.Pixel) });
 
         var gridSplitter = new GridSplitter { Height = 5, HorizontalAlignment = HorizontalAlignment.Stretch };
         Grid.SetRow(gridSplitter, i * 2 - 1);
         grid.Children.Add(gridSplitter);
 
-        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(viewModel.State.ViewHeight, GridUnitType.Star) });
+        grid.RowDefinitions.Add(new RowDefinition { Height = new(viewModel.State.ViewHeight, GridUnitType.Star) });
 
-        view = new TraceDataPlotView();
+        view = new();
         Grid.SetRow(view, i * 2);
         grid.Children.Add(view);
         view.DataContext = viewModel;

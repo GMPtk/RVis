@@ -19,13 +19,13 @@ namespace RVis.Model
       var pathToCsvFile = Combine(pathToEvidenceDirectory, subject + ".csv");
       if (!Exists(pathToCsvFile))
       {
-        return new SimObservationsSet(subject, Arr<SimObservations>.Empty);
+        return new(subject, Arr<SimObservations>.Empty);
       }
 
       var lines = ReadAllLines(pathToCsvFile);
       if (lines.IsEmpty())
       {
-        return new SimObservationsSet(subject, Arr<SimObservations>.Empty);
+        return new(subject, Arr<SimObservations>.Empty);
       }
 
       var id = NOT_FOUND;
@@ -83,7 +83,7 @@ namespace RVis.Model
           g.Key,
           g.First().EvidenceSourceID,
           subject,
-          g.First().RefName ?? throw new Exception("null evidence source RefName"),
+          g.First().RefName ?? throw new("null evidence source RefName"),
           g.Select(t => t.X).ToArr(),
           g.Select(t => t.Y).ToArr()
           ))
@@ -98,7 +98,7 @@ namespace RVis.Model
         "Found duplicate RefNames"
         );
 
-      return new SimObservationsSet(subject, observations);
+      return new(subject, observations);
     }
 
     internal static void Save(SimObservationsSet observationsSet, string pathToEvidenceDirectory)
@@ -170,7 +170,7 @@ namespace RVis.Model
       var observations = observationsSet.Observations.Filter(
         o => o.EvidenceSourceID != evidenceSourceID
         );
-      return new SimObservationsSet(observationsSet.Subject, observations);
+      return new(observationsSet.Subject, observations);
     }
 
     internal static SimObservationsSet RemoveObservations(
@@ -181,7 +181,7 @@ namespace RVis.Model
       var observations = observationsSet.Observations.Filter(
         o => o.ID != toRemove.ID
         );
-      return new SimObservationsSet(observationsSet.Subject, observations);
+      return new(observationsSet.Subject, observations);
     }
   }
 }

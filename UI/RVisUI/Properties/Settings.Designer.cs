@@ -12,7 +12,7 @@ namespace RVisUI.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.8.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.1.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -133,78 +133,6 @@ namespace RVisUI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("8")]
-        public int PrimaryColorHue {
-            get {
-                return ((int)(this["PrimaryColorHue"]));
-            }
-            set {
-                this["PrimaryColorHue"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("6")]
-        public int SecondaryColorHue {
-            get {
-                return ((int)(this["SecondaryColorHue"]));
-            }
-            set {
-                this["SecondaryColorHue"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string PrimaryForegroundColorName {
-            get {
-                return ((string)(this["PrimaryForegroundColorName"]));
-            }
-            set {
-                this["PrimaryForegroundColorName"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int PrimaryForegroundColorHue {
-            get {
-                return ((int)(this["PrimaryForegroundColorHue"]));
-            }
-            set {
-                this["PrimaryForegroundColorHue"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string SecondaryForegroundColorName {
-            get {
-                return ((string)(this["SecondaryForegroundColorName"]));
-            }
-            set {
-                this["SecondaryForegroundColorName"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int SecondaryForegroundColorHue {
-            get {
-                return ((int)(this["SecondaryForegroundColorHue"]));
-            }
-            set {
-                this["SecondaryForegroundColorHue"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
         public double Zoom {
             get {
@@ -224,6 +152,54 @@ namespace RVisUI.Properties {
             }
             set {
                 this["PathToRunControlDrop"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsColorAdjusted {
+            get {
+                return ((bool)(this["IsColorAdjusted"]));
+            }
+            set {
+                this["IsColorAdjusted"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4.5")]
+        public float DesiredContrastRatio {
+            get {
+                return ((float)(this["DesiredContrastRatio"]));
+            }
+            set {
+                this["DesiredContrastRatio"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int ContrastValue {
+            get {
+                return ((int)(this["ContrastValue"]));
+            }
+            set {
+                this["ContrastValue"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3")]
+        public int ColorSelectionValue {
+            get {
+                return ((int)(this["ColorSelectionValue"]));
+            }
+            set {
+                this["ColorSelectionValue"] = value;
             }
         }
     }

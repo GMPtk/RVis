@@ -847,14 +847,14 @@ namespace Estimation
     private readonly IReactiveSafeInvoke _reactiveSafeInvoke;
     private readonly IDisposable _subscriptions;
     private IDisposable? _secondIntervalSubscription;
-    private readonly SortedDictionary<int, LineSeries> _series = new SortedDictionary<int, LineSeries>();
+    private readonly SortedDictionary<int, LineSeries> _series = new();
     private readonly LinearAxis _horizontalAxis;
     private readonly LinearAxis _verticalAxis;
     private readonly RectangleAnnotation _posteriorAnnotation;
     private readonly SortedDictionary<string, SortedDictionary<int, List<(int Iteration, double Value)>>> _chartData =
-      new SortedDictionary<string, SortedDictionary<int, List<(int, double)>>>();
-    private readonly List<IterationUpdateArr> _iterationUpdates = new List<IterationUpdateArr>();
-    private readonly object _syncLock = new object();
+      new();
+    private readonly List<IterationUpdateArr> _iterationUpdates = new();
+    private readonly object _syncLock = new();
     private bool _disposed = false;
   }
 }

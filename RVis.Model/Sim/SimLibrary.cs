@@ -55,33 +55,20 @@ namespace RVis.Model
       return (simulations.Count, failures);
     }
 
-    public string ImportRSimulation(string location)
+    public string ImportRSimulation(string location, string libraryDirectoryName) => 
+      ImportSimulation(location, libraryDirectoryName, "R");
+
+    public string ImportExeSimulation(string location, string libraryDirectoryName) => 
+      ImportSimulation(location, libraryDirectoryName, "exe");
+
+    private string ImportSimulation(string location, string libraryDirectoryName, string ext)
     {
       RequireDirectory(Location);
       RequireDirectory(location);
 
       var diSimulation = new DirectoryInfo(location);
-      var rFiles = diSimulation.GetFiles("*.R");
-      RequireEqual(rFiles.Length, 1);
-
-      var fiR = rFiles[0];
-      var directoryName = Path.GetFileNameWithoutExtension(fiR.Name);
-      var libraryDirectoryName = GetImportDirectoryName(directoryName, Location);
-      var pathToSimulation = Path.Combine(Location, libraryDirectoryName);
-
-      Directory.Move(location, pathToSimulation);
-
-      return libraryDirectoryName;
-    }
-
-    public string ImportExeSimulation(string location, string libraryDirectoryName)
-    {
-      RequireDirectory(Location);
-      RequireDirectory(location);
-
-      var diSimulation = new DirectoryInfo(location);
-      var exeFiles = diSimulation.GetFiles("*.exe");
-      RequireEqual(exeFiles.Length, 1);
+      var files = diSimulation.GetFiles($"*.{ext}");
+      RequireEqual(files.Length, 1);
 
       libraryDirectoryName = GetImportDirectoryName(libraryDirectoryName, Location);
       var pathToSimulation = Path.Combine(Location, libraryDirectoryName);

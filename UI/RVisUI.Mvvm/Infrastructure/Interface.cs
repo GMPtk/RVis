@@ -65,7 +65,7 @@ namespace RVisUI.Mvvm
   public interface IHomeViewModel
   {
     ISelectSimulationViewModel SelectSimulationViewModel { get; }
-    IImportSimulationViewModel ImportSimulationViewModel { get; }
+    IImportRSimViewModel ImportRSimViewModel { get; }
     IImportMCSimViewModel ImportMCSimViewModel { get; }
     ILibraryViewModel LibraryViewModel { get; }
     IRunControlViewModel RunControlViewModel { get; }
@@ -98,110 +98,18 @@ namespace RVisUI.Mvvm
     string? RVersion { get; set; }
   }
 
-  public interface ISelectExecViewModel
+  public interface IImportRSimViewModel
   {
-    Arr<string> UnaryFunctions { get; }
-    int UnaryFunctionSelectedIndex { get; set; }
-    Arr<string> ScalarSets { get; }
-    int ScalarSetSelectedIndex { get; set; }
-    ICommand OK { get; }
-    ICommand Cancel { get; }
-    bool? DialogResult { get; set; }
-  }
+    ICommand BrowseForScript { get; }
+    string? PathToScript { get; set; }
 
-  public interface IChangeDescriptionUnitViewModel
-  {
-    string TargetSymbol { get; set; }
-    string? Description { get; set; }
-    string? Unit { get; set; }
-    object?[][] LineSymDescUnit { get; }
-    ICommand OK { get; }
-    ICommand Cancel { get; }
-    bool? DialogResult { get; set; }
-  }
+    bool OpenOnImport { get; set; }
 
-  public interface IParameterCandidateViewModel
-  {
-    bool IsUsed { get; set; }
-    string Name { get; set; }
-    double Value { get; set; }
-    string? Unit { get; set; }
-    string? Description { get; set; }
-    ICommand ChangeUnitDescription { get; set; }
-  }
-
-  public interface IElementCandidateViewModel
-  {
-    bool IsUsed { get; set; }
-    string Name { get; set; }
-    string ValueName { get; set; }
-    bool IsIndependentVariable { get; set; }
-    string Values { get; set; }
-    string? Unit { get; set; }
-    string? Description { get; set; }
-    ICommand ChangeUnitDescription { get; set; }
-  }
-
-  public interface IImportExecViewModel
-  {
-    string ExecInvocation { get; }
-    Arr<IParameterCandidateViewModel> ParameterCandidates { get; }
-    ICommand UseAllParameters { get; }
-    ICommand UseNoParameters { get; }
-    IElementCandidateViewModel IndependentVariable { get; }
-    Arr<IElementCandidateViewModel> ElementCandidates { get; }
-    ICommand UseAllOutputs { get; }
-    ICommand UseNoOutputs { get; }
-    string SimulationName { get; set; }
-    string? SimulationDescription { get; set; }
-    ICommand OK { get; }
-    ICommand Cancel { get; }
-    bool? DialogResult { get; set; }
-  }
-
-  public interface IImportTmplViewModel
-  {
-    string FileName { get; }
-    Arr<IParameterCandidateViewModel> ParameterCandidates { get; }
-    ICommand UseAllParameters { get; }
-    ICommand UseNoParameters { get; }
-    IElementCandidateViewModel? IndependentVariable { get; set; }
-    ICommand SetIndependentVariable { get; }
-    ObservableCollection<IElementCandidateViewModel> ElementCandidates { get; }
-    IElementCandidateViewModel? SelectedElementCandidate { get; set; }
-    ICommand UseAllOutputs { get; }
-    ICommand UseNoOutputs { get; }
-    string SimulationName { get; set; }
-    string? SimulationDescription { get; set; }
-    ICommand OK { get; }
-    ICommand Cancel { get; }
-    bool? DialogResult { get; set; }
-  }
-
-  public interface IImportSimulationViewModel
-  {
-    ICommand BrowseForRFile { get; }
-    string? PathToRFile { get; set; }
-    ICommand InspectRFile { get; }
-    ManagedImport? ManagedImport { get; set; }
-    Arr<ISymbolInfo> UnaryFuncs { get; set; }
-    Arr<ISymbolInfo> Scalars { get; set; }
-    Arr<ISymbolInfo> ScalarSets { get; set; }
-    Arr<ISymbolInfo> DataSets { get; set; }
-
-    ISymbolInfo? ExecutiveFunction { get; set; }
-    ISymbolInfo? ExecutiveFormal { get; set; }
-    NumDataTable? ExecutiveOutput { get; set; }
-    ICommand SelectExecutive { get; }
-
-    ICommand ImportUsingExec { get; }
-    ICommand ImportUsingTmpl { get; }
+    ICommand Import { get; }
+    bool CanImport { get; }
 
     bool IsBusy { get; set; }
     string? BusyWith { get; set; }
-    ObservableCollection<string>? BusyMessages { get; }
-    bool EnableBusyCancel { get; set; }
-    ICommand BusyCancel { get; }
   }
 
   public interface IImportMCSimViewModel
@@ -209,11 +117,7 @@ namespace RVisUI.Mvvm
     ICommand BrowseForExecutable { get; }
     string? PathToExecutable { get; set; }
 
-    ICommand BrowseForConfigurationFile { get; }
-    string? PathToConfigurationFile { get; set; }
-
-    ICommand BrowseForTemplateInFile { get; }
-    string? PathToTemplateInFile { get; set; }
+    string? PathToInFile { get; set; }
 
     bool OpenOnImport { get; set; }
 

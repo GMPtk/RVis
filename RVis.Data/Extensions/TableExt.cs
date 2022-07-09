@@ -13,11 +13,11 @@ namespace RVis.Data.Extensions
     public static FxDataTable ToFxDataTable(this NumDataTable rvDataTable)
     {
       var fxDataTable = new FxDataTable(rvDataTable.Name);
-      
+
       rvDataTable.ColumnNames.Iter(
         cn => fxDataTable.Columns.Add(cn, typeof(double))
         );
-      
+
       for (var i = 0; i < rvDataTable.NRows; ++i)
       {
         var row = rvDataTable.GetRow<object>(i);
@@ -52,9 +52,9 @@ namespace RVis.Data.Extensions
 
     public static IDataColumn<T> ToDataColumn<T>(this IEnumerable<T> data, string name) => new DataColumn<T>(name, data);
 
-    public static NumDataColumn ToDataColumn(this double[] data, string name) => new NumDataColumn(name, data);
+    public static NumDataColumn ToDataColumn(this double[] data, string name) => new(name, data);
 
-    public static NumDataColumn ToDataColumn(this IEnumerable<double> data, string name) => new NumDataColumn(name, data);
+    public static NumDataColumn ToDataColumn(this IEnumerable<double> data, string name) => new(name, data);
 
     public static IDataColumn<T> Get<T>(this IDataTable dataTable, string name) => EnsureDataType<T>(dataTable[name]);
 

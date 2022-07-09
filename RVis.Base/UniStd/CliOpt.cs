@@ -35,7 +35,7 @@ namespace RVis.Base
       OptArgUsage = optArgUsage;
     }
 
-    public static readonly CliOptSpec ArgOnly = new CliOptSpec(null, OptArgType.ArgOnly, OptArgUsage.Required);
+    public static readonly CliOptSpec ArgOnly = new(null, OptArgType.ArgOnly, OptArgUsage.Required);
 
     public readonly string? Option;
     public readonly OptArgType OptArgType;
@@ -109,13 +109,13 @@ namespace RVis.Base
           }
           else
           {
-            option = arg.Substring(0, index);
+            option = arg[..index];
             argument = arg[(index + 1)..];
           }
         }
         else
         {
-          option = arg.Substring(0, 1);
+          option = arg[..1];
           argument = arg.Length > 1 ? arg[1..] : null;
         }
 
@@ -136,7 +136,7 @@ namespace RVis.Base
 
     public static Option<CliOpt> GetOpt<T>(this Seq<CliOpt> cliOpts, params T[] ts)
     {
-      var options = ts.Map(t => Convert.ToString(t,InvariantCulture)!.PascalToHyphenated().ToLowerInvariant()).ToSeq();
+      var options = ts.Map(t => Convert.ToString(t, InvariantCulture)!.PascalToHyphenated().ToLowerInvariant()).ToSeq();
       return GetOptImpl(cliOpts, options);
     }
 

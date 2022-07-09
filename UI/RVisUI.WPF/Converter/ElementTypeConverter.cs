@@ -8,7 +8,7 @@ namespace RVisUI.Wpf
 {
   public class ElementTypeConverter : IValueConverter
   {
-    public static readonly ElementTypeConverter Default = new ElementTypeConverter();
+    public static readonly ElementTypeConverter Default = new();
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

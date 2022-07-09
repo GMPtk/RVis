@@ -41,20 +41,6 @@ namespace RVisUI.Ioc
       }
     }
 
-    public int PrimaryColorHue
-    {
-      get => Settings.Default.PrimaryColorHue;
-      set
-      {
-        if (value != Settings.Default.PrimaryColorHue)
-        {
-          Settings.Default.PrimaryColorHue = value;
-          Settings.Default.Save();
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
     public string SecondaryColorName
     {
       get => Settings.Default.SecondaryColorName;
@@ -69,76 +55,6 @@ namespace RVisUI.Ioc
       }
     }
 
-    public int SecondaryColorHue
-    {
-      get => Settings.Default.SecondaryColorHue;
-      set
-      {
-        if (value != Settings.Default.SecondaryColorHue)
-        {
-          Settings.Default.SecondaryColorHue = value;
-          Settings.Default.Save();
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
-    public string? PrimaryForegroundColorName
-    {
-      get => Settings.Default.PrimaryForegroundColorName;
-      set
-      {
-        if (value != Settings.Default.PrimaryForegroundColorName)
-        {
-          Settings.Default.PrimaryForegroundColorName = value;
-          Settings.Default.Save();
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
-    public int PrimaryForegroundColorHue
-    {
-      get => Settings.Default.PrimaryForegroundColorHue;
-      set
-      {
-        if (value != Settings.Default.PrimaryForegroundColorHue)
-        {
-          Settings.Default.PrimaryForegroundColorHue = value;
-          Settings.Default.Save();
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
-    public string? SecondaryForegroundColorName
-    {
-      get => Settings.Default.SecondaryForegroundColorName;
-      set
-      {
-        if (value != Settings.Default.SecondaryForegroundColorName)
-        {
-          Settings.Default.SecondaryForegroundColorName = value;
-          Settings.Default.Save();
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
-    public int SecondaryForegroundColorHue
-    {
-      get => Settings.Default.SecondaryForegroundColorHue;
-      set
-      {
-        if (value != Settings.Default.SecondaryForegroundColorHue)
-        {
-          Settings.Default.SecondaryForegroundColorHue = value;
-          Settings.Default.Save();
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
     public bool IsBaseDark
     {
       get => Settings.Default.IsBaseDark;
@@ -147,6 +63,62 @@ namespace RVisUI.Ioc
         if (value != Settings.Default.IsBaseDark)
         {
           Settings.Default.IsBaseDark = value;
+          Settings.Default.Save();
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    public bool IsColorAdjusted 
+    {
+      get => Settings.Default.IsColorAdjusted;
+      set
+      {
+        if (value != Settings.Default.IsColorAdjusted)
+        {
+          Settings.Default.IsColorAdjusted = value;
+          Settings.Default.Save();
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    public float DesiredContrastRatio 
+    {
+      get => Settings.Default.DesiredContrastRatio;
+      set
+      {
+        if (value != Settings.Default.DesiredContrastRatio)
+        {
+          Settings.Default.DesiredContrastRatio = value;
+          Settings.Default.Save();
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    public int ContrastValue 
+    {
+      get => Settings.Default.ContrastValue;
+      set
+      {
+        if (value != Settings.Default.ContrastValue)
+        {
+          Settings.Default.ContrastValue = value;
+          Settings.Default.Save();
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
+    public int ColorSelectionValue 
+    {
+      get => Settings.Default.ColorSelectionValue;
+      set
+      {
+        if (value != Settings.Default.ColorSelectionValue)
+        {
+          Settings.Default.ColorSelectionValue = value;
           Settings.Default.Save();
           NotifyPropertyChanged();
         }

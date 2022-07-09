@@ -1,26 +1,23 @@
 ﻿using LanguageExt;
-using RVis.Base.Extensions;
 using RVis.Data;
 using RVis.Model.Extensions;
 using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static LanguageExt.Prelude;
+using static RVis.Base.Check;
 using static RVis.Model.Logger;
 using static System.Double;
 using static System.String;
-using static RVis.Base.Check;
 
 namespace RVis.Model
 {
   public sealed partial class SimData
   {
     private static async Task<Arr<SimInput>> EvaluateNonScalarsAsync(
-      SimInput seriesInput, 
-      SimInput defaultInput, 
+      SimInput seriesInput,
+      SimInput defaultInput,
       ServerLicense serverLicense,
       CancellationToken cancellationToken
       )
@@ -92,9 +89,9 @@ namespace RVis.Model
     }
 
     private async Task<OutputRequest> FulfilRequestAsync(
-      Simulation simulation, 
-      SimInput seriesInput, 
-      ServerLicense serverLicense, 
+      Simulation simulation,
+      SimInput seriesInput,
+      ServerLicense serverLicense,
       bool persist,
       CancellationToken cancellationToken)
     {
@@ -106,8 +103,6 @@ namespace RVis.Model
         );
 
       Log.Debug($"Evaluating non-scalar parameter values produced n={serieInputs.Count} series");
-
-      var useExec = simulation.SimConfig.SimCode.Exec.IsAString();
 
       async Task<(SimInput SerieInput, NumDataTable Serie, bool Persist, OutputOrigin OutputOrigin)> AcquireSerieDataAsync(SimInput serieInput)
       {
@@ -128,20 +123,10 @@ namespace RVis.Model
         if (simulation.IsRSimulation())
         {
           var client = await serverLicense.GetRClientAsync(cancellationToken);
-
-          if (useExec)
-          {
-            var pathToCodeFile = simulation.PathToCodeFile;
-            RequireFile(pathToCodeFile);
-            await client.RunExecAsync(pathToCodeFile, serieConfig, cancellationToken);
-            serie = await client.TabulateExecOutputAsync(serieConfig, cancellationToken);
-          }
-          else
-          {
-            var pathToCodeFile = simulation.PopulateTemplate(serieConfig.SimInput.SimParameters);
-            await client.SourceFileAsync(pathToCodeFile, cancellationToken);
-            serie = await client.TabulateTmplOutputAsync(serieConfig, cancellationToken);
-          }
+          var pathToCodeFile = simulation.PathToCodeFile;
+          RequireFile(pathToCodeFile);
+          await client.RunExecAsync(pathToCodeFile, serieConfig, cancellationToken);
+          serie = await client.TabulateExecOutputAsync(serieConfig, cancellationToken);
         }
         else
         {

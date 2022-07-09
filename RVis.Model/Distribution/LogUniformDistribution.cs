@@ -14,7 +14,7 @@ namespace RVis.Model
 {
   public struct LogUniformDistribution : IDistribution<ContinuousUniform>, IEquatable<LogUniformDistribution>
   {
-    public readonly static LogUniformDistribution Default = new LogUniformDistribution(NaN, NaN);
+    public readonly static LogUniformDistribution Default = new(NaN, NaN);
 
     public LogUniformDistribution(double lower, double upper)
     {
@@ -28,7 +28,7 @@ namespace RVis.Model
     public double Upper { get; }
 
     public ContinuousUniform? Implementation => IsConfigured
-      ? new ContinuousUniform(Lower, Upper, Generator)
+      ? new(Lower, Upper, Generator)
       : default;
 
     public DistributionType DistributionType => DistributionType.LogUniform;
@@ -39,7 +39,7 @@ namespace RVis.Model
 
     IDistribution IDistribution.WithLowerUpper(double lower, double upper) =>
       lower > 0d && upper > 0d 
-      ? new LogUniformDistribution(Log(lower), Log(upper))
+      ? new(Log(lower), Log(upper))
       : this;
 
     public bool IsConfigured => !IsNaN(Lower) && !IsNaN(Upper);

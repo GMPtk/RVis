@@ -9,7 +9,7 @@ namespace RVisUI.Mvvm
     public HomeViewModel(IAppService appService)
     {
       SelectSimulationViewModel = appService.Factory.Get<ISelectSimulationViewModel>();
-      ImportSimulationViewModel = appService.Factory.Get<IImportSimulationViewModel>();
+      ImportRSimViewModel = appService.Factory.Get<IImportRSimViewModel>();
       ImportMCSimViewModel = appService.Factory.Get<IImportMCSimViewModel>();
       LibraryViewModel = appService.Factory.Get<ILibraryViewModel>();
       RunControlViewModel = appService.Factory.Get<IRunControlViewModel>();
@@ -17,7 +17,7 @@ namespace RVisUI.Mvvm
     }
 
     public ISelectSimulationViewModel SelectSimulationViewModel { get; }
-    public IImportSimulationViewModel ImportSimulationViewModel { get; }
+    public IImportRSimViewModel ImportRSimViewModel { get; }
     public IImportMCSimViewModel ImportMCSimViewModel { get; }
     public ILibraryViewModel LibraryViewModel { get; }
     public IRunControlViewModel RunControlViewModel { get; }

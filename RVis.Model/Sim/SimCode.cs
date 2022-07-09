@@ -1,42 +1,30 @@
 ﻿using ProtoBuf;
 using System;
-using System.Collections.Generic;
 
 namespace RVis.Model
 {
   [ProtoContract]
   public struct SimCode : IEquatable<SimCode>
   {
-    public SimCode(string? file, string? exec, string? formal)
+    public const string R_ASSIGN_PARAMETERS = "assign_parameters";
+    public const string R_RUN_MODEL = "run_model";
+
+    public SimCode(string? file)
     {
       _file = file;
-      _exec = exec;
-      _formal = formal;
     }
 
     [ProtoIgnore]
     public string? File => _file;
 
-    [ProtoIgnore]
-    public string? Exec => _exec;
-
-    [ProtoIgnore]
-    public string? Formal => _formal;
-
     [ProtoMember(1)]
     private readonly string? _file;
 
-    [ProtoMember(2)]
-    private readonly string? _exec;
-
-    [ProtoMember(3)]
-    private readonly string? _formal;
-
     public bool Equals(SimCode rhs) =>
-      _file == rhs._file && _exec == rhs._exec && _formal == rhs._formal;
+      _file == rhs._file;
 
-    public override int GetHashCode() => 
-      HashCode.Combine(_file, _exec, _formal);
+    public override int GetHashCode() =>
+      HashCode.Combine(_file);
 
     public override bool Equals(object? obj) =>
       obj is SimCode code && Equals(code);

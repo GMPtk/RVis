@@ -22,7 +22,7 @@ namespace RVisUI.Ioc
     public IObservable<Option<Simulation>> Simulation =>
       _targetSimulation.AsObservable();
     private readonly BehaviorSubject<Option<Simulation>> _targetSimulation =
-      new BehaviorSubject<Option<Simulation>>(None);
+      new(None);
 
     public ISimData SimData => 
       _simData ?? throw new InvalidOperationException("Trying to access state after failed start-up");

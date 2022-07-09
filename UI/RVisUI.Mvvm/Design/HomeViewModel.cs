@@ -6,7 +6,7 @@ namespace RVisUI.Mvvm.Design
   {
     public ISelectSimulationViewModel SelectSimulationViewModel => new SelectSimulationViewModel();
 
-    public IImportSimulationViewModel ImportSimulationViewModel => throw new NotImplementedException();
+    public IImportRSimViewModel ImportRSimViewModel => new ImportRSimViewModel();
 
     public IImportMCSimViewModel ImportMCSimViewModel => new ImportMCSimViewModel();
 

@@ -156,7 +156,7 @@ namespace RVis.Model
 
     private void ServeData(object? stateInfo)
     {
-      Log.Debug($"{nameof(SimData)} entering service loop on MTID={Thread.CurrentThread.ManagedThreadId}");
+      Log.Debug($"{nameof(SimData)} entering service loop on MTID={Environment.CurrentManagedThreadId}");
 
       try
       {
@@ -178,16 +178,14 @@ namespace RVis.Model
     private const int OUTPUTCLEARWINDOWMS = 1000;
 
     private readonly IRVisServerPool _serverPool;
-    private readonly ConcurrentDictionary<int, SimDataItem<OutputRequest>> _outputRequests =
-      new ConcurrentDictionary<int, SimDataItem<OutputRequest>>();
-    private readonly ConcurrentDictionary<(string InputHash, Simulation Simulation), SimDataOutput> _outputs =
-      new ConcurrentDictionary<(string InputHash, Simulation Simulation), SimDataOutput>();
+    private readonly ConcurrentDictionary<int, SimDataItem<OutputRequest>> _outputRequests = new();
+    private readonly ConcurrentDictionary<(string InputHash, Simulation Simulation), SimDataOutput> _outputs = new();
 
     private Thread? _serviceThread;
     private CancellationTokenSource? _ctsDataService;
-    private readonly ManualResetEventSlim _mreDataService = new ManualResetEventSlim(false);
+    private readonly ManualResetEventSlim _mreDataService = new(false);
 
     private readonly IDictionary<Simulation, SimExecutionInterval> _executionIntervals = new Dictionary<Simulation, SimExecutionInterval>();
-    private readonly object _syncLock = new object();
+    private readonly object _syncLock = new();
   }
 }

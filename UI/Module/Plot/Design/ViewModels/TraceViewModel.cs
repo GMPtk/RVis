@@ -36,7 +36,7 @@ namespace Plot.Design
 
     public int IsWorkingSetPanelOpen { get => 0; set => throw new NotImplementedException(); }
     public ObservableCollection<IParameterViewModel> WorkingSet =>
-      new ObservableCollection<IParameterViewModel>(
+      new(
         Range(1, 20).Select(i => new ParameterViewModel(
           i % 2 == 0 ? $"Selected{i:0000}" : Join(" ", Repeat($"Selected{i:0000}", i * 2)),
           i.ToString(),

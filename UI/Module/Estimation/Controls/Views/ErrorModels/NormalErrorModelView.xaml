@@ -6,6 +6,9 @@
              xmlns:local="clr-namespace:Estimation"
              xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
              xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignBackground}"					  
              mc:Ignorable="d" 
              d:DesignHeight="150" d:DesignWidth="350"
              >

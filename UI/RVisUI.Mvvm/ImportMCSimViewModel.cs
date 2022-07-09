@@ -4,6 +4,7 @@ using RVis.Model;
 using RVis.Model.Extensions;
 using RVisUI.Model;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -13,7 +14,6 @@ using static LanguageExt.Prelude;
 using static RVis.Base.Check;
 using static System.Double;
 using static System.Environment;
-using static System.Globalization.CultureInfo;
 using static System.IO.Path;
 using static System.String;
 
@@ -28,10 +28,8 @@ namespace RVisUI.Mvvm
       _appService = appService;
 
       BrowseForExecutable = ReactiveCommand.Create(HandleBrowseForExecutable);
-      BrowseForConfigurationFile = ReactiveCommand.Create(HandleBrowseForConfigurationFile);
-      BrowseForTemplateInFile = ReactiveCommand.Create(HandleBrowseForTemplateInFile);
       Import = ReactiveCommand.Create(
-        HandleImport,
+        HandleImportAsync,
         this.ObservableForProperty(vm => vm.CanImport, _ => CanImport)
         );
 
@@ -47,30 +45,19 @@ namespace RVisUI.Mvvm
     }
     private string? _pathToExecutable;
 
-    public ICommand BrowseForConfigurationFile { get; }
-
-    public string? PathToConfigurationFile
+    public string? PathToInFile
     {
-      get => _pathToConfigurationFile;
-      set => this.RaiseAndSetIfChanged(ref _pathToConfigurationFile, value);
+      get => _pathToInFile;
+      set => this.RaiseAndSetIfChanged(ref _pathToInFile, value);
     }
-    private string? _pathToConfigurationFile;
-
-    public ICommand BrowseForTemplateInFile { get; }
-
-    public string? PathToTemplateInFile
-    {
-      get => _pathToTemplateInFile;
-      set => this.RaiseAndSetIfChanged(ref _pathToTemplateInFile, value);
-    }
-    private string? _pathToTemplateInFile;
+    private string? _pathToInFile;
 
     public bool OpenOnImport
     {
       get => _openOnImport;
       set => this.RaiseAndSetIfChanged(ref _openOnImport, value);
     }
-    private bool _openOnImport;
+    private bool _openOnImport = true;
 
     public ICommand Import { get; }
 
@@ -118,137 +105,87 @@ namespace RVisUI.Mvvm
         RequireNotNullEmptyWhiteSpace(rootName);
         var rootPath = Combine(rootDir, rootName);
 
-        var pathToConfigurationFile = rootPath + ".config.R";
-        if (File.Exists(pathToConfigurationFile))
+        var pathToInFile = rootPath + ".in";
+        if (File.Exists(pathToInFile))
         {
-          PathToConfigurationFile = pathToConfigurationFile;
+          PathToInFile = pathToInFile;
         }
-
-        var pathToTemplateInFile = rootPath + ".template.in";
-        if (File.Exists(pathToTemplateInFile))
+        else
         {
-          PathToTemplateInFile = pathToTemplateInFile;
+          PathToInFile = null;
         }
 
         UpdateEnable();
       }
     }
 
-    private void HandleBrowseForConfigurationFile()
+    private async Task HandleImportAsync()
     {
-      var initialDirectory = PathToConfigurationFile.IsAString()
-        ? GetDirectoryName(PathToConfigurationFile)
-        : default;
+      IsBusy = true;
+      BusyWith = "Import MCSim";
 
-      var didBrowse = _appService.OpenFile(
-        "Select Configuration File",
-        initialDirectory,
-        "R Files|*.R",
-        out string? pathToFile
-        );
-
-      if (didBrowse)
+      try
       {
-        PathToConfigurationFile = pathToFile;
-        UpdateEnable();
-      }
-    }
+        var (simulationName, directoryName) = await Task
+          .Run(() => HandleImport())
+          .ConfigureAwait(continueOnCapturedContext: true);
 
-    private void HandleBrowseForTemplateInFile()
-    {
-      var initialDirectory = PathToTemplateInFile.IsAString()
-        ? GetDirectoryName(PathToTemplateInFile)
-        : default;
+        _appState.Status = $"Imported {simulationName}";
 
-      var didBrowse = _appService.OpenFile(
-        "Select Template .in File",
-        initialDirectory,
-        "in Files|*.in",
-        out string? pathToFile
-        );
+        _simLibrary.Refresh();
 
-      if (didBrowse)
-      {
-        PathToTemplateInFile = pathToFile;
-        UpdateEnable();
-      }
-    }
-
-    private void HandleImport()
-    {
-      async Task SomeServer(ServerLicense serverLicense)
-      {
-        IsBusy = true;
-        BusyWith = "Import MCSim";
-
-        try
+        if (OpenOnImport)
         {
-          using (serverLicense)
-          {
-            var (simulationName, directoryName) = await HandleImportAsync(await serverLicense.GetRClientAsync())
-              .ConfigureAwait(continueOnCapturedContext: true);
+          var lookup = $"{DirectorySeparatorChar}{directoryName}";
 
-            _appState.Status = $"Imported {simulationName}";
-
-            _simLibrary.Refresh();
-
-            if (OpenOnImport)
-            {
-              var lookup = $"{DirectorySeparatorChar}{directoryName}";
-
-              var simulation = _simLibrary.Simulations.Find(
-                s => s.PathToSimulation.EndsWith(directoryName)
-                );
-
-              _appState.Target = simulation;
-            }
-          }
-        }
-        catch (MCSimExecutionException ex)
-        {
-          _appService.Notify(
-            NotificationType.Error,
-            nameof(ImportMCSimViewModel),
-            nameof(HandleImportAsync),
-            ex.Message + NewLine + NewLine + Join(NewLine, ex.Diagnostics),
-            this
+          var simulation = _simLibrary.Simulations.Find(
+            s => s.PathToSimulation.EndsWith(directoryName)
             );
-        }
-        catch (Exception ex)
-        {
-          _appService.Notify(
-            NotificationType.Error,
-            nameof(ImportMCSimViewModel),
-            nameof(HandleImportAsync),
-            ex.Message,
-            this
-            );
+
+          _appState.Target = simulation;
         }
 
-        IsBusy = false;
+        PathToExecutable = null;
+        PathToInFile = null;
+        UpdateEnable();
       }
-
-      async Task NoServer()
+      catch (MCSimExecutionException ex)
       {
         _appService.Notify(
           NotificationType.Error,
           nameof(ImportMCSimViewModel),
           nameof(HandleImportAsync),
-          "No R server available",
+          ex.Message + NewLine + NewLine + Join(NewLine, ex.Diagnostics),
           this
           );
-
-        await Task.CompletedTask;
+      }
+      catch (Exception ex)
+      {
+        _appService.Notify(
+          NotificationType.Error,
+          nameof(ImportMCSimViewModel),
+          nameof(HandleImportAsync),
+          ex.Message,
+          this
+          );
       }
 
-      var _ = _appService.RVisServerPool.RequestServer().Match(SomeServer, NoServer);
+      IsBusy = false;
     }
 
-    private async Task<(string SimulationName, string DirectoryName)> HandleImportAsync(IRVisClient client)
+    private (string SimulationName, string DirectoryName) HandleImport()
     {
-      RequireFile(PathToConfigurationFile);
       RequireFile(PathToExecutable);
-      RequireFile(PathToTemplateInFile);
+      RequireFile(PathToInFile);
+
+      var executable = GetFileName(PathToExecutable);
+      var simulationName = GetFileNameWithoutExtension(executable);
+
+      var existing = _simLibrary.Simulations.Any(
+        s => simulationName.Equals(s.SimConfig.Title, StringComparison.InvariantCultureIgnoreCase)
+        );
+
+      RequireFalse(existing, $"There is already a simulation with name {simulationName} in your library");
 
       string pathToContainingDirectory;
       do
@@ -259,144 +196,185 @@ namespace RVisUI.Mvvm
 
       RequireNotNull(Directory.CreateDirectory(pathToContainingDirectory));
 
-      await client.ClearAsync().ConfigureAwait(continueOnCapturedContext: false);
-      var inspection = await client.InspectSymbolsAsync(PathToConfigurationFile).ConfigureAwait(continueOnCapturedContext: false);
-      var symbolInfos = inspection.ToArr();
-
-      var reAssignment = new Regex("(\\w+)\\W*=\\W*([^\"]+)");
-
-      var assignments = symbolInfos
-        .Select(si =>
-        {
-          if (si.Code.IsntAString()) return None;
-          var match = reAssignment.Match(si.Code);
-          if (!match.Success) return None;
-          var symbol = match.Groups[1].Value;
-          var assignment = match.Groups[2].Value.Trim();
-          return Some((Symbol: symbol, Assignment: assignment, SymbolInfo: si));
-        })
-        .Somes()
+      var lines = File
+        .ReadAllLines(PathToInFile)
+        .Select((l, i) => new { Index = i, Line = l })
         .ToArray();
 
-      string? simulationName;
-      simulationName = (
-        from assignment in assignments
-        where assignment.Symbol == nameof(simulationName)
-        select assignment.Assignment
-        ).SingleOrDefault();
-      RequireNotNullEmptyWhiteSpace(simulationName, "Simulation name not specified");
+      var reSimulation = new Regex(@"^\s*Simulation\s*{\s*$");
+      var simulationLines = lines.Where(l => reSimulation.IsMatch(l.Line)).ToArray();
+      RequireTrue(simulationLines.Length == 1, "Expecting one Simulation block in .in file");
+      var simulationIndex = simulationLines[0].Index;
 
-      string? description;
-      description = (
-        from assignment in assignments
-        where assignment.Symbol == nameof(description)
-        select assignment.Assignment
-        ).SingleOrDefault();
+      var rePrintStep = new Regex(@"^\s*PrintStep\s*\(\s*$");
+      var printStepLines = lines.Where(l => rePrintStep.IsMatch(l.Line)).ToArray();
+      RequireTrue(printStepLines.Length == 1, "Expecting one PrintStep closure in .in file");
+      var printStepIndex = printStepLines[0].Index;
 
-      string? importName;
-      importName = (
-        from assignment in assignments
-        where assignment.Symbol == nameof(importName)
-        select assignment.Assignment
-        ).SingleOrDefault();
-      RequireNotNullEmptyWhiteSpace(importName, "Import name not specified");
+      RequireTrue(printStepIndex > simulationIndex, "Expecting Simulation before PrintStep");
 
-      ISymbolInfo parameters;
-      parameters = symbolInfos.SingleOrDefault(si => si.Symbol == nameof(parameters));
-      RequireNotNull(parameters, $"{nameof(parameters)} section not found in configuration file");
-      RequireNotNull(parameters.Names, "Unable to read parameter names from configuration file");
+      var reEndPrintStep = new Regex(@"^\s*\)\s*;\s*$");
+      var endPrintStepLines = lines.Skip(printStepIndex + 1).Where(l => reEndPrintStep.IsMatch(l.Line)).ToArray();
+      RequireTrue(endPrintStepLines.Length == 1, "Expecting one PrintStep closure in .in file");
+      var endPrintStepIndex = endPrintStepLines[0].Index;
 
-      var simParameters = parameters.Names
-        .Select(pn =>
+      var parameters = new List<(string Name, string Value, string Description, string Unit)>();
+      var reParameter = new Regex(@"^\s*(?'name'\w+)\s*=\s*(?'value'[0-9eE\/*\-\+\.]+)\s*;\s*#\s*(?'desc'[^[]*)\[(?'unit'[^\]]*)]\s*$");
+
+      var index = simulationIndex + 1;
+      Regex reTemplate;
+      string templateLine;
+
+      do
+      {
+        var match = reParameter.Match(lines[index].Line);
+        if (match.Success)
         {
-          var parameterAssignment = assignments.Single(a => a.Symbol == pn);
+          parameters.Add((
+            match.Groups["name"].Value.Trim(),
+            match.Groups["value"].Value.Trim(),
+            match.Groups["desc"].Value.Trim(),
+            match.Groups["unit"].Value.Trim()
+            ));
+          reTemplate = new Regex(@"=\s*" + Regex.Escape(match.Groups["value"].Value));
+          templateLine = reTemplate.Replace(lines[index].Line, $"= {{{{{match.Groups["name"].Value}}}}}", 1);
+          lines[index] = new { lines[index].Index, Line = templateLine };
+        }
+        ++index;
+      } while (index < printStepIndex);
 
-          RequireTrue(
-            TryParse(parameterAssignment.Assignment, out double _),
-            $"parameter {pn} does not have scalar assignment"
-            );
+      RequireTrue(parameters.Count > 0, "Found zero parameters");
 
-          return new SimParameter(
-            pn,
-            parameterAssignment.Assignment,
-            parameterAssignment.SymbolInfo.Unit,
-            parameterAssignment.SymbolInfo.Comment
-            );
-        })
+      var outputs = new List<(string Name, string Description, string Unit)>();
+      var reOutput = new Regex(@"^\s*(?'name'[\w0-9eE\-\+\.]+)\s*,?\s*#\s*(?'desc'[^[]*)\[(?'unit'[^\]]*)]\s*$");
+
+      ++index;
+      do
+      {
+        var match = reOutput.Match(lines[index].Line);
+        if (match.Success)
+        {
+          outputs.Add((
+            match.Groups["name"].Value.Trim(),
+            match.Groups["desc"].Value.Trim(),
+            match.Groups["unit"].Value.Trim()
+            ));
+        }
+        ++index;
+      } while (index < endPrintStepIndex);
+
+      RequireTrue(outputs.Count > 0, "Found zero outputs");
+      RequireTrue(outputs.Count > 3, "Expecting four or more arguments to PrintStep");
+
+      var name = outputs[^3].Name;
+      RequireTrue(TryParse(name, out double t_start), $"Expecting numerical start time; found {name}");
+      const string T_START_NAME = "t_start";
+      reTemplate = new Regex(Regex.Escape(name));
+      templateLine = reTemplate.Replace(lines[index - 3].Line, $"{{{{{T_START_NAME}}}}}", 1);
+      lines[index - 3] = new { lines[index - 3].Index, Line = templateLine };
+
+      name = outputs[^2].Name;
+      RequireTrue(TryParse(name, out double t_end), $"Expecting numerical end time; found {name}");
+      const string T_END_NAME = "t_end";
+      reTemplate = new Regex(Regex.Escape(name));
+      templateLine = reTemplate.Replace(lines[index - 2].Line, $"{{{{{T_END_NAME}}}}}", 1);
+      lines[index - 2] = new { lines[index - 2].Index, Line = templateLine };
+
+      name = outputs[^1].Name;
+      RequireTrue(TryParse(name, out double t_int), $"Expecting numerical time step; found {name}");
+      const string T_INT_NAME = "t_int";
+      reTemplate = new Regex(Regex.Escape(name));
+      templateLine = reTemplate.Replace(lines[index - 1].Line, $"{{{{{T_INT_NAME}}}}}", 1);
+      lines[index - 1] = new { lines[index - 1].Index, Line = templateLine };
+
+      var pathToExecutable = Combine(pathToContainingDirectory, executable);
+      File.Copy(PathToExecutable, pathToExecutable);
+
+      var pathToInFile = Combine(pathToContainingDirectory, simulationName + ".in");
+      File.WriteAllLines(pathToInFile, lines.Select(l => l.Line));
+
+      var simParameters = parameters
+        .Select(t => new SimParameter(t.Name, t.Value, t.Unit.RejectEmpty(), t.Description.RejectEmpty()))
+        .ToArr();
+
+      RequireFalse(simParameters.Any(p => IsNaN(p.Scalar)), "One or more parameter values is not a numeric literal");
+
+      var tStartParameter = new SimParameter(
+        T_START_NAME,
+        t_start.ToString(),
+        outputs[^3].Unit,
+        "start time"
+        );
+
+      var tEndParameter = new SimParameter(
+        T_END_NAME,
+        t_end.ToString(),
+        outputs[^2].Unit,
+        "end time"
+        );
+
+      var tIntParameter = new SimParameter(
+        T_INT_NAME,
+        t_int.ToString(),
+        outputs[^1].Unit,
+        "time interval"
+        );
+
+      simParameters = (simParameters + tStartParameter + tEndParameter + tIntParameter)
         .OrderBy(p => p.Name)
         .ToArr();
 
-      ISymbolInfo independentVariable;
-      independentVariable = symbolInfos.SingleOrDefault(si => si.Symbol == nameof(independentVariable));
-      RequireNotNull(independentVariable, $"{nameof(independentVariable)} section not found in configuration file");
-      RequireNotNull(independentVariable.Names, "Unable to read independent variable name from configuration file");
+      var outputValues = outputs
+        .Take(outputs.Count - 3)
+        .Select(t => new SimValue(
+          t.Name,
+          Array(new SimElement(t.Name, isIndependentVariable: false, t.Unit.RejectEmpty(), t.Description.RejectEmpty()))
+          )
+        )
+        .ToArr();
 
-      var independentVariableName = independentVariable.Names.Single();
-      var ivAssignment = assignments.Single(si => si.Symbol == independentVariableName);
       var independentVariableValue = new SimValue(
-        independentVariableName,
+        "Time",
         Array(new SimElement(
-          independentVariableName,
+          "Time",
           isIndependentVariable: true,
-          ivAssignment.SymbolInfo.Unit,
-          ivAssignment.SymbolInfo.Comment
+          outputs[^3].Unit,
+          "sim time"
           ))
         );
 
-      ISymbolInfo outputs;
-      outputs = symbolInfos.SingleOrDefault(si => si.Symbol == nameof(outputs));
-      RequireNotNull(outputs, $"{nameof(outputs)} section not found in configuration file");
-      RequireNotNull(outputs.Names, "Unable to read output names from configuration file");
-
-      var outputValues = outputs.Names
-        .Select(on =>
-        {
-          var outputAssignment = assignments.Single(a => a.Symbol == on);
-
-          var simElement = new SimElement(
-            on,
-            isIndependentVariable: false,
-            outputAssignment.SymbolInfo.Unit,
-            outputAssignment.SymbolInfo.Comment
-            );
-
-          return new SimValue(on, Array(simElement));
-        })
+      var simValues = (outputValues + independentVariableValue)
+        .OrderBy(v => v.Name)
         .ToArr();
 
-      var simValues = (independentVariableValue + outputValues).OrderBy(p => p.Name).ToArr();
-
-      var executable = GetFileName(PathToExecutable);
+      const string DESCRIPTION_PREFIX = "# Description:";
+      var descriptionLine = lines.FirstOrDefault(l => l.Line.StartsWith(DESCRIPTION_PREFIX));
+      var simulationDescription = descriptionLine == default
+        ? default
+        : descriptionLine.Line[DESCRIPTION_PREFIX.Length..].Trim();
 
       var config = new SimConfig(
         simulationName,
-        description,
+        simulationDescription,
         DateTime.UtcNow,
-        new SimCode(executable, default, default),
+        new SimCode(executable),
         new SimInput(simParameters, isDefault: true),
         new SimOutput(simValues)
         );
 
       config.WriteToFile(pathToContainingDirectory);
 
-      var pathToExecutable = Combine(pathToContainingDirectory, executable);
-      File.Copy(PathToExecutable, pathToExecutable);
-
-      var templateInFileName = GetFileNameWithoutExtension(executable) + ".in";
-      var pathToTemplateInFile = Combine(pathToContainingDirectory, templateInFileName);
-      File.Copy(PathToTemplateInFile, pathToTemplateInFile);
-
       using var executor = new MCSimExecutor(pathToContainingDirectory, config);
       var _ = executor.Execute(default);
 
-      var directoryName = _simLibrary.ImportExeSimulation(pathToContainingDirectory, importName);
+      var directoryName = _simLibrary.ImportExeSimulation(pathToContainingDirectory, simulationName);
 
       return (simulationName, directoryName);
     }
 
     private void UpdateEnable()
     {
-      CanImport = PathToExecutable.IsAString() && PathToConfigurationFile.IsAString();
+      CanImport = PathToExecutable.IsAString() && PathToInFile.IsAString();
     }
 
     private readonly SimLibrary _simLibrary;

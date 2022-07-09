@@ -4,13 +4,10 @@
                     xmlns:ctrls="http://metro.mahapps.com/winfx/xaml/controls"
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
-                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
-                    xmlns:local="clr-namespace:RVisUI.Controls.Dialogs"
                     xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
                     xmlns:mvvmd="clr-namespace:RVisUI.Mvvm.Design;assembly=RVisUI.Mvvm"
                     mc:Ignorable="d"
-                    Title="Module Configuration"
+                    Title="Common Configuration"
                     Height="500" Width="700"
                     TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                     TextElement.FontWeight="Regular"
@@ -49,7 +46,7 @@
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
-    <TabControl Margin="5">
+    <TabControl Margin="10" HorizontalContentAlignment="Left">
       <TabItem Header="Shared State">
 
         <Grid Grid.IsSharedSizeScope="True">
@@ -70,15 +67,15 @@
             <TextBlock Grid.Column="0"/>
 
             <TextBlock Grid.Column="2" 
-                       HorizontalAlignment="Center" 
-                       TextDecorations="Underline"
-                       Text="Share"
-                       />
+                        HorizontalAlignment="Center" 
+                        TextDecorations="Underline"
+                        Text="Share"
+                        />
             <TextBlock Grid.Column="3" 
-                       HorizontalAlignment="Center" 
-                       TextDecorations="Underline"
-                       Text="Apply"
-                       />
+                        HorizontalAlignment="Center" 
+                        TextDecorations="Underline"
+                        Text="Apply"
+                        />
 
           </Grid>
 
@@ -123,14 +120,14 @@
                     </Grid.RowDefinitions>
                     
                     <TextBlock Margin="0 10 10 0" 
-                               FontWeight="SemiBold"
-                               Text="{Binding DisplayName}" />
+                                FontWeight="SemiBold"
+                                Text="{Binding DisplayName}" />
 
                     <TextBlock Grid.Row="1" 
-                               Margin="5 10" 
-                               Grid.Column="1" 
-                               Text="Parameters" 
-                               />
+                                Margin="5 10" 
+                                Grid.Column="1" 
+                                Text="Parameters" 
+                                />
                     <CheckBox Grid.Row="1" 
                               Grid.Column="2"
                               Style="{StaticResource ShareApplyCheckBoxStyle}" 
@@ -143,10 +140,10 @@
                               />
 
                     <TextBlock Grid.Row="2" 
-                               Margin="5 10" 
-                               Grid.Column="1" 
-                               Text="Outputs" 
-                               />
+                                Margin="5 10" 
+                                Grid.Column="1" 
+                                Text="Outputs" 
+                                />
                     <CheckBox Grid.Row="2" 
                               Grid.Column="2"
                               Style="{StaticResource ShareApplyCheckBoxStyle}" 
@@ -159,10 +156,10 @@
                               />
 
                     <TextBlock Grid.Row="3" 
-                               Margin="5 10" 
-                               Grid.Column="1" 
-                               Text="Observations" 
-                               />
+                                Margin="5 10" 
+                                Grid.Column="1" 
+                                Text="Observations" 
+                                />
                     <CheckBox Grid.Row="3" 
                               Grid.Column="2"
                               Style="{StaticResource ShareApplyCheckBoxStyle}" 
@@ -180,12 +177,11 @@
             </ItemsControl>
           </ScrollViewer>
 
-
         </Grid>
         
       </TabItem>
     </TabControl>
-
+    
     <Separator Grid.Row="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="2" Width="Auto" VerticalAlignment="Center" />
 
     <Grid Grid.Row="2" Margin="0,0,0,10" HorizontalAlignment="Center">

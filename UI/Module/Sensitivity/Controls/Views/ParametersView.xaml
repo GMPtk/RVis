@@ -4,10 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Sensitivity"
              xmlns:appinf="clr-namespace:RVisUI.AppInf;assembly=RVisUI.AppInf"
              xmlns:design="clr-namespace:Sensitivity.Design"
              xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignBackground}"					  
              mc:Ignorable="d" 
              d:DesignHeight="768" d:DesignWidth="1366"
              d:DataContext="{d:DesignInstance Type=design:ParametersViewModel, IsDesignTimeCreatable=True}"
@@ -17,8 +19,8 @@
     <ResourceDictionary>
 
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Sensitivity;component/Design/Resource/Theme.xaml" />
         <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Sensitivity;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <Style x:Key="ItemsControlStyle" TargetType="{x:Type ItemsControl}">

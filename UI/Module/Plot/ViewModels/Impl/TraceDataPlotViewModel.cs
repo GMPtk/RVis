@@ -723,7 +723,7 @@ namespace Plot
 
     private OxyPalette GetPalette(int numberOfColors) =>
       _appSettings.IsBaseDark
-        ? OxyPalettes.Cool(numberOfColors)
+        ? OxyPalettes.Hue(numberOfColors)
         : OxyPalettes.Rainbow(numberOfColors);
 
     private const int INTERPOLATION_LIMIT = 30;

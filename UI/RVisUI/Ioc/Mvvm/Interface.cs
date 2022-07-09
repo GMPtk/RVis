@@ -1,48 +1,28 @@
 ﻿using LanguageExt;
 using MaterialDesignColors;
+using MaterialDesignThemes.Wpf;
+using System.Collections.Generic;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace RVisUI.Ioc.Mvvm
 {
-  public interface IHueViewModel
-  {
-    int HueIndex { get; }
-    Color Hue { get; }
-    ISwatch Swatch { get; }
-    ICommand ChangeHue { get; }
-    bool IsSelected { get; set; }
-  }
-
-  public interface ISwatchViewModel
-  {
-    ISwatch Swatch { get; }
-    Arr<IHueViewModel> HueViewModels { get; }
-  }
-
   internal interface IAppSettingsViewModel
   {
-    ICommand View { get; }
-    bool Show { get; set; }
     bool RestoreWindow { get; set; }
 
     Arr<string> CoresOptions { get; }
     int NumberOfCoresSelectedIndex { get; set; }
 
     bool IsBaseDark { get; set; }
-    Arr<ISwatchViewModel> SwatchViewModels { get; }
-    ColorScheme ActiveScheme { get; set; }
-
-    string? SecondaryHueLightHex { get; }
-    string? SecondaryHueMidHex { get; }
-    string? SecondaryHueDarkHex { get; }
-    string? SecondaryHueMidForegroundHex { get; }
-
-    ICommand ChangeHue { get; }
-    ICommand ChangeToPrimary { get; }
-    ICommand ChangeToSecondary { get; }
-    ICommand ChangeToPrimaryForeground { get; }
-    ICommand ChangeToSecondaryForeground { get; }
+    bool IsColorAdjusted { get; set; }
+    float DesiredContrastRatio { get; set; }
+    IEnumerable<Contrast> ContrastValues { get; }
+    Contrast ContrastValue { get; set; }
+    IEnumerable<ColorSelection> ColorSelectionValues { get; }
+    ColorSelection ColorSelectionValue { get; set; }
+    IEnumerable<Swatch> Swatches { get; }
+    ICommand ApplyPrimaryCommand { get; }
+    ICommand ApplyAccentCommand { get; }
 
     string ModuleConfiguration { get; set; }
   }

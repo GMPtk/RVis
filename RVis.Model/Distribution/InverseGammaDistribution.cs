@@ -13,7 +13,7 @@ namespace RVis.Model
 {
   public struct InverseGammaDistribution : IDistribution<InverseGamma>, IEquatable<InverseGammaDistribution>
   {
-    public readonly static InverseGammaDistribution Default = new InverseGammaDistribution(NaN, NaN);
+    public readonly static InverseGammaDistribution Default = new(NaN, NaN);
 
     public InverseGammaDistribution(double alpha, double beta)
     {
@@ -25,7 +25,7 @@ namespace RVis.Model
     public double Beta { get; }
 
     public InverseGamma? Implementation => IsConfigured
-      ? new InverseGamma(Alpha, Beta, Generator)
+      ? new(Alpha, Beta, Generator)
       : default;
 
     public DistributionType DistributionType => DistributionType.InverseGamma;

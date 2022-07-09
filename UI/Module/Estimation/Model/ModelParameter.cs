@@ -24,7 +24,7 @@ namespace Estimation
     internal double Step { get; }
 
     public ModelParameter GetProposal() => 
-      new ModelParameter(
+      new(
         Name, 
         Distribution, 
         Distribution.GetProposal(Value, Step), 
@@ -32,7 +32,7 @@ namespace Estimation
         );
 
     public ModelParameter ApplyBias(double bias) =>
-      new ModelParameter(
+      new(
         Name, 
         Distribution, 
         Value, 

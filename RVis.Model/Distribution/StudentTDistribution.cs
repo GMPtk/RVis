@@ -14,7 +14,7 @@ namespace RVis.Model
 {
   public struct StudentTDistribution : IDistribution, IEquatable<StudentTDistribution>
   {
-    public readonly static StudentTDistribution Default = new StudentTDistribution(NaN, NaN, NaN);
+    public readonly static StudentTDistribution Default = new(NaN, NaN, NaN);
 
     public DistributionType DistributionType => DistributionType.StudentT;
 
@@ -42,7 +42,7 @@ namespace RVis.Model
     public double Upper { get; }
 
     public StudentT? Implementation => IsConfigured
-      ? new StudentT(Mu, Sigma, Nu, Generator)
+      ? new(Mu, Sigma, Nu, Generator)
       : default;
 
     public bool CanTruncate => true;
@@ -53,7 +53,7 @@ namespace RVis.Model
       WithLowerUpper(lower, upper);
 
     public StudentTDistribution WithLowerUpper(double lower, double upper) =>
-      new StudentTDistribution(Mu, Sigma, Nu, lower, upper);
+      new(Mu, Sigma, Nu, lower, upper);
 
     public bool IsConfigured => !(IsNaN(Mu) || IsNaN(Sigma) || IsNaN(Nu));
 

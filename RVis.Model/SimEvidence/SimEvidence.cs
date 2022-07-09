@@ -328,7 +328,7 @@ namespace RVis.Model
       new Subject<(SimEvidenceSource SimEvidenceSource, ObservableQualifier Change)>();
     private readonly ISubject<(Arr<SimObservations> SimObservations, ObservableQualifier Change)> _observationsChangesSubject =
       new Subject<(Arr<SimObservations> SimObservations, ObservableQualifier Change)>();
-    private readonly object _syncLock = new object();
+    private readonly object _syncLock = new();
     private bool _disposed = false;
   }
 }

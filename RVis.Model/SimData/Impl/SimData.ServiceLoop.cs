@@ -3,11 +3,10 @@ using RVis.Model.Extensions;
 using System;
 using System.Linq;
 using System.Reactive.Linq;
-using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
-using static RVis.Model.Logger;
 using static RVis.Base.Check;
+using static RVis.Model.Logger;
 
 namespace RVis.Model
 {
@@ -115,7 +114,7 @@ namespace RVis.Model
         catch (Exception ex)
         {
           _outputRequests.TryRemove(item.Key, out SimDataItem<OutputRequest> _);
-          
+
           var fulfilled = SimDataItem.Create(
             OutputRequest.Create(simDataItem.Item.SeriesInput, ex),
             simDataItem.Simulation,

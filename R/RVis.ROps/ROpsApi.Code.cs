@@ -1,9 +1,7 @@
 ﻿using RDotNet;
 using RVis.Data;
-using RVis.Model;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using static RVis.Base.Check;
 using static System.Linq.Enumerable;
@@ -88,20 +86,6 @@ namespace RVis.ROps
     {
       var instance = REngine.GetInstance();
       instance.Evaluate(code);
-    }
-
-    public static SymbolInfo[] InspectSymbols(string pathToCode)
-    {
-      var instance = REngine.GetInstance();
-
-      SourceFile(pathToCode, instance);
-      var symbolInfos = InspectGlobalEnvironment(instance);
-
-      var lines = File.ReadAllLines(pathToCode);
-      var codeSymbolInfos = InspectCode(lines, symbolInfos, instance);
-      symbolInfos.AddRange(codeSymbolInfos);
-
-      return symbolInfos.ToArray();
     }
   }
 }

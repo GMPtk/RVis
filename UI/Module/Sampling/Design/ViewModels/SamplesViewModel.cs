@@ -53,7 +53,7 @@ namespace Sampling.Design
     }).ToArray();
 
     public ObservableCollection<IParameterSamplingViewModel> ParameterSamplingViewModels =>
-      new ObservableCollection<IParameterSamplingViewModel>(
+      new(
         new IParameterSamplingViewModel[]
         {
           Data.BetaParameterSamplingViewModel,

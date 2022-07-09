@@ -50,8 +50,28 @@ namespace RVisUI.DepProps
         {
           try
           {
+            var stackPanel = new StackPanel();
+
             var kind = (PackIconKind)Enum.Parse(typeof(PackIconKind), c.DisplayIcon, true);
-            header = new PackIcon() { Kind = kind, Width = 25, Height = 25 };
+            var packIcon = new PackIcon() 
+            { 
+              Kind = kind, 
+              Width = 25, 
+              Height = 25, 
+              HorizontalAlignment = HorizontalAlignment.Center 
+            };
+            stackPanel.Children.Add(packIcon);
+
+            var textBlock = new TextBlock
+            {
+              HorizontalAlignment = HorizontalAlignment.Center,
+              FontSize = 8, 
+              TextWrapping = TextWrapping.Wrap
+            };
+            textBlock.Inlines.Add(c.DisplayName.ToUpperInvariant());
+            stackPanel.Children.Add(textBlock);
+
+            header = stackPanel;
             toolTip = c.DisplayName;
           }
           catch (Exception ex)

@@ -8,6 +8,9 @@
              xmlns:local="clr-namespace:Plot.Controls.Views.Impl"
              xmlns:design="clr-namespace:Plot.Design"
              xmlns:wpf="clr-namespace:RVisUI.Wpf;assembly=RVisUI.Wpf"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignBackground}"					  
              mc:Ignorable="d" 
              d:DesignHeight="750" 
              d:DesignWidth="1000"
@@ -16,11 +19,9 @@
 
   <UserControl.Resources>
     <ResourceDictionary>
-
       <ResourceDictionary.MergedDictionaries>
         <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Plot;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
-
     </ResourceDictionary>
   </UserControl.Resources>
 

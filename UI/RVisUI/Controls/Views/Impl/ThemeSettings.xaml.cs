@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace RVisUI.Controls.Views
+namespace RVisUI.Controls.Views.Impl
 {
   /// <summary>
-  /// Interaction logic for ImportSimulationView.xaml
+  /// Interaction logic for ThemeSettings.xaml
   /// </summary>
-  public partial class ImportSimulationView : UserControl
+  public partial class ThemeSettings : UserControl
   {
-    public ImportSimulationView()
+    public ThemeSettings()
     {
       InitializeComponent();
     }

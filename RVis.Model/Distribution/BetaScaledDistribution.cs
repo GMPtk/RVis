@@ -14,7 +14,7 @@ namespace RVis.Model
 {
   public struct BetaScaledDistribution : IDistribution<BetaScaled>, IEquatable<BetaScaledDistribution>
   {
-    public readonly static BetaScaledDistribution Default = new BetaScaledDistribution(NaN, NaN, NaN, NaN);
+    public readonly static BetaScaledDistribution Default = new(NaN, NaN, NaN, NaN);
 
     public BetaScaledDistribution(
       double alpha,
@@ -43,7 +43,7 @@ namespace RVis.Model
     public double Upper { get; }
 
     public BetaScaled? Implementation => IsConfigured
-      ? new BetaScaled(Alpha, Beta, Location, Scale, Generator)
+      ? new(Alpha, Beta, Location, Scale, Generator)
       : default;
 
     public DistributionType DistributionType => DistributionType.BetaScaled;
@@ -56,7 +56,7 @@ namespace RVis.Model
       WithLowerUpper(lower, upper);
 
     public BetaScaledDistribution WithLowerUpper(double lower, double upper) =>
-      new BetaScaledDistribution(Alpha, Beta, Location, Scale, lower, upper);
+      new(Alpha, Beta, Location, Scale, lower, upper);
 
     public bool IsConfigured => !(IsNaN(Alpha) || IsNaN(Beta) || IsNaN(Location) || IsNaN(Scale));
 

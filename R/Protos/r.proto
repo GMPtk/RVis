@@ -17,8 +17,6 @@ service ROps {
   rpc RunExec(RunExecRequest) returns (RunExecReply);
   rpc SourceFile(SourceFileRequest) returns (SourceFileReply);
   rpc TabulateExecOutput(TabulateExecOutputRequest) returns (TabulateExecOutputReply);
-  rpc TabulateTmplOutput(TabulateTmplOutputRequest) returns (TabulateTmplOutputReply);
-  rpc InspectSymbols(InspectSymbolsRequest) returns (InspectSymbolsReply);
   rpc Serialize(SerializeRequest) returns (SerializeReply);
   rpc Unserialize(UnserializeRequest) returns (UnserializeReply);
   rpc SaveObjectToBinary(SaveObjectToBinaryRequest) returns (SaveObjectToBinaryReply);
@@ -214,36 +212,6 @@ message TabulateExecOutputReply {
   oneof reply {
     Error error = 1;
     TabulateExecOutputPayload payload = 2;
-  }
-}
-
-message TabulateTmplOutputRequest {
-  bytes sim_config = 1;
-}
-
-message TabulateTmplOutputPayload {
-  repeated DoubleColumn double_columns = 1;
-}
-
-message TabulateTmplOutputReply {
-  oneof reply {
-    Error error = 1;
-    TabulateTmplOutputPayload payload = 2;
-  }
-}
-
-message InspectSymbolsRequest {
-  string pathToCode = 1;
-}
-
-message InspectSymbolsPayload {
-  bytes symbol_infos = 1;
-}
-
-message InspectSymbolsReply {
-  oneof reply {
-    Error error = 1;
-    InspectSymbolsPayload payload = 2;
   }
 }
 

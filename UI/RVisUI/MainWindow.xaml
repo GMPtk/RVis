@@ -11,7 +11,6 @@
                  xmlns:ctrls="clr-namespace:RVisUI.Controls"
                  xmlns:vi="clr-namespace:RVisUI.Controls.Views.Impl"
                  mc:Ignorable="d"
-                 FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
                  TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                  TextElement.FontWeight="Regular"
                  TextElement.FontSize="13"
@@ -39,7 +38,8 @@
 
   <Window.InputBindings>
     <KeyBinding Key="S" Modifiers="Ctrl+Shift"
-                Command="{Binding [AppSettings].View, Source={StaticResource Locator}}"
+                Command="{x:Static md:DrawerHost.OpenDrawerCommand}"
+                CommandParameter="{x:Static Dock.Left}"
                 />
     <KeyBinding Key="F11" 
                 Command="{Binding ToggleFullScreenCommand, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -55,176 +55,179 @@
                 />
   </Window.InputBindings>
 
-  <mmc:MetroWindow.Flyouts>
-    <mmc:FlyoutsControl>
-      <ctrls:AppSettingsFlyout DataContext="{Binding [AppSettings], Source={StaticResource Locator}}" />
-    </mmc:FlyoutsControl>
-  </mmc:MetroWindow.Flyouts>
+  <md:DrawerHost>
 
-  <Grid SizeChanged="HandleSizeChanged">
+    <md:DrawerHost.LeftDrawerContent>
+      <ctrls:AppSettingsDrawer DataContext="{Binding [AppSettings], Source={StaticResource Locator}}" />
+    </md:DrawerHost.LeftDrawerContent>
 
-    <Grid.LayoutTransform>
-      <ScaleTransform CenterX="0"
-                      CenterY="0"
-                      ScaleX="{Binding ElementName=_mainWindow, Path=ClientScale}"
-                      ScaleY="{Binding ElementName=_mainWindow, Path=ClientScale}" 
-                      />
-    </Grid.LayoutTransform>
+    <Grid SizeChanged="HandleSizeChanged">
 
-    <Grid.RowDefinitions>
-      <RowDefinition Height="*" />
-      <RowDefinition Height="Auto" />
-    </Grid.RowDefinitions>
+      <Grid.LayoutTransform>
+        <ScaleTransform CenterX="0"
+                        CenterY="0"
+                        ScaleX="{Binding ElementName=_mainWindow, Path=ClientScale}"
+                        ScaleY="{Binding ElementName=_mainWindow, Path=ClientScale}" 
+                        />
+      </Grid.LayoutTransform>
 
-    <Grid Margin="3 3 3 1">
-      <ContentControl Content="{Binding AppState.ActiveViewModel, Source={x:Static app:App.Current}}" 
-                      ContentTemplateSelector="{StaticResource activeViewTemplateSelector}" 
-                      />
+      <Grid.RowDefinitions>
+        <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <Grid Margin="3 3 3 1">
+        <ContentControl Content="{Binding AppState.ActiveViewModel, Source={x:Static app:App.Current}}" 
+                        ContentTemplateSelector="{StaticResource activeViewTemplateSelector}" 
+                        />
+      </Grid>
+
+      <StatusBar Grid.Row="2">
+        <StatusBar.ItemsPanel>
+          <ItemsPanelTemplate>
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="50" />
+              </Grid.ColumnDefinitions>
+            </Grid>
+          </ItemsPanelTemplate>
+        </StatusBar.ItemsPanel>
+
+        <StatusBar.Resources>
+          <Style TargetType="md:PackIcon">
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+          </Style>
+          <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniButton}">
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+          </Style>
+          <Style TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionToggleButton}">
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+          </Style>
+          <Style TargetType="Separator" BasedOn="{StaticResource MahApps.Styles.Separator.StatusBar}">
+
+          </Style>
+        </StatusBar.Resources>
+
+        <StatusBarItem>
+          <TextBlock Text="{Binding Source={x:Static local:App.Current}, Path=AppState.Status}"
+                     Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                     />
+        </StatusBarItem>
+
+        <StatusBarItem Grid.Column="1">
+          <TextBlock Margin="10 0" 
+                     Text="{Binding FrameRate, StringFormat={}{0:N1} fps, ElementName=_mainWindow}"
+                     Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                     >
+            <TextBlock.Style>
+              <Style TargetType="TextBlock">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding FrameRate, ElementName=_mainWindow}" Value="0.0">
+                    <Setter Property="Visibility" Value="Hidden"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </StatusBarItem>
+
+        <Separator Grid.Column="2"/>
+
+        <StatusBarItem Grid.Column="3">
+          <Button x:Name="_zoomOpen"
+                  Command="{Binding [Zoom].Open, Source={StaticResource Locator}}"
+                  ToolTip="Adjust zoom" >
+            <md:PackIcon Kind="ZoomInOutline"/>
+          </Button>
+        </StatusBarItem>
+
+        <Separator Grid.Column="4"/>
+
+        <StatusBarItem Grid.Column="5">
+          <Button Click="HandleConfigureModules"
+                  ToolTip="Configure modules...">
+            <md:PackIcon Kind="Sitemap"/>
+          </Button>
+        </StatusBarItem>
+
+        <Separator Grid.Column="6"/>
+
+        <StatusBarItem Grid.Column="7">
+          <Button Command="{x:Static md:DrawerHost.OpenDrawerCommand}"
+                  CommandParameter="{x:Static Dock.Left}"
+                  ToolTip="Adjust application settings (Ctrl+Shift+S)" >
+            <md:PackIcon Kind="Settings"/>
+          </Button>
+        </StatusBarItem>
+
+        <Separator Grid.Column="8"/>
+
+        <StatusBarItem Grid.Column="9">
+          <Button Click="HandleOpenLogDirectory"
+                  ToolTip="Open directory containing application log files">
+            <md:PackIcon Kind="Bug"/>
+          </Button>
+        </StatusBarItem>
+
+        <Separator Grid.Column="10"/>
+
+        <StatusBarItem Grid.Column="11">
+          <Button Click="HandleResetRServices"
+                  ToolTip="Reset R services">
+            <TextBlock x:Name="_tbResetRServices" 
+                       FontWeight="ExtraBold">R</TextBlock>
+          </Button>
+        </StatusBarItem>
+
+        <Separator Grid.Column="12"/>
+
+        <StatusBarItem Grid.Column="13">
+          <Button Click="HandleToggleFullScreen"
+                  ToolTip="Toggle full screen (F11)">
+            <md:PackIcon Kind="OpenInNew"/>
+          </Button>
+        </StatusBarItem>
+      </StatusBar>
+
+      <Popup IsOpen="{Binding IsOpen}" 
+             PlacementTarget="{Binding ElementName=_zoomOpen}"
+             Placement="Top"
+             PopupAnimation="Fade" 
+             AllowsTransparency="True"
+             StaysOpen="False"
+             DataContext="{Binding [Zoom], Source={StaticResource Locator}}"
+             >
+
+        <Popup.InputBindings>
+          <KeyBinding Key="Escape" Command="{Binding Open}"/>
+        </Popup.InputBindings>
+
+        <vi:ZoomView/>
+
+      </Popup>
+
     </Grid>
-    
-    <StatusBar Grid.Row="2">
-      <StatusBar.ItemsPanel>
-        <ItemsPanelTemplate>
-          <Grid>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="50" />
-            </Grid.ColumnDefinitions>
-          </Grid>
-        </ItemsPanelTemplate>
-      </StatusBar.ItemsPanel>
 
-      <StatusBar.Resources>
-        <Style TargetType="md:PackIcon">
-          <Setter Property="Width" Value="12"/>
-          <Setter Property="Height" Value="12"/>
-        </Style>
-        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionMiniButton}">
-          <Setter Property="Width" Value="18"/>
-          <Setter Property="Height" Value="18"/>
-          <Setter Property="HorizontalAlignment" Value="Center"/>
-        </Style>
-        <Style TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignActionToggleButton}">
-          <Setter Property="Width" Value="18"/>
-          <Setter Property="Height" Value="18"/>
-          <Setter Property="HorizontalAlignment" Value="Center"/>
-        </Style>
-        <Style TargetType="Separator" BasedOn="{StaticResource MahApps.Styles.Separator.StatusBar}">
-
-        </Style>
-      </StatusBar.Resources>
-
-      <StatusBarItem>
-        <TextBlock Text="{Binding Source={x:Static local:App.Current}, Path=AppState.Status}"
-                   Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
-                   />
-      </StatusBarItem>
-
-      <StatusBarItem Grid.Column="1">
-        <TextBlock Margin="10 0" 
-                   Text="{Binding FrameRate, StringFormat={}{0:N1} fps, ElementName=_mainWindow}"
-                   Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
-                   >
-          <TextBlock.Style>
-            <Style TargetType="TextBlock">
-              <Style.Triggers>
-                <DataTrigger Binding="{Binding FrameRate, ElementName=_mainWindow}" Value="0.0">
-                  <Setter Property="Visibility" Value="Hidden"/>
-                </DataTrigger>
-              </Style.Triggers>
-            </Style>
-          </TextBlock.Style>
-        </TextBlock>
-      </StatusBarItem>
-
-      <Separator Grid.Column="2"/>
-
-      <StatusBarItem Grid.Column="3">
-        <Button x:Name="_zoomOpen"
-                Command="{Binding [Zoom].Open, Source={StaticResource Locator}}"
-                ToolTip="Adjust zoom" >
-          <md:PackIcon Kind="ZoomInOutline"/>
-        </Button>
-      </StatusBarItem>
-
-      <Separator Grid.Column="4"/>
-
-      <StatusBarItem Grid.Column="5">
-        <Button Click="HandleConfigureModules"
-                ToolTip="Configure modules...">
-          <md:PackIcon Kind="Sitemap"/>
-        </Button>
-      </StatusBarItem>
-
-      <Separator Grid.Column="6"/>
-
-      <StatusBarItem Grid.Column="7">
-        <Button Command="{Binding [AppSettings].View, Source={StaticResource Locator}}"
-                ToolTip="Adjust application settings (Ctrl+Shift+S)" >
-          <md:PackIcon Kind="Settings"/>
-        </Button>
-      </StatusBarItem>
-
-      <Separator Grid.Column="8"/>
-
-      <StatusBarItem Grid.Column="9">
-        <Button Click="HandleOpenLogDirectory"
-                ToolTip="Open directory containing application log files">
-          <md:PackIcon Kind="Bug"/>
-        </Button>
-      </StatusBarItem>
-
-      <Separator Grid.Column="10"/>
-
-      <StatusBarItem Grid.Column="11">
-        <Button Click="HandleResetRServices"
-                ToolTip="Reset R services">
-          <TextBlock x:Name="_tbResetRServices" 
-                     FontWeight="ExtraBold">R</TextBlock>
-        </Button>
-      </StatusBarItem>
-
-      <Separator Grid.Column="12"/>
-
-      <StatusBarItem Grid.Column="13">
-        <Button Click="HandleToggleFullScreen"
-                ToolTip="Toggle full screen (F11)">
-          <md:PackIcon Kind="OpenInNew"/>
-        </Button>
-      </StatusBarItem>
-    </StatusBar>
-
-    <Popup IsOpen="{Binding IsOpen}" 
-           PlacementTarget="{Binding ElementName=_zoomOpen}"
-           Placement="Top"
-           PopupAnimation="Fade" 
-           AllowsTransparency="True"
-           StaysOpen="False"
-           DataContext="{Binding [Zoom], Source={StaticResource Locator}}"
-           >
-
-      <Popup.InputBindings>
-        <KeyBinding Key="Escape" Command="{Binding Open}"/>
-      </Popup.InputBindings>
-
-      <vi:ZoomView/>
-
-    </Popup>
-
-  </Grid>
+  </md:DrawerHost>
 
 </mmc:MetroWindow>

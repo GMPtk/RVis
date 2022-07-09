@@ -99,6 +99,7 @@ namespace Sampling
 
         var histogramSeries = new HistogramSeries
         {
+          StrokeColor = Histogram.TextColor,
           StrokeThickness = 1
         };
 

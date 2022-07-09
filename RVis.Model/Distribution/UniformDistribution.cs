@@ -15,14 +15,14 @@ namespace RVis.Model
 {
   public struct UniformDistribution : IDistribution<ContinuousUniform>, IEquatable<UniformDistribution>
   {
-    public readonly static UniformDistribution Default = new UniformDistribution(NaN, NaN);
+    public readonly static UniformDistribution Default = new(NaN, NaN);
 
     public static UniformDistribution CreateDefault(double center)
     {
       var disp = center == 0d ? 1d : Abs(center) / 2d;
       var lower = (center - disp).ToSigFigs(2);
       var upper = (center + disp).ToSigFigs(2);
-      return new UniformDistribution(lower, upper);
+      return new(lower, upper);
     }
 
     public UniformDistribution(double lower, double upper)
@@ -35,7 +35,7 @@ namespace RVis.Model
     public double Upper { get; }
 
     public ContinuousUniform? Implementation => IsConfigured
-      ? new ContinuousUniform(Lower, Upper, Generator)
+      ? new(Lower, Upper, Generator)
       : default;
 
     public DistributionType DistributionType => DistributionType.Uniform;

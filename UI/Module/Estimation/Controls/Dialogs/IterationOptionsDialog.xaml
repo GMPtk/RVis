@@ -32,8 +32,8 @@
   <ctrls:MetroWindow.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Estimation;component/Design/Resource/Theme.xaml" />
         <ResourceDictionary Source="pack://application:,,,/RVisUI.AppInf;component/Resources/HelpButton.xaml"/>
+        <wpf:DesignModeResourceDictionary DesignModeSource="pack://application:,,,/Estimation;component/Design/Resource/Theme.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </ctrls:MetroWindow.Resources>
