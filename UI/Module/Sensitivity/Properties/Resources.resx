@@ -156,7 +156,7 @@ rvis_sensitivity_r &lt;- {1}
 rvis_sensitivity_binf &lt;- c({2}) 
 rvis_sensitivity_bsup &lt;- c({3}) 
 rvis_sensitivity_levels &lt;- rep(as.integer({4}), length(rvis_sensitivity_factors))
-rvis_sensitivity_grid_jump &lt;- rep(as.integer({5}), length(rvis_sensitivity_factors))
+rvis_sensitivity_grid_jump &lt;- as.integer({5})
   
 rvis_sensitivity_design_{6:00000000} &lt;- sensitivity::morris(
   factors = rvis_sensitivity_factors, 

@@ -19,7 +19,7 @@ namespace Sensitivity.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -100,14 +100,16 @@ namespace Sensitivity.Properties {
         ///rvis_sensitivity_binf &lt;- c({2}) 
         ///rvis_sensitivity_bsup &lt;- c({3}) 
         ///rvis_sensitivity_levels &lt;- rep(as.integer({4}), length(rvis_sensitivity_factors))
-        ///rvis_sensitivity_grid_jump &lt;- rep(as.integer({5}), length(rvis_sensitivity_factors))
+        ///rvis_sensitivity_grid_jump &lt;- as.integer({5})
         ///  
         ///rvis_sensitivity_design_{6:00000000} &lt;- sensitivity::morris(
         ///  factors = rvis_sensitivity_factors, 
         ///  r = rvis_sensitivity_r,
         ///  binf = rvis_sensitivity_binf,
         ///  bsup = rvis_sensitivity_bsup,
-        ///  design = li [rest of string was truncated]&quot;;.
+        ///  design = list(
+        ///    type = &quot;oat&quot;, 
+        ///    levels = r [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string FMT_CREATE_MORRIS_DESIGN {
             get {
