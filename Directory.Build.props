@@ -2,9 +2,9 @@
   <PropertyGroup>
     <Company>HSE</Company>
     <Product>RVis</Product>
-    <Copyright>Copyright © HSE 2022</Copyright>
-    <Version>0.17.0</Version>
-    <AssemblyVersion>0.17.11068.0</AssemblyVersion>
+    <Copyright>Copyright © HSE 2024</Copyright>
+    <Version>0.18.0</Version>
+    <AssemblyVersion>0.18.11068.0</AssemblyVersion>
     <NeutralLanguage>en-GB</NeutralLanguage>
   </PropertyGroup>
 </Project>
